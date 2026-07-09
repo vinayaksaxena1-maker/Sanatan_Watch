@@ -1,0 +1,12 @@
+{
+  "name": "aaj-ka-dharmic-samay",
+  "description": "Hindu Panchang and Muhurat app.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

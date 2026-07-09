@@ -1,0 +1,357 @@
+/**
+ * Phase 2A: Swiss Ephemeris Core Integration (Part A)
+ *
+ * Exposes a Worker Proxy interface with isReady() checking
+ * to block UI render during Web Worker compilation.
+ */
+
+export interface SolarTimes {
+  sunrise: string;
+  sunset: string;
+  sunriseRaw: number; // minutes since midnight
+  sunsetRaw: number;  // minutes since midnight
+}
+
+export interface MoonTimes {
+  moonrise: string;
+  moonset: string;
+  moonriseRaw: number; // minutes since midnight
+  moonsetRaw: number;  // minutes since midnight
+}
+
+export interface PanchangPositions {
+  tithiIdx: number;            // 0 to 29
+  tithiPercent: number;        // fraction passed (0.0 to 1.0)
+  tithiRemainingHours: number;
+  tithiPassedHours: number;
+
+  naksIdx: number;             // 0 to 26
+  naksPercent: number;         // fraction passed (0.0 to 1.0)
+  naksRemainingHours: number;
+
+  yogaIdx: number;             // 0 to 26
+  yogaPercent: number;         // fraction passed (0.0 to 1.0)
+  yogaRemainingHours: number;
+
+  karanaTotalSec: number;      // 0 to 59
+  karanaVal: number;           // 0 to 10
+  karanaPercent: number;       // fraction passed (0.0 to 1.0)
+  karanaRemainingHours: number;
+
+  monthsSinceEpoch: number;
+  diffDays: number;
+}
+
+export interface AstronomicalEngine {
+  getSolarTimes(lat: number, lon: number, date: Date): SolarTimes;
+  getMoonTimes(sunriseMin: number, sunsetMin: number, tithiIdx: number, date: Date, lat: number, lon: number): MoonTimes;
+  getPanchangPositions(date: Date): PanchangPositions;
+  isReady(): boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Helper: formatRawMin
+// ---------------------------------------------------------------------------
+function formatRawMin(m: number): string {
+  let hrs = Math.floor(m / 60);
+  let mins = Math.floor(m % 60);
+  const ampm = hrs >= 12 ? 'PM' : 'AM';
+  hrs = hrs % 12;
+  if (hrs === 0) hrs = 12;
+  return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')} ${ampm}`;
+}
+
+// ---------------------------------------------------------------------------
+// Mock Implementation using original mathematical approximations
+// ---------------------------------------------------------------------------
+class MockAstronomicalEngine implements AstronomicalEngine {
+  isReady(): boolean {
+    return true;
+  }
+
+  getSolarTimes(lat: number, lon: number, date: Date): SolarTimes {
+    const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000);
+    
+    // Approximate Equation of Time & Solar Declination
+    const gamma = (2 * Math.PI / 365) * (dayOfYear - 1 + (12 - 12) / 24);
+    const eqTime = 229.18 * (0.000075 + 0.001868 * Math.cos(gamma) - 0.032077 * Math.sin(gamma) - 0.014615 * Math.cos(2 * gamma) - 0.040849 * Math.sin(2 * gamma));
+    const decl = 0.006918 - 0.399912 * Math.cos(gamma) + 0.070257 * Math.sin(gamma) - 0.006758 * Math.cos(2 * gamma) + 0.000907 * Math.sin(2 * gamma) - 0.002697 * Math.cos(3 * gamma) + 0.00148 * Math.sin(3 * gamma);
+
+    // Hour Angle
+    const latRad = lat * Math.PI / 180;
+    let cosH = (Math.cos(90.833 * Math.PI / 180) - Math.sin(latRad) * Math.sin(decl)) / (Math.cos(latRad) * Math.cos(decl));
+    
+    if (cosH > 1) cosH = 1;
+    if (cosH < -1) cosH = -1;
+    
+    const H = Math.acos(cosH) * 180 / Math.PI; // degrees
+    
+    // Solar Noon (UTC) = 720 - 4 * Lon - eqTime
+    const solarNoonLST = 720 - 4 * lon - eqTime + (5.5 * 60); // In India UTC+5.5
+    
+    const sunriseMinutes = solarNoonLST - H * 4;
+    const sunsetMinutes = solarNoonLST + H * 4;
+
+    return {
+      sunrise: formatRawMin(sunriseMinutes),
+      sunset: formatRawMin(sunsetMinutes),
+      sunriseRaw: sunriseMinutes,
+      sunsetRaw: sunsetMinutes
+    };
+  }
+
+  getMoonTimes(sunriseMin: number, sunsetMin: number, tithiIdx: number, _date: Date, _lat: number, _lon: number): MoonTimes {
+    // Moonrise / Moonset approximation based on Tithi index
+    // Each Tithi, moonrise delays by roughly 48 minutes
+    const moonRefSecs = (tithiIdx * 48);
+    const moonriseRaw = (sunriseMin + 360 + moonRefSecs) % 1440;
+    const moonsetRaw = (sunsetMin + 360 + moonRefSecs) % 1440;
+
+    return {
+      moonrise: formatRawMin(moonriseRaw),
+      moonset: formatRawMin(moonsetRaw),
+      moonriseRaw,
+      moonsetRaw
+    };
+  }
+
+  getPanchangPositions(date: Date): PanchangPositions {
+    // Reference Epoch (New moon on March 18, 2026 UTC, start of Chaitra Shukla 1)
+    const epoch = new Date('2026-03-18T05:30:00Z'); 
+    const diffTime = date.getTime() - epoch.getTime();
+    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+    // Synodic month cycle is roughly 29.53059 days
+    const lunarCycle = 29.530588853;
+    const rawLunarMonthAge = (diffDays) % lunarCycle;
+    const lunarMonthAge = rawLunarMonthAge < 0 ? rawLunarMonthAge + lunarCycle : rawLunarMonthAge;
+
+    // Sidereal moon cycle (Nakshatra) is roughly 27.32166 days
+    const siderealCycle = 27.321661;
+    const rawNakshatraAge = (diffDays * 1.011 + 6) % siderealCycle; // Offset 6 to start correctly
+    const nakshatraAge = rawNakshatraAge < 0 ? rawNakshatraAge + siderealCycle : rawNakshatraAge;
+
+    // Yoga cycle is roughly 27 days base
+    const rawYogaAge = (diffDays * 1.055 + 2) % 27;
+    const yogaAge = rawYogaAge < 0 ? rawYogaAge + 27 : rawYogaAge;
+
+    // Calculates Tithi Index (1-30)
+    let tithiIdx = Math.floor((lunarMonthAge / lunarCycle) * 30);
+    if (tithiIdx < 0) tithiIdx += 30;
+    if (tithiIdx >= 30) tithiIdx = 29;
+    const tithiPercent = (lunarMonthAge / lunarCycle) * 30 - tithiIdx;
+    const tithiRemainingHours = (1 - tithiPercent) * 23.6;
+    const tithiPassedHours = tithiPercent * 23.6;
+
+    // Calculates Nakshatra (1-27)
+    let naksIdx = Math.floor((nakshatraAge / siderealCycle) * 27);
+    if (naksIdx < 0) naksIdx += 27;
+    if (naksIdx >= 27) naksIdx = 26;
+    const naksPercent = (nakshatraAge / siderealCycle) * 27 - naksIdx;
+    const naksRemainingHours = (1 - naksPercent) * 24.2;
+
+    // Calculates Yoga (1-27)
+    let yogaIdx = Math.floor(yogaAge);
+    if (yogaIdx < 0) yogaIdx += 27;
+    if (yogaIdx >= 27) yogaIdx = 26;
+    const yogaPercent = yogaAge - yogaIdx;
+    const yogaRemainingHours = (1 - yogaPercent) * 26.1;
+
+    // Calculates Karana (1-11)
+    let karanaTotalSec = Math.floor(((lunarMonthAge / lunarCycle) * 60));
+    if (karanaTotalSec < 0) karanaTotalSec += 60;
+    if (karanaTotalSec >= 60) karanaTotalSec = 59;
+    
+    let karanaVal = 0;
+    if (karanaTotalSec === 0) {
+      karanaVal = 10; // Kimstughna
+    } else if (karanaTotalSec >= 57) {
+      if (karanaTotalSec === 57) karanaVal = 7; // Shakuni
+      else if (karanaTotalSec === 58) karanaVal = 8; // Chatuspada
+      else karanaVal = 9; // Naga
+    } else {
+      karanaVal = ((karanaTotalSec - 1) % 7);
+    }
+    const karanaPercent = ((lunarMonthAge / lunarCycle) * 60) - karanaTotalSec;
+    const karanaRemainingHours = (1 - karanaPercent) * 11.8;
+
+    const monthsSinceEpoch = Math.floor(diffDays / lunarCycle);
+
+    return {
+      tithiIdx,
+      tithiPercent,
+      tithiRemainingHours,
+      tithiPassedHours,
+      naksIdx,
+      naksPercent,
+      naksRemainingHours,
+      yogaIdx,
+      yogaPercent,
+      yogaRemainingHours,
+      karanaTotalSec,
+      karanaVal,
+      karanaPercent,
+      karanaRemainingHours,
+      monthsSinceEpoch,
+      diffDays
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Isolated Web Worker Integration (Part B Boundary)
+// ---------------------------------------------------------------------------
+const worker = new Worker(
+  new URL('./astroWorker.ts', import.meta.url),
+  { type: 'module' }
+);
+
+const solarCache = new Map<string, SolarTimes>();
+const moonCache = new Map<string, MoonTimes>();
+const positionCache = new Map<string, PanchangPositions>();
+const pendingQueries = new Set<string>();
+
+const mockEngine = new MockAstronomicalEngine();
+let updateListener: (() => void) | null = null;
+let isEngineReady = false;
+
+export function registerEngineListener(callback: () => void) {
+  updateListener = callback;
+}
+
+export function isReady(): boolean {
+  return isEngineReady;
+}
+
+if (typeof window !== 'undefined') {
+  worker.postMessage({
+    type: 'INIT',
+    origin: window.location.origin
+  });
+}
+
+worker.onmessage = (event: MessageEvent) => {
+  const { type, key, data, message } = event.data;
+
+  if (type === 'READY') {
+    isEngineReady = true;
+    console.log('[AstronomicalEngine] Web Worker loaded and Swiss Ephemeris initialized successfully.');
+    
+    // Pre-fetch default location coordinates to completely avoid initial mock fallbacks
+    const today = new Date();
+    const lat = 28.6139; // New Delhi
+    const lon = 77.2090;
+
+    const cacheKeySolar = `SOLAR_${lat.toFixed(4)}_${lon.toFixed(4)}_${today.toDateString()}`;
+    const cacheKeyMoon = `MOON_${lat.toFixed(4)}_${lon.toFixed(4)}_${today.toDateString()}`;
+    const cacheKeyPos = `POS_${today.toDateString()}`;
+
+    pendingQueries.add(cacheKeySolar);
+    pendingQueries.add(cacheKeyMoon);
+    pendingQueries.add(cacheKeyPos);
+
+    worker.postMessage({ type: 'CALCULATE_SOLAR', key: cacheKeySolar, lat, lon, date: today.toISOString() });
+    worker.postMessage({ type: 'CALCULATE_MOON', key: cacheKeyMoon, lat, lon, date: today.toISOString() });
+    worker.postMessage({ type: 'CALCULATE_COORDINATES', key: cacheKeyPos, date: today.toISOString() });
+
+    if (updateListener) {
+      updateListener();
+    }
+    return;
+  }
+
+  if (type === 'ERROR') {
+    console.error('[AstronomicalEngine] Worker error:', message);
+    return;
+  }
+
+  if (type === 'RESULT') {
+    if (key.startsWith('SOLAR_')) {
+      solarCache.set(key, data);
+    } else if (key.startsWith('MOON_')) {
+      moonCache.set(key, data);
+    } else if (key.startsWith('POS_')) {
+      positionCache.set(key, data);
+    }
+    pendingQueries.delete(key);
+
+    if (updateListener) {
+      updateListener();
+    }
+  }
+};
+
+class SwissEphemerisAstronomicalEngine implements AstronomicalEngine {
+  isReady(): boolean {
+    return isEngineReady;
+  }
+
+  getSolarTimes(lat: number, lon: number, date: Date): SolarTimes {
+    const cacheKey = `SOLAR_${lat.toFixed(4)}_${lon.toFixed(4)}_${date.toDateString()}`;
+    const cached = solarCache.get(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
+    if (!pendingQueries.has(cacheKey)) {
+      pendingQueries.add(cacheKey);
+      worker.postMessage({
+        type: 'CALCULATE_SOLAR',
+        key: cacheKey,
+        lat,
+        lon,
+        date: date.toISOString()
+      });
+    }
+
+    return mockEngine.getSolarTimes(lat, lon, date);
+  }
+
+  getMoonTimes(sunriseMin: number, sunsetMin: number, tithiIdx: number, date: Date, lat: number, lon: number): MoonTimes {
+    const cacheKey = `MOON_${lat.toFixed(4)}_${lon.toFixed(4)}_${date.toDateString()}`;
+    const cached = moonCache.get(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
+    if (!pendingQueries.has(cacheKey)) {
+      pendingQueries.add(cacheKey);
+      worker.postMessage({
+        type: 'CALCULATE_MOON',
+        key: cacheKey,
+        lat,
+        lon,
+        date: date.toISOString(),
+        sunriseMin,
+        sunsetMin,
+        tithiIdx
+      });
+    }
+
+    return mockEngine.getMoonTimes(sunriseMin, sunsetMin, tithiIdx, date, lat, lon);
+  }
+
+  getPanchangPositions(date: Date): PanchangPositions {
+    const cacheKey = `POS_${date.toDateString()}`;
+    const cached = positionCache.get(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
+    if (!pendingQueries.has(cacheKey)) {
+      pendingQueries.add(cacheKey);
+      worker.postMessage({
+        type: 'CALCULATE_COORDINATES',
+        key: cacheKey,
+        date: date.toISOString()
+      });
+    }
+
+    return mockEngine.getPanchangPositions(date);
+  }
+}
+
+export const astronomicalEngine: AstronomicalEngine = new SwissEphemerisAstronomicalEngine();

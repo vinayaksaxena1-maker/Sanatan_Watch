@@ -1,0 +1,145 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState } from 'react';
+import { Search, Calendar, Smile } from 'lucide-react';
+import { Festival } from '../types';
+import { FESTVALS_PRESETS } from '../utils/panchangCalc';
+
+export function FestivalScreen() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState<string>('all');
+  
+  // Custom upcoming filter logic
+  const filteredFestivals = FESTVALS_PRESETS.filter((fest) => {
+    const matchesSearch =
+      fest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      fest.hindiName.includes(searchQuery) ||
+      fest.month.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      fest.tithi.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesType = selectedType === 'all' || fest.type === selectedType;
+
+    return matchesSearch && matchesType;
+  });
+
+  const getBadgeStyles = (type: string) => {
+    switch (type) {
+      case 'Ekadashi':
+        return 'bg-blue-50 border-blue-200 text-blue-850';
+      case 'Purnima':
+        return 'bg-amber-50 border-amber-200 text-amber-900';
+      case 'Amavasya':
+        return 'bg-stone-50 border-stone-250 text-stone-800';
+      case 'Sankashti':
+        return 'bg-rose-50 border-rose-200 text-rose-800';
+      case 'Jayanti':
+        return 'bg-teal-50 border-teal-200 text-teal-850';
+      default:
+        return 'bg-orange-50 border-orange-200 text-orange-850';
+    }
+  };
+
+  return (
+    <div id="festival_screen_root" className="space-y-4 sm:space-y-6 font-sans">
+      
+      {/* Search Input and Filters Bar */}
+      <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left">
+        <label className="text-xs font-bold text-slate-400 dark:text-amber-500 uppercase tracking-wider mb-2 font-mono block">त्यौहार और व्रत खोजें</label>
+        
+        {/* Search Input Box */}
+        <div className="relative flex items-center mb-4">
+          <input
+            type="text"
+            placeholder="त्यौहार खोजें जैसे दीवाली, होली, एकादशी..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full text-xs p-3.5 pl-11 rounded-2xl bg-slate-500/5 dark:bg-zinc-950/40 border border-slate-200/50 dark:border-zinc-800/60 focus:bg-white dark:focus:bg-zinc-950 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-slate-800 dark:text-slate-100"
+          />
+          <Search className="w-5 h-5 text-slate-400 absolute left-4 pointer-events-none" />
+        </div>
+
+        {/* Categories Pills bar */}
+        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+          {['all', 'Major', 'Ekadashi', 'Purnima', 'Amavasya', 'Sankashti', 'Jayanti'].map((type) => (
+            <button
+              key={type}
+              onClick={() => setSelectedType(type)}
+              className={`px-3.5 py-1.5 sm:py-2 rounded-xl text-2xs font-extrabold whitespace-nowrap transition-all cursor-pointer border ${
+                selectedType === type
+                  ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+                  : 'bg-white/80 dark:bg-zinc-900/60 hover:bg-slate-50 dark:hover:bg-zinc-800 border-orange-100 dark:border-orange-950/45 text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              {type === 'all' ? 'सभी त्यौहार' : type}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Festivals List */}
+      <div className="space-y-3.5 sm:space-y-4">
+        {filteredFestivals.length === 0 ? (
+          <div className="glass-card-light dark:glass-card-dark p-10 sm:p-12 text-center h-48 flex flex-col justify-center items-center">
+            <Smile className="w-8 h-8 text-orange-400 mb-2 animate-bounce" />
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">आपकी खोज से मेल खाने वाला कोई त्यौहार नहीं मिला।</span>
+            <span className="text-3xs text-slate-400 mt-1">कृपया अपने खोज शब्द बदलें।</span>
+          </div>
+        ) : (
+          filteredFestivals.map((fest) => {
+            const formattedDateStr = new Date(fest.date).toLocaleDateString('en-IN', {
+              weekday: 'short',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            });
+
+            return (
+              <div
+                key={fest.id}
+                className="glass-card-light dark:glass-card-dark p-4 sm:p-5 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between text-left"
+              >
+                {/* Festival Metas */}
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`text-[9px] font-extrabold px-2.5 py-0.5 rounded-full border ${getBadgeStyles(fest.type)} font-mono uppercase tracking-wide`}>
+                      {fest.type}
+                    </span>
+                    <span className="text-[10px] text-[#A64B00] dark:text-[#FFB366] font-mono font-bold">
+                      🌙 {fest.month} • {fest.tithi}
+                    </span>
+                  </div>
+
+                  <h3 className="text-base sm:text-lg font-black text-slate-800 dark:text-amber-100 font-serif leading-snug">
+                    {fest.hindiName}
+                  </h3>
+
+                  <p className="text-[11px] sm:text-2xs text-slate-600 dark:text-slate-400 leading-relaxed font-sans max-w-2xl">
+                    {fest.description}
+                  </p>
+                </div>
+
+                {/* Calendar timing anchor */}
+                <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center border-t md:border-t-0 border-slate-100 dark:border-slate-800/50 pt-2.5 md:pt-0 w-full md:w-auto mt-1 md:mt-0 flex-shrink-0">
+                  <div className="bg-orange-50/50 dark:bg-orange-950/15 p-2 sm:p-2.5 rounded-2xl border border-orange-100/30 flex items-center gap-2 text-left md:text-right">
+                    <Calendar className="w-5 h-5 text-orange-600 shrink-0" />
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 block uppercase font-mono tracking-widest leading-3">त्यौहार की तिथि</span>
+                      <span className="text-2xs font-extrabold text-orange-950 dark:text-orange-200 font-sans mt-0.5 block whitespace-nowrap">
+                        {formattedDateStr}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            );
+          })
+        )}
+      </div>
+
+    </div>
+  );
+}

@@ -1,0 +1,318 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Martel:wght@400;700;900&family=Noto+Sans+Devanagari:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+html, body {
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+input, textarea, select {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+@theme {
+  --font-sans: "Noto Sans Devanagari", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Martel", "Playfair Display", ui-serif, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Central Tailwind v4 color mapping mapping directly to Theme Tokens */
+  --color-deep-black: var(--bg-app-dark-start);
+  --color-surface-black: var(--bg-envelope-dark);
+  --color-temple-gold: var(--temple-gold-col);
+  --color-divine-gold: var(--divine-gold-col);
+  --color-glow-gold: var(--glow-gold-col);
+  --color-bhagwa: var(--bhagwa-col);
+}
+
+:root {
+  /* ==========================================================================
+     SANATAN GHADI — CENTRAL SYSTEM FOR TEMPLE GOLD THEME V1 (REVERSIBLE)
+     ========================================================================== */
+  
+  /* Toggle to 'true' for Premium Temple Gold Theme, 
+     revert to 'false' to restore original flat saffron styles. */
+  --theme-premium-temple-gold: true;
+
+  /* App Backgrounds */
+  --bg-app-light: #FFFDF8;
+  --bg-envelope-light: #FAF5EC;
+  
+  /* Standard light mode card assets */
+  --card-bg-light: rgba(255, 255, 255, 0.88);
+  --card-border-light: rgba(255, 255, 255, 0.6);
+  --card-shadow-light: 0 8px 32px rgba(255, 153, 51, 0.08);
+  --card-shadow-hover-light: 0 12px 36px rgba(255, 153, 51, 0.14);
+  --card-border-hover-light: rgba(255, 153, 51, 0.25);
+
+  /* Fallback/Original Saffron Dark Mode Layout Values */
+  --bg-app-dark-start: #15120F;
+  --bg-app-dark-mid: #15120F;
+  --bg-app-dark-end: #15120F;
+  --bg-envelope-dark: #1B1612;
+  
+  --card-bg-dark: rgba(27, 22, 18, 0.9);
+  --card-border-dark: rgba(255, 153, 51, 0.12);
+  --card-shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --card-border-hover-dark: rgba(255, 153, 51, 0.3);
+  --card-shadow-hover-dark: 0 12px 36px rgba(255, 153, 51, 0.18);
+  --card-blur-dark: 14px;
+
+  /* Original Palette */
+  --temple-gold-col: #F6C453;
+  --divine-gold-col: #DCA12F;
+  --glow-gold-col: #FCE679;
+  --bhagwa-col: #FF9933;
+}
+
+/* Upgrade active dark theme context with Premium Temple Gold tokens */
+.dark {
+  --bg-app-dark-start: #0A0A0A;
+  --bg-app-dark-mid: #141414;
+  --bg-app-dark-end: #1E140A;
+  --bg-app-dark-glow: #5A2D00;
+  --bg-envelope-dark: #141414;
+
+  /* Glass Card Upgrades (Phase 1 SPECIFICATION) */
+  --card-bg-dark: rgba(20, 20, 20, 0.92);
+  --card-border-dark: rgba(244, 180, 0, 0.20);
+  --card-shadow-dark: 0 10px 30px rgba(244, 180, 0, 0.15);
+  --card-border-hover-dark: rgba(244, 180, 0, 0.40);
+  --card-shadow-hover-dark: 0 12px 36px rgba(244, 180, 0, 0.25);
+  --card-blur-dark: 20px;
+
+  /* Brand Colors Upgrade (Phase 1 SPECIFICATION) */
+  --temple-gold-col: #D89B00;
+  --divine-gold-col: #F4B400;
+  --glow-gold-col: #FFD54F;
+  --bhagwa-col: #FF6F00;
+}
+
+/* ==========================================================================
+   TEMPLE GOLD ENHANCED THEME — ULTRAPREMIUM SACRED EXPERIENCE
+   ========================================================================== */
+.temple {
+  --bg-app-dark-start: #030100; /* Deep black foundation */
+  --bg-app-dark-mid: #080503; /* Deep spiritual earth tones */
+  --bg-app-dark-end: #0f0a05;
+  --bg-app-dark-glow: #2c1200;
+  --bg-envelope-dark: #050302; /* Rich black foundation */
+
+  /* Glass Card Upgrades with Gold linings */
+  --card-bg-dark: rgba(10, 7, 5, 0.96); /* Deep warm earth-stone card */
+  --card-border-dark: rgba(246, 196, 83, 0.35); /* High-fidelity Temple Gold border */
+  --card-shadow-dark: 0 12px 35px rgba(246, 196, 83, 0.12), inset 0 1px 1px rgba(246, 196, 83, 0.1);
+  --card-border-hover-dark: rgba(255, 213, 79, 0.6); /* Majestic Divine Gold hover */
+  --card-shadow-hover-dark: 0 16px 45px rgba(255, 213, 79, 0.25);
+  --card-blur-dark: 24px;
+
+  /* Premium brand colors */
+  --temple-gold-col: #F6C453; /* Temple Gold */
+  --divine-gold-col: #FFD54F; /* Divine Gold */
+  --glow-gold-col: #FFF4CC; /* Soft temple lamp illumination */
+  --bhagwa-col: #FF6F00; /* Bhagwa accent */
+}
+
+.temple .sacred-motif-overlay {
+  opacity: 0.08 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M60 0 C40 20, 20 40, 20 60 C20 80, 40 100, 60 120 C80 100, 100 80, 100 60 C100 40, 80 20, 60 0 Z M60 20 C70 35, 85 50, 85 60 C85 70, 70 85, 60 100 C50 85, 35 70, 35 60 C35 50, 50 35, 60 20 Z' fill='%23FFD54F' fill-opacity='0.25'/%3E%3C/svg%3E") !important;
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Bento Grid Themes & Glassmorphism styles */
+.temple-bg-pattern {
+  background: linear-gradient(180deg, var(--bhagwa-col) 0%, var(--glow-gold-col) 100%);
+  border-radius: 0 0 50% 50% / 0 0 15% 15%;
+  height: 280px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  opacity: 0.95;
+}
+
+/* Decorative Sanskrit/Lotus/Mandala Background Pattern Tile Overlay */
+.sacred-motif-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M60 0 C40 20, 20 40, 20 60 C20 80, 40 100, 60 120 C80 100, 100 80, 100 60 C100 40, 80 20, 60 0 Z M60 20 C70 35, 85 50, 85 60 C85 70, 70 85, 60 100 C50 85, 35 70, 35 60 C35 50, 50 35, 60 20 Z' fill='%23D89B00' fill-opacity='0.12'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+.glass-card-light {
+  background: var(--card-bg-light);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--card-border-light);
+  border-radius: 24px;
+  box-shadow: var(--card-shadow-light);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-light:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover-light);
+  border-color: var(--card-border-hover-light);
+}
+
+.glass-card-dark {
+  background: var(--card-bg-dark);
+  backdrop-filter: blur(var(--card-blur-dark));
+  border: 1px solid var(--card-border-dark);
+  border-radius: 24px;
+  box-shadow: var(--card-shadow-dark);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card-dark:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover-dark);
+  border-color: var(--card-border-hover-dark);
+}
+
+.muhurat-watch-frame {
+  border: 10px solid #F6C453;
+  border-radius: 50%;
+  box-shadow: inset 0 0 25px rgba(246, 196, 83, 0.25), 0 15px 35px rgba(255, 153, 51, 0.12);
+  background: #ffffff;
+}
+
+.dark .muhurat-watch-frame {
+  border: 10px solid #DCA12F;
+  background: #1C1713;
+  box-shadow: inset 0 0 25px rgba(220, 161, 47, 0.2), 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.shubh-pulse-dot {
+  width: 10px;
+  height: 10px;
+  background: #4CAF50;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 10px #4CAF50;
+}
+
+.label-caps-theme {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+@keyframes swing {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(15deg); }
+  40% { transform: rotate(-10deg); }
+  60% { transform: rotate(5deg); }
+  80% { transform: rotate(-5deg); }
+}
+
+.animate-swing {
+  animation: swing 2s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin 45s linear infinite;
+}
+
+/* Custom subtle scrollbar with orange track/thumb for horizontal boxes */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 153, 51, 0.05);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 153, 51, 0.4);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 153, 51, 0.65);
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 153, 51, 0.4) rgba(255, 153, 51, 0.05);
+}
+
+.inactive-chaughadiya-segment {
+  transition: all 0.3s ease;
+}
+
+.active-chaughadiya-segment {
+  shape-rendering: geometricPrecision;
+  stroke-linejoin: round;
+  transition: all 0.3s ease;
+}
+
+
+
+
+/* Active Choghadiya Segment Glow & Bezel Shine Animations */
+@keyframes activeSegmentGlow {
+  0% {
+    opacity: 0.3;
+    stroke: #D4AF37;
+  }
+  50% {
+    opacity: 0.7;
+    stroke: #FFE57F;
+  }
+  100% {
+    opacity: 0.3;
+    stroke: #D4AF37;
+  }
+}
+
+.animate-active-segment-glow {
+  animation: activeSegmentGlow 3s ease-in-out infinite;
+}
+
+@keyframes activeSegmentGlowSubtle {
+  0% {
+    opacity: 0.05;
+    stroke: #D4AF37;
+  }
+  50% {
+    opacity: 0.15;
+    stroke: #FFE57F;
+  }
+  100% {
+    opacity: 0.05;
+    stroke: #D4AF37;
+  }
+}
+
+.animate-active-segment-glow-subtle {
+  animation: activeSegmentGlowSubtle 3s ease-in-out infinite;
+}
+
+@keyframes activeBezelShine {
+  0% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1.0;
+    stroke: #FFFFFF;
+  }
+  100% {
+    opacity: 0.45;
+  }
+}
+
+.animate-active-bezel-shine {
+  animation: activeBezelShine 2s ease-in-out infinite;
+}
