@@ -61,6 +61,30 @@ import { LiveLagna } from './components/LiveLagna';
 import { StotraSangrah } from './components/StotraSangrah';
 import dialBg from './components/VintageDialBackground.png';
 
+const NAKSHATRAS_LIST = [
+  "Ashwini (अश्विनी)", "Bharani (भरणी)", "Krittika (कृत्तिका)", "Rohini (रोहिणी)", "Mrigashira (मृगशिरा)", "Ardra (आर्द्रा)",
+  "Punarvasu (पुनर्वसु)", "Pushya (पुष्य)", "Ashlesha (श्लेषा)", "Magha (मघा)", "Purva Phalguni (पूर्वाफाल्गुनी)", "Uttara Phalguni (उत्तराफाल्गुनी)",
+  "Hasta (हस्त)", "Chitra (चित्रा)", "Swati (स्वाती)", "Vishakha (विशाखा)", "Anuradha (अनुराधा)", "Jyeshtha (ज्येष्ठा)",
+  "Mula (मूल)", "Purva Ashadha (पूर्वाषाढ़ा)", "Uttara Ashadha (उत्तराषाढ़ा)", "Shravana (श्रवण)", "Dhanishta (धनिष्ठा)",
+  "Shatabhisha (शतभिषा)", "Purva Bhadrapada (पूर्वाभाद्रपद)", "Uttara Bhadrapada (उत्तराभाद्रपद)", "Revati (रेवती)"
+];
+
+const RASHIS_LIST = [
+  { eng: "Aries", hin: "मेष (Aries)" },
+  { eng: "Taurus", hin: "वृषभ (Taurus)" },
+  { eng: "Gemini", hin: "मिथुन (Gemini)" },
+  { eng: "Cancer", hin: "कर्क (Cancer)" },
+  { eng: "Leo", hin: "सिंह (Leo)" },
+  { eng: "Virgo", hin: "कन्या (Virgo)" },
+  { eng: "Libra", hin: "तुला (Libra)" },
+  { eng: "Scorpio", hin: "वृश्चिक (Scorpio)" },
+  { eng: "Sagittarius", hin: "धनु (Sagittarius)" },
+  { eng: "Capricorn", hin: "मकर (Capricorn)" },
+  { eng: "Aquarius", hin: "कुम्भ (Aquarius)" },
+  { eng: "Pisces", hin: "मीन (Pisces)" }
+];
+
+
 
 // Default Location (New Delhi, India)
 const DEFAULT_COORDS: Coords = {
@@ -158,6 +182,23 @@ export default function App() {
   const [coords, setCoords] = useState<Coords>(DEFAULT_COORDS);
   const [gpsActive, setGpsActive] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
+
+  // Birth Details for Personalized Tara Bala / Chandra Bala
+  const [birthNakshatraIdx, setBirthNakshatraIdx] = useState<number>(() => {
+    const cached = localStorage.getItem('dharmic_birth_naks');
+    return cached ? parseInt(cached, 10) : 0;
+  });
+  const [birthRashiIdx, setBirthRashiIdx] = useState<number>(() => {
+    const cached = localStorage.getItem('dharmic_birth_rashi');
+    return cached ? parseInt(cached, 10) : 0;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('dharmic_birth_naks', birthNakshatraIdx.toString());
+  }, [birthNakshatraIdx]);
+  useEffect(() => {
+    localStorage.setItem('dharmic_birth_rashi', birthRashiIdx.toString());
+  }, [birthRashiIdx]);
 
   // Preferences & Logs
   const [settings, setSettings] = useState<SettingsState>(DEFAULT_SETTINGS);
@@ -299,11 +340,12 @@ export default function App() {
 
   const activeChoghadiya = getActiveChoghadiya();
 
-  // Find current active Hora based on actual currentTime (today)
-  const getActiveHora = () => {
+  // Find rolling chronological Hora list and current active Hora
+  const getHoraPresentationData = () => {
     try {
-      const todayPanchang = getPanchangForDate(coords.latitude, coords.longitude, new Date());
-      const currentMin = currentTime.getHours() * 60 + currentTime.getMinutes();
+      const curDateObj = new Date(currentTime);
+      const selDateObj = new Date(selectedDate);
+      const currentMin = curDateObj.getHours() * 60 + curDateObj.getMinutes();
 
       const parseTimeToMinutes = (timeStr: string): number => {
         const [time, ampm] = timeStr.split(' ');
@@ -314,25 +356,103 @@ export default function App() {
         return hrs * 60 + mins;
       };
 
-      const isTimeInInterval = (currMin: number, startStr: string, endStr: string): boolean => {
-        const start = parseTimeToMinutes(startStr);
-        const end = parseTimeToMinutes(endStr);
-        if (start <= end) {
-          return currMin >= start && currMin < end;
-        } else {
-          return currMin >= start || currMin < end;
-        }
-      };
+      // Get sunrise for selectedDate
+      const pRef = getPanchangForDate(coords.latitude, coords.longitude, selDateObj);
+      const sunriseMin = parseTimeToMinutes(pRef.sunrise);
 
-      return todayPanchang.hora?.find(h => 
-        isTimeInInterval(currentMin, h.startTime, h.endTime)
+      // Determine active and next Vedic days
+      let dateActive: Date;
+      let dateNext: Date;
+      const refTime = selDateObj.getTime();
+
+      if (currentMin < sunriseMin) {
+        dateActive = new Date(refTime - 24 * 60 * 60 * 1000);
+        dateNext = new Date(refTime);
+      } else {
+        dateActive = new Date(refTime);
+        dateNext = new Date(refTime + 24 * 60 * 60 * 1000);
+      }
+
+      const pActive = getPanchangForDate(coords.latitude, coords.longitude, dateActive);
+      const pNext = getPanchangForDate(coords.latitude, coords.longitude, dateNext);
+
+      const combinedHoras: { hora: HoraInterval; startAbs: number; endAbs: number }[] = [];
+      const midnightActive = new Date(dateActive);
+      midnightActive.setHours(0, 0, 0, 0);
+      const midnightNext = new Date(dateNext);
+      midnightNext.setHours(0, 0, 0, 0);
+
+      const pActiveSunsetMin = parseTimeToMinutes(pActive.sunset);
+      pActive.hora?.forEach((h, idx) => {
+        let startM = parseTimeToMinutes(h.startTime);
+        let endM = parseTimeToMinutes(h.endTime);
+        if (!h.isDay) {
+          if (startM < pActiveSunsetMin) startM += 1440;
+          if (endM < pActiveSunsetMin) endM += 1440;
+        }
+        const startAbs = midnightActive.getTime() + startM * 60000;
+        const endAbs = midnightActive.getTime() + endM * 60000;
+        combinedHoras.push({
+          hora: { ...h, number: idx + 1 },
+          startAbs,
+          endAbs
+        });
+      });
+
+      const pNextSunsetMin = parseTimeToMinutes(pNext.sunset);
+      pNext.hora?.forEach((h, idx) => {
+        let startM = parseTimeToMinutes(h.startTime);
+        let endM = parseTimeToMinutes(h.endTime);
+        if (!h.isDay) {
+          if (startM < pNextSunsetMin) startM += 1440;
+          if (endM < pNextSunsetMin) endM += 1440;
+        }
+        const startAbs = midnightNext.getTime() + startM * 60000;
+        const endAbs = midnightNext.getTime() + endM * 60000;
+        combinedHoras.push({
+          hora: { ...h, number: idx + 25 },
+          startAbs,
+          endAbs
+        });
+      });
+
+      const virtualCurrentTime = new Date(selDateObj);
+      virtualCurrentTime.setHours(curDateObj.getHours());
+      virtualCurrentTime.setMinutes(curDateObj.getMinutes());
+      virtualCurrentTime.setSeconds(curDateObj.getSeconds());
+      virtualCurrentTime.setMilliseconds(curDateObj.getMilliseconds());
+      const currentTimeAbs = virtualCurrentTime.getTime();
+
+      const activeItem = combinedHoras.find(item => 
+        currentTimeAbs >= item.startAbs && currentTimeAbs < item.endAbs
+      ) || combinedHoras[0];
+
+      const windowStart = currentTimeAbs;
+      const windowEnd = currentTimeAbs + 720 * 60000;
+
+      const upcomingHoraItems = combinedHoras.filter(item => 
+        item.startAbs < windowEnd && item.endAbs > windowStart
       );
-    } catch {
-      return undefined;
+
+      const rollingList = upcomingHoraItems.map(item => item.hora);
+      
+      console.log("Calculated rolling Hora list:", rollingList.map(h => `${h.number}: ${h.lordHindi} (${h.startTime} - ${h.endTime})`));
+
+      return {
+        rollingHoraList: rollingList,
+        rollingActiveHora: activeItem ? activeItem.hora : (panchangInfo.hora?.[0] || null)
+      };
+    } catch (e) {
+      console.error("Error in getHoraPresentationData:", e);
+      return {
+        rollingHoraList: panchangInfo.hora || [],
+        rollingActiveHora: panchangInfo.hora?.[0] || null
+      };
     }
   };
 
-  const activeHora = getActiveHora() || panchangInfo.hora?.[0];
+  const { rollingHoraList, rollingActiveHora } = getHoraPresentationData();
+  const activeHora = rollingActiveHora;
 
   // Chaughadiya Ring presentation data consumed directly from the Sanatan Engine
   const {
@@ -896,44 +1016,32 @@ export default function App() {
                   </button>
                   <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                     <div className="space-y-1">
-                      <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block">॥ नमस्कार ॥</span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block">॥ नमस्कार ॥</span>
+                        {panchangInfo.hinduDate.ayana && (
+                          <span className={`text-[9px] font-black px-2 py-0.5 rounded-md border ${
+                            panchangInfo.hinduDate.ayana === 'Uttarayana'
+                              ? 'bg-amber-100 dark:bg-amber-950/40 border-amber-300 text-amber-800 dark:text-amber-350'
+                              : 'bg-indigo-100 dark:bg-indigo-950/40 border-indigo-300 text-indigo-850 dark:text-indigo-350'
+                          } font-sans uppercase tracking-wider flex items-center gap-0.5 shadow-3xs`}>
+                            {panchangInfo.hinduDate.ayana === 'Uttarayana' ? '🌞 उत्तरायण' : '🌙 दक्षिणायन'}
+                          </span>
+                        )}
+                      </div>
                       <h2 className="text-lg sm:text-xl font-bold font-serif text-slate-800 dark:text-amber-100">आध्यात्मिक दिन में आपका स्वागत है</h2>
                       <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 max-w-xl">
                         दैनिक ग्रहों की शुभता और सटीक सूर्य सिद्धांत गणनाओं के साथ जुड़ें।
                       </p>
                     </div>
                     
-                    {/* Right side container: Date selector */}
-                    <div className="flex flex-col gap-2 w-full lg:w-auto min-w-[280px] sm:min-w-[340px] md:min-w-[400px]">
-                      {/* Date Selector override */}
-                      <div 
-                        onClick={() => {
-                          if (dateInputRef.current) {
-                            try {
-                              dateInputRef.current.showPicker();
-                            } catch (err) {
-                              dateInputRef.current.click();
-                            }
-                          }
-                        }}
-                        className="flex-grow flex items-center gap-2 bg-white/75 dark:bg-zinc-900/60 p-2 px-3 rounded-xl border border-orange-100 dark:border-orange-950/40 shadow-xs relative cursor-pointer min-w-0"
-                      >
-                        <Calendar className="w-4 h-4 text-orange-600 shrink-0" />
-                        <div className="min-w-0 pr-1 text-left">
-                          <span className="text-[8px] sm:text-[9px] text-slate-400 font-mono uppercase tracking-wider block">चयनित तिथि</span>
-                          <span className="text-3xs sm:text-2xs font-extrabold text-[#9A3412] dark:text-orange-200 font-sans block truncate leading-none mt-0.5 whitespace-nowrap">
-                            {formattedDateStr}
-                          </span>
-                        </div>
-                        <input
-                          type="date"
-                          ref={dateInputRef}
-                          value={selectedDate.toISOString().split('T')[0]}
-                          onChange={(e) => setSelectedDate(new Date(e.target.value))}
-                          onClick={(e) => e.stopPropagation()}
-                          className="absolute w-0 h-0 opacity-0 pointer-events-none"
-                          title="Override active date calculations"
-                        />
+                    {/* Right side container: Today's Date Badge (Static) */}
+                    <div className="flex-grow flex items-center gap-2 bg-white/75 dark:bg-zinc-900/60 p-2 px-3 rounded-xl border border-orange-100 dark:border-orange-950/40 shadow-xs relative min-w-0 select-none">
+                      <Calendar className="w-4 h-4 text-orange-600 shrink-0" />
+                      <div className="min-w-0 pr-1 text-left">
+                        <span className="text-[8px] sm:text-[9px] text-slate-400 font-mono uppercase tracking-wider block">आज की तिथि (Today)</span>
+                        <span className="text-3xs sm:text-2xs font-extrabold text-[#9A3412] dark:text-orange-200 font-sans block truncate leading-none mt-0.5 whitespace-nowrap">
+                          {formattedDateStr}
+                        </span>
                       </div>
                     </div>
 
@@ -1028,8 +1136,17 @@ export default function App() {
                         <div className="space-y-1 sm:space-y-1.5 justify-center flex flex-col h-full">
                           <div className="flex justify-between items-center text-[10px] sm:text-[11px] min-w-0 gap-1">
                             <span className="text-slate-500 dark:text-slate-400 shrink-0">मास:</span>
-                            <span className="font-serif font-bold text-orange-700 dark:text-orange-350 ml-1 break-words text-right">{panchangInfo.hinduDate.monthHindi}</span>
+                            <span className="font-serif font-bold text-orange-700 dark:text-orange-350 ml-1 break-words text-right">
+                              {panchangInfo.hinduDate.monthHindi}
+                              {panchangInfo.hinduDate.isLeapMonth ? ' (अधिमास)' : ''}
+                            </span>
                           </div>
+                          {panchangInfo.hinduDate.solarMonth && (
+                            <div className="flex justify-between items-center text-[10px] sm:text-[11px] min-w-0 gap-1">
+                              <span className="text-slate-500 dark:text-slate-400 shrink-0">सौर मास:</span>
+                              <span className="font-serif font-bold text-orange-700 dark:text-orange-350 ml-1 break-words text-right">{panchangInfo.hinduDate.solarMonth}</span>
+                            </div>
+                          )}
                           <div className="flex justify-between items-center text-[10px] sm:text-[11px] min-w-0 gap-1">
                             <span className="text-slate-500 dark:text-slate-400 shrink-0">ऋतु:</span>
                             <span className="font-serif font-bold text-orange-700 dark:text-orange-350 ml-1 break-words text-right">
@@ -1085,7 +1202,7 @@ export default function App() {
                       sunsetTimeStr={panchangInfo.sunset}
                       tithiHindiName={panchangInfo.hinduDate.tithi.hindiName}
                       nakshatraHindiName={panchangInfo.hinduDate.nakshatra.hindiName}
-                      horaList={panchangInfo.hora || []}
+                      horaList={rollingHoraList}
                       activeHora={activeHora}
                       choghadiyaList={choghadiyaList}
                       activeChoghadiyaIndex={activeIndex}
@@ -1099,6 +1216,118 @@ export default function App() {
                 {/* Interactive Moon Phase Orbit Visualizer */}
                 <motion.div variants={itemVariants} className="mt-2">
                   <MoonPhaseVisualizer panchang={panchangInfo} />
+                </motion.div>
+
+                {/* Personalized Muhurat (Tara Bala & Chandra Bala) Card */}
+                <motion.div 
+                  variants={itemVariants}
+                  className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left border border-orange-100/50 dark:border-orange-950/20 rounded-3xl space-y-4 shadow-md"
+                >
+                  <div className="flex items-center justify-between border-b border-orange-100/20 dark:border-orange-950/10 pb-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-orange-500" />
+                      <div>
+                        <span className="text-[10px] font-black text-slate-400 dark:text-amber-500 uppercase tracking-widest font-mono">व्यक्तिगत मुहूर्त विश्लेषण</span>
+                        <h3 className="text-base font-bold text-slate-800 dark:text-amber-100 leading-tight">ताराबल एवं चन्द्रबल (Tara Bala & Chandra Bala)</h3>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Input Selectors */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-bold text-slate-400 font-mono uppercase tracking-wider">अपना जन्म नक्षत्र चुनें (Birth Nakshatra)</span>
+                      <select
+                        value={birthNakshatraIdx}
+                        onChange={(e) => setBirthNakshatraIdx(parseInt(e.target.value, 10))}
+                        className="text-xs p-2.5 rounded-xl bg-slate-500/5 dark:bg-zinc-950/40 border border-slate-200/50 dark:border-zinc-800/60 text-slate-800 dark:text-slate-100 focus:outline-none"
+                      >
+                        {NAKSHATRAS_LIST.map((name, idx) => (
+                          <option key={idx} value={idx}>{name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-bold text-slate-400 font-mono uppercase tracking-wider">अपनी जन्म राशि चुनें (Birth Moon Sign)</span>
+                      <select
+                        value={birthRashiIdx}
+                        onChange={(e) => setBirthRashiIdx(parseInt(e.target.value, 10))}
+                        className="text-xs p-2.5 rounded-xl bg-slate-500/5 dark:bg-zinc-950/40 border border-slate-200/50 dark:border-zinc-800/60 text-slate-800 dark:text-slate-100 focus:outline-none"
+                      >
+                        {RASHIS_LIST.map((rashi, idx) => (
+                          <option key={idx} value={idx}>{rashi.hin}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Calculation Output Results */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    {/* Tara Bala Result */}
+                    {(() => {
+                      const currentNaksIdx = panchangInfo.hinduDate.nakshatra.value - 1;
+                      const taraBalaIdx = ((currentNaksIdx - birthNakshatraIdx + 9) % 9) + 1;
+                      const taraBalaDetails = [
+                        { name: "Janma Tara (जन्म)", quality: "Inauspicious / Average", desc: "शारीरिक ऊर्जा के प्रति सचेत रहें। लंबी यात्रा या नए कार्यों को टालें। दान-पुण्य शुभ।", color: "border-rose-250 bg-rose-50/40 text-rose-800 dark:bg-rose-950/10 dark:text-rose-300" },
+                        { name: "Sampat Tara (सम्पाद)", quality: "Highly Auspicious", desc: "धन लाभ, व्यवसाय वृद्धि और समृद्धि की दिशा में प्रयास करने का सर्वोत्तम समय।", color: "border-emerald-250 bg-emerald-50/40 text-emerald-800 dark:bg-emerald-950/10 dark:text-emerald-300" },
+                        { name: "Vipat Tara (विपत्)", quality: "Inauspicious", desc: "कार्यों में विघ्न या हानि का भय। जोखिम भरे कार्यों एवं महत्वपूर्ण यात्रा से बचें।", color: "border-rose-250 bg-rose-50/40 text-rose-800 dark:bg-rose-950/10 dark:text-rose-300" },
+                        { name: "Kshema Tara (क्षेम)", quality: "Auspicious", desc: "सुरक्षा, संरक्षण और सुखद यात्राओं के लिए उत्तम समय। घरेलू कार्यों के लिए अनुकूल।", color: "border-emerald-250 bg-emerald-50/40 text-emerald-800 dark:bg-emerald-950/10 dark:text-emerald-300" },
+                        { name: "Pratyak Tara (प्रत्यरि)", quality: "Inauspicious", desc: "शत्रु बाधा या विवाद की आशंका। आज किसी से बहस या नई साझीदारी न करें।", color: "border-amber-250 bg-amber-50/40 text-amber-800 dark:bg-amber-950/10 dark:text-amber-300" },
+                        { name: "Sadhana Tara (साधना)", quality: "Highly Auspicious", desc: "मन्त्र साधना, शिक्षा प्राप्ति, साक्षात्कार और गंभीर योजनाओं के लिए सर्वोत्तम।", color: "border-teal-250 bg-teal-50/40 text-teal-800 dark:bg-teal-950/10 dark:text-teal-300" },
+                        { name: "Naidhana Tara (निधन)", quality: "Highly Inauspicious", desc: "गंभीर कष्ट या हानि की चेतावनी। किसी भी प्रकार के नए उद्यम या निवेश को पूरी तरह टालें।", color: "border-red-250 bg-red-50/40 text-red-800 dark:bg-red-950/10 dark:text-red-300" },
+                        { name: "Mitra Tara (मित्र)", quality: "Auspicious", desc: "मित्रों से सहयोग, सुखद संवाद और सामाजिक मेलजोल बढ़ाने के लिए उत्कृष्ट दिन।", color: "border-emerald-250 bg-emerald-50/40 text-emerald-800 dark:bg-emerald-950/10 dark:text-emerald-300" },
+                        { name: "Parama Mitra Tara (परम मित्र)", quality: "Highly Auspicious", desc: "अत्यंत अनुकूल परिणाम। महत्वपूर्ण निर्णयों, सम्मेलनों और सौदों के लिए श्रेष्ठ।", color: "border-emerald-250 bg-emerald-50/40 text-emerald-800 dark:bg-emerald-950/10 dark:text-emerald-300" }
+                      ][taraBalaIdx - 1];
+
+                      return (
+                        <div className={`p-3.5 rounded-2xl border flex flex-col justify-between gap-1.5 ${taraBalaDetails.color}`}>
+                          <div className="flex justify-between items-center border-b border-orange-100/10 pb-1">
+                            <span className="text-2xs font-extrabold uppercase font-mono tracking-wider">ताराबल (Tara Bala)</span>
+                            <span className="text-[10px] font-black">{taraBalaDetails.quality}</span>
+                          </div>
+                          <h4 className="text-sm font-black font-serif leading-none mt-1">{taraBalaDetails.name}</h4>
+                          <p className="text-[10.5px] leading-snug font-sans opacity-90">{taraBalaDetails.desc}</p>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Chandra Bala Result */}
+                    {(() => {
+                      const moonPlanet = panchangInfo.planets?.find(p => p.name === 'Moon');
+                      const currentMoonRashiIdx = moonPlanet 
+                        ? RASHIS_LIST.findIndex(r => r.eng === moonPlanet.sign)
+                        : Math.floor((panchangInfo.hinduDate.nakshatra.value - 1) * 27 / 12) % 12;
+
+                      const distance = (currentMoonRashiIdx - birthRashiIdx + 12) % 12 + 1;
+                      
+                      const chandraBalaDetails = ({
+                        1: { quality: "शुभ (Auspicious)", desc: "उत्तम स्वास्थ्य, मानसिक शांति और नए वस्त्र व भोजन का आनंद प्राप्त होता है।", color: "border-emerald-250 bg-emerald-50/40 text-emerald-800 dark:bg-emerald-950/10 dark:text-emerald-300" },
+                        2: { quality: "मध्यम (Neutral - Worship Shiva)", desc: "वित्तीय लेन-देन में सतर्कता रखें। भगवान शिव की आराधना से बाधाएं टलेंगी।", color: "border-amber-250 bg-amber-50/40 text-amber-800 dark:bg-amber-950/10 dark:text-amber-300" },
+                        3: { quality: "शुभ (Auspicious)", desc: "पराक्रम में वृद्धि, शत्रुओं पर विजय और कार्यों में पूर्ण सफलता का योग।", color: "border-emerald-250 bg-emerald-50/40 text-emerald-800 dark:bg-emerald-950/10 dark:text-emerald-300" },
+                        4: { quality: "वर्जित (Inauspicious)", desc: "पारिवारिक कलह या गृह क्लेश की आशंका। मन अशान्त रहेगा। आज महत्वपूर्ण निर्णय न लें।", color: "border-rose-250 bg-rose-50/40 text-rose-800 dark:bg-rose-950/10 dark:text-rose-300" },
+                        5: { quality: "मध्यम (Neutral - Worship Ganesha)", desc: "बौद्धिक कार्यों में रूकावटें आ सकती हैं। गणेश जी को दूर्वा चढ़ाकर कार्य शुरू करें।", color: "border-amber-250 bg-amber-50/40 text-amber-800 dark:bg-amber-950/10 dark:text-amber-300" },
+                        6: { quality: "शुभ (Auspicious)", desc: "शारीरिक निरोगिता, विवादों में विजय और कर्ज से मुक्ति मिलने का उत्तम दिन।", color: "border-emerald-250 bg-emerald-50/40 text-emerald-800 dark:bg-emerald-950/10 dark:text-emerald-300" },
+                        7: { quality: "शुभ (Auspicious)", desc: "साझेदारी में लाभ, जीवनसाथी का भरपूर सहयोग और सुखद यात्रा संभव।", color: "border-emerald-250 bg-emerald-50/40 text-emerald-800 dark:bg-emerald-950/10 dark:text-emerald-300" },
+                        8: { quality: "वर्जित (Highly Inauspicious)", desc: "चोट-चपेट या आकस्मिक हानि का प्रबल योग। वाहन चलाते समय विशेष सावधानी रखें।", color: "border-red-250 bg-red-50/40 text-red-800 dark:bg-red-950/10 dark:text-red-300" },
+                        9: { quality: "मध्यम (Neutral - Worship Vishnu)", desc: "धार्मिक यात्रा या पूजन के लिए अच्छा है। भगवान विष्णु की पूजा से समृद्धि होगी।", color: "border-amber-250 bg-amber-50/40 text-amber-800 dark:bg-amber-950/10 dark:text-amber-300" },
+                        10: { quality: "शुभ (Auspicious)", desc: "नौकरी व व्यवसाय में विशेष तरक्की। कार्यों में सरकारी बाधाएं दूर होंगी।", color: "border-emerald-250 bg-emerald-50/40 text-emerald-800 dark:bg-emerald-950/10 dark:text-emerald-300" },
+                        11: { quality: "शुभ (Auspicious)", desc: "हर ओर से लाभ एवं प्रसन्नता। निवेश से आशातीत रिटर्न और सुखद समाचार प्राप्ति।", color: "border-emerald-250 bg-emerald-50/40 text-emerald-800 dark:bg-emerald-950/10 dark:text-emerald-300" },
+                        12: { quality: "वर्जित (Inauspicious)", desc: "अत्यधिक अनायास खर्च और मानसिक तनाव। व्यर्थ की यात्राओं में समय नष्ट हो सकता है।", color: "border-rose-250 bg-rose-50/40 text-rose-800 dark:bg-rose-950/10 dark:text-rose-300" }
+                      } as Record<number, { quality: string; desc: string; color: string }>)[distance] || { quality: "Neutral", desc: "", color: "" };
+
+                      return (
+                        <div className={`p-3.5 rounded-2xl border flex flex-col justify-between gap-1.5 ${chandraBalaDetails.color}`}>
+                          <div className="flex justify-between items-center border-b border-orange-100/10 pb-1">
+                            <span className="text-2xs font-extrabold uppercase font-mono tracking-wider">चन्द्रबल (Chandra Bala)</span>
+                            <span className="text-[10px] font-black">{chandraBalaDetails.quality}</span>
+                          </div>
+                          <h4 className="text-sm font-black font-serif leading-none mt-1">गोचर में चन्द्र {distance}वें स्थान पर</h4>
+                          <p className="text-[10.5px] leading-snug font-sans opacity-90">{chandraBalaDetails.desc}</p>
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </motion.div>
 
                 
@@ -1124,7 +1353,7 @@ export default function App() {
 
             {/* 4. FESTIVAL SCREEN */}
             {activeTab === 'festival' && (
-              <FestivalScreen />
+              <FestivalScreen lat={coords.latitude} lon={coords.longitude} year={selectedDate.getFullYear()} />
             )}
 
             {/* 5. NAKSHATRA SCREEN */}

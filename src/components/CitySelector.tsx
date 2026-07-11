@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, MapPin, Navigation, Check, AlertCircle } from 'lucide-react';
 import { Coords } from '../types';
+import { findClosestCity } from '../utils/geocoder';
 import { EXTENDED_INDIAN_CITIES as INDIAN_CITIES } from '../utils/indianCities';
 
 interface CitySelectorProps {
@@ -28,70 +29,24 @@ export function CitySelector({ currentCoords, onSelectCity, gpsActive, setGpsAct
     }
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      (position) => {
         const lat = parseFloat(position.coords.latitude.toFixed(4));
         const lon = parseFloat(position.coords.longitude.toFixed(4));
         
-        let nearestCity = 'मेरा जीपीएस स्थान';
-        let state = 'Detected';
-
-        try {
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`);
-          if (response.ok) {
-            const data = await response.json();
-            if (data && data.address) {
-              nearestCity = data.address.city || data.address.town || data.address.village || data.address.county || nearestCity;
-              state = data.address.state || state;
-            }
-          } else {
-            throw new Error('Reverse geocoding request failed');
-          }
-        } catch (error) {
-          console.error('Reverse geocoding error, falling back to local calculation', error);
-          
-          const toRad = (value: number) => (value * Math.PI) / 180;
-          const R = 6371; // Earth's radius in km
-          let minDistance = Infinity;
-
-          INDIAN_CITIES.forEach(c => {
-            const dLat = toRad(c.latitude - lat);
-            const dLon = toRad(c.longitude - lon);
-            const a = 
-              Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(toRad(lat)) * Math.cos(toRad(c.latitude)) * 
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c_dist = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            const distanceKm = R * c_dist;
-
-            if (distanceKm < minDistance) {
-              minDistance = distanceKm;
-              if (distanceKm < 50) {
-                nearestCity = `Near ${c.city}`;
-                state = c.state;
-              } else if (distanceKm < 200) {
-                nearestCity = `${Math.round(distanceKm)}km from ${c.city}`;
-                state = c.state;
-              }
-            }
-          });
-
-          if (minDistance >= 200) {
-             nearestCity = 'जीपीएस स्थान';
-             state = 'Detected';
-          }
-        }
-
+        // 100% offline reverse geocoding
+        const matched = findClosestCity(lat, lon);
+        
         onSelectCity({
           latitude: lat,
           longitude: lon,
-          city: nearestCity,
-          state: state
+          city: matched.name,
+          state: matched.state
         });
         setGpsActive(true);
       },
       (error) => {
         console.error('GPS trigger failed', error);
-         setErrorMessage('भौगोलिक स्थान की अनुमति अस्वीकार कर दी गई या समय समाप्त हो गया। कृपया नीचे से मैन्युअल रूप से एक शहर का चयन करें।');
+        setErrorMessage('भौगोलिक स्थान की अनुमति अस्वीकार कर दी गई या समय समाप्त हो गया। कृपया नीचे से मैन्युअल रूप से एक शहर का चयन करें।');
         setGpsActive(false);
       },
       { enableHighAccuracy: true, timeout: 8000 }

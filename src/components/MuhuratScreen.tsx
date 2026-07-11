@@ -11,6 +11,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { PanchangInfo } from '../types';
+import { getMuhuratsForPanchang } from '../utils/panchangCalc';
 
 interface MuhuratScreenProps {
   panchang: PanchangInfo;
@@ -29,6 +30,8 @@ export function MuhuratScreen({
 }: MuhuratScreenProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const dateInputRef = useRef<HTMLInputElement>(null);
+  
+  const allMuhurats = getMuhuratsForPanchang(panchang);
   
   // Custom Muhurat types and auspicious calculation formulas based on current Tithi & Month
   const tithiValue = panchang.hinduDate.tithi.value;
@@ -311,6 +314,158 @@ export function MuhuratScreen({
             title="मुहूर्त तिथि बदलें"
           />
         </div>
+      </div>
+
+      {/* PHASE 14: ASTROLOGICAL DASHBOARD CARD GRID */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        
+        {/* Card 1: शुभ मुहूर्त व योग */}
+        <div className="glass-card-light dark:glass-card-dark p-5 text-left rounded-3xl border border-emerald-100/50 dark:border-emerald-950/20 hover:border-emerald-500/30 transition-all duration-300 flex flex-col justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 pb-2.5 border-b border-emerald-100/60 dark:border-zinc-800/40">
+              <span className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">✨</span>
+              <div>
+                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">शुभ मुहूर्त व योग (Siddhi Yogas)</h3>
+                <span className="text-[9px] text-emerald-600 dark:text-emerald-400 block mt-1 uppercase tracking-widest font-mono">Auspicious Timings</span>
+              </div>
+            </div>
+
+            {/* Timings */}
+            <div className="space-y-2 text-xs">
+              {allMuhurats.filter(m => m.type !== 'Ashubh').map((m, idx) => (
+                <div key={idx} className="flex justify-between items-center py-1.5 border-b border-slate-100/40 dark:border-slate-800/10">
+                  <span className="text-slate-400 font-medium">{m.hindiName || m.name}:</span>
+                  <span className="font-bold text-slate-855 dark:text-emerald-350 font-mono">{m.startTime} - {m.endTime}</span>
+                </div>
+              ))}
+            </div>
+            {/* Shubh Yogas List */}
+            {((panchang.shubhYogas && panchang.shubhYogas.length > 0) || (panchang.pushkarYog && panchang.pushkarYog.active)) && (
+              <div className="mt-4 pt-3 border-t border-slate-100/50 dark:border-slate-800/30 space-y-2">
+                <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest block font-mono">आज के विशेष योग (Auspicious Yogas):</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {panchang.pushkarYog && panchang.pushkarYog.active && (
+                    <span className="text-[9.5px] font-black px-2 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-350 border border-amber-300/40 animate-pulse font-serif">
+                      🌟 {panchang.pushkarYog.hindiName} ({panchang.pushkarYog.type})
+                    </span>
+                  )}
+                  {panchang.shubhYogas && panchang.shubhYogas.map((y, idx) => (
+                    <span key={idx} className="text-[9.5px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-350 border border-emerald-250/30 font-serif">
+                      ✨ {y.hindiName} ({y.start} - {y.end})
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Card 2: वर्जित समय चक्र */}
+        <div className="glass-card-light dark:glass-card-dark p-5 text-left rounded-3xl border border-red-150 dark:border-red-950/20 hover:border-red-500/30 transition-all duration-300 flex flex-col justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 pb-2.5 border-b border-red-100/60 dark:border-zinc-800/40">
+              <span className="p-1.5 rounded-lg bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400">⚠️</span>
+              <div>
+                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">वर्जित समय चक्र (Adverse Periods)</h3>
+                <span className="text-[9px] text-red-600 dark:text-red-405 block mt-1 uppercase tracking-widest font-mono">Inauspicious Timings</span>
+              </div>
+            </div>
+
+            {/* Inauspicious Timings */}
+            <div className="space-y-2 text-xs">
+              {allMuhurats.filter(m => m.type === 'Ashubh').map((m, idx) => (
+                <div key={idx} className="flex justify-between items-center py-1.5 border-b border-slate-100/40 dark:border-slate-800/10">
+                  <span className="text-slate-400 font-medium">{m.hindiName || m.name}:</span>
+                  <span className="font-bold text-red-655 dark:text-rose-400 font-mono">{m.startTime} - {m.endTime}</span>
+                </div>
+              ))}
+
+              {/* Durmuhurat & Varjyam */}
+              {panchang.durmuhurat && panchang.durmuhurat.length > 0 && panchang.durmuhurat.map((d, idx) => (
+                <div key={`dur-${idx}`} className="flex justify-between items-center py-1.5 border-b border-slate-100/40 dark:border-slate-800/10">
+                  <span className="text-slate-400 font-medium">दुर्मुहूर्त (Durmuhurat):</span>
+                  <span className="font-bold text-red-655 dark:text-rose-400 font-mono">{d.start} - {d.end}</span>
+                </div>
+              ))}
+              {panchang.varjyam && panchang.varjyam.length > 0 && panchang.varjyam.map((v, idx) => (
+                <div key={`var-${idx}`} className="flex justify-between items-center py-1.5 border-b border-slate-100/40 dark:border-slate-800/10">
+                  <span className="text-slate-400 font-medium">वर्ज्यम (Varjyam):</span>
+                  <span className="font-bold text-red-655 dark:text-rose-400 font-mono">{v.start} - {v.end}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Alerts */}
+            {((panchang.dagdaTithi && panchang.dagdaTithi.isDagda) || (panchang.bhadra && panchang.bhadra.active)) && (
+              <div className="mt-3 pt-2.5 border-t border-slate-100/50 dark:border-slate-800/30 space-y-1 text-[10px]">
+                {panchang.dagdaTithi && panchang.dagdaTithi.isDagda && (
+                  <div className="text-red-700 dark:text-red-400 font-bold bg-red-500/10 px-2 py-1 rounded border border-red-500/15 font-serif">
+                    🚨 आज **दग्ध तिथि** है! महत्वपूर्ण कार्य टालें।
+                  </div>
+                )}
+                {panchang.bhadra && panchang.bhadra.active && (
+                  <div className="text-red-700 dark:text-red-400 font-bold bg-red-500/10 px-2 py-1 rounded border border-red-500/15 font-serif">
+                    🚨 भद्रा काल सक्रिय है ({panchang.bhadra.startTime} से {panchang.bhadra.endTime} तक)।
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Card 3: शिववास व अग्निवास */}
+        <div className="glass-card-light dark:glass-card-dark p-5 text-left rounded-3xl border border-orange-150 dark:border-orange-950/20 hover:border-orange-500/30 transition-all duration-300 flex flex-col justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 pb-2.5 border-b border-orange-100/60 dark:border-zinc-800/40">
+              <span className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400">🔥</span>
+              <div>
+                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">अग्निवास व शिववास (Ritual Muhurats)</h3>
+                <span className="text-[9px] text-orange-600 dark:text-orange-400 block mt-1 uppercase tracking-widest font-mono">Ritual Auspiciousness</span>
+              </div>
+            </div>
+
+            <div className="space-y-3.5">
+              {/* Shiva Vaas */}
+              {panchang.shivaVaas && (
+                <div className="p-3 rounded-2xl bg-white/5 dark:bg-white/2 border border-white/10 dark:border-white/5">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 font-serif">शिववास (रुद्राभिषेक):</span>
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded border ${
+                      panchang.shivaVaas.isAuspicious
+                        ? 'bg-emerald-100 border-emerald-250 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
+                        : 'bg-rose-100 border-rose-250 text-rose-800 dark:bg-rose-950/30 dark:text-rose-455'
+                    }`}>
+                      {panchang.shivaVaas.isAuspicious ? 'शुभ (Auspicious)' : 'अशुभ (Avoid)'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1 leading-normal font-sans">
+                    <strong>वास स्थान:</strong> {panchang.shivaVaas.residenceHindi || panchang.shivaVaas.residence} - {panchang.shivaVaas.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Agni Vaas */}
+              {panchang.agniVaas && (
+                <div className="p-3 rounded-2xl bg-white/5 dark:bg-white/2 border border-white/10 dark:border-white/5">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 font-serif">अग्निवास (यज्ञ/हवन):</span>
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded border ${
+                      panchang.agniVaas.isAuspicious
+                        ? 'bg-emerald-100 border-emerald-250 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
+                        : 'bg-rose-100 border-rose-250 text-rose-800 dark:bg-rose-950/30 dark:text-rose-455'
+                    }`}>
+                      {panchang.agniVaas.isAuspicious ? 'शुभ (Auspicious)' : 'अशुभ (Avoid)'}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-1 leading-normal font-sans">
+                    <strong>वास स्थान:</strong> {panchang.agniVaas.residenceHindi || panchang.agniVaas.residence} - {panchang.agniVaas.description}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
       </div>
 
       {/* Active Muhurats Section */}

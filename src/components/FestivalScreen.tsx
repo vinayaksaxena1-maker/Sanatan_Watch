@@ -3,17 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { Search, Calendar, Smile } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Search, Calendar, Smile, Download, ExternalLink } from 'lucide-react';
 import { Festival } from '../types';
-import { FESTVALS_PRESETS } from '../utils/panchangCalc';
+import { getFestivalsForYear } from '../utils/festivalEngine';
+import { generateGoogleCalendarUrl, exportToIcsFile } from '../utils/calendarSync';
 
-export function FestivalScreen() {
+interface FestivalScreenProps {
+  lat: number;
+  lon: number;
+  year: number;
+}
+
+export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
   
-  // Custom upcoming filter logic
-  const filteredFestivals = FESTVALS_PRESETS.filter((fest) => {
+  // Calculate festivals dynamically based on local rules
+  const festivals = useMemo(() => {
+    return getFestivalsForYear(year, lat, lon);
+  }, [year, lat, lon]);
+
+  const filteredFestivals = festivals.filter((fest) => {
     const matchesSearch =
       fest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       fest.hindiName.includes(searchQuery) ||
@@ -28,18 +39,46 @@ export function FestivalScreen() {
   const getBadgeStyles = (type: string) => {
     switch (type) {
       case 'Ekadashi':
-        return 'bg-blue-50 border-blue-200 text-blue-850';
+        return 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950/20 dark:border-blue-900 dark:text-blue-300';
       case 'Purnima':
-        return 'bg-amber-50 border-amber-200 text-amber-900';
+        return 'bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/20 dark:border-amber-900 dark:text-amber-300';
       case 'Amavasya':
-        return 'bg-stone-50 border-stone-250 text-stone-800';
+        return 'bg-stone-50 border-stone-250 text-stone-800 dark:bg-stone-900/20 dark:border-stone-800 dark:text-stone-300';
       case 'Sankashti':
-        return 'bg-rose-50 border-rose-200 text-rose-800';
+        return 'bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/20 dark:border-rose-900 dark:text-rose-300';
       case 'Jayanti':
-        return 'bg-teal-50 border-teal-200 text-teal-850';
+        return 'bg-teal-50 border-teal-200 text-teal-800 dark:bg-teal-950/20 dark:border-teal-900 dark:text-teal-300';
       default:
-        return 'bg-orange-50 border-orange-200 text-orange-850';
+        return 'bg-orange-50 border-orange-200 text-orange-800 dark:bg-orange-950/20 dark:border-orange-900 dark:text-orange-300';
     }
+  };
+
+  const handleIcsExport = (fest: Festival) => {
+    const sD = new Date(fest.date);
+    const eD = new Date(sD);
+    eD.setDate(eD.getDate() + 1);
+
+    exportToIcsFile({
+      title: fest.hindiName,
+      description: fest.description,
+      startDate: fest.date,
+      endDate: eD.toISOString().split('T')[0],
+      location: 'India'
+    });
+  };
+
+  const getGoogleUrl = (fest: Festival) => {
+    const sD = new Date(fest.date);
+    const eD = new Date(sD);
+    eD.setDate(eD.getDate() + 1);
+
+    return generateGoogleCalendarUrl({
+      title: fest.hindiName,
+      description: fest.description,
+      startDate: fest.date,
+      endDate: eD.toISOString().split('T')[0],
+      location: 'India'
+    });
   };
 
   return (
@@ -119,6 +158,24 @@ export function FestivalScreen() {
                   <p className="text-[11px] sm:text-2xs text-slate-600 dark:text-slate-400 leading-relaxed font-sans max-w-2xl">
                     {fest.description}
                   </p>
+                  
+                  {/* Calendar Sync Actions */}
+                  <div className="flex gap-2 pt-1">
+                    <a
+                      href={getGoogleUrl(fest)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-[10px] font-bold text-orange-600 dark:text-orange-400 hover:underline"
+                    >
+                      <ExternalLink className="w-3 h-3" /> Google Calendar
+                    </a>
+                    <button
+                      onClick={() => handleIcsExport(fest)}
+                      className="flex items-center gap-1 text-[10px] font-bold text-orange-655 hover:underline cursor-pointer bg-transparent border-0"
+                    >
+                      <Download className="w-3 h-3" /> export iCal
+                    </button>
+                  </div>
                 </div>
 
                 {/* Calendar timing anchor */}

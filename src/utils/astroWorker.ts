@@ -33,8 +33,9 @@ function jdToLocalMinutes(jd: number, offsetHours: number = 5.5): number {
 }
 
 function formatRawMin(m: number): string {
-  let hrs = Math.floor(m / 60);
-  let mins = Math.floor(m % 60);
+  const normM = (m % 1440 + 1440) % 1440;
+  let hrs = Math.floor(normM / 60);
+  let mins = Math.floor(normM % 60);
   const ampm = hrs >= 12 ? 'PM' : 'AM';
   hrs = hrs % 12;
   if (hrs === 0) hrs = 12;
@@ -45,11 +46,36 @@ function formatRawMin(m: number): string {
 // Rise / Set calculation helper
 // ---------------------------------------------------------------------------
 function getRiseTrans(swe: any, jd: number, planet: number, lon: number, lat: number, alt: number, isRise: boolean): number {
-  const flags = isRise ? 1 : 2; // SE_CALC_RISE = 1, SE_CALC_SET = 2
-  // Strictly use Swiss Ephemeris (2 = SEFLG_SWIEPH). No Moshier fallback.
-  const res = swe.rise_trans(jd, planet, lon, lat, alt, flags | 2);
-  if (res && res.length > 0) return res[0];
-  throw new Error('Rise/trans calculation failed or returned empty.');
+  const geoposPtr = swe.SweModule._malloc(3 * 8);
+  const tretPtr = swe.SweModule._malloc(4 * 8);
+  const serrPtr = swe.SweModule._malloc(256);
+
+  // Set geopos [lon, lat, alt]
+  swe.SweModule.HEAPF64[geoposPtr / 8] = lon;
+  swe.SweModule.HEAPF64[geoposPtr / 8 + 1] = lat;
+  swe.SweModule.HEAPF64[geoposPtr / 8 + 2] = alt;
+
+  const epheflag = 2; // SEFLG_SWIEPH (Strictly use Swiss Ephemeris)
+  const rsmi = isRise ? 1 : 2; // 1 = SE_CALC_RISE, 2 = SE_CALC_SET
+
+  const retFlag = swe.SweModule.ccall(
+    'swe_rise_trans',
+    'number',
+    ['number', 'number', 'pointer', 'number', 'number', 'pointer', 'number', 'number', 'pointer', 'pointer'],
+    [jd, planet, 0, epheflag, rsmi, geoposPtr, 0, 0, tretPtr, serrPtr]
+  );
+
+  const start = tretPtr / 8;
+  const results = swe.SweModule.HEAPF64.slice(start, start + 4);
+
+  swe.SweModule._free(geoposPtr);
+  swe.SweModule._free(tretPtr);
+  swe.SweModule._free(serrPtr);
+
+  if (retFlag < 0) {
+    throw new Error(`Swiss Ephemeris rise_trans failed with code ${retFlag}`);
+  }
+  return results[0];
 }
 
 // ---------------------------------------------------------------------------
@@ -121,6 +147,7 @@ async function initWorker(origin: string) {
 
     swe = new SwissEph();
     await swe.initSwissEph();
+    swe.set_sid_mode(1, 0, 0);
 
     try {
       swe.SweModule.FS.mkdir('/sweph');
@@ -270,6 +297,70 @@ self.onmessage = async (event: MessageEvent) => {
       const sunLonAtNewMoon = (sunSidereal - daysSinceNewMoon + 360) % 360;
       const monthIdx = Math.floor(sunLonAtNewMoon / 30);
 
+      // 6. Calculate Navagraha Positions
+      const Grahas = [
+        { id: 0, name: 'Sun', hindiName: 'सूर्य' },
+        { id: 1, name: 'Moon', hindiName: 'चन्द्र' },
+        { id: 4, name: 'Mars', hindiName: 'मंगल' },
+        { id: 2, name: 'Mercury', hindiName: 'बुध' },
+        { id: 5, name: 'Jupiter', hindiName: 'गुरु' },
+        { id: 3, name: 'Venus', hindiName: 'शुक्र' },
+        { id: 6, name: 'Saturn', hindiName: 'शनि' },
+        { id: 10, name: 'Rahu', hindiName: 'राहु' }
+      ];
+
+      const zodiacSigns = [
+        { eng: 'Aries', hin: 'मेष' },
+        { eng: 'Taurus', hin: 'वृषभ' },
+        { eng: 'Gemini', hin: 'मिथुन' },
+        { eng: 'Cancer', hin: 'कर्क' },
+        { eng: 'Leo', hin: 'सिंह' },
+        { eng: 'Virgo', hin: 'कन्या' },
+        { eng: 'Libra', hin: 'तुला' },
+        { eng: 'Scorpio', hin: 'वृश्चिक' },
+        { eng: 'Sagittarius', hin: 'धनु' },
+        { eng: 'Capricorn', hin: 'मकर' },
+        { eng: 'Aquarius', hin: 'कुम्भ' },
+        { eng: 'Pisces', hin: 'मीन' }
+      ];
+
+      const planetsResult: any[] = [];
+      for (const g of Grahas) {
+        const pos = swe.calc_ut(jdMidnight, g.id, 2 | 256);
+        const lon = pos[0];
+        const speed = pos[3];
+        const siderealLon = (lon - ayanamsa + 360) % 360;
+        
+        const signIdx = Math.floor(siderealLon / 30);
+        const sign = zodiacSigns[signIdx];
+        
+        planetsResult.push({
+          name: g.name,
+          hindiName: g.hindiName,
+          longitude: siderealLon,
+          speed: speed,
+          isRetrograde: speed < 0,
+          sign: sign.eng,
+          signHindi: sign.hin
+        });
+      }
+
+      // Add Ketu (Ketu is always opposite to Rahu, meaning Rahu + 180 degrees)
+      const rahu = planetsResult.find(p => p.name === 'Rahu')!;
+      const ketuLon = (rahu.longitude + 180) % 360;
+      const ketuSignIdx = Math.floor(ketuLon / 30);
+      const ketuSign = zodiacSigns[ketuSignIdx];
+      
+      planetsResult.push({
+        name: 'Ketu',
+        hindiName: 'केतु',
+        longitude: ketuLon,
+        speed: rahu.speed,
+        isRetrograde: true,
+        sign: ketuSign.eng,
+        signHindi: ketuSign.hin
+      });
+
       self.postMessage({
         type: 'RESULT',
         key,
@@ -289,7 +380,11 @@ self.onmessage = async (event: MessageEvent) => {
           karanaPercent,
           karanaRemainingHours,
           monthsSinceEpoch: monthIdx,
-          diffDays: 0
+          diffDays: 0,
+          sunSidereal,
+          moonSidereal,
+          ayanamsa,
+          planets: planetsResult
         }
       });
       return;

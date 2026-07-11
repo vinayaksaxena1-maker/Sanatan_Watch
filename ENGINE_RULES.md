@@ -273,6 +273,17 @@ Recommended Git tags:
 
 ---
 
+# Rule 17 — Astronomical Engine Lock (STRICT)
+
+The core astronomical engine files:
+
+* `src/utils/astronomicalEngine.ts`
+* `src/utils/astroWorker.ts`
+
+Are strictly LOCKED. No developer or AI assistant is allowed to modify, refactor, optimize, or delete any code within these files without obtaining explicit, written confirmation and approval from the project owner in the active chat session.
+
+---
+
 # Non-Negotiable Rules
 
 The following rules must never be violated:
@@ -286,6 +297,7 @@ The following rules must never be violated:
 * No loss of offline capability.
 * No replacement of Swiss Ephemeris with approximation methods.
 * No modification of the approved architecture without project owner approval.
+* No modification of locked engine files (`src/utils/astronomicalEngine.ts` and `src/utils/astroWorker.ts`) without explicit project owner approval.
 
 ---
 

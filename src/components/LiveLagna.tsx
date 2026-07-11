@@ -162,7 +162,7 @@ export function LiveLagna({ panchang, currentTime }: LiveLagnaProps) {
           </div>
 
           {/* North Indian style Kundali SVG container box */}
-          <div className="relative w-64 h-64 my-2 select-none">
+          <div className="relative w-56 h-56 sm:w-64 sm:h-64 my-2 select-none">
             <svg viewBox="0 0 200 200" className="w-full h-full stroke-orange-350 dark:stroke-amber-600/70 fill-none stroke-2">
               {/* Outer Square */}
               <rect x="10" y="10" width="180" height="180" />

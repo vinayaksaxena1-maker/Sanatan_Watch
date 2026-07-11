@@ -3,6 +3,103 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export interface TimeInterval {
+  start: string;
+  end: string;
+}
+
+export interface ShubhYogItem {
+  name: string;
+  hindiName: string;
+  start: string;
+  end: string;
+}
+
+export interface PlanetCombustion {
+  name: string;
+  hindiName: string;
+  isCombust: boolean;
+  angularDistance: number;
+}
+
+export interface PanchakDetail {
+  active: boolean;
+  name: string;
+  hindiName: string;
+  type: string;
+  typeHindi: string;
+  description: string;
+}
+
+export interface GandMoolDetail {
+  isGandMool: boolean;
+  nakshatraName: string;
+  nakshatraHindiName: string;
+  rulingPlanet: string;
+  rulingPlanetHindi: string;
+  description: string;
+}
+
+export interface SuryaNakshatraDetail {
+  name: string;
+  hindiName: string;
+  pada: number;
+  lord: string;
+  deity: string;
+}
+
+export interface ChandraNakshatraDetail {
+  name: string;
+  hindiName: string;
+  pada: number;
+  lord: string;
+  deity: string;
+}
+
+export interface RituDetail {
+  solarRitu: string;
+  solarRituHindi: string;
+  lunarRitu: string;
+  lunarRituHindi: string;
+  description: string;
+}
+
+export interface PayaDetail {
+  name: 'Gold' | 'Silver' | 'Copper' | 'Iron';
+  hindiName: 'सोना' | 'चांदी' | 'तांबा' | 'लोहा';
+  description: string;
+}
+
+export interface DagdaTithiDetail {
+  isDagda: boolean;
+  name: string;
+  hindiName: string;
+  description: string;
+}
+
+export interface AgniVaasDetail {
+  residence: 'Earth' | 'Sky' | 'Netherworld';
+  residenceHindi: 'पृथ्वी' | 'आकाश' | 'पाताल';
+  isAuspicious: boolean;
+  description: string;
+}
+
+export interface ShivaVaasDetail {
+  residence: 'Kailash' | 'Gauri' | 'Vrishabha' | 'Sabha' | 'Bhojan' | 'Kreeda' | 'Shmashan';
+  residenceHindi: 'कैलाश' | 'गौरी के साथ' | 'वृषभ पर' | 'सभा में' | 'भोजन में' | 'क्रीड़ा में' | 'श्मशान में';
+  isAuspicious: boolean;
+  description: string;
+}
+
+export interface PushkarYogDetail {
+  active: boolean;
+  name: 'None' | 'Dwipushkar Yoga' | 'Tripushkar Yoga';
+  hindiName: 'कोई नहीं' | 'द्विपुष्कर योग' | 'त्रिपुष्कर योग';
+  type: 'Dwipushkar' | 'Tripushkar' | 'None';
+  description: string;
+  suitability: string;
+}
+
 export interface Coords {
   latitude: number;
   longitude: number;
@@ -23,6 +120,8 @@ export interface Tithi {
   percentPassed?: number;
   lord: string;
   deity: string;
+  isKshaya?: boolean;
+  isVriddhi?: boolean;
 }
 
 export interface Nakshatra {
@@ -37,6 +136,11 @@ export interface Nakshatra {
   description: string;
   suitableActivities: string[];
   avoidActivities: string[];
+  pada?: number;
+  padaEndTime?: string;
+  gana?: string;
+  yoni?: string;
+  nadi?: string;
 }
 
 export interface Yoga {
@@ -45,6 +149,9 @@ export interface Yoga {
   value: number; // 1 to 27
   endTime: string;
   meaning: string;
+  isAuspicious?: boolean;
+  type?: 'Shubh' | 'Ashubh';
+  description?: string;
 }
 
 export interface Karana {
@@ -52,7 +159,12 @@ export interface Karana {
   hindiName: string;
   value: number; // 1 to 11
   endTime: string;
-  type: string;
+  type: string; // Keep as string for backward compatibility
+  isAuspicious?: boolean;
+  classification?: 'Shubh' | 'Ashubh';
+  nature?: 'Movable' | 'Fixed';
+  natureHindi?: 'चर' | 'स्थिर';
+  description?: string;
 }
 
 export interface ChoghadiyaInterval {
@@ -101,7 +213,13 @@ export interface HinduDate {
   ritu: string;
   samvatVikram: number;
   samvatShaka: number;
+  samvatGujarati?: number;
+  solarMonth?: string;
+  isLeapMonth?: boolean;
+  ayana?: string;
 }
+
+import { PlanetPosition } from './utils/astronomicalEngine';
 
 export interface PanchangInfo {
   date: string;
@@ -115,6 +233,30 @@ export interface PanchangInfo {
   yamagandam: { start: string; end: string };
   choghadiya: ChoghadiyaInterval[];
   hora: HoraInterval[];
+  bhadra?: {
+    active: boolean;
+    startTime?: string;
+    endTime?: string;
+    vas?: string;
+    vasHindi?: string;
+    mukha?: string;
+    puchha?: string;
+  };
+  planets?: PlanetPosition[];
+  varjyam?: TimeInterval[];
+  durmuhurat?: TimeInterval[];
+  shubhYogas?: ShubhYogItem[];
+  combustion?: PlanetCombustion[];
+  panchak?: PanchakDetail;
+  gandMool?: GandMoolDetail;
+  suryaNakshatra?: SuryaNakshatraDetail;
+  chandraNakshatra?: ChandraNakshatraDetail;
+  rituDetails?: RituDetail;
+  paya?: PayaDetail;
+  dagdaTithi?: DagdaTithiDetail;
+  agniVaas?: AgniVaasDetail;
+  shivaVaas?: ShivaVaasDetail;
+  pushkarYog?: PushkarYogDetail;
 }
 
 export interface Festival {

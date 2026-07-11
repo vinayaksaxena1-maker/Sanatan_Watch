@@ -29,6 +29,15 @@ export function PanchangScreen({ panchang, currentTime, onShare }: PanchangScree
   const [mainViewMode, setMainViewMode] = useState<'choghadiya' | 'hora'>('choghadiya');
   const hDate = panchang.hinduDate;
 
+  const getPlanetCombustionState = (planetName: string) => {
+    if (!panchang.combustion) return undefined;
+    const combustInfo = panchang.combustion.find(c => c.name.toLowerCase() === planetName.toLowerCase());
+    if (combustInfo) {
+      return combustInfo.isCombust ? "अस्त (Combust)" : "उदित (Rising)";
+    }
+    return undefined;
+  };
+
   const getActiveHora = () => {
     const todayPanchang = panchang;
     if (!todayPanchang || !todayPanchang.hora) return undefined;
@@ -129,33 +138,38 @@ export function PanchangScreen({ panchang, currentTime, onShare }: PanchangScree
     },
     {
       title: 'नक्षत्र',
-      fullName: `${hDate.nakshatra.hindiName}`,
+      fullName: `${hDate.nakshatra.hindiName}${hDate.nakshatra.pada ? ` (चरण ${hDate.nakshatra.pada})` : ''}`,
       engName: `Lord: ${hDate.nakshatra.lord}`,
       endTime: hDate.nakshatra.endTime,
       lord: hDate.nakshatra.lord,
       deity: hDate.nakshatra.deity,
-      description: `चंद्र राशि का भाग (${hDate.nakshatra.symbol})। प्रकृति ${hDate.nakshatra.nature} है।`,
+      description: `चंद्र राशि का भाग (${hDate.nakshatra.symbol})। प्रकृति ${hDate.nakshatra.nature} है।` + 
+        (hDate.nakshatra.gana ? ` गण: ${hDate.nakshatra.gana} | योनि: ${hDate.nakshatra.yoni} | नाड़ी: ${hDate.nakshatra.nadi}` : ''),
       badgeColor: 'bg-amber-100 border-amber-200 text-amber-800'
     },
     {
       title: 'योग',
-      fullName: hDate.yoga.hindiName.split(' ')[0],
+      fullName: hDate.yoga.hindiName,
       engName: hDate.yoga.name,
       endTime: hDate.yoga.endTime,
-      lord: hDate.yoga.meaning,
-      deity: 'Sun/Moon Union',
-      description: 'सूर्य और चंद्रमा का संयुक्त देशांतर जिसे 27 समान भागों में विभाजित किया गया है।',
-      badgeColor: 'bg-emerald-100 border-emerald-250 text-emerald-850'
+      lord: hDate.yoga.type === 'Shubh' ? 'शुभ (Auspicious)' : 'अशुभ (Inauspicious)',
+      deity: hDate.yoga.meaning,
+      description: hDate.yoga.description || 'सूर्य और चंद्रमा का संयुक्त देशांतर जिसे 27 समान भागों में विभाजित किया गया है।',
+      badgeColor: hDate.yoga.type === 'Shubh' 
+        ? 'bg-emerald-100 border-emerald-250 text-emerald-850 dark:bg-emerald-950/30 dark:text-emerald-400' 
+        : 'bg-rose-100 border-rose-250 text-rose-850 dark:bg-rose-950/30 dark:text-rose-450'
     },
     {
       title: 'करण',
       fullName: hDate.karana.hindiName,
       engName: hDate.karana.name,
       endTime: hDate.karana.endTime,
-      lord: hDate.karana.type === 'Fixed' ? 'स्थिर' : 'चर / गतिशील',
-      deity: 'Karan Ruler',
-      description: 'एक तिथि का आधा हिस्सा, चंद्र चक्र में एक महत्वपूर्ण घटना का संकेत देता है।',
-      badgeColor: 'bg-purple-100 border-purple-250 text-purple-850'
+      lord: hDate.karana.natureHindi || (hDate.karana.type === 'Fixed' ? 'स्थिर' : 'चर'),
+      deity: hDate.karana.classification === 'Shubh' ? 'शुभ (Auspicious)' : 'अशुभ (Inauspicious)',
+      description: hDate.karana.description || 'एक तिथि का आधा हिस्सा, चंद्र चक्र में एक महत्वपूर्ण घटना का संकेत देता है।',
+      badgeColor: hDate.karana.classification === 'Shubh' 
+        ? 'bg-purple-100 border-purple-250 text-purple-850 dark:bg-purple-950/30 dark:text-purple-400' 
+        : 'bg-red-100 border-red-250 text-red-850 dark:bg-red-950/30 dark:text-red-400'
     }
   ];
 
@@ -307,19 +321,181 @@ export function PanchangScreen({ panchang, currentTime, onShare }: PanchangScree
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 w-full md:w-auto shrink-0">
-              <div className="p-2 px-3 rounded-xl bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 text-center font-mono min-w-[100px]">
+            <div className="grid grid-cols-3 gap-3 w-full md:w-auto shrink-0">
+              <div className="p-2 px-3 rounded-xl bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 text-center font-mono min-w-[90px]">
                 <span className="text-[9px] font-bold text-[#9E2A00] dark:text-[#FF9933] uppercase block tracking-wider font-sans">विक्रम संवत्</span>
-                <span className="text-orange-950 dark:text-amber-200 font-extrabold text-base block mt-0.5">{hDate.samvatVikram}</span>
+                <span className="text-orange-950 dark:text-amber-200 font-extrabold text-sm sm:text-base block mt-0.5">{hDate.samvatVikram}</span>
               </div>
-              <div className="p-2 px-3 rounded-xl bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 text-center font-mono min-w-[100px]">
+              <div className="p-2 px-3 rounded-xl bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 text-center font-mono min-w-[90px]">
                 <span className="text-[9px] font-bold text-[#9E2A00] dark:text-[#FF9933] uppercase block tracking-wider font-sans">शक संवत्</span>
-                <span className="text-orange-950 dark:text-amber-200 font-extrabold text-base block mt-0.5">{hDate.samvatShaka}</span>
+                <span className="text-orange-950 dark:text-amber-200 font-extrabold text-sm sm:text-base block mt-0.5">{hDate.samvatShaka}</span>
+              </div>
+              <div className="p-2 px-3 rounded-xl bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 text-center font-mono min-w-[90px]">
+                <span className="text-[9px] font-bold text-[#9E2A00] dark:text-[#FF9933] uppercase block tracking-wider font-sans">गुजरात संवत्</span>
+                <span className="text-orange-950 dark:text-amber-200 font-extrabold text-sm sm:text-base block mt-0.5">{hDate.samvatGujarati || hDate.samvatVikram - 1}</span>
               </div>
             </div>
           </div>
         </div>
 
+      </div>
+
+      {/* PHASE 12: DETAILED ASTROLOGICAL ATTRIBUTES CARD */}
+      <div className="glass-card-light dark:glass-card-dark p-4 sm:p-6 text-left space-y-6">
+        <div className="space-y-1 pb-3 border-b border-orange-100/60 dark:border-zinc-800/80">
+          <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block">॥ अयन, ऋतु, पाया व नक्षत्र विशेष ॥</span>
+          <h2 className="text-lg sm:text-xl font-bold font-serif text-slate-800 dark:text-amber-100">सूक्ष्म ज्योतिषीय विवरण</h2>
+          <p className="text-[10.5px] sm:text-[11.5px] text-slate-500 dark:text-slate-400">
+            चन्द्र नक्षत्र के स्वामी, देवता, चरण, ऋतु और पाया का विस्तृत खगोलीय फलादेश।
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          {/* Card 1: अयन व नक्षत्र पाया */}
+          <div className="bg-white/5 dark:bg-[#120B08]/40 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-white/10 dark:border-white/5 hover:border-orange-500/30 transition-all duration-300 flex flex-col justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.15)]">
+            <div>
+              <span className="text-xs font-extrabold text-orange-600 dark:text-orange-400 font-serif block">अयन व पाया (Ayana & Paya)</span>
+              
+              {/* Ayana Badge */}
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-slate-400 text-xs font-mono">अयन:</span>
+                {hDate.ayana && (
+                  <span className={`text-[10.5px] font-black px-3 py-1 rounded-full border ${
+                    hDate.ayana === 'Uttarayana'
+                      ? 'bg-amber-100 dark:bg-amber-950/45 border-amber-300 text-amber-800 dark:text-amber-350'
+                      : 'bg-indigo-100 dark:bg-indigo-950/45 border-indigo-300 text-indigo-850 dark:text-indigo-350'
+                  } font-sans uppercase tracking-wider flex items-center gap-1 shadow-3xs`}>
+                    {hDate.ayana === 'Uttarayana' ? '🌞 उत्तरायण (Uttarayana)' : '🌙 दक्षिणायन (Dakshinayana)'}
+                  </span>
+                )}
+              </div>
+
+              {/* Paya Detail */}
+              {panchang.paya && (
+                <div className="mt-4 pt-3 border-t border-slate-100/50 dark:border-slate-800/40">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400 text-xs font-mono">नक्षत्र पाया:</span>
+                    <span className={`text-xs font-black px-2.5 py-0.5 rounded-md border font-serif ${
+                      panchang.paya.name === 'Gold' ? 'bg-amber-100 border-amber-300 text-amber-800 dark:bg-amber-950/30 dark:text-amber-400' :
+                      panchang.paya.name === 'Silver' ? 'bg-slate-100 border-slate-300 text-slate-800 dark:bg-slate-900/30 dark:text-slate-355' :
+                      panchang.paya.name === 'Copper' ? 'bg-orange-100 border-orange-350 text-orange-850 dark:bg-orange-950/30 dark:text-orange-400' :
+                      'bg-zinc-150 border-zinc-300 text-zinc-800 dark:bg-zinc-800/30 dark:text-zinc-400'
+                    }`}>
+                      {panchang.paya.hindiName} ({panchang.paya.name})
+                    </span>
+                  </div>
+                  <p className="text-[10.5px] text-slate-550 dark:text-slate-400 font-sans mt-2 leading-relaxed">
+                    {panchang.paya.description}
+                  </p>
+                </div>
+              )}
+              {/* Surya Nakshatra Detail */}
+              {panchang.suryaNakshatra && (
+                <div className="mt-4 pt-3 border-t border-slate-100/50 dark:border-slate-800/40">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400 text-xs font-mono">सूर्य नक्षत्र:</span>
+                    <span className="text-xs font-black text-amber-600 dark:text-amber-400 font-serif">
+                      {panchang.suryaNakshatra.hindiName} (चरण {panchang.suryaNakshatra.pada})
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] text-slate-500 mt-1">
+                    <span>स्वामी: {panchang.suryaNakshatra.lord}</span>
+                    <span>देवता: {panchang.suryaNakshatra.deity}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Solar Month & Leap Month */}
+              <div className="mt-4 pt-3 border-t border-slate-100/50 dark:border-slate-800/40 space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-400 font-mono">सौर मास (Solar Month):</span>
+                  <span className="font-bold text-slate-700 dark:text-amber-255 font-serif">
+                    {hDate.solarMonth || 'अप्रकाशित'}
+                  </span>
+                </div>
+                {hDate.isLeapMonth !== undefined && (
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-400 font-mono">अधिमास स्थिति:</span>
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded border ${
+                      hDate.isLeapMonth
+                        ? 'bg-rose-100 border-rose-300 text-rose-700 dark:bg-rose-950/20'
+                        : 'bg-emerald-100 border-emerald-300 text-emerald-700 dark:bg-emerald-950/20'
+                    }`}>
+                      {hDate.isLeapMonth ? '⚠️ अधिमास (Leap)' : 'शुद्ध मास (Standard)'}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: चन्द्र नक्षत्र स्वामी, देवता, प्रतीक, पद/चरण, गण, योनि, नाड़ी */}
+          <div className="bg-white/5 dark:bg-[#120B08]/40 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-white/10 dark:border-white/5 hover:border-orange-500/30 transition-all duration-300 flex flex-col justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.15)]">
+            <div>
+              <span className="text-xs font-extrabold text-orange-600 dark:text-orange-400 font-serif block">चन्द्र नक्षत्र सूक्ष्म विवरण (Chandra Nakshatra Details)</span>
+              
+              <div className="mt-3 space-y-2 text-xs">
+                <div className="flex justify-between py-1 border-b border-slate-100/40 dark:border-slate-800/20">
+                  <span className="text-slate-400 font-mono">नक्षत्र स्वामी:</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 font-serif">{hDate.nakshatra.lord || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-100/40 dark:border-slate-800/20">
+                  <span className="text-slate-400 font-mono">नक्षत्र देवता:</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 font-serif">{hDate.nakshatra.deity || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-100/40 dark:border-slate-800/20">
+                  <span className="text-slate-400 font-mono">नक्षत्र प्रतीक (Symbol):</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 font-serif">{hDate.nakshatra.symbol || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-100/40 dark:border-slate-800/20">
+                  <span className="text-slate-400 font-mono">नक्षत्र चरण (Pada):</span>
+                  <span className="font-bold text-orange-600 dark:text-orange-400 font-mono">चरण {hDate.nakshatra.pada || 1}</span>
+                </div>
+                {hDate.nakshatra.gana && (
+                  <div className="grid grid-cols-3 gap-1 pt-1.5 text-[10px] text-center">
+                    <div className="bg-slate-100/50 dark:bg-slate-900/40 p-1 rounded-md border border-slate-200/30">
+                      <span className="text-slate-400 block font-mono">गण</span>
+                      <strong className="text-slate-800 dark:text-slate-200 font-serif">{hDate.nakshatra.gana}</strong>
+                    </div>
+                    <div className="bg-slate-100/50 dark:bg-slate-900/40 p-1 rounded-md border border-slate-200/30">
+                      <span className="text-slate-400 block font-mono">योनि</span>
+                      <strong className="text-slate-800 dark:text-slate-200 font-serif">{hDate.nakshatra.yoni}</strong>
+                    </div>
+                    <div className="bg-slate-100/50 dark:bg-slate-900/40 p-1 rounded-md border border-slate-200/30">
+                      <span className="text-slate-400 block font-mono">नाड़ी</span>
+                      <strong className="text-slate-800 dark:text-slate-200 font-serif">{hDate.nakshatra.nadi}</strong>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3: ऋतु चक्र */}
+          <div className="bg-white/5 dark:bg-[#120B08]/40 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-white/10 dark:border-white/5 hover:border-orange-500/30 transition-all duration-300 flex flex-col justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.15)]">
+            <div>
+              <span className="text-xs font-extrabold text-orange-600 dark:text-orange-400 font-serif block">ऋतु चक्र विवरण (Vedic Seasons)</span>
+              
+              {panchang.rituDetails && (
+                <div className="mt-3 space-y-2 text-xs">
+                  <div className="flex justify-between py-1 border-b border-slate-100/40 dark:border-slate-800/20">
+                    <span className="text-slate-400 font-mono">सौर ऋतु (Solar):</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 font-serif">{panchang.rituDetails.solarRituHindi} ({panchang.rituDetails.solarRitu})</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100/40 dark:border-slate-800/20">
+                    <span className="text-slate-400 font-mono">चन्द्र ऋतु (Lunar):</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 font-serif">{panchang.rituDetails.lunarRituHindi} ({panchang.rituDetails.lunarRitu})</span>
+                  </div>
+                  <p className="text-[10.5px] text-slate-550 dark:text-slate-400 font-sans mt-2 leading-relaxed">
+                    {panchang.rituDetails.description}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+        </div>
       </div>
 
       {/* COMPACT & INTEGRATED CARD SWITCHER - CHOGHADIYA & VEDIC HORA */}
@@ -669,6 +845,142 @@ export function PanchangScreen({ panchang, currentTime, onShare }: PanchangScree
               </div>
             );
           })()}
+        </div>
+      )}
+
+      {/* Bhadra (Vishti Karana) Engine details card */}
+      {panchang.bhadra && panchang.bhadra.active && (
+        <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 border border-red-200 dark:border-red-950/40 rounded-3xl bg-red-50/20 dark:bg-red-950/5 mt-4 text-left shadow-md">
+          <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-red-200/35 dark:border-red-950/20">
+            <span className="text-sm">⚠️</span>
+            <span className="text-[10px] font-black text-red-650 dark:text-red-400 uppercase tracking-widest font-mono">भद्रा दोष चेतावनी (Bhadra Alert)</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+            <div>
+              <span className="text-slate-400 block font-mono text-[9px] uppercase tracking-wider">भद्रा वास (Bhadra Residence)</span>
+              <span className="font-extrabold text-red-750 dark:text-red-400 block text-2xs">{panchang.bhadra.vasHindi}</span>
+              <span className="text-[9.5px] text-slate-500 block mt-0.5">{panchang.bhadra.vas}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block font-mono text-[9px] uppercase tracking-wider">भद्रा समय (Bhadra Duration)</span>
+              <span className="font-extrabold text-slate-800 dark:text-orange-200 block text-2xs">{panchang.bhadra.startTime} से {panchang.bhadra.endTime} तक</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block font-mono text-[9px] uppercase tracking-wider">भद्रा मुख (Bhadra Mukha)</span>
+              <span className="font-bold text-red-650 dark:text-red-400 block text-2xs">{panchang.bhadra.mukha} (अशुभतम समय)</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block font-mono text-[9px] uppercase tracking-wider">भद्रा पुच्छ (Bhadra Puchha)</span>
+              <span className="font-bold text-emerald-600 dark:text-emerald-400 block text-2xs">{panchang.bhadra.puchha} (अपेक्षाकृत अनुकूल)</span>
+            </div>
+          </div>
+          <p className="text-[9.5px] text-slate-500 dark:text-slate-400 mt-2.5 leading-relaxed font-serif italic border-t border-red-200/10 pt-1.5">
+            * भद्रा के पृथ्वी लोक (मृत्यु लोक) में वास के दौरान विवाह, गृह प्रवेश, मुंडन, और अन्य सभी मांगलिक कार्य सर्वथा वर्जित हैं।
+          </p>
+        </div>
+      )}
+
+      {/* Panchak Alert Card */}
+      {panchang.panchak && panchang.panchak.active && (
+        <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 border border-amber-250 dark:border-amber-950/40 rounded-3xl bg-amber-50/20 dark:bg-amber-950/5 mt-4 text-left shadow-md">
+          <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-amber-250/35 dark:border-amber-950/20">
+            <span className="text-sm">⚠️</span>
+            <span className="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest font-mono">पंचक विचार अलर्ट ({panchang.panchak.hindiName})</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+            <div>
+              <span className="text-slate-400 block font-mono text-[9px] uppercase tracking-wider">पंचक प्रकार (Panchak Type)</span>
+              <span className="font-extrabold text-amber-750 dark:text-amber-400 block text-2xs">{panchang.panchak.typeHindi} ({panchang.panchak.type} Panchak)</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block font-mono text-[9px] uppercase tracking-wider">विवरण / फलादेश</span>
+              <span className="text-slate-650 dark:text-zinc-300 block text-3xs sm:text-2xs leading-relaxed">{panchang.panchak.description}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Gand Mool Alert Card */}
+      {panchang.gandMool && panchang.gandMool.isGandMool && (
+        <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 border border-rose-200 dark:border-rose-950/40 rounded-3xl bg-rose-50/20 dark:bg-rose-950/5 mt-4 text-left shadow-md">
+          <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-rose-200/35 dark:border-rose-950/20">
+            <span className="text-sm">⚠️</span>
+            <span className="text-[10px] font-black text-rose-650 dark:text-rose-455 uppercase tracking-widest font-mono">गण्ड मूल नक्षत्र दोष अलर्ट</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+            <div>
+              <span className="text-slate-400 block font-mono text-[9px] uppercase tracking-wider">दोष युक्त नक्षत्र</span>
+              <span className="font-extrabold text-rose-750 dark:text-rose-400 block text-2xs">{panchang.gandMool.nakshatraHindiName} ({panchang.gandMool.nakshatraName})</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block font-mono text-[9px] uppercase tracking-wider">स्वामी ग्रह (Ruling Lord)</span>
+              <span className="font-extrabold text-slate-800 dark:text-orange-200 block text-2xs">{panchang.gandMool.rulingPlanetHindi} ({panchang.gandMool.rulingPlanet})</span>
+            </div>
+          </div>
+          <p className="text-[9.5px] text-slate-555 dark:text-slate-455 mt-2.5 leading-relaxed font-sans border-t border-rose-200/10 pt-1.5">
+            <strong>वैदिक प्रभाव:</strong> {panchang.gandMool.description} शिशु के जन्म के 27वें दिन नक्षत्र शांति पूजा कराना आवश्यक है।
+          </p>
+        </div>
+      )}
+
+      {/* Navagraha Planetary Degrees details card */}
+      {panchang.planets && (
+        <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 border border-orange-100/50 dark:border-orange-950/20 rounded-3xl mt-4 text-left shadow-md">
+          <div className="flex items-center gap-2 mb-3 pb-1.5 border-b border-orange-100/20 dark:border-orange-950/10">
+            <Feather className="w-4 h-4 text-orange-500" />
+            <span className="text-[10px] font-black text-slate-400 dark:text-amber-500 uppercase tracking-widest font-mono">नवग्रह स्पष्ट स्थिति (Navagraha Planetary Positions)</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-slate-650 dark:text-zinc-300">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-zinc-800/80 text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+                  <th className="pb-2">ग्रह (Graha)</th>
+                  <th className="pb-2">राशि (Rashi / Sign)</th>
+                  <th className="pb-2">भोग (Longitude)</th>
+                  <th className="pb-2">गति / अवस्था (Speed / State)</th>
+                  <th className="pb-2">तारा अस्त/उदय</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100/50 dark:divide-zinc-800/40 font-mono">
+                {panchang.planets.map((p, idx) => {
+                  const deg = Math.floor(p.longitude);
+                  const minFloat = (p.longitude - deg) * 60;
+                  const min = Math.floor(minFloat);
+                  const sec = Math.floor((minFloat - min) * 60);
+                  const degreeStr = `${deg}° ${min}' ${sec}"`;
+                  
+                  const isRetro = p.isRetrograde;
+                  let stateText = "मार्गी (Direct)";
+                  let stateClass = "text-emerald-600 dark:text-emerald-450";
+                  if (p.name === 'Sun' || p.name === 'Moon') {
+                    stateText = "नित्य मार्गी";
+                    stateClass = "text-slate-500";
+                  } else if (p.name === 'Rahu' || p.name === 'Ketu') {
+                    stateText = "वक्री (Retrograde)";
+                    stateClass = "text-orange-600 dark:text-orange-400 font-extrabold";
+                  } else if (isRetro) {
+                    stateText = "वक्री (Retrograde / Vakri)";
+                    stateClass = "text-rose-600 dark:text-rose-450 font-extrabold";
+                  }
+
+                  const combustState = getPlanetCombustionState(p.name);
+                  const combustClass = combustState?.includes("अस्त")
+                    ? "text-rose-600 dark:text-rose-400 font-bold"
+                    : "text-emerald-600 dark:text-emerald-450";
+
+                  return (
+                    <tr key={idx} className="hover:bg-slate-50/20 dark:hover:bg-zinc-800/10">
+                      <td className="py-2.5 font-bold font-serif text-slate-800 dark:text-orange-100">{p.hindiName} ({p.name})</td>
+                      <td className="py-2.5 font-serif">{p.signHindi} ({p.sign})</td>
+                      <td className="py-2.5">{degreeStr}</td>
+                      <td className={`py-2.5 ${stateClass}`}>{stateText}</td>
+                      <td className={`py-2.5 ${combustClass}`}>{combustState || "—"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

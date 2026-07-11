@@ -19,6 +19,16 @@ export interface MoonTimes {
   moonsetRaw: number;  // minutes since midnight
 }
 
+export interface PlanetPosition {
+  name: string;
+  hindiName: string;
+  longitude: number;
+  speed: number;
+  isRetrograde: boolean;
+  sign: string;
+  signHindi: string;
+}
+
 export interface PanchangPositions {
   tithiIdx: number;            // 0 to 29
   tithiPercent: number;        // fraction passed (0.0 to 1.0)
@@ -40,6 +50,11 @@ export interface PanchangPositions {
 
   monthsSinceEpoch: number;
   diffDays: number;
+
+  sunSidereal: number;
+  moonSidereal: number;
+  ayanamsa: number;
+  planets: PlanetPosition[];
 }
 
 export interface AstronomicalEngine {
@@ -177,6 +192,22 @@ class MockAstronomicalEngine implements AstronomicalEngine {
 
     const monthsSinceEpoch = Math.floor(diffDays / lunarCycle);
 
+    const sunSidereal = (diffDays * 0.9856) % 360;
+    const moonSidereal = (diffDays * 13.176) % 360;
+    const ayanamsa = 24.2;
+    
+    const mockPlanets: PlanetPosition[] = [
+      { name: 'Sun', hindiName: 'सूर्य', longitude: sunSidereal, speed: 0.9856, isRetrograde: false, sign: 'Aries', signHindi: 'मेष' },
+      { name: 'Moon', hindiName: 'चन्द्र', longitude: moonSidereal, speed: 13.176, isRetrograde: false, sign: 'Aries', signHindi: 'मेष' },
+      { name: 'Mars', hindiName: 'मंगल', longitude: (diffDays * 0.524) % 360, speed: 0.524, isRetrograde: false, sign: 'Aries', signHindi: 'मेष' },
+      { name: 'Mercury', hindiName: 'बुध', longitude: (diffDays * 1.2) % 360, speed: 1.2, isRetrograde: false, sign: 'Aries', signHindi: 'मेष' },
+      { name: 'Jupiter', hindiName: 'गुरु', longitude: (diffDays * 0.083) % 360, speed: 0.083, isRetrograde: false, sign: 'Aries', signHindi: 'मेष' },
+      { name: 'Venus', hindiName: 'शुक्र', longitude: (diffDays * 1.6) % 360, speed: 1.6, isRetrograde: false, sign: 'Aries', signHindi: 'मेष' },
+      { name: 'Saturn', hindiName: 'शनि', longitude: (diffDays * 0.033) % 360, speed: 0.033, isRetrograde: false, sign: 'Aries', signHindi: 'मेष' },
+      { name: 'Rahu', hindiName: 'राहु', longitude: (360 - (diffDays * 0.053)) % 360, speed: -0.053, isRetrograde: true, sign: 'Aries', signHindi: 'मेष' },
+      { name: 'Ketu', hindiName: 'केतु', longitude: (180 - (diffDays * 0.053)) % 360, speed: -0.053, isRetrograde: true, sign: 'Aries', signHindi: 'मेष' }
+    ];
+
     return {
       tithiIdx,
       tithiPercent,
@@ -193,7 +224,11 @@ class MockAstronomicalEngine implements AstronomicalEngine {
       karanaPercent,
       karanaRemainingHours,
       monthsSinceEpoch,
-      diffDays
+      diffDays,
+      sunSidereal,
+      moonSidereal,
+      ayanamsa,
+      planets: mockPlanets
     };
   }
 }

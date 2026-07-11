@@ -54,8 +54,21 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
     return activeSegment ? activeSegment.isDay : (currentTime.getHours() >= 6 && currentTime.getHours() < 18);
   }, [horaList, activeIndex, currentTime]);
 
+  const consecutiveSegments = useMemo(() => {
+    const baseIdx = activeIndex !== -1 ? activeIndex : 0;
+    const list: { segment: HoraInterval; originalIndex: number }[] = [];
+    for (let offset = 0; offset < horaList.length; offset++) {
+      const idx = (baseIdx + offset) % horaList.length;
+      list.push({
+        segment: horaList[idx],
+        originalIndex: idx
+      });
+    }
+    return list;
+  }, [horaList, activeIndex]);
+
   // Helper to compute visible start and end angles for a segment using 12-hour minute grid
-  const getVisibleAngles = (segment: HoraInterval, i: number, minWidthDegrees: number) => {
+  const getVisibleAngles = (segment: HoraInterval, currentOffset: number, minWidthDegrees: number) => {
     const startMin = parseTimeToMinutes(segment.startTime);
     const endMin = parseTimeToMinutes(segment.endTime);
     
@@ -71,48 +84,18 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
       for (let m = start; m < end; m++) dial[m] = true;
     }
 
-    // Rolling 12-hour window check
-    const ws = currentMin;
-    const we = currentMin + 720;
-
-    // Clip against all overlapping current-period segments if this is other-period
-    if (segment.isDay !== isDaytime) {
-      for (let j = 0; j < horaList.length; j++) {
-        const cur = horaList[j];
-        if (cur.isDay === isDaytime) {
-          const cStartMin = parseTimeToMinutes(cur.startTime);
-          const cEndMin = parseTimeToMinutes(cur.endTime);
-          let cSegStart = cStartMin;
-          let cSegEnd = cEndMin;
-          if (cSegEnd < cSegStart) cSegEnd += 1440;
-          
-          const cOverlaps = (cSegStart < we && cSegEnd > ws) ||
-                            (cSegStart - 1440 < we && cSegEnd - 1440 > ws) ||
-                            (cSegStart + 1440 < we && cSegEnd + 1440 > ws);
-          if (!cOverlaps) continue;
-
-          let curStart = cStartMin % 720;
-          let curEnd = cEndMin % 720;
-          if (curEnd < curStart) {
-            for (let m = curStart; m < 720; m++) dial[m] = false;
-            for (let m = 0; m < curEnd; m++) dial[m] = false;
-          } else {
-            for (let m = curStart; m < curEnd; m++) dial[m] = false;
-          }
-        }
-      }
-    } else if (activeIndex !== -1 && i !== activeIndex) {
-      // If current-period, clip against the active segment to keep separation clean
-      const activeSeg = horaList[activeIndex];
-      const aStartMin = parseTimeToMinutes(activeSeg.startTime);
-      const aEndMin = parseTimeToMinutes(activeSeg.endTime);
-      let curStart = aStartMin % 720;
-      let curEnd = aEndMin % 720;
-      if (curEnd < curStart) {
-        for (let m = curStart; m < 720; m++) dial[m] = false;
-        for (let m = 0; m < curEnd; m++) dial[m] = false;
+    // Clip against all preceding segments in the chronological rolling window
+    for (let prevOffset = 0; prevOffset < currentOffset; prevOffset++) {
+      const prevSeg = consecutiveSegments[prevOffset].segment;
+      const pStartMin = parseTimeToMinutes(prevSeg.startTime);
+      const pEndMin = parseTimeToMinutes(prevSeg.endTime);
+      let pStart = pStartMin % 720;
+      let pEnd = pEndMin % 720;
+      if (pEnd < pStart) {
+        for (let m = pStart; m < 720; m++) dial[m] = false;
+        for (let m = 0; m < pEnd; m++) dial[m] = false;
       } else {
-        for (let m = curStart; m < curEnd; m++) dial[m] = false;
+        for (let m = pStart; m < pEnd; m++) dial[m] = false;
       }
     }
 
@@ -154,28 +137,16 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
       visibleEndAngle += 360;
     }
 
-    return { visibleStartAngle, visibleEndAngle };
+    return { visibleStartAngle, visibleEndAngle, visibleDuration: maxLen };
   };
 
-  const renderHora = (h: HoraInterval, i: number) => {
-    const startMin = parseTimeToMinutes(h.startTime);
-    const endMin = parseTimeToMinutes(h.endTime);
+  const renderHora = (h: HoraInterval, originalIndex: number) => {
+    if (originalIndex === activeIndex) return null;
 
-    // Rolling 12-hour window filter
-    const ws = currentMin;
-    const we = currentMin + 720;
-    
-    let segStart = startMin;
-    let segEnd = endMin;
-    if (segEnd < segStart) segEnd += 1440;
-    
-    const overlaps = (segStart < we && segEnd > ws) ||
-                     (segStart - 1440 < we && segEnd - 1440 > ws) ||
-                     (segStart + 1440 < we && segEnd + 1440 > ws);
-                     
-    if (!overlaps || i === activeIndex) return null;
+    const currentOffset = consecutiveSegments.findIndex(cs => cs.originalIndex === originalIndex);
+    if (currentOffset === -1) return null;
 
-    const angles = getVisibleAngles(h, i, 0.5);
+    const angles = getVisibleAngles(h, currentOffset, 0.5);
     if (!angles) return null;
     const { visibleStartAngle, visibleEndAngle } = angles;
 
@@ -255,27 +226,20 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
     );
   };
 
-  const renderLabel = (h: HoraInterval, i: number) => {
-    const startMin = parseTimeToMinutes(h.startTime);
-    const endMin = parseTimeToMinutes(h.endTime);
+  const renderLabel = (h: HoraInterval, originalIndex: number) => {
+    const currentOffset = consecutiveSegments.findIndex(cs => cs.originalIndex === originalIndex);
+    if (currentOffset === -1) return null;
 
-    // Rolling 12-hour window filter
-    const ws = currentMin;
-    const we = currentMin + 720;
-    
-    let segStart = startMin;
-    let segEnd = endMin;
-    if (segEnd < segStart) segEnd += 1440;
-    
-    const overlaps = (segStart < we && segEnd > ws) ||
-                     (segStart - 1440 < we && segEnd - 1440 > ws) ||
-                     (segStart + 1440 < we && segEnd + 1440 > ws);
-                     
-    if (!overlaps) return null;
-
-    const angles = getVisibleAngles(h, i, 4.0);
+    const angles = getVisibleAngles(h, currentOffset, 0.5);
     if (!angles) return null;
-    const { visibleStartAngle, visibleEndAngle } = angles;
+    const { visibleStartAngle, visibleEndAngle, visibleDuration } = angles;
+
+    const duration = visibleDuration ?? 0;
+
+    // Stage 1 (Duration <= 10 Minutes): Labels completely hidden
+    if (duration <= 10) {
+      return null;
+    }
 
     const centerAngle = visibleStartAngle + (visibleEndAngle - visibleStartAngle) / 2;
     const rad = (centerAngle * Math.PI) / 180;
@@ -284,7 +248,7 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
     const y = 200 + R * Math.sin(rad);
 
     const info = getPlanetLordInfo(h.lord);
-    const isActive = i === activeIndex;
+    const isActive = originalIndex === activeIndex;
 
     const formatTimeRange = (startStr: string, endStr: string): string => {
       if (!startStr || !endStr) return "";
@@ -304,6 +268,32 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
 
     const timeRange = formatTimeRange(h.startTime, h.endTime);
 
+    // Stage 2 (Duration 11 to 30 Minutes): Render only Hindi Name with dy="0"
+    if (duration >= 11 && duration <= 30) {
+      return (
+        <g key={`hora_label_group_${h.number}`}>
+          <text
+            id={`hora_label_${h.number}`}
+            x={x}
+            y={y}
+            dy="0"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize={isActive ? "24" : "18"}
+            fontWeight="600"
+            fill={isActive ? "#FFFFFF" : "#FF9933"}
+            fontFamily="'Noto Sans Devanagari', 'Inter', sans-serif"
+            className="select-none"
+            letterSpacing="0.05em"
+            style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.75))" }}
+          >
+            {info.label}
+          </text>
+        </g>
+      );
+    }
+
+    // Stage 3 (Duration >= 31 Minutes): Render Name and Time Range
     return (
       <g key={`hora_label_group_${h.number}`}>
         {/* Planet Lord Name */}
