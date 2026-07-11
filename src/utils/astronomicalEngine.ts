@@ -236,10 +236,15 @@ class MockAstronomicalEngine implements AstronomicalEngine {
 // ---------------------------------------------------------------------------
 // Isolated Web Worker Integration (Part B Boundary)
 // ---------------------------------------------------------------------------
-const worker = new Worker(
-  new URL('./astroWorker.ts', import.meta.url),
-  { type: 'module' }
-);
+let worker: Worker | null = null;
+try {
+  worker = new Worker(
+    new URL('./astroWorker.ts', import.meta.url),
+    { type: 'module' }
+  );
+} catch (e) {
+  console.error('[AstronomicalEngine] Failed to create Web Worker:', e);
+}
 
 const solarCache = new Map<string, SolarTimes>();
 const moonCache = new Map<string, MoonTimes>();
@@ -259,62 +264,105 @@ export function isReady(): boolean {
 }
 
 if (typeof window !== 'undefined') {
-  worker.postMessage({
-    type: 'INIT',
-    origin: window.location.origin
-  });
+  if (worker) {
+    // Fetch ephemeris files on the main thread to completely bypass Web Worker CORS/protocol restrictions in WebViews
+    Promise.all([
+      fetch('/ephe/sepl_18.se1').then(r => {
+        if (!r.ok) throw new Error(`sepl_18.se1 fetch failed: ${r.status}`);
+        return r.arrayBuffer();
+      }),
+      fetch('/ephe/semo_18.se1').then(r => {
+        if (!r.ok) throw new Error(`semo_18.se1 fetch failed: ${r.status}`);
+        return r.arrayBuffer();
+      })
+    ]).then(([seplBuf, semoBuf]) => {
+      if (worker) {
+        worker.postMessage({
+          type: 'INIT',
+          seplBuf,
+          semoBuf
+        }, [seplBuf, semoBuf]);
+      }
+    }).catch(err => {
+      console.error('[AstronomicalEngine] Failed to fetch ephemeris files on main thread:', err);
+      if (worker) {
+        worker.postMessage({
+          type: 'INIT_FAIL',
+          error: err.message || String(err)
+        });
+      }
+    });
+
+    // Fallback timeout in case worker fails to initialize
+    setTimeout(() => {
+      if (!isEngineReady) {
+        console.warn('[AstronomicalEngine] Worker initialization timed out. Falling back to Mock Engine.');
+        isEngineReady = true;
+        if (updateListener) {
+          updateListener();
+        }
+      }
+    }, 4000);
+  } else {
+    // If worker couldn't be spawned, mark ready immediately to fallback to mock
+    isEngineReady = true;
+  }
 }
 
-worker.onmessage = (event: MessageEvent) => {
-  const { type, key, data, message } = event.data;
+if (worker) {
+  worker.onmessage = (event: MessageEvent) => {
+    const { type, key, data, message } = event.data;
 
-  if (type === 'READY') {
-    isEngineReady = true;
-    console.log('[AstronomicalEngine] Web Worker loaded and Swiss Ephemeris initialized successfully.');
-    
-    // Pre-fetch default location coordinates to completely avoid initial mock fallbacks
-    const today = new Date();
-    const lat = 28.6139; // New Delhi
-    const lon = 77.2090;
+    if (type === 'READY') {
+      isEngineReady = true;
+      console.log('[AstronomicalEngine] Web Worker loaded and Swiss Ephemeris initialized successfully.');
+      
+      // Pre-fetch default location coordinates to completely avoid initial mock fallbacks
+      const today = new Date();
+      const lat = 28.6139; // New Delhi
+      const lon = 77.2090;
 
-    const cacheKeySolar = `SOLAR_${lat.toFixed(4)}_${lon.toFixed(4)}_${today.toDateString()}`;
-    const cacheKeyMoon = `MOON_${lat.toFixed(4)}_${lon.toFixed(4)}_${today.toDateString()}`;
-    const cacheKeyPos = `POS_${today.toDateString()}`;
+      const cacheKeySolar = `SOLAR_${lat.toFixed(4)}_${lon.toFixed(4)}_${today.toDateString()}`;
+      const cacheKeyMoon = `MOON_${lat.toFixed(4)}_${lon.toFixed(4)}_${today.toDateString()}`;
+      const cacheKeyPos = `POS_${today.toDateString()}`;
 
-    pendingQueries.add(cacheKeySolar);
-    pendingQueries.add(cacheKeyMoon);
-    pendingQueries.add(cacheKeyPos);
+      pendingQueries.add(cacheKeySolar);
+      pendingQueries.add(cacheKeyMoon);
+      pendingQueries.add(cacheKeyPos);
 
-    worker.postMessage({ type: 'CALCULATE_SOLAR', key: cacheKeySolar, lat, lon, date: today.toISOString() });
-    worker.postMessage({ type: 'CALCULATE_MOON', key: cacheKeyMoon, lat, lon, date: today.toISOString() });
-    worker.postMessage({ type: 'CALCULATE_COORDINATES', key: cacheKeyPos, date: today.toISOString() });
+      if (worker) {
+        worker.postMessage({ type: 'CALCULATE_SOLAR', key: cacheKeySolar, lat, lon, date: today.toISOString() });
+        worker.postMessage({ type: 'CALCULATE_MOON', key: cacheKeyMoon, lat, lon, date: today.toISOString() });
+        worker.postMessage({ type: 'CALCULATE_COORDINATES', key: cacheKeyPos, date: today.toISOString() });
+      }
 
-    if (updateListener) {
-      updateListener();
+      if (updateListener) {
+        updateListener();
+      }
+      return;
     }
-    return;
-  }
 
-  if (type === 'ERROR') {
-    console.error('[AstronomicalEngine] Worker error:', message);
-    return;
-  }
-
-  if (type === 'RESULT') {
-    if (key.startsWith('SOLAR_')) {
-      solarCache.set(key, data);
-    } else if (key.startsWith('MOON_')) {
-      moonCache.set(key, data);
-    } else if (key.startsWith('POS_')) {
-      positionCache.set(key, data);
+    if (type === 'ERROR') {
+      console.error('[AstronomicalEngine] Worker error:', message);
+      return;
     }
-    pendingQueries.delete(key);
 
-    if (updateListener) {
-      updateListener();
+    if (type === 'RESULT') {
+      if (key.startsWith('SOLAR_')) {
+        solarCache.set(key, data);
+      } else if (key.startsWith('MOON_')) {
+        moonCache.set(key, data);
+      } else if (key.startsWith('POS_')) {
+        positionCache.set(key, data);
+      }
+      pendingQueries.delete(key);
+
+      if (updateListener) {
+        updateListener();
+      }
     }
-  }
-};
+  };
+}
 
 class SwissEphemerisAstronomicalEngine implements AstronomicalEngine {
   isReady(): boolean {
@@ -331,13 +379,15 @@ class SwissEphemerisAstronomicalEngine implements AstronomicalEngine {
 
     if (!pendingQueries.has(cacheKey)) {
       pendingQueries.add(cacheKey);
-      worker.postMessage({
-        type: 'CALCULATE_SOLAR',
-        key: cacheKey,
-        lat,
-        lon,
-        date: date.toISOString()
-      });
+      if (worker) {
+        worker.postMessage({
+          type: 'CALCULATE_SOLAR',
+          key: cacheKey,
+          lat,
+          lon,
+          date: date.toISOString()
+        });
+      }
     }
 
     return mockEngine.getSolarTimes(lat, lon, date);
@@ -353,16 +403,18 @@ class SwissEphemerisAstronomicalEngine implements AstronomicalEngine {
 
     if (!pendingQueries.has(cacheKey)) {
       pendingQueries.add(cacheKey);
-      worker.postMessage({
-        type: 'CALCULATE_MOON',
-        key: cacheKey,
-        lat,
-        lon,
-        date: date.toISOString(),
-        sunriseMin,
-        sunsetMin,
-        tithiIdx
-      });
+      if (worker) {
+        worker.postMessage({
+          type: 'CALCULATE_MOON',
+          key: cacheKey,
+          lat,
+          lon,
+          date: date.toISOString(),
+          sunriseMin,
+          sunsetMin,
+          tithiIdx
+        });
+      }
     }
 
     return mockEngine.getMoonTimes(sunriseMin, sunsetMin, tithiIdx, date, lat, lon);
@@ -378,11 +430,13 @@ class SwissEphemerisAstronomicalEngine implements AstronomicalEngine {
 
     if (!pendingQueries.has(cacheKey)) {
       pendingQueries.add(cacheKey);
-      worker.postMessage({
-        type: 'CALCULATE_COORDINATES',
-        key: cacheKey,
-        date: date.toISOString()
-      });
+      if (worker) {
+        worker.postMessage({
+          type: 'CALCULATE_COORDINATES',
+          key: cacheKey,
+          date: date.toISOString()
+        });
+      }
     }
 
     return mockEngine.getPanchangPositions(date);

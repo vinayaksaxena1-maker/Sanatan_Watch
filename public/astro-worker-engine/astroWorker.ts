@@ -103,22 +103,8 @@ function findBoundaryCrossing(
 // ---------------------------------------------------------------------------
 // Worker initialization
 // ---------------------------------------------------------------------------
-async function initWorker(origin: string) {
+async function initWorker(seplBuf: ArrayBuffer, semoBuf: ArrayBuffer) {
   try {
-    const [seplRes, semoRes] = await Promise.all([
-      fetch(`${origin}/ephe/sepl_18.se1`),
-      fetch(`${origin}/ephe/semo_18.se1`)
-    ]);
-
-    if (!seplRes.ok || !semoRes.ok) {
-      throw new Error(`Failed to fetch ephemeris files: sepl_18.se1 (${seplRes.status}), semo_18.se1 (${semoRes.status})`);
-    }
-
-    const [seplBuf, semoBuf] = await Promise.all([
-      seplRes.arrayBuffer(),
-      semoRes.arrayBuffer()
-    ]);
-
     swe = new SwissEph();
     await swe.initSwissEph();
 
@@ -142,10 +128,15 @@ async function initWorker(origin: string) {
 // Worker Message Handler
 // ---------------------------------------------------------------------------
 self.onmessage = async (event: MessageEvent) => {
-  const { type, key, origin, lat, lon, date } = event.data;
+  const { type, key, seplBuf, semoBuf, error, lat, lon, date } = event.data;
 
   if (type === 'INIT') {
-    await initWorker(origin);
+    await initWorker(seplBuf, semoBuf);
+    return;
+  }
+
+  if (type === 'INIT_FAIL') {
+    self.postMessage({ type: 'ERROR', message: `Main thread fetch failed: ${error}` });
     return;
   }
 

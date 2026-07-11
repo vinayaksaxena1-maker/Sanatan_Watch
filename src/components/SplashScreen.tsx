@@ -16,6 +16,8 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
   const [style, setStyle] = useState<SplashStyle>(selectedStyle);
   const [dots, setDots] = useState<Array<{ id: number; left: number; top: number; delay: number; duration: number }>>([]);
   const [key, setKey] = useState(0); // To force replay of animations
+  const [progress, setProgress] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
   const isVideoSplash = customSplash && (
@@ -59,15 +61,46 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
     onCompleteRef.current = onComplete;
   }, [onComplete]);
 
-  // Handle auto-timeout for non-demo mode
+  // Manage progress and isLoaded state for custom splash screen (15 seconds duration)
+  useEffect(() => {
+    if (!customSplash) return;
+    setProgress(0);
+    setIsLoaded(false);
+
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsLoaded(true);
+          if (!isDemoMode && onCompleteRef.current) {
+            onCompleteRef.current();
+          }
+          return 100;
+        }
+        return prev + 1;
+      });
+    }, 150);
+
+    return () => clearInterval(interval);
+  }, [customSplash, isDemoMode, key]);
+
+  // Handle auto-timeout for non-demo mode (15 seconds duration)
   useEffect(() => {
     if (isDemoMode) return;
-    const duration = isVideoSplash ? 8500 : 5000;
+    if (customSplash) return; // Custom splash progress bar will handle auto-completion at 15s
+    const duration = 15000;
     const timer = setTimeout(() => {
       if (onCompleteRef.current) onCompleteRef.current();
     }, duration);
     return () => clearTimeout(timer);
-  }, [isDemoMode, isVideoSplash]);
+  }, [isDemoMode, customSplash]);
+
+  const getStatusText = (prog: number) => {
+    if (prog <= 30) return "🖊️ स्याही घोली जा रही है...";
+    if (prog <= 70) return "📝 गणनाओं को पन्नों पर पिरोया जा रहा है...";
+    if (prog <= 90) return "📝 शब्दों को पन्नों पर पिरोया जा रहा है...";
+    return "📚 दैनिक पंचांग तैयार है!";
+  };
 
   const handleReplay = () => {
     setKey(prev => prev + 1);
@@ -168,20 +201,20 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
           </video>
         )}
 
-        {!isVideoSplash && dots.map((dot) => (
+        {!customSplash && !isVideoSplash && dots.map((dot) => (
           <motion.div
             key={`${dot.id}-${key}`}
-            className="absolute rounded-full bg-white/60 shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+            className="absolute rounded-full bg-white shadow-[0_0_12px_#ffffff,_0_0_24px_rgba(255,255,255,0.9),_0_0_36px_rgba(255,255,255,0.6)]"
             style={{
-              width: Math.random() * 3 + 2,
-              height: Math.random() * 3 + 2,
+              width: Math.random() * 2 + 3,
+              height: Math.random() * 2 + 3,
               left: `${dot.left}%`,
               top: `${dot.top}%`,
             }}
             animate={{
-              opacity: [0, 0.9, 0],
-              scale: [0.6, 1.2, 0.6],
-              y: [0, -30, 0]
+              opacity: [0, 1, 0],
+              scale: [0.5, 1.8, 0.5],
+              y: [0, -40, 0]
             }}
             transition={{
               duration: dot.duration,
@@ -261,7 +294,7 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
       )}
 
       {/* CENTER REGION: THE SACRED OM EMBLEM AND DETAILS */}
-      {!isVideoSplash && (
+      {!customSplash && !isVideoSplash && (
         <AnimatePresence mode="wait">
           <motion.div 
             key={`${style}-${key}`}
@@ -442,22 +475,7 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
       )}
 
       {/* BOTTOM REGION: INTERACTIVE SELECTORS OR VIDEO ENTER PILL */}
-      {isVideoSplash ? (
-        <div className="w-full flex justify-center py-6 z-20">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (onComplete) onComplete();
-            }}
-            className="flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-amber-600 via-yellow-550 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-serif font-black text-xs sm:text-sm tracking-widest rounded-full shadow-[0_4px_25px_rgba(245,158,11,0.5)] border border-amber-200/40 transition-all cursor-pointer select-none uppercase"
-          >
-            सनातन घड़ी में प्रवेश करें (Enter App)
-            <Play className="w-3.5 h-3.5 fill-current text-white animate-pulse" />
-          </motion.button>
-        </div>
-      ) : (
+      {!customSplash ? (
         <div className="w-full flex flex-col items-center gap-3 z-20">
           {isDemoMode ? (
             <div className="space-y-3 w-full max-w-md mb-2">
@@ -472,7 +490,7 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
                   }}
                   className={`py-2 px-1 rounded-xl font-bold text-[9px] border transition-all cursor-pointer text-center text-white ${
                     style === 'saffron'
-                      ? 'bg-[#FF8008] border-white shadow-md scale-102 font-black shadow-orange-500/45'
+                      ? 'bg-[#FF8008] border-white shadow-md scale-102 font-black shadow-orange-550/45'
                       : 'bg-black/20 border-white/10 hover:bg-black/30'
                   }`}
                 >
@@ -536,6 +554,23 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
           }`}>
             ॥ धर्मो रक्षति रक्षितः - Precise Vedic Calculations ॥
           </p>
+        </div>
+      ) : (
+        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 w-[calc(100%-3rem)] max-w-md flex flex-col items-center gap-2.5 z-20">
+          <div className="w-full bg-white/10 dark:bg-black/30 h-[10px] rounded-full overflow-hidden border-2 border-glow-gold shadow-[0_0_10px_rgba(255,213,79,0.4)] shadow-inner">
+            <div 
+              className="h-full bg-gradient-to-r from-amber-400 via-orange-500 to-glow-gold transition-all duration-300 ease-linear shadow-[0_0_8px_rgba(255,213,79,0.6)]"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <div className="w-full flex justify-between items-center px-1">
+            <span className="text-[14px] font-bold text-glow-gold font-sans tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+              {getStatusText(progress)}
+            </span>
+            <span className="text-[14px] font-black text-glow-gold font-mono shrink-0 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+              {progress}%
+            </span>
+          </div>
         </div>
       )}
     </div>

@@ -284,8 +284,8 @@ export type SplashStyle = 'saffron' | 'golden' | 'crimson' | 'sanatan-video';
 export type LogoStyle = 'om' | 'swastika' | 'trishul' | 'kalash' | 'diya';
 
 export interface SettingsState {
-  theme: 'light' | 'dark' | 'temple';
-  language: 'English' | 'Hindi' | 'Sanskrit';
+  theme: 'light' | 'dark';
+  language: 'English' | 'Hindi';
   locationMode: 'GPS' | 'Manual';
   notifications: {
     morningPanchang: boolean;

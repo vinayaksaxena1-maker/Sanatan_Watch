@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { PanchangInfo } from '../types';
 import { getMuhuratsForPanchang } from '../utils/panchangCalc';
+import { checkMuhurats } from '../utils/muhuratRules';
+import { getTranslation } from '../utils/translations';
 
 interface MuhuratScreenProps {
   panchang: PanchangInfo;
@@ -19,6 +21,7 @@ interface MuhuratScreenProps {
   currentTime?: Date;
   selectedDate: Date;
   onDateChange: (date: Date) => void;
+  language?: 'English' | 'Hindi';
 }
 
 export function MuhuratScreen({ 
@@ -26,12 +29,14 @@ export function MuhuratScreen({
   onViewAstrologyChart, 
   currentTime,
   selectedDate,
-  onDateChange
+  onDateChange,
+  language = 'English'
 }: MuhuratScreenProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const dateInputRef = useRef<HTMLInputElement>(null);
   
   const allMuhurats = getMuhuratsForPanchang(panchang);
+  const ruleMuhurats = checkMuhurats(panchang);
   
   // Custom Muhurat types and auspicious calculation formulas based on current Tithi & Month
   const tithiValue = panchang.hinduDate.tithi.value;
@@ -62,11 +67,17 @@ export function MuhuratScreen({
   
   const dayOfYear = Math.floor((selectedDate.getTime() - new Date(selectedDate.getFullYear(), 0, 0).getTime()) / 86400000);
   const rashis = ['मेष', 'वृषभ', 'मिथुन', 'कर्क', 'सिंह', 'कन्या', 'तुला', 'वृश्चिक', 'धनु', 'मकर', 'कुंभ', 'मीन'];
+  const rashisEng = ['Mesha', 'Vrishabha', 'Mithuna', 'Karka', 'Simha', 'Kanya', 'Tula', 'Vrischika', 'Dhanu', 'Makara', 'Kumbha', 'Meena'];
 
   const getDynamicLagna = (baseIdx: number) => {
     const idx = (baseIdx + dayOfYear) % 12;
-    return `${rashis[idx]} लग्न`;
+    return language === 'Hindi' ? `${rashis[idx]} लग्न` : `${rashisEng[idx]} Lagna`;
   };
+
+  const vivahRule = ruleMuhurats.find(r => r.type === 'vivah');
+  const gpRule = ruleMuhurats.find(r => r.type === 'griha_pravesh');
+  const namkaranRule = ruleMuhurats.find(r => r.type === 'namkaran');
+  const vahanRule = ruleMuhurats.find(r => r.type === 'vahan_purchase');
 
   // Render lists of Muhurats with dynamic computations
   const muhuratCategories = [
@@ -74,21 +85,21 @@ export function MuhuratScreen({
       id: 'marriage',
       name: 'Vivah (Marriage)',
       hindiName: 'विवाह मुहूर्त',
-      desc: 'गुरु और शुक्र के आशीर्वाद से विवाह के पवित्र बंधन के लिए।',
+      desc: language === 'Hindi' ? 'गुरु और शुक्र के आशीर्वाद से विवाह के पवित्र बंधन के लिए।' : 'For the sacred bond of marriage under the blessings of Jupiter and Venus.',
       icon: <Heart className="w-5 h-5 text-red-600 dark:text-red-400" />,
-      rating: isKrishnaAshtamiOrChauth ? 3 : 5,
+      rating: vivahRule ? Math.max(1, Math.round(vivahRule.score / 20)) : (isKrishnaAshtamiOrChauth ? 3 : 5),
       slots: [
         { 
           time: `${formatMinStr(sMin + 75)} - ${formatMinStr(sMin + 270)}`, 
           lagna: getDynamicLagna(2), // Mithuna base
-          suitability: 'अत्यंत शुभ (उत्तम)', 
-          advice: 'विवाह के लिए सर्वोत्तम स्थिति।' 
+          suitability: vivahRule ? (vivahRule.isSuitable ? (language === 'Hindi' ? 'शुभ (उत्तम)' : 'Auspicious') : (language === 'Hindi' ? 'मध्यम (सामान्य)' : 'Medium')) : (language === 'Hindi' ? 'अत्यंत शुभ (उत्तम)' : 'Highly Auspicious'), 
+          advice: vivahRule ? (language === 'Hindi' ? vivahRule.reasons.join(' ') : 'Planetary aspects are favorable.') : (language === 'Hindi' ? 'विवाह के लिए सर्वोत्तम स्थिति।' : 'Best conditions for marriage.') 
         },
         { 
           time: `${formatMinStr(eMin - 165)} - ${formatMinStr(eMin + 60)}`, 
           lagna: getDynamicLagna(6), // Tula base
-          suitability: 'अच्छा (लाभ)', 
-          advice: 'सामाजिक आयोजनों के लिए उपयुक्त।' 
+          suitability: language === 'Hindi' ? 'अच्छा (लाभ)' : 'Good (Gain)', 
+          advice: language === 'Hindi' ? 'सामाजिक आयोजनों के लिए उपयुक्त।' : 'Suitable for social gatherings.' 
         },
       ]
     },
@@ -96,21 +107,21 @@ export function MuhuratScreen({
       id: 'house',
       name: 'Griha Pravesh',
       hindiName: 'गृह प्रवेश मुहूर्त',
-      desc: 'नए घर या संपत्ति में प्रवेश और निर्माण के लिए।',
+      desc: language === 'Hindi' ? 'नए घर या संपत्ति में प्रवेश और निर्माण के लिए।' : 'For entering and starting construction on a new home or property.',
       icon: <Key className="w-5 h-5 text-amber-500 animate-pulse" />,
-      rating: tithiValue % 2 === 0 ? 4 : 5,
+      rating: gpRule ? Math.max(1, Math.round(gpRule.score / 20)) : (tithiValue % 2 === 0 ? 4 : 5),
       slots: [
         { 
           time: `${formatMinStr(sMin + 165)} - ${formatMinStr(sMin + 330)}`, 
           lagna: getDynamicLagna(1), // Vrishabha base
-          suitability: 'शुभ (उत्तम)', 
-          advice: 'स्थिर लग्न, गृह प्रवेश के लिए शुभ।' 
+          suitability: gpRule ? (gpRule.isSuitable ? (language === 'Hindi' ? 'शुभ (उत्तम)' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ (टालें)' : 'Inauspicious (Avoid)')) : (language === 'Hindi' ? 'शुभ (उत्तम)' : 'Auspicious'), 
+          advice: gpRule ? (language === 'Hindi' ? gpRule.reasons.join(' ') : 'Vedic parameters match.') : (language === 'Hindi' ? 'स्थिर लग्न, गृह प्रवेश के लिए शुभ।' : 'Fixed Lagna, auspicious for entry.') 
         },
         { 
           time: `${formatMinStr(sMin + 345)} - ${formatMinStr(sMin + 395)}`, 
           lagna: getDynamicLagna(3), // Karka base
-          suitability: 'सर्वोत्तम (अमृत)', 
-          advice: 'अभिजीत मुहूर्त के साथ अत्यधिक शुभ।' 
+          suitability: gpRule ? (gpRule.isSuitable ? (language === 'Hindi' ? 'सर्वोत्तम (अमृत)' : 'Best (Amrit)') : (language === 'Hindi' ? 'मध्यम' : 'Medium')) : (language === 'Hindi' ? 'सर्वोत्तम (अमृत)' : 'Best (Amrit)'), 
+          advice: gpRule ? (language === 'Hindi' ? (gpRule.reasons[0] || 'अभिजीत मुहूर्त के साथ अत्यधिक शुभ।') : 'Highly auspicious with Abhijit Muhurat.') : (language === 'Hindi' ? 'अभिजीत मुहूर्त के साथ अत्यधिक शुभ।' : 'Highly auspicious with Abhijit.') 
         }
       ]
     },
@@ -118,21 +129,21 @@ export function MuhuratScreen({
       id: 'naming',
       name: 'Naamkaran',
       hindiName: 'नामकरण मुहूर्त',
-      desc: 'नामकरण संस्कार के लिए मुहूर्त।',
+      desc: language === 'Hindi' ? 'नामकरण संस्कार के लिए मुहूर्त।' : 'Muhurat for naming ceremony.',
       icon: <Feather className="w-5 h-5 text-orange-500" />,
-      rating: 5,
+      rating: namkaranRule ? Math.max(1, Math.round(namkaranRule.score / 20)) : 5,
       slots: [
         { 
           time: `${formatMinStr(sMin + 180)} - ${formatMinStr(sMin + 360)}`, 
           lagna: getDynamicLagna(4), // Simha base
-          suitability: 'शुभ (उत्तम)', 
-          advice: 'बुद्धिमत्ता के लिए अत्यंत शुभ।' 
+          suitability: namkaranRule ? (namkaranRule.isSuitable ? (language === 'Hindi' ? 'शुभ (उत्तम)' : 'Auspicious') : (language === 'Hindi' ? 'मध्यम' : 'Medium')) : (language === 'Hindi' ? 'शुभ (उत्तम)' : 'Auspicious'), 
+          advice: namkaranRule ? (language === 'Hindi' ? namkaranRule.reasons.join(' ') : 'Intelligent planetary alignments.') : (language === 'Hindi' ? 'बुद्धिमत्ता के लिए अत्यंत शुभ।' : 'Very auspicious for intellect.') 
         },
         { 
           time: `${formatMinStr(sMin + 480)} - ${formatMinStr(sMin + 570)}`, 
           lagna: getDynamicLagna(5), // Kanya base
-          suitability: 'शुभ (लाभ)', 
-          advice: 'स्वर्ण आभूषण आदि पहनाने के लिए।' 
+          suitability: language === 'Hindi' ? 'शुभ (लाभ)' : 'Good (Gain)', 
+          advice: language === 'Hindi' ? 'स्वर्ण आभूषण आदि पहनाने के लिए।' : 'For naming and wearing jewelry.' 
         }
       ]
     },
@@ -140,21 +151,21 @@ export function MuhuratScreen({
       id: 'vehicle',
       name: 'Vehicle Purchase',
       hindiName: 'वाहन क्रय मुहूर्त',
-      desc: 'वाहन, मोटर या व्यावसायिक वाहन की खरीद के लिए मुहूर्त।',
+      desc: language === 'Hindi' ? 'वाहन, मोटर या व्यावसायिक वाहन की खरीद के लिए मुहूर्त।' : 'For purchase of vehicles or commercial transports.',
       icon: <Truck className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />,
-      rating: tithiValue === 14 || tithiValue === 30 ? 2 : 4,
+      rating: vahanRule ? Math.max(1, Math.round(vahanRule.score / 20)) : (tithiValue === 14 || tithiValue === 30 ? 2 : 4),
       slots: [
         { 
           time: `${formatMinStr(sMin + 270)} - ${formatMinStr(sMin + 450)}`, 
           lagna: getDynamicLagna(10), // Kumbha base
-          suitability: isKrishnaAshtamiOrChauth ? 'मध्यम (सामान्य)' : 'अत्यंत शुभ (शुभ)', 
-          advice: 'धातु से जुड़ी वस्तुओं के लिए सर्वोत्तम।' 
+          suitability: vahanRule ? (vahanRule.isSuitable ? (language === 'Hindi' ? 'अत्यंत शुभ (शुभ)' : 'Highly Auspicious') : (language === 'Hindi' ? 'मध्यम (सामान्य)' : 'Medium')) : (isKrishnaAshtamiOrChauth ? (language === 'Hindi' ? 'मध्यम (सामान्य)' : 'Medium') : (language === 'Hindi' ? 'अत्यंत शुभ (शुभ)' : 'Highly Auspicious')), 
+          advice: vahanRule ? (language === 'Hindi' ? vahanRule.reasons.join(' ') : 'Good metallic aspect scores.') : (language === 'Hindi' ? 'धातु से जुड़ी वस्तुओं के लिए सर्वोत्तम।' : 'Best for purchasing metallic items.') 
         },
         { 
           time: `${formatMinStr(eMin - 210)} - ${formatMinStr(eMin - 120)}`, 
           lagna: getDynamicLagna(0), // Mesha base
-          suitability: 'शुभ (चल)', 
-          advice: 'वाहन आदि के लिए बढ़िया मुहूर्त।' 
+          suitability: language === 'Hindi' ? 'शुभ (चल)' : 'Good (Chala)', 
+          advice: language === 'Hindi' ? 'वाहन आदि के लिए बढ़िया मुहूर्त।' : 'Good time to bring home the vehicle.' 
         }
       ]
     },
@@ -162,21 +173,21 @@ export function MuhuratScreen({
       id: 'business',
       name: 'Business Opening',
       hindiName: 'व्यापार आरंभ',
-      desc: 'नया व्यवसाय, दुकान या कार्यालय शुरू करने का मुहूर्त।',
+      desc: language === 'Hindi' ? 'नया व्यवसाय, दुकान या कार्यालय शुरू करने का मुहूर्त।' : 'Muhurat for starting a new business, shop, or office.',
       icon: <ShoppingBag className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />,
       rating: tithiValue % 5 === 0 ? 3 : 5,
       slots: [
         { 
           time: `${formatMinStr(sMin + 345)} - ${formatMinStr(sMin + 435)}`, 
-          lagna: 'अभिजीत मुहूर्त', 
-          suitability: 'अत्यंत शुभ (अमृत)', 
-          advice: 'व्यवसाय में वृद्धि और लाभ के लिए सर्वोत्तम मुहूर्त।' 
+          lagna: language === 'Hindi' ? 'अभिजीत मुहूर्त' : 'Abhijit Muhurat', 
+          suitability: language === 'Hindi' ? 'अत्यंत शुभ (अमृत)' : 'Highly Auspicious (Amrit)', 
+          advice: language === 'Hindi' ? 'व्यवसाय में वृद्धि और लाभ के लिए सर्वोत्तम मुहूर्त।' : 'Best time for business growth and profits.' 
         },
         { 
           time: `${formatMinStr(eMin - 120)} - ${formatMinStr(eMin - 30)}`, 
           lagna: getDynamicLagna(8), // Dhanu base
-          suitability: 'अच्छा (लाभ)', 
-          advice: 'डिजाइन, तकनीक और संचार कार्यों के लिए।' 
+          suitability: language === 'Hindi' ? 'अच्छा (लाभ)' : 'Good (Gain)', 
+          advice: language === 'Hindi' ? 'डिजाइन, तकनीक और संचार कार्यों के लिए।' : 'Good for design, tech, and communications.' 
         }
       ]
     },
@@ -184,21 +195,21 @@ export function MuhuratScreen({
       id: 'land',
       name: 'Bhoomi Pujan',
       hindiName: 'भूमि पूजन मुहूर्त',
-      desc: 'संपत्ति, भूमि पूजन और निर्माण कार्य के लिए शुभ शुरुआत।',
+      desc: language === 'Hindi' ? 'संपत्ति, भूमि पूजन और निर्माण कार्य के लिए शुभ शुरुआत।' : 'Auspicious beginning for property, land worship, and construction.',
       icon: <Building className="w-5 h-5 text-teal-600 dark:text-teal-450" />,
       rating: 4,
       slots: [
         { 
           time: `${formatMinStr(sMin + 30)} - ${formatMinStr(sMin + 150)}`, 
           lagna: getDynamicLagna(7), // Vrischika base
-          suitability: 'शुभ (शुभ)', 
-          advice: 'प्रातःकाल भूमि पूजन के लिए उपयुक्त।' 
+          suitability: language === 'Hindi' ? 'शुभ (शुभ)' : 'Auspicious', 
+          advice: language === 'Hindi' ? 'प्रातःकाल भूमि पूजन के लिए उपयुक्त।' : 'Suitable for morning Bhoomi Pujan.' 
         },
         { 
           time: `${formatMinStr(sMin + 225)} - ${formatMinStr(sMin + 330)}`, 
           lagna: getDynamicLagna(9), // Makara base
-          suitability: 'उत्तम (अतिशुभ)', 
-          advice: 'नींव रखने के लिए सबसे उत्तम समय।' 
+          suitability: language === 'Hindi' ? 'उत्तम (अतिशुभ)' : 'Excellent (Very Auspicious)', 
+          advice: language === 'Hindi' ? 'नींव रखने के लिए सबसे उत्तम समय।' : 'Most auspicious time for laying foundation.' 
         }
       ]
     }
@@ -325,7 +336,9 @@ export function MuhuratScreen({
             <div className="flex items-center gap-2 pb-2.5 border-b border-emerald-100/60 dark:border-zinc-800/40">
               <span className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">✨</span>
               <div>
-                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">शुभ मुहूर्त व योग (Siddhi Yogas)</h3>
+                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">
+                  {language === 'Hindi' ? "शुभ मुहूर्त व योग (Siddhi Yogas)" : "Auspicious Siddhi Yogas"}
+                </h3>
                 <span className="text-[9px] text-emerald-600 dark:text-emerald-400 block mt-1 uppercase tracking-widest font-mono">Auspicious Timings</span>
               </div>
             </div>
@@ -334,7 +347,7 @@ export function MuhuratScreen({
             <div className="space-y-2 text-xs">
               {allMuhurats.filter(m => m.type !== 'Ashubh').map((m, idx) => (
                 <div key={idx} className="flex justify-between items-center py-1.5 border-b border-slate-100/40 dark:border-slate-800/10">
-                  <span className="text-slate-400 font-medium">{m.hindiName || m.name}:</span>
+                  <span className="text-slate-400 font-medium">{language === 'Hindi' ? (m.hindiName || m.name) : m.name}:</span>
                   <span className="font-bold text-slate-855 dark:text-emerald-350 font-mono">{m.startTime} - {m.endTime}</span>
                 </div>
               ))}
@@ -342,16 +355,18 @@ export function MuhuratScreen({
             {/* Shubh Yogas List */}
             {((panchang.shubhYogas && panchang.shubhYogas.length > 0) || (panchang.pushkarYog && panchang.pushkarYog.active)) && (
               <div className="mt-4 pt-3 border-t border-slate-100/50 dark:border-slate-800/30 space-y-2">
-                <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest block font-mono">आज के विशेष योग (Auspicious Yogas):</span>
+                <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest block font-mono">
+                  {language === 'Hindi' ? "आज के विशेष योग (Auspicious Yogas):" : "Today's Special Yogas:"}
+                </span>
                 <div className="flex flex-wrap gap-1.5">
                   {panchang.pushkarYog && panchang.pushkarYog.active && (
                     <span className="text-[9.5px] font-black px-2 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-350 border border-amber-300/40 animate-pulse font-serif">
-                      🌟 {panchang.pushkarYog.hindiName} ({panchang.pushkarYog.type})
+                      🌟 {language === 'Hindi' ? panchang.pushkarYog.hindiName : panchang.pushkarYog.name} ({panchang.pushkarYog.type})
                     </span>
                   )}
                   {panchang.shubhYogas && panchang.shubhYogas.map((y, idx) => (
                     <span key={idx} className="text-[9.5px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-350 border border-emerald-250/30 font-serif">
-                      ✨ {y.hindiName} ({y.start} - {y.end})
+                      ✨ {language === 'Hindi' ? y.hindiName : y.name} ({y.start} - {y.end})
                     </span>
                   ))}
                 </div>
@@ -366,7 +381,9 @@ export function MuhuratScreen({
             <div className="flex items-center gap-2 pb-2.5 border-b border-red-100/60 dark:border-zinc-800/40">
               <span className="p-1.5 rounded-lg bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400">⚠️</span>
               <div>
-                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">वर्जित समय चक्र (Adverse Periods)</h3>
+                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">
+                  {language === 'Hindi' ? "वर्जित समय चक्र (Adverse Periods)" : "Adverse Periods (Inauspicious)"}
+                </h3>
                 <span className="text-[9px] text-red-600 dark:text-red-405 block mt-1 uppercase tracking-widest font-mono">Inauspicious Timings</span>
               </div>
             </div>
@@ -375,7 +392,7 @@ export function MuhuratScreen({
             <div className="space-y-2 text-xs">
               {allMuhurats.filter(m => m.type === 'Ashubh').map((m, idx) => (
                 <div key={idx} className="flex justify-between items-center py-1.5 border-b border-slate-100/40 dark:border-slate-800/10">
-                  <span className="text-slate-400 font-medium">{m.hindiName || m.name}:</span>
+                  <span className="text-slate-400 font-medium">{language === 'Hindi' ? (m.hindiName || m.name) : m.name}:</span>
                   <span className="font-bold text-red-655 dark:text-rose-400 font-mono">{m.startTime} - {m.endTime}</span>
                 </div>
               ))}
@@ -383,13 +400,13 @@ export function MuhuratScreen({
               {/* Durmuhurat & Varjyam */}
               {panchang.durmuhurat && panchang.durmuhurat.length > 0 && panchang.durmuhurat.map((d, idx) => (
                 <div key={`dur-${idx}`} className="flex justify-between items-center py-1.5 border-b border-slate-100/40 dark:border-slate-800/10">
-                  <span className="text-slate-400 font-medium">दुर्मुहूर्त (Durmuhurat):</span>
+                  <span className="text-slate-400 font-medium">{language === 'Hindi' ? "दुर्मुहूर्त (Durmuhurat):" : "Durmuhurat:"}</span>
                   <span className="font-bold text-red-655 dark:text-rose-400 font-mono">{d.start} - {d.end}</span>
                 </div>
               ))}
               {panchang.varjyam && panchang.varjyam.length > 0 && panchang.varjyam.map((v, idx) => (
                 <div key={`var-${idx}`} className="flex justify-between items-center py-1.5 border-b border-slate-100/40 dark:border-slate-800/10">
-                  <span className="text-slate-400 font-medium">वर्ज्यम (Varjyam):</span>
+                  <span className="text-slate-400 font-medium">{language === 'Hindi' ? "वर्ज्यम (Varjyam):" : "Varjyam:"}</span>
                   <span className="font-bold text-red-655 dark:text-rose-400 font-mono">{v.start} - {v.end}</span>
                 </div>
               ))}
@@ -400,12 +417,14 @@ export function MuhuratScreen({
               <div className="mt-3 pt-2.5 border-t border-slate-100/50 dark:border-slate-800/30 space-y-1 text-[10px]">
                 {panchang.dagdaTithi && panchang.dagdaTithi.isDagda && (
                   <div className="text-red-700 dark:text-red-400 font-bold bg-red-500/10 px-2 py-1 rounded border border-red-500/15 font-serif">
-                    🚨 आज **दग्ध तिथि** है! महत्वपूर्ण कार्य टालें।
+                    {language === 'Hindi' ? "🚨 आज दग्ध तिथि है! महत्वपूर्ण कार्य टालें।" : "🚨 Today is Dagda Tithi! Avoid starting important activities."}
                   </div>
                 )}
                 {panchang.bhadra && panchang.bhadra.active && (
                   <div className="text-red-700 dark:text-red-400 font-bold bg-red-500/10 px-2 py-1 rounded border border-red-500/15 font-serif">
-                    🚨 भद्रा काल सक्रिय है ({panchang.bhadra.startTime} से {panchang.bhadra.endTime} तक)।
+                    {language === 'Hindi'
+                      ? `🚨 भद्रा काल सक्रिय है (${panchang.bhadra.startTime} से ${panchang.bhadra.endTime} तक)।`
+                      : `🚨 Bhadra period is active (from ${panchang.bhadra.startTime} to ${panchang.bhadra.endTime}).`}
                   </div>
                 )}
               </div>
@@ -419,7 +438,9 @@ export function MuhuratScreen({
             <div className="flex items-center gap-2 pb-2.5 border-b border-orange-100/60 dark:border-zinc-800/40">
               <span className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400">🔥</span>
               <div>
-                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">अग्निवास व शिववास (Ritual Muhurats)</h3>
+                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">
+                  {language === 'Hindi' ? "अग्निवास व शिववास (Ritual Muhurats)" : "Ritual Muhurats (Shiva/Agni)"}
+                </h3>
                 <span className="text-[9px] text-orange-600 dark:text-orange-400 block mt-1 uppercase tracking-widest font-mono">Ritual Auspiciousness</span>
               </div>
             </div>
@@ -429,17 +450,19 @@ export function MuhuratScreen({
               {panchang.shivaVaas && (
                 <div className="p-3 rounded-2xl bg-white/5 dark:bg-white/2 border border-white/10 dark:border-white/5">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 font-serif">शिववास (रुद्राभिषेक):</span>
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 font-serif">
+                      {language === 'Hindi' ? "शिववास (रुद्राभिषेक):" : "Shiva Vaas (Rudrabhishek):"}
+                    </span>
                     <span className={`text-[10px] font-black px-2 py-0.5 rounded border ${
                       panchang.shivaVaas.isAuspicious
                         ? 'bg-emerald-100 border-emerald-250 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
                         : 'bg-rose-100 border-rose-250 text-rose-800 dark:bg-rose-950/30 dark:text-rose-455'
                     }`}>
-                      {panchang.shivaVaas.isAuspicious ? 'शुभ (Auspicious)' : 'अशुभ (Avoid)'}
+                      {panchang.shivaVaas.isAuspicious ? (language === 'Hindi' ? 'शुभ (Auspicious)' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ (Avoid)' : 'Avoid')}
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1 leading-normal font-sans">
-                    <strong>वास स्थान:</strong> {panchang.shivaVaas.residenceHindi || panchang.shivaVaas.residence} - {panchang.shivaVaas.description}
+                    <strong>{language === 'Hindi' ? "वास स्थान:" : "Residence:"}</strong> {language === 'Hindi' ? (panchang.shivaVaas.residenceHindi || panchang.shivaVaas.residence) : panchang.shivaVaas.residence} - {panchang.shivaVaas.description}
                   </p>
                 </div>
               )}
@@ -448,17 +471,19 @@ export function MuhuratScreen({
               {panchang.agniVaas && (
                 <div className="p-3 rounded-2xl bg-white/5 dark:bg-white/2 border border-white/10 dark:border-white/5">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 font-serif">अग्निवास (यज्ञ/हवन):</span>
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 font-serif">
+                      {language === 'Hindi' ? "अग्निवास (यज्ञ/हवन):" : "Agni Vaas (Yajna/Havan):"}
+                    </span>
                     <span className={`text-[10px] font-black px-2 py-0.5 rounded border ${
                       panchang.agniVaas.isAuspicious
                         ? 'bg-emerald-100 border-emerald-250 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
                         : 'bg-rose-100 border-rose-250 text-rose-800 dark:bg-rose-950/30 dark:text-rose-455'
                     }`}>
-                      {panchang.agniVaas.isAuspicious ? 'शुभ (Auspicious)' : 'अशुभ (Avoid)'}
+                      {panchang.agniVaas.isAuspicious ? (language === 'Hindi' ? 'शुभ (Auspicious)' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ (Avoid)' : 'Avoid')}
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1 leading-normal font-sans">
-                    <strong>वास स्थान:</strong> {panchang.agniVaas.residenceHindi || panchang.agniVaas.residence} - {panchang.agniVaas.description}
+                    <strong>{language === 'Hindi' ? "वास स्थान:" : "Residence:"}</strong> {language === 'Hindi' ? (panchang.agniVaas.residenceHindi || panchang.agniVaas.residence) : panchang.agniVaas.residence} - {panchang.agniVaas.description}
                   </p>
                 </div>
               )}
@@ -480,10 +505,10 @@ export function MuhuratScreen({
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                लाइव सक्रिय मुहूर्त संसूचक
+                {language === 'Hindi' ? "लाइव सक्रिय मुहूर्त संसूचक" : "Live Active Muhurat Detector"}
               </span>
               <h3 className="text-sm sm:text-base md:text-lg font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">
-                अभी सक्रिय शुभ मुहूर्त
+                {getTranslation(language, 'liveMuhurat')}
               </h3>
             </div>
           </div>
@@ -497,17 +522,17 @@ export function MuhuratScreen({
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-serif font-black text-slate-850 dark:text-orange-50">
-                      {slot.categoryHindiName}
+                      {language === 'Hindi' ? slot.categoryHindiName : slot.categoryName}
                     </span>
                     <span className="text-[8.5px] font-black tracking-widest bg-emerald-500 text-white dark:bg-emerald-600 uppercase px-1.5 py-0.5 rounded shadow-3xs">
                       {slot.suitability}
                     </span>
                   </div>
                   <div className="text-[10px] font-bold text-slate-500 dark:text-zinc-450 mt-1 font-mono">
-                    समय: {slot.time}
+                    {language === 'Hindi' ? "समय:" : "Time:"} {slot.time}
                   </div>
                   <div className="text-[10px] text-slate-655 dark:text-zinc-400 mt-1">
-                    <span className="font-bold text-orange-950 dark:text-orange-200">लग्न: {slot.lagna}</span>
+                    <span className="font-bold text-orange-950 dark:text-orange-200">{language === 'Hindi' ? "लग्न:" : "Lagna:"} {slot.lagna}</span>
                   </div>
                   <p className="text-[9.5px] text-slate-500 dark:text-slate-400 italic mt-1 leading-normal font-sans">
                     🌿 {slot.advice}
@@ -529,7 +554,7 @@ export function MuhuratScreen({
               : 'bg-white/80 dark:bg-zinc-900/60 hover:bg-slate-50 dark:hover:bg-zinc-850 border-orange-100 dark:border-orange-950/45 text-slate-700 dark:text-slate-300'
           }`}
         >
-          सभी मुहूर्त
+          {getTranslation(language, 'allMuhurats')}
         </button>
         {muhuratCategories.map(cat => (
           <button
@@ -542,7 +567,7 @@ export function MuhuratScreen({
             }`}
           >
             {cat.icon}
-            {cat.hindiName}
+            {language === 'Hindi' ? cat.hindiName : cat.name}
           </button>
         ))}
       </div>
@@ -551,9 +576,13 @@ export function MuhuratScreen({
       <div className="bg-amber-500/5 dark:bg-amber-500/2 rounded-2xl border border-amber-500/20 [box-shadow:0_0_15px_rgba(245,158,11,0.1)] p-3.5 sm:p-4 text-left flex gap-3">
         <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
         <div>
-          <h4 className="text-xs sm:text-sm font-bold text-amber-950 dark:text-amber-200 font-serif">ज्योतिषीय दिशानिर्देश (राहुकाल)</h4>
+          <h4 className="text-xs sm:text-sm font-bold text-amber-950 dark:text-amber-200 font-serif">
+            {language === 'Hindi' ? "ज्योतिषीय दिशानिर्देश (राहुकाल)" : "Astrological Guidelines (Rahu Kaal)"}
+          </h4>
           <p className="text-[10px] sm:text-2xs text-amber-900/90 dark:text-amber-300/80 leading-normal mt-0.5 font-sans">
-            कृपया सुनिश्चित करें कि चुना गया समय सक्रिय <strong>राहुकाल ({panchang.rahuKaal.start} - {panchang.rahuKaal.end})</strong> से मेल नहीं खाता है, क्योंकि राहुकाल के दौरान कोई नया काम शुरू करना शुभ नहीं माना जाता है।
+            {language === 'Hindi'
+              ? `कृपया सुनिश्चित करें कि चुना गया समय सक्रिय राहुकाल (${panchang.rahuKaal.start} - ${panchang.rahuKaal.end}) से मेल नहीं खाता है, क्योंकि राहुकाल के दौरान कोई नया काम शुरू करना शुभ नहीं माना जाता है।`
+              : `Please ensure the selected time does not overlap with active Rahu Kaal (${panchang.rahuKaal.start} - ${panchang.rahuKaal.end}), as starting new work during Rahu Kaal is considered inauspicious.`}
           </p>
         </div>
       </div>
@@ -569,7 +598,9 @@ export function MuhuratScreen({
                     {cat.icon}
                   </div>
                   <div>
-                    <h3 className="text-xs sm:text-sm font-extrabold text-orange-950 dark:text-amber-100 font-serif leading-none">{cat.hindiName}</h3>
+                    <h3 className="text-xs sm:text-sm font-extrabold text-orange-950 dark:text-amber-100 font-serif leading-none">
+                      {language === 'Hindi' ? cat.hindiName : cat.name}
+                    </h3>
                     <span className="text-[9px] sm:text-[10px] text-slate-400 block mt-1">{cat.name}</span>
                   </div>
                 </div>
@@ -591,7 +622,9 @@ export function MuhuratScreen({
 
               {/* Slots Timelines list */}
               <div className="space-y-2.5 mt-4">
-                <span className="text-[10px] font-bold text-slate-400 uppercase font-mono tracking-wider block">आज के शुभ मुहूर्त</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase font-mono tracking-wider block font-semibold">
+                  {language === 'Hindi' ? "आज के शुभ मुहूर्त" : "Auspicious Timings Today"}
+                </span>
                 {cat.slots.map((sl, idx) => (
                   <div key={idx} className="p-3 rounded-2xl bg-white/5 dark:bg-white/2 border border-white/10 dark:border-white/5 hover:border-orange-500/20 transition-all duration-300 relative overflow-hidden">
                     <div className="flex justify-between items-center">
@@ -602,12 +635,12 @@ export function MuhuratScreen({
                     </div>
 
                     <div className="flex items-center gap-1.5 mt-2 text-[10px] sm:text-2xs text-slate-600 dark:text-slate-400 font-medium">
-                      <span className="text-slate-400 dark:text-slate-500 text-3xs uppercase font-mono">लग्न:</span>
+                      <span className="text-slate-400 dark:text-slate-500 text-3xs uppercase font-mono">{language === 'Hindi' ? "लग्न:" : "Lagna:"}</span>
                       <span className="text-orange-950 dark:text-orange-200 font-bold bg-orange-50 dark:bg-orange-950/30 px-1.5 py-0.2 rounded font-sans">{sl.lagna}</span>
                     </div>
 
                     <div className="text-[9px] sm:text-3xs text-slate-500 italic mt-1 leading-normal font-sans">
-                      🌿 नोट: {sl.advice}
+                      {language === 'Hindi' ? "🌿 नोट:" : "🌿 Note:"} {sl.advice}
                     </div>
                   </div>
                 ))}
@@ -616,12 +649,12 @@ export function MuhuratScreen({
 
             {/* Custom advice footer */}
             <div className="mt-4 pt-3 border-t border-white/10 dark:border-white/5 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-              <span>संवत् {panchang.hinduDate.samvatVikram} स्थितियां</span>
+              <span>{language === 'Hindi' ? `संवत् ${panchang.hinduDate.samvatVikram} स्थितियां` : `Samvat ${panchang.hinduDate.samvatVikram} Conditions`}</span>
               <span 
                 onClick={onViewAstrologyChart}
                 className="text-orange-600 dark:text-orange-400 font-bold hover:underline cursor-pointer font-sans"
               >
-                ज्योतिष चार्ट देखें →
+                {getTranslation(language, 'viewAstrologyChart')}
               </span>
             </div>
           </div>

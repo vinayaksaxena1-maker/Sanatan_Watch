@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Samay Ghadi</string>
+    <string name="title_activity_main">Samay Ghadi</string>
+    <string name="package_name">com.samayghadi.app</string>
+    <string name="custom_url_scheme">com.samayghadi.app</string>
+</resources>

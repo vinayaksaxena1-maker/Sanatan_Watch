@@ -18,14 +18,16 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { PanchangInfo } from '../types';
 import { MoonPhaseVisualizer } from './MoonPhaseVisualizer';
 import { HoraSystem } from './HoraSystem';
+import { getTranslation } from '../utils/translations';
 
 interface PanchangScreenProps {
   panchang: PanchangInfo;
   currentTime?: Date;
   onShare?: () => void;
+  language?: 'English' | 'Hindi';
 }
 
-export function PanchangScreen({ panchang, currentTime, onShare }: PanchangScreenProps) {
+export function PanchangScreen({ panchang, currentTime, onShare, language = 'English' }: PanchangScreenProps) {
   const [mainViewMode, setMainViewMode] = useState<'choghadiya' | 'hora'>('choghadiya');
   const hDate = panchang.hinduDate;
 
@@ -33,7 +35,7 @@ export function PanchangScreen({ panchang, currentTime, onShare }: PanchangScree
     if (!panchang.combustion) return undefined;
     const combustInfo = panchang.combustion.find(c => c.name.toLowerCase() === planetName.toLowerCase());
     if (combustInfo) {
-      return combustInfo.isCombust ? "अस्त (Combust)" : "उदित (Rising)";
+      return combustInfo.isCombust ? (language === 'Hindi' ? "अस्त (Combust)" : "Combust") : (language === 'Hindi' ? "उदित (Rising)" : "Rising");
     }
     return undefined;
   };
@@ -66,7 +68,7 @@ export function PanchangScreen({ panchang, currentTime, onShare }: PanchangScree
       };
 
       return todayPanchang.hora.find(h => 
-        isTimeInInterval(currentMin, h.startTime, h.endTime)
+         isTimeInInterval(currentMin, h.startTime, h.endTime)
       );
     } catch {
       return undefined;
@@ -119,54 +121,65 @@ export function PanchangScreen({ panchang, currentTime, onShare }: PanchangScree
   ];
 
   const solarLunarTrio = [
-    { label: 'सूर्योदय', val: panchang.sunrise, desc: 'प्रार्थना के लिए शुभ प्रातःकाल', icon: <Sun className="w-5 h-5 text-amber-500 animate-spin-slow" /> },
-    { label: 'सूर्यास्त', val: panchang.sunset, desc: 'संध्यावंदन का समय', icon: <Sun className="w-5 h-5 text-orange-600" /> },
-    { label: 'चन्द्रोदय', val: panchang.moonrise, desc: 'चन्द्रोदय का समय', icon: <Moon className="w-5 h-5 text-indigo-400" /> },
-    { label: 'चन्द्रास्त', val: panchang.moonset, desc: 'चन्द्रास्त का समय', icon: <Moon className="w-5 h-5 text-slate-400" /> },
+    { label: getTranslation(language, 'sunrise'), val: panchang.sunrise, desc: language === 'Hindi' ? 'प्रार्थना के लिए शुभ प्रातःकाल' : 'Auspicious morning time', icon: <Sun className="w-5 h-5 text-amber-500 animate-spin-slow" /> },
+    { label: getTranslation(language, 'sunset'), val: panchang.sunset, desc: language === 'Hindi' ? 'संध्यावंदन का समय' : 'Evening prayer time', icon: <Sun className="w-5 h-5 text-orange-600" /> },
+    { label: getTranslation(language, 'moonrise'), val: panchang.moonrise, desc: language === 'Hindi' ? 'चन्द्रोदय का समय' : 'Moonrise time', icon: <Moon className="w-5 h-5 text-indigo-400" /> },
+    { label: getTranslation(language, 'moonset'), val: panchang.moonset, desc: language === 'Hindi' ? 'चन्द्रास्त का समय' : 'Moonset time', icon: <Moon className="w-5 h-5 text-slate-400" /> },
   ];
 
   const mainPanchangElements = [
     {
-      title: 'तिथि',
-      fullName: hDate.tithi.hindiName,
+      title: getTranslation(language, 'tithi'),
+      fullName: language === 'Hindi' ? hDate.tithi.hindiName : hDate.tithi.name,
       engName: hDate.tithi.name,
       endTime: hDate.tithi.endTime,
       lord: hDate.tithi.lord,
       deity: hDate.tithi.deity,
-      description: 'चंद्रमा की 12 डिग्री की कोणीय दूरी को दर्शाने वाला चंद्र-सौर दिन।',
+      description: language === 'Hindi' ? 'चंद्रमा की 12 डिग्री की कोणीय दूरी को दर्शाने वाला चंद्र-सौर दिन।' : 'Lunar day representing a 12-degree angular displacement of the Moon.',
       badgeColor: 'bg-orange-100 border-orange-255 text-orange-850'
     },
     {
-      title: 'नक्षत्र',
-      fullName: `${hDate.nakshatra.hindiName}${hDate.nakshatra.pada ? ` (चरण ${hDate.nakshatra.pada})` : ''}`,
+      title: getTranslation(language, 'nakshatra'),
+      fullName: language === 'Hindi' 
+        ? `${hDate.nakshatra.hindiName}${hDate.nakshatra.pada ? ` (चरण ${hDate.nakshatra.pada})` : ''}`
+        : `${hDate.nakshatra.name}${hDate.nakshatra.pada ? ` (Pada ${hDate.nakshatra.pada})` : ''}`,
       engName: `Lord: ${hDate.nakshatra.lord}`,
       endTime: hDate.nakshatra.endTime,
       lord: hDate.nakshatra.lord,
       deity: hDate.nakshatra.deity,
-      description: `चंद्र राशि का भाग (${hDate.nakshatra.symbol})। प्रकृति ${hDate.nakshatra.nature} है।` + 
-        (hDate.nakshatra.gana ? ` गण: ${hDate.nakshatra.gana} | योनि: ${hDate.nakshatra.yoni} | नाड़ी: ${hDate.nakshatra.nadi}` : ''),
+      description: language === 'Hindi'
+        ? `चंद्र राशि का भाग (${hDate.nakshatra.symbol})। प्रकृति ${hDate.nakshatra.nature} है।` + 
+          (hDate.nakshatra.gana ? ` गण: ${hDate.nakshatra.gana} | योनि: ${hDate.nakshatra.yoni} | नाड़ी: ${hDate.nakshatra.nadi}` : '')
+        : `Segment of Moon's path (${hDate.nakshatra.symbol}). Nature is ${hDate.nakshatra.nature}.` + 
+          (hDate.nakshatra.gana ? ` Gana: ${hDate.nakshatra.gana} | Yoni: ${hDate.nakshatra.yoni} | Nadi: ${hDate.nakshatra.nadi}` : ''),
       badgeColor: 'bg-amber-100 border-amber-200 text-amber-800'
     },
     {
-      title: 'योग',
-      fullName: hDate.yoga.hindiName,
+      title: getTranslation(language, 'yoga'),
+      fullName: language === 'Hindi' ? hDate.yoga.hindiName : hDate.yoga.name,
       engName: hDate.yoga.name,
       endTime: hDate.yoga.endTime,
-      lord: hDate.yoga.type === 'Shubh' ? 'शुभ (Auspicious)' : 'अशुभ (Inauspicious)',
+      lord: hDate.yoga.type === 'Shubh' ? (language === 'Hindi' ? 'शुभ (Auspicious)' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ (Inauspicious)' : 'Inauspicious'),
       deity: hDate.yoga.meaning,
-      description: hDate.yoga.description || 'सूर्य और चंद्रमा का संयुक्त देशांतर जिसे 27 समान भागों में विभाजित किया गया है।',
+      description: language === 'Hindi'
+        ? (hDate.yoga.description || 'सूर्य और चंद्रमा का संयुक्त देशांतर जिसे 27 समान भागों में विभाजित किया गया है।')
+        : (hDate.yoga.meaning || 'Combined longitude of Sun and Moon divided into 27 equal parts.'),
       badgeColor: hDate.yoga.type === 'Shubh' 
         ? 'bg-emerald-100 border-emerald-250 text-emerald-850 dark:bg-emerald-950/30 dark:text-emerald-400' 
         : 'bg-rose-100 border-rose-250 text-rose-850 dark:bg-rose-950/30 dark:text-rose-450'
     },
     {
-      title: 'करण',
-      fullName: hDate.karana.hindiName,
+      title: getTranslation(language, 'karana'),
+      fullName: language === 'Hindi' ? hDate.karana.hindiName : hDate.karana.name,
       engName: hDate.karana.name,
       endTime: hDate.karana.endTime,
-      lord: hDate.karana.natureHindi || (hDate.karana.type === 'Fixed' ? 'स्थिर' : 'चर'),
-      deity: hDate.karana.classification === 'Shubh' ? 'शुभ (Auspicious)' : 'अशुभ (Inauspicious)',
-      description: hDate.karana.description || 'एक तिथि का आधा हिस्सा, चंद्र चक्र में एक महत्वपूर्ण घटना का संकेत देता है।',
+      lord: language === 'Hindi' 
+        ? (hDate.karana.natureHindi || (hDate.karana.type === 'Fixed' ? 'स्थिर' : 'चर'))
+        : (hDate.karana.nature || hDate.karana.type),
+      deity: hDate.karana.classification === 'Shubh' ? (language === 'Hindi' ? 'शुभ (Auspicious)' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ (Inauspicious)' : 'Inauspicious'),
+      description: language === 'Hindi'
+        ? (hDate.karana.description || 'एक तिथि का आधा हिस्सा, चंद्र चक्र में एक महत्वपूर्ण घटना का संकेत देता है।')
+        : 'Half of a Tithi, indicating a critical phase in the lunar cycle.',
       badgeColor: hDate.karana.classification === 'Shubh' 
         ? 'bg-purple-100 border-purple-250 text-purple-850 dark:bg-purple-950/30 dark:text-purple-400' 
         : 'bg-red-100 border-red-250 text-red-850 dark:bg-red-950/30 dark:text-red-400'
@@ -182,17 +195,23 @@ export function PanchangScreen({ panchang, currentTime, onShare }: PanchangScree
         
         {/* Header section (Aligns to Name/Grec status card) */}
         <div className="space-y-1 pb-3 border-b border-orange-100/60 dark:border-zinc-800/80">
-          <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block">॥ संपूर्ण विवरण ॥</span>
-          <h2 className="text-lg sm:text-xl font-bold font-serif text-slate-800 dark:text-amber-100">वैदिक पंचांग संपूर्ण गणना</h2>
+          <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block">
+            {language === 'Hindi' ? "॥ संपूर्ण विवरण ॥" : "|| Detailed Breakdown ||"}
+          </span>
+          <h2 className="text-lg sm:text-xl font-bold font-serif text-slate-800 dark:text-amber-100">
+            {language === 'Hindi' ? "वैदिक पंचांग संपूर्ण गणना" : "Vedic Panchang Complete Calculations"}
+          </h2>
           <p className="text-[10.5px] sm:text-[11.5px] text-slate-500 dark:text-slate-400">
-            सूर्योदय, सूर्यास्त, तिथि, नक्षत्र, योग, करण और संवत् का वैज्ञानिक एवं आध्यात्मिक संयोजन।
+            {language === 'Hindi' 
+              ? "सूर्योदय, सूर्यास्त, तिथि, नक्षत्र, योग, करण और संवत् का वैज्ञानिक एवं आध्यात्मिक संयोजन।" 
+              : "Scientific and spiritual combination of sunrise, sunset, tithi, nakshatra, yoga, karana, and samvat."}
           </p>
         </div>
 
         {/* A. Astronomical Timings Section */}
         <div>
           <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 font-mono">
-            🌅 सूर्य और चन्द्रोदय समय (Astronomical Timings)
+            {language === 'Hindi' ? "🌅 सूर्य और चन्द्रोदय समय (Astronomical Timings)" : "🌅 Astronomical Timings"}
           </h4>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {solarLunarTrio.map((item, idx) => (
@@ -216,7 +235,7 @@ export function PanchangScreen({ panchang, currentTime, onShare }: PanchangScree
         {/* B. Core Panchang Attributes Grid (Tithi, Nakshatra, Yoga, Karana) */}
         <div className="pt-5 border-t border-slate-100 dark:border-zinc-800/80">
           <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3.5 font-mono">
-            🕉️ मुख्य पंचांग अंग (Five Essential Elements)
+            {language === 'Hindi' ? "🕉️ मुख्य पंचांग अंग (Five Essential Elements)" : "🕉️ Five Essential Elements (Panchang)"}
           </h4>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -246,7 +265,7 @@ export function PanchangScreen({ panchang, currentTime, onShare }: PanchangScree
                     </h3>
                     
                     <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-slate-900/60 px-2 py-0.5 rounded-md inline-flex text-[9.5px] text-slate-500 mt-1.5 font-mono">
-                      <span>समाप्ति:</span>
+                      <span>{language === 'Hindi' ? "समाप्ति:" : "Ends:"}</span>
                       <strong className="text-slate-800 dark:text-slate-200 font-bold">{elem.endTime}</strong>
                     </div>
 
@@ -254,11 +273,11 @@ export function PanchangScreen({ panchang, currentTime, onShare }: PanchangScree
                       {elem.description}
                     </p>
 
-                    {elem.title === 'तिथि' && hDate.tithi.percentPassed !== undefined && (
+                    {elem.title === getTranslation(language, 'tithi') && hDate.tithi.percentPassed !== undefined && (
                       <div className="w-full relative h-[100px] flex flex-col items-center justify-end mt-3 bg-white/5 dark:bg-white/2 rounded-xl p-2.5 border border-white/10 dark:border-white/5">
                         <div className="absolute top-2 w-full px-4 flex justify-between text-[8px] font-mono font-semibold text-slate-500">
-                          <div className="text-left leading-tight">आरंभ<br/><span className="text-slate-800 dark:text-slate-300 font-bold">{hDate.tithi.startTime}</span></div>
-                          <div className="text-right leading-tight">समाप्ति<br/><span className="text-slate-800 dark:text-slate-300 font-bold">{hDate.tithi.endTime}</span></div>
+                          <div className="text-left leading-tight">{language === 'Hindi' ? "आरंभ" : "Starts"}<br/><span className="text-slate-800 dark:text-slate-300 font-bold">{hDate.tithi.startTime}</span></div>
+                          <div className="text-right leading-tight">{language === 'Hindi' ? "समाप्ति" : "Ends"}<br/><span className="text-slate-800 dark:text-slate-300 font-bold">{hDate.tithi.endTime}</span></div>
                         </div>
                         <div className="h-[42px] w-full -mb-1 mt-4">
                           <ResponsiveContainer width="100%" height="100%">

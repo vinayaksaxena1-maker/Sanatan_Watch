@@ -92,35 +92,7 @@ input, textarea, select {
   --bhagwa-col: #FF6F00;
 }
 
-/* ==========================================================================
-   TEMPLE GOLD ENHANCED THEME — ULTRAPREMIUM SACRED EXPERIENCE
-   ========================================================================== */
-.temple {
-  --bg-app-dark-start: #030100; /* Deep black foundation */
-  --bg-app-dark-mid: #080503; /* Deep spiritual earth tones */
-  --bg-app-dark-end: #0f0a05;
-  --bg-app-dark-glow: #2c1200;
-  --bg-envelope-dark: #050302; /* Rich black foundation */
-
-  /* Glass Card Upgrades with Gold linings */
-  --card-bg-dark: rgba(10, 7, 5, 0.96); /* Deep warm earth-stone card */
-  --card-border-dark: rgba(246, 196, 83, 0.35); /* High-fidelity Temple Gold border */
-  --card-shadow-dark: 0 12px 35px rgba(246, 196, 83, 0.12), inset 0 1px 1px rgba(246, 196, 83, 0.1);
-  --card-border-hover-dark: rgba(255, 213, 79, 0.6); /* Majestic Divine Gold hover */
-  --card-shadow-hover-dark: 0 16px 45px rgba(255, 213, 79, 0.25);
-  --card-blur-dark: 24px;
-
-  /* Premium brand colors */
-  --temple-gold-col: #F6C453; /* Temple Gold */
-  --divine-gold-col: #FFD54F; /* Divine Gold */
-  --glow-gold-col: #FFF4CC; /* Soft temple lamp illumination */
-  --bhagwa-col: #FF6F00; /* Bhagwa accent */
-}
-
-.temple .sacred-motif-overlay {
-  opacity: 0.08 !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M60 0 C40 20, 20 40, 20 60 C20 80, 40 100, 60 120 C80 100, 100 80, 100 60 C100 40, 80 20, 60 0 Z M60 20 C70 35, 85 50, 85 60 C85 70, 70 85, 60 100 C50 85, 35 70, 35 60 C35 50, 50 35, 60 20 Z' fill='%23FFD54F' fill-opacity='0.25'/%3E%3C/svg%3E") !important;
-}
+/* Temple Gold theme styles removed */
 
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {

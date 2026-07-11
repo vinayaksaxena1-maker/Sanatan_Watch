@@ -60,6 +60,7 @@ import { MantraJapa } from './components/MantraJapa';
 import { LiveLagna } from './components/LiveLagna';
 import { StotraSangrah } from './components/StotraSangrah';
 import dialBg from './components/VintageDialBackground.png';
+import { getTranslation } from './utils/translations';
 
 const NAKSHATRAS_LIST = [
   "Ashwini (अश्विनी)", "Bharani (भरणी)", "Krittika (कृत्तिका)", "Rohini (रोहिणी)", "Mrigashira (मृगशिरा)", "Ardra (आर्द्रा)",
@@ -109,7 +110,7 @@ const DEFAULT_SETTINGS: SettingsState = {
   splashStyle: 'crimson',
   logoStyle: 'om',
   clockMode: 'digital',
-  customSplash: '/Splash.01.mp4'
+  customSplash: '/Splash2.0.png'
 };
 
 const translateSanskritMonth = (month: string) => {
@@ -222,6 +223,17 @@ export default function App() {
     });
   }, [splashAnimationCompleted]);
 
+  // Safety timeout to ensure Splash Screen is dismissed even if engine is slow or fails
+  useEffect(() => {
+    if (isSplashActive) {
+      const timer = setTimeout(() => {
+        console.warn('[App] Splash screen safety timeout triggered. Force dismissing splash screen.');
+        setIsSplashActive(false);
+      }, 7000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSplashActive]);
+
   // Load from local Cache on Mount
   useEffect(() => {
     try {
@@ -234,7 +246,11 @@ export default function App() {
         setGpsActive(true);
       }
       if (cachedSettings) {
-        setSettings(JSON.parse(cachedSettings));
+        const parsed = JSON.parse(cachedSettings);
+        if (parsed.customSplash === '/Splash1.0.png') {
+          parsed.customSplash = '/Splash2.0.png';
+        }
+        setSettings(parsed);
       }
       if (cachedAlerts) {
         setNotificationsList(JSON.parse(cachedAlerts));
@@ -276,14 +292,10 @@ export default function App() {
     if (typeof document !== 'undefined') {
       if (settings.theme === 'dark') {
         document.documentElement.classList.add('dark');
-        document.documentElement.classList.remove('temple');
-      } else if (settings.theme === 'temple') {
-        document.documentElement.classList.add('dark');
-        document.documentElement.classList.add('temple');
       } else {
         document.documentElement.classList.remove('dark');
-        document.documentElement.classList.remove('temple');
       }
+      document.documentElement.classList.remove('temple');
     }
   }, [settings.theme]);
 
@@ -865,6 +877,7 @@ export default function App() {
           }
         }} 
         customSplash={settings.customSplash}
+        language={settings.language}
       />
     );
   }
@@ -875,6 +888,7 @@ export default function App() {
         selectedStyle={previewSplashStyle} 
         onComplete={() => setPreviewSplashStyle(null)} 
         customSplash={settings.customSplash}
+        language={settings.language}
       />
     );
   }
@@ -1337,7 +1351,7 @@ export default function App() {
 
             {/* 2. PANCHANG SCREEN */}
             {activeTab === 'panchang' && (
-              <PanchangScreen panchang={panchangInfo} onShare={handleShareDailyPanchang} currentTime={currentTime} />
+              <PanchangScreen panchang={panchangInfo} onShare={handleShareDailyPanchang} currentTime={currentTime} language={settings.language} />
             )}
 
             {/* 3. MUHURAT SCREEN */}
@@ -1348,12 +1362,13 @@ export default function App() {
                 currentTime={currentTime} 
                 selectedDate={selectedDate}
                 onDateChange={setSelectedDate}
+                language={settings.language}
               />
             )}
 
             {/* 4. FESTIVAL SCREEN */}
             {activeTab === 'festival' && (
-              <FestivalScreen lat={coords.latitude} lon={coords.longitude} year={selectedDate.getFullYear()} />
+              <FestivalScreen lat={coords.latitude} lon={coords.longitude} year={selectedDate.getFullYear()} language={settings.language} />
             )}
 
             {/* 5. NAKSHATRA SCREEN */}
@@ -1607,7 +1622,7 @@ export default function App() {
               }`}
             >
               <Home className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">मुख्य</span>
+              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'homeTab')}</span>
             </button>
 
             <button
@@ -1619,7 +1634,7 @@ export default function App() {
               }`}
             >
               <Landmark className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase font-semibold">पंचांग</span>
+              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase font-semibold">{getTranslation(settings.language, 'panchangTab')}</span>
             </button>
 
             <button
@@ -1631,7 +1646,7 @@ export default function App() {
               }`}
             >
               <Clock className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">मुहूर्त</span>
+              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'muhuratTab')}</span>
             </button>
 
             <button
@@ -1643,7 +1658,7 @@ export default function App() {
               }`}
             >
               <Calendar className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">त्योहार</span>
+              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'festivalTab')}</span>
             </button>
 
             <button
@@ -1655,7 +1670,7 @@ export default function App() {
               }`}
             >
               <Map className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">नक्षत्र</span>
+              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'nakshatraTab')}</span>
             </button>
 
             <button
@@ -1667,7 +1682,7 @@ export default function App() {
               }`}
             >
               <Sparkles className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">साधना</span>
+              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'sadhanaTab')}</span>
             </button>
 
             <button
@@ -1679,7 +1694,7 @@ export default function App() {
               }`}
             >
               <Bell className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">अलार्म</span>
+              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'alarmsTab')}</span>
             </button>
 
             <button
@@ -1691,7 +1706,7 @@ export default function App() {
               }`}
             >
               <Settings className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">सुविधाएं</span>
+              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'toolsTab')}</span>
             </button>
 
           </footer>
