@@ -1349,10 +1349,19 @@ export default function App() {
                   const todayDateStr = selectedDate.toISOString().split('T')[0];
                   const todayFests = yearFestivals.filter(f => f.date === todayDateStr);
 
+                  const upcomingFest = yearFestivals
+                    .filter(f => f.date > todayDateStr)
+                    .sort((a, b) => a.date.localeCompare(b.date))[0];
+
+                  const formatFestivalDate = (dateStr: string) => {
+                    const d = new Date(dateStr);
+                    return d.toLocaleDateString('hi-IN', { day: 'numeric', month: 'long' });
+                  };
+
                   return (
                     <motion.div
                       variants={itemVariants}
-                      className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left border border-orange-100/50 dark:border-orange-950/20 rounded-3xl space-y-3 shadow-sm"
+                      className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left border border-orange-100/50 dark:border-orange-950/20 rounded-3xl space-y-4 shadow-sm"
                     >
                       <div className="flex items-center gap-1.5 border-b border-orange-100/20 dark:border-orange-950/10 pb-2">
                         <span className="text-[13px] sm:text-[14px]">🎉</span>
@@ -1387,6 +1396,30 @@ export default function App() {
                               )}
                             </div>
                           ))}
+                        </div>
+                      )}
+
+                      {/* Upcoming Festival */}
+                      {upcomingFest && (
+                        <div className="border-t border-orange-100/20 dark:border-orange-950/10 pt-3.5 space-y-2">
+                          <span className="text-[10px] font-black text-amber-605 dark:text-amber-500 uppercase tracking-widest font-mono flex items-center gap-1">
+                            📅 अगला आने वाला व्रत/त्योहार (Upcoming)
+                          </span>
+                          <div className="flex items-center justify-between p-3 bg-orange-500/5 dark:bg-zinc-950/20 border border-orange-100/10 dark:border-zinc-800/10 rounded-2xl gap-3 text-left">
+                            <div className="flex flex-col gap-0.5">
+                              <h4 className="text-xs sm:text-sm font-black font-serif text-slate-800 dark:text-orange-200">
+                                {settings.language === 'Hindi' ? upcomingFest.hindiName : upcomingFest.name}
+                              </h4>
+                              <span className="text-[8.5px] font-semibold text-slate-400 uppercase tracking-tight">
+                                {upcomingFest.type}
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-xs font-serif font-black text-orange-655 dark:text-amber-500">
+                                {formatFestivalDate(upcomingFest.date)}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </motion.div>
