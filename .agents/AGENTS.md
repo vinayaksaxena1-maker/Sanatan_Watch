@@ -37,6 +37,10 @@ Do not include any other sections in the audit report.
 - The Home Page UI components and layouts in `src/App.tsx` are strictly LOCKED.
 - No modifications, refactoring, styling adjustments, or layout changes can be made to the Home Page UI without explicit, written user approval in the chat.
 
+## 9. Panchang Calculation Lock (STRICT)
+- The Panchang calculation file `src/utils/panchangCalc.ts` is strictly LOCKED.
+- No modifications, refactoring, or adjustments can be made to this file without explicit, written user approval in the chat.
+
 
 
 

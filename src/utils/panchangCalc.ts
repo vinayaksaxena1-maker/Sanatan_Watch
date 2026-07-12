@@ -1054,11 +1054,14 @@ const SOLAR_MONTHS = [
 
 export function getPanchangForDate(lat: number, lon: number, date: Date): PanchangInfo {
 
-  const solarTimes = calculateSolarTimes(lat, lon, date);
+  // Normalize date to local midnight for stable computations
+  const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
 
-  const positions = astronomicalEngine.getPanchangPositions(date);
+  const solarTimes = calculateSolarTimes(lat, lon, normalizedDate);
 
-  
+  const positions = astronomicalEngine.getPanchangPositions(normalizedDate);
+
+  const isSwiss = !positions.planets.every(p => p.sign === 'Aries');
 
   const tithiIdx = positions.tithiIdx;
 
@@ -1072,11 +1075,9 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
 
   const fullTithiNameHindi = `${paksha === "Shukla" ? "शुक्ल" : "कृष्ण"} ${baseTithiObj.hindiName.split(" ")[0]}`;
 
-  
+  const tithiEndTime = subHoursToTimeStr(normalizedDate, positions.tithiRemainingHours, isSwiss);
 
-  const tithiEndTime = subHoursToTimeStr(date, positions.tithiRemainingHours);
-
-  const tithiStartTime = subHoursToTimeStr(date, -positions.tithiPassedHours);
+  const tithiStartTime = subHoursToTimeStr(normalizedDate, -positions.tithiPassedHours, isSwiss);
 
   const tithi: Tithi = {
     name: fullTithiName,
@@ -1093,7 +1094,7 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
 
   const naksIdx = positions.naksIdx;
   const baseNaksObj = NAKSHATRA_DETAILS[naksIdx];
-  const naksEndTime = subHoursToTimeStr(date, positions.naksRemainingHours);
+  const naksEndTime = subHoursToTimeStr(normalizedDate, positions.naksRemainingHours, isSwiss);
 
   // Compute dynamic Pada/Charan details based on Moon longitude
   const relativeLon = (positions.moonSidereal || 0) % 13.333333333333334;
@@ -1101,7 +1102,7 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   const moonSpeed = positions.planets?.find(p => p.name === 'Moon')?.speed || 13.176;
   const remainingPadaLon = (pada * 3.3333333333333335) - relativeLon;
   const padaRemainingHours = remainingPadaLon / (moonSpeed / 24);
-  const padaEndTime = subHoursToTimeStr(date, padaRemainingHours);
+  const padaEndTime = subHoursToTimeStr(normalizedDate, padaRemainingHours, isSwiss);
 
   const nakshatra: Nakshatra = {
     ...baseNaksObj,
@@ -1115,7 +1116,7 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   };
 
   const yogaIdx = positions.yogaIdx;
-  const yogaEndTime = subHoursToTimeStr(date, positions.yogaRemainingHours);
+  const yogaEndTime = subHoursToTimeStr(normalizedDate, positions.yogaRemainingHours, isSwiss);
   const yogaString = YOGA_DETAILS[yogaIdx];
   const yogaNameEng = yogaString.split(" ")[0];
   const yogaMeaning = yogaString.includes("(") ? yogaString.slice(yogaString.indexOf("(") + 1, -1) : "Peaceful";
@@ -1168,7 +1169,7 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   };
 
   const karanaVal = positions.karanaVal;
-  const karanaEndTime = subHoursToTimeStr(date, positions.karanaRemainingHours);
+  const karanaEndTime = subHoursToTimeStr(normalizedDate, positions.karanaRemainingHours, isSwiss);
   const karanaName = KARANA_DETAILS[karanaVal];
 
   const ASHUBH_KARANA_INDICES = [6, 7, 8, 9]; // Vishti (Bhadra), Shakuni, Chatushpada, Naga
@@ -1217,17 +1218,17 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   let k2EndTime = '';
 
   if (isFirstHalfActive) {
-    k1EndTime = subHoursToTimeStr(date, positions.karanaRemainingHours) + " तक";
+    k1EndTime = subHoursToTimeStr(normalizedDate, positions.karanaRemainingHours, isSwiss) + " तक";
     k2EndTime = tithi.endTime;
   } else {
     const totalTithiHours = positions.tithiRemainingHours + positions.tithiPassedHours;
     const firstKaranaEndHoursAgo = positions.tithiPassedHours - totalTithiHours / 2;
     if (firstKaranaEndHoursAgo > 0) {
-      k1EndTime = subHoursToTimeStr(date, -firstKaranaEndHoursAgo) + " पर (समाप्त)";
+      k1EndTime = subHoursToTimeStr(normalizedDate, -firstKaranaEndHoursAgo, isSwiss) + " पर (समाप्त)";
     } else {
       k1EndTime = "व्यतीत";
     }
-    k2EndTime = subHoursToTimeStr(date, positions.karanaRemainingHours) + " तक";
+    k2EndTime = subHoursToTimeStr(normalizedDate, positions.karanaRemainingHours, isSwiss) + " तक";
   }
 
   const getKaranaObject = (totalIdx: number, endTimeStr: string): Karana => {
@@ -1263,8 +1264,6 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   const karana1 = getKaranaObject(totalKaranaIdx1, k1EndTime);
   const karana2 = getKaranaObject(totalKaranaIdx2, k2EndTime);
 
-
-
   const monthIdx = (positions.monthsSinceEpoch % 12 + 12) % 12;
 
   const monthInfo = MONTHS_ENGLISH_HINDI[monthIdx];
@@ -1278,14 +1277,9 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   const currentYearEpochStart = new Date(`${baseYear}-03-18T00:00:00`);
 
   if (date < currentYearEpochStart) {
-
     samvatVikram--;
-
     samvatShaka--;
-
   }
-
-
 
   const samvatGujarati = monthIdx >= 7 ? samvatVikram : samvatVikram - 1;
   const solarMonthIdx = Math.floor((positions.sunSidereal || 0) / 30);
@@ -1363,8 +1357,8 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   const varjyamEndOffset = varjyamStartOffset + (4 / 60) * naksDuration;
   const varjyamList: TimeInterval[] = [
     {
-      start: subHoursToTimeStr(date, varjyamStartOffset),
-      end: subHoursToTimeStr(date, varjyamEndOffset)
+      start: subHoursToTimeStr(normalizedDate, varjyamStartOffset, isSwiss),
+      end: subHoursToTimeStr(normalizedDate, varjyamEndOffset, isSwiss)
     }
   ];
 
@@ -1393,20 +1387,19 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   // 3. Shubh Yogas Calculation
   const shubhYogas: ShubhYogItem[] = [];
 
-  // Sunrise and Next Sunrise offsets relative to query date
-  const currentMinutes = date.getHours() * 60 + date.getMinutes();
-  const sunriseOffset = (sunriseMin - currentMinutes) / 60;
-  const nextSunriseOffset = sunriseOffset + 24;
+  const baseHours = isSwiss ? 5.5 : 0.0;
+  const sunriseOffsetBase = (sunriseMin / 60) - baseHours;
+  const nextSunriseOffsetBase = sunriseOffsetBase + 24;
   const naksEndOffset = (1 - positions.naksPercent) * naksDuration;
 
   // Helper to check overlap and format
   const getOverlapInterval = () => {
-    const yogaStart = Math.max(sunriseOffset, naksStartOffset);
-    const yogaEnd = Math.min(nextSunriseOffset, naksEndOffset);
+    const yogaStart = Math.max(sunriseOffsetBase, naksStartOffset);
+    const yogaEnd = Math.min(nextSunriseOffsetBase, naksEndOffset);
     if (yogaStart < yogaEnd) {
       return {
-        start: subHoursToTimeStr(date, yogaStart),
-        end: subHoursToTimeStr(date, yogaEnd)
+        start: subHoursToTimeStr(normalizedDate, yogaStart, isSwiss),
+        end: subHoursToTimeStr(normalizedDate, yogaEnd, isSwiss)
       };
     }
     return null;
@@ -1588,6 +1581,7 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
     name: baseMoonNaksObj.name,
     hindiName: baseMoonNaksObj.hindiName,
     pada: pada,
+    padaEndTime: padaEndTime,
     lord: baseMoonNaksObj.lord,
     deity: baseMoonNaksObj.deity
   };
@@ -1642,259 +1636,88 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   const pushkarYogObj = calculatePushkarYog(day, tithiIdx, naksIdx);
 
   const choghadiyaDaySeqs = [
-
     ["Udveg", "Chal", "Labh", "Amrit", "Kaal", "Shubh", "Rog", "Udveg"],
-
     ["Amrit", "Kaal", "Shubh", "Rog", "Udveg", "Chal", "Labh", "Amrit"],
-
     ["Rog", "Udveg", "Chal", "Labh", "Amrit", "Kaal", "Shubh", "Rog"],
-
     ["Labh", "Amrit", "Kaal", "Shubh", "Rog", "Udveg", "Chal", "Labh"],
-
     ["Shubh", "Rog", "Udveg", "Chal", "Labh", "Amrit", "Kaal", "Shubh"],
-
     ["Chal", "Labh", "Amrit", "Kaal", "Shubh", "Rog", "Udveg", "Chal"],
-
     ["Kaal", "Shubh", "Rog", "Udveg", "Chal", "Labh", "Amrit", "Kaal"]
-
   ];
 
   const choghadiyaNightSeqs = [
-
     ["Amrit", "Chal", "Rog", "Kaal", "Labh", "Udveg", "Shubh", "Amrit"],
-
     ["Chal", "Rog", "Kaal", "Labh", "Udveg", "Shubh", "Amrit", "Chal"],
-
     ["Rog", "Kaal", "Labh", "Udveg", "Shubh", "Amrit", "Chal", "Rog"],
-
     ["Kaal", "Labh", "Udveg", "Shubh", "Amrit", "Chal", "Rog", "Kaal"],
-
     ["Labh", "Udveg", "Shubh", "Amrit", "Chal", "Rog", "Kaal", "Labh"],
-
     ["Udveg", "Shubh", "Amrit", "Chal", "Rog", "Kaal", "Labh", "Udveg"],
-
     ["Shubh", "Amrit", "Chal", "Rog", "Kaal", "Labh", "Udveg", "Shubh"]
-
   ];
 
   const daySeq = choghadiyaDaySeqs[day];
-
   const nightSeq = choghadiyaNightSeqs[day];
-
   const nightPartLength = (1440 - dayLength) / 8;
 
   const getQualityAndName = (type: string) => {
-
     switch (type) {
-
-      case "Amrit":
-
-        return { name: "Amrit (Nectar)", hindiName: "अमृत", type: "Amrit" as const, quality: "Excellent" as const };
-
-      case "Shubh":
-
-        return { name: "Shubh (Auspicious)", hindiName: "शुभ", type: "Shubh" as const, quality: "Good" as const };
-
-      case "Labh":
-
-        return { name: "Labh (Gain)", hindiName: "लाभ", type: "Labh" as const, quality: "Excellent" as const };
-
-      case "Chal":
-
-        return { name: "Chal (Neutral)", hindiName: "चल", type: "Chal" as const, quality: "Neutral" as const };
-
-      case "Kaal":
-
-        return { name: "Kaal (Loss)", hindiName: "काल", type: "Kaal" as const, quality: "Bad" as const };
-
-      case "Rog":
-
-        return { name: "Rog (Disease)", hindiName: "रोग", type: "Rog" as const, quality: "Inauspicious" as const };
-
-      default:
-
-        return { name: "Udveg (Anxiety)", hindiName: "उद्वेग", type: "Udveg" as const, quality: "Inauspicious" as const };
-
+      case "Amrit": return { name: "Amrit (Nectar)", hindiName: "अमृत", type: "Amrit" as const, quality: "Excellent" as const };
+      case "Shubh": return { name: "Shubh (Auspicious)", hindiName: "शुभ", type: "Shubh" as const, quality: "Good" as const };
+      case "Labh": return { name: "Labh (Gain)", hindiName: "लाभ", type: "Labh" as const, quality: "Excellent" as const };
+      case "Chal": return { name: "Chal (Neutral)", hindiName: "चल", type: "Chal" as const, quality: "Neutral" as const };
+      case "Kaal": return { name: "Kaal (Loss)", hindiName: "काल", type: "Kaal" as const, quality: "Bad" as const };
+      case "Rog": return { name: "Rog (Disease)", hindiName: "रोग", type: "Rog" as const, quality: "Inauspicious" as const };
+      default: return { name: "Udveg (Anxiety)", hindiName: "उद्वेग", type: "Udveg" as const, quality: "Inauspicious" as const };
     }
-
   };
 
   const choghadiya: ChoghadiyaInterval[] = [];
-
   for (let i = 0; i < 8; i++) {
-
     const startM = sunriseMin + i * partLength;
-
     const endM = sunriseMin + (i + 1) * partLength;
-
     const item = getQualityAndName(daySeq[i]);
-
     choghadiya.push({
-
       name: item.name,
-
       hindiName: item.hindiName,
-
       type: item.type,
-
       quality: item.quality,
-
       startTime: formatRawMin(startM),
-
       endTime: formatRawMin(endM),
-
       isDay: true
-
     });
-
   }
-
   for (let i = 0; i < 8; i++) {
-
     const startM = (sunsetMin + i * nightPartLength) % 1440;
-
     const endM = (sunsetMin + (i + 1) * nightPartLength) % 1440;
-
     const item = getQualityAndName(nightSeq[i]);
-
     choghadiya.push({
-
       name: item.name,
-
       hindiName: item.hindiName,
-
       type: item.type,
-
       quality: item.quality,
-
       startTime: formatRawMin(startM),
-
       endTime: formatRawMin(endM),
-
       isDay: false
-
     });
-
   }
 
   const moonTimes = astronomicalEngine.getMoonTimes(solarTimes.sunriseRaw, solarTimes.sunsetRaw, tithiIdx, date, lat, lon);
-
   const moonriseRaw = moonTimes.moonriseRaw;
-
   const moonsetRaw = moonTimes.moonsetRaw;
-
   
-
   const dayHoraLength = (sunsetMin - sunriseMin) / 12;
-
   const nightHoraLength = (sunriseMin + 1440 - sunsetMin) / 12;
-
   const HORA_LORDS = ["Sun", "Venus", "Mercury", "Moon", "Saturn", "Jupiter", "Mars"];
-
   const weekdayToHoraStart = [0, 3, 6, 2, 5, 1, 4];
-
   const startIdx = weekdayToHoraStart[day];
-
   const HORA_INFO_MAP = {
-
-    "Sun": {
-
-      hindi: "सूर्य (Surya)",
-
-      quality: "Neutral" as const,
-
-      qualityHindi: "सामान्य / मध्यम",
-
-      color: "text-orange-650 dark:text-orange-400 bg-orange-50/50 dark:bg-orange-950/15 border-orange-200/50 dark:border-orange-950/30",
-
-      benefits: "प्रशासनिक कार्य, सरकारी काम, नौकरी, राजनीति और पदभार ग्रहण।"
-
-    },
-
-    "Venus": {
-
-      hindi: "शुक्र (Shukra)",
-
-      quality: "Auspicious" as const,
-
-      qualityHindi: "अत्यंत शुभ / अमृत",
-
-      color: "text-pink-600 dark:text-pink-400 bg-pink-50/50 dark:bg-pink-950/15 border-pink-200/50 dark:border-pink-950/30",
-
-      benefits: "कला, संगीत, यात्रा, आभूषण व वस्त्र क्रय, सौंदर्य प्रसाधन, विवाह चर्चा।"
-
-    },
-
-    "Mercury": {
-
-      hindi: "बुध (Budh)",
-
-      quality: "Auspicious" as const,
-
-      qualityHindi: "शुभ",
-
-      color: "text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/15 border-emerald-200/50 dark:border-emerald-950/30",
-
-      benefits: "व्यापार, लेखन, शिक्षण, बैंक कार्य, नया निवेश और गणितीय कार्य।"
-
-    },
-
-    "Moon": {
-
-      hindi: "चंद्र (Chandra)",
-
-      quality: "Auspicious" as const,
-
-      qualityHindi: "शुभ",
-
-      color: "text-cyan-600 dark:text-cyan-400 bg-cyan-50/50 dark:bg-cyan-950/15 border-cyan-200/50 dark:border-cyan-950/30",
-
-      benefits: "यात्रा, गृह प्रवेश, जल/तरल व्यवसाय, नवीन योजनाएँ और संगीत।"
-
-    },
-
-    "Saturn": {
-
-      hindi: "शनि (Shani)",
-
-      quality: "Inauspicious" as const,
-
-      qualityHindi: "अशुभ",
-
-      color: "text-slate-600 dark:text-slate-400 bg-slate-50/50 dark:bg-zinc-900/30 border-slate-200/50 dark:border-slate-800/30",
-
-      benefits: "लोहा, तेल, भूमि, निर्माण कार्य और पुरानी मशीनरी का लेन-देन।"
-
-    },
-
-    "Jupiter": {
-
-      hindi: "गुरु (Guru)",
-
-      quality: "Auspicious" as const,
-
-      qualityHindi: "अत्यंत शुभ / अमृत",
-
-      color: "text-amber-500 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/15 border-amber-200/50 dark:border-amber-950/30",
-
-      benefits: "धार्मिक कार्य, पूजा-अनुष्ठान, शिक्षा, गुरु दीक्षा, धन निवेश।"
-
-    },
-
-    "Mars": {
-
-      hindi: "मंगल (Mangal)",
-
-      quality: "Inauspicious" as const,
-
-      qualityHindi: "अशु्भ",
-
-      color: "text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/15 border-rose-200/50 dark:border-rose-950/30",
-
-      benefits: "शारीरिक गतिविधि, साहस, भूमि या पराक्रम कार्य। गृह प्रवेश या विवाह वर्जित।"
-
-    }
-
+    "Sun": { hindi: "सूर्य (Surya)", quality: "Neutral" as const, qualityHindi: "सामान्य / मध्यम", color: "text-orange-650 dark:text-orange-400 bg-orange-50/50 dark:bg-orange-950/15 border-orange-200/50 dark:border-orange-950/30", benefits: "प्रशासनिक कार्य, सरकारी काम, नौकरी, राजनीति और पदभार ग्रहण।" },
+    "Venus": { hindi: "शुक्र (Shukra)", quality: "Auspicious" as const, qualityHindi: "अत्यंत शुभ / अमृत", color: "text-pink-600 dark:text-pink-400 bg-pink-50/50 dark:bg-pink-950/15 border-pink-200/50 dark:border-pink-950/30", benefits: "कला, संगीत, यात्रा, आभूषण व वस्त्र क्रय, सौंदर्य प्रसाधन, विवाह चर्चा।" },
+    "Mercury": { hindi: "बुध (Budh)", quality: "Auspicious" as const, qualityHindi: "शुभ", color: "text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/15 border-emerald-200/50 dark:border-emerald-950/30", benefits: "व्यापार, लेखन, शिक्षण, बैंक कार्य, नया निवेश और गणितीय कार्य।" },
+    "Moon": { hindi: "चंद्र (Chandra)", quality: "Auspicious" as const, qualityHindi: "शुभ", color: "text-cyan-600 dark:text-cyan-400 bg-cyan-50/50 dark:bg-cyan-950/15 border-cyan-200/50 dark:border-cyan-950/30", benefits: "यात्रा, गृह प्रवेश, जल/तरल व्यवसाय, नवीन योजनाएँ और संगीत।" },
+    "Saturn": { hindi: "शनि (Shani)", quality: "Inauspicious" as const, qualityHindi: "अशुभ", color: "text-slate-600 dark:text-slate-400 bg-slate-50/50 dark:bg-zinc-900/30 border-slate-200/50 dark:border-slate-800/30", benefits: "लोहा, तेल, भूमि, निर्माण कार्य और पुरानी मशीनरी का लेन-देन।" },
+    "Jupiter": { hindi: "गुरु (Guru)", quality: "Auspicious" as const, qualityHindi: "अत्यंत शुभ / अमृत", color: "text-amber-500 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/15 border-amber-200/50 dark:border-amber-950/30", benefits: "धार्मिक कार्य, पूजा-अनुष्ठान, शिक्षा, गुरु दीक्षा, धन निवेश।" },
+    "Mars": { hindi: "मंगल (Mangal)", quality: "Inauspicious" as const, qualityHindi: "अशु्भ", color: "text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/15 border-rose-200/50 dark:border-rose-950/30", benefits: "शारीरिक गतिविधि, साहस, भूमि या पराक्रम कार्य। गृह प्रवेश या विवाह वर्जित।" }
   };
 
   const horaList: HoraInterval[] = [];
@@ -1992,10 +1815,11 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
       vasHindi = "पाताललोक (शुभ)";
     }
 
-    const bhadraStartTime = subHoursToTimeStr(date, -positions.karanaPercent * 12);
+    const bhadraStartOffset = -positions.karanaPercent * 12;
+    const bhadraStartTime = subHoursToTimeStr(normalizedDate, bhadraStartOffset, isSwiss);
     const bhadraEndTime = karanaEndTime;
-    const mukhaTime = subHoursToTimeStr(date, 5); // 5 hours after start
-    const puchhaTime = subHoursToTimeStr(date, 10); // 10 hours after start
+    const mukhaTime = subHoursToTimeStr(normalizedDate, bhadraStartOffset + 5, isSwiss);
+    const puchhaTime = subHoursToTimeStr(normalizedDate, bhadraStartOffset + 10, isSwiss);
 
     bhadraObj = {
       active: true,
@@ -2041,13 +1865,17 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
 
 }
 
-function subHoursToTimeStr(date: Date, hours: number): string {
+function subHoursToTimeStr(date: Date, hours: number, isSwiss: boolean = false): string {
 
-  const futureDate = new Date(date.getTime() + hours * 36e5);
+  const baseHours = isSwiss ? 5.5 : 0.0;
 
-  let hrs = futureDate.getHours();
+  const localMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
 
-  const mins = futureDate.getMinutes();
+  const targetDate = new Date(localMidnight.getTime() + (baseHours + hours) * 36e5);
+
+  let hrs = targetDate.getHours();
+
+  const mins = targetDate.getMinutes();
 
   const ampm = hrs >= 12 ? "PM" : "AM";
 
