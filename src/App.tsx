@@ -952,61 +952,63 @@ export default function App() {
           <div className="absolute inset-0 sacred-motif-overlay pointer-events-none z-0 opacity-[0.03] dark:opacity-[0.05]"></div>
           
           {/* MAIN BRAND HEADER BANNER */}
-          <header className={`p-4 border-b-2 flex flex-col gap-2 sm:gap-3 ${
-            settings.theme === 'light' ? 'bg-orange-50/20 border-orange-100' : 'bg-orange-950/10 border-orange-950/20'
-          }`}>
-            {/* ROW 1: Logo, Title & Tagline */}
-            <div className="flex items-center gap-3 w-full justify-between sm:justify-start">
-              <div className="flex items-center gap-3">
-                <img 
-                  src="/LOGO4.png" 
-                  alt="सनातन घड़ी लोगो" 
-                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain drop-shadow-md rounded-xl"
-                />
-                <div className="flex flex-col text-left">
-                  <h1 className="text-base sm:text-lg font-serif font-black text-orange-900 dark:text-amber-100 tracking-wider leading-tight">
-                    सनातन घड़ी
-                  </h1>
-                  <span className="text-[9px] sm:text-[10px] font-serif font-bold text-orange-700/80 dark:text-amber-500/80 tracking-wide mt-0.5">
-                    ।। कालचक्र ज्ञान यंत्र ।।
+          <div className="px-4 pt-4 pb-1 select-none relative z-10">
+            <header className={`p-4 sm:p-5 rounded-[28px] border border-orange-100/50 dark:border-orange-950/20 flex flex-col gap-4 shadow-sm ${
+              settings.theme === 'light' ? 'bg-orange-50/15' : 'bg-orange-950/5'
+            }`}>
+              {/* ROW 1: Logo, Title & Tagline + Location */}
+              <div className="flex items-center justify-between w-full gap-3">
+                <div className="flex items-center gap-3">
+                  <img 
+                    src="/LOGO4.png" 
+                    alt="सनातन घड़ी लोगो" 
+                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-orange-200/50 p-0.5 object-cover drop-shadow-sm"
+                  />
+                  <div className="flex flex-col text-left">
+                    <h1 className="text-base sm:text-lg font-serif font-black text-orange-900 dark:text-amber-100 tracking-wider leading-tight">
+                      सनातन घड़ी
+                    </h1>
+                    <span className="text-[9px] sm:text-[10px] font-serif font-bold text-orange-700/80 dark:text-amber-500/80 tracking-wide mt-0.5">
+                      ।। कालचक्र ज्ञान यंत्र ।।
+                    </span>
+                  </div>
+                </div>
+
+                {/* Location Box (Right aligned in Row 1) */}
+                <div 
+                  onClick={() => setIsCityModalOpen(true)}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-orange-100/50 dark:bg-zinc-900/40 border border-orange-200/30 dark:border-zinc-800/30 hover:bg-orange-200/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shrink-0"
+                  title="स्थान बदलें (Change Location)"
+                >
+                  <MapPin className="w-3.5 h-3.5 text-orange-600 animate-pulse" />
+                  <span className="text-[9px] font-extrabold text-orange-900 dark:text-amber-100 uppercase font-mono tracking-tight leading-none truncate max-w-[120px]">
+                    {coords.city}
                   </span>
                 </div>
               </div>
-            </div>
 
-            {/* ROW 2: Location and Clock (exactly 16px space from Row 1 on mobile due to gap-2 (8px) + pt-2 (8px)) */}
-            <div className="flex flex-wrap gap-1.5 sm:gap-2.5 items-center w-full justify-between select-none pt-2 border-t border-orange-100/10 dark:border-orange-950/5">
-              <div 
-                onClick={() => setIsCityModalOpen(true)}
-                className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-orange-100/50 border border-orange-200/30 hover:bg-orange-200/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-                title="स्थान बदलें (Change Location)"
-              >
-                <MapPin className="w-3.5 h-3.5 text-orange-600 animate-pulse" />
-                <span className="text-[9px] font-extrabold text-orange-900 uppercase font-mono tracking-tight leading-none truncate max-w-[160px]">
-                  {coords.city}
-                </span>
-              </div>
-
-              {/* Precise clock */}
+              {/* ROW 2: Precise clock & Choghadiya Trend Badge */}
               <div 
                 id="header_clock_wrapper"
-                className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-slate-100 dark:bg-stone-900/60 border border-slate-200 dark:border-zinc-800/40 transition-all duration-300 shadow-3xs shrink-0"
+                className="flex items-center justify-between w-full rounded-full px-4 py-2 bg-slate-50/50 dark:bg-stone-900/60 border border-slate-200/60 dark:border-zinc-800/40 shadow-3xs"
               >
-                <Clock className="w-3.5 h-3.5 text-slate-500 transition-colors drop-shadow-3xs" />
-                <span 
-                  className="text-[9px] font-black text-slate-700 dark:text-slate-300 tracking-tight font-mono whitespace-nowrap leading-none [text-shadow:0_1px_1px_rgba(0,0,0,0.12)] dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.45)]"
-                >
-                  {formattedClockStr}
-                </span>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5 text-orange-500 transition-colors drop-shadow-3xs" />
+                  <span 
+                    className="text-[9px] font-black text-slate-700 dark:text-slate-300 tracking-tight font-mono whitespace-nowrap leading-none [text-shadow:0_1px_1px_rgba(0,0,0,0.12)] dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.45)]"
+                  >
+                    {selectedDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} • {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                  </span>
+                </div>
                 {trendInfo.icon && (
-                  <span className={`inline-flex items-center gap-0.5 px-1 py-[2px] rounded-md border text-[9px] font-black leading-none shadow-3xs hover:shadow-2xs transition-shadow duration-300 ${trendInfo.colorClass}`}>
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[9px] font-black leading-none shadow-3xs hover:shadow-2xs transition-shadow duration-300 ${trendInfo.colorClass}`}>
                     {trendInfo.icon}
                     <span className="font-serif [text-shadow:0_0.5px_1px_rgba(255,255,255,0.45)] dark:[text-shadow:0_0.5px_1px_rgba(0,0,0,0.35)]">{activeChoghadiya?.hindiName}</span>
                   </span>
                 )}
               </div>
-            </div>
-          </header>
+            </header>
+          </div>
 
           {/* MAIN CONTAINER PREVIEW SCREEN */}
           <main className="pt-3 px-4 pb-24 md:pb-4 flex-grow flex-1 min-h-[460px]">
