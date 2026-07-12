@@ -257,6 +257,11 @@ export interface PanchangInfo {
   agniVaas?: AgniVaasDetail;
   shivaVaas?: ShivaVaasDetail;
   pushkarYog?: PushkarYogDetail;
+  ishtakala?: {
+    ghati: number;
+    vighati: number;
+    formatted: string;
+  };
 }
 
 export interface Festival {

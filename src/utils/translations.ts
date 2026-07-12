@@ -52,6 +52,7 @@ export const translations = {
     sadhanaTab: "Sadhana",
     alarmsTab: "Alarms",
     toolsTab: "Tools",
+    gocharTab: "Transits",
     
     // Common UI Labels
     todayDharmicTime: "Today's Dharmic Time",
@@ -121,6 +122,7 @@ export const translations = {
     sadhanaTab: "साधना",
     alarmsTab: "अलार्म",
     toolsTab: "सुविधाएं",
+    gocharTab: "गोचर",
     
     // Common UI Labels
     todayDharmicTime: "आज का धार्मिक समय",

@@ -1971,7 +1971,8 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
     dagdaTithi: dagdaTithiObj,
     agniVaas: agniVaasObj,
     shivaVaas: shivaVaasObj,
-    pushkarYog: pushkarYogObj
+    pushkarYog: pushkarYogObj,
+    ishtakala: calculateIshtakala(date, solarTimes.sunriseRaw)
   };
 
 }
@@ -2813,5 +2814,21 @@ export function getChoghadiyaPresentationData(panchang: PanchangInfo, currentTim
 
   };
 
+}
+
+export function calculateIshtakala(date: Date, sunriseRaw: number): { ghati: number; vighati: number; formatted: string } {
+  const currentMin = date.getHours() * 60 + date.getMinutes();
+  let elapsedMinutes = currentMin - sunriseRaw;
+  if (elapsedMinutes < 0) {
+    elapsedMinutes += 1440;
+  }
+  const totalGhati = elapsedMinutes / 24;
+  const ghati = Math.floor(totalGhati);
+  const vighati = Math.floor((elapsedMinutes % 24) * 2.5);
+  return {
+    ghati,
+    vighati,
+    formatted: `${ghati} घटी, ${vighati} विघटी`
+  };
 }
 

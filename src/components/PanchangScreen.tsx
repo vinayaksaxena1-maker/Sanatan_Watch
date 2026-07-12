@@ -125,6 +125,12 @@ export function PanchangScreen({ panchang, currentTime, onShare, language = 'Eng
     { label: getTranslation(language, 'sunset'), val: panchang.sunset, desc: language === 'Hindi' ? 'संध्यावंदन का समय' : 'Evening prayer time', icon: <Sun className="w-5 h-5 text-orange-600" /> },
     { label: getTranslation(language, 'moonrise'), val: panchang.moonrise, desc: language === 'Hindi' ? 'चन्द्रोदय का समय' : 'Moonrise time', icon: <Moon className="w-5 h-5 text-indigo-400" /> },
     { label: getTranslation(language, 'moonset'), val: panchang.moonset, desc: language === 'Hindi' ? 'चन्द्रास्त का समय' : 'Moonset time', icon: <Moon className="w-5 h-5 text-slate-400" /> },
+    {
+      label: language === 'Hindi' ? 'इष्टकाल' : 'Ishtakala',
+      val: panchang.ishtakala?.formatted || 'N/A',
+      desc: language === 'Hindi' ? 'सूर्योदय से व्यतीत समय (घटी-विघटी)' : 'Time elapsed since sunrise (Ghati-Vighati)',
+      icon: <Clock className="w-5 h-5 text-emerald-500" />
+    }
   ];
 
   const mainPanchangElements = [
@@ -213,7 +219,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, language = 'Eng
           <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3 font-mono">
             {language === 'Hindi' ? "🌅 सूर्य और चन्द्रोदय समय (Astronomical Timings)" : "🌅 Astronomical Timings"}
           </h4>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
             {solarLunarTrio.map((item, idx) => (
               <div 
                 key={idx} 
