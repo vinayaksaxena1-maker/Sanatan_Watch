@@ -33,6 +33,10 @@ Do not include any other sections in the audit report.
 - The active, user-approved plan for the 35-point Panchang UI integration is located in the workspace root at [PANCHANG_UI_PLAN.md](file:///c:/Users/user/Desktop/Samay%20Ghadi/PANCHANG_UI_PLAN.md).
 - Any agent working on this task must read and strictly follow the step-by-step phases defined in [PANCHANG_UI_PLAN.md](file:///c:/Users/user/Desktop/Samay%20Ghadi/PANCHANG_UI_PLAN.md). No coding can start unless explicitly approved by the user.
 
+## 8. Home Page UI Lock (STRICT)
+- The Home Page UI components and layouts in `src/App.tsx` are strictly LOCKED.
+- No modifications, refactoring, styling adjustments, or layout changes can be made to the Home Page UI without explicit, written user approval in the chat.
+
 
 
 
