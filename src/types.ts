@@ -207,6 +207,8 @@ export interface HinduDate {
   nakshatra: Nakshatra;
   yoga: Yoga;
   karana: Karana;
+  karana1?: Karana;
+  karana2?: Karana;
   paksha: PakshaType;
   month: string;
   monthHindi: string;

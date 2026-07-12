@@ -1211,7 +1211,7 @@ export default function App() {
                     </h3>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 select-none">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 select-none">
                     {/* Tithi */}
                     <div className="flex flex-col bg-amber-50/20 dark:bg-orange-950/5 border border-orange-100/30 dark:border-orange-950/15 rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
                       <span className="text-[9px] sm:text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">तिथि (Tithi)</span>
@@ -1246,14 +1246,25 @@ export default function App() {
                       </span>
                     </div>
 
-                    {/* Karana */}
+                    {/* Karana 1 */}
                     <div className="flex flex-col bg-amber-50/20 dark:bg-orange-950/5 border border-orange-100/30 dark:border-orange-950/15 rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
-                      <span className="text-[9px] sm:text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">करण (Karana)</span>
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">प्रथम करण</span>
                       <span className="text-sm sm:text-base font-black font-serif text-orange-655 leading-tight my-1.5 break-words">
-                        {translateKarana(panchangInfo.hinduDate.karana.hindiName)}
+                        {panchangInfo.hinduDate.karana1 ? translateKarana(panchangInfo.hinduDate.karana1.hindiName) : ''}
                       </span>
                       <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-0.5 font-sans leading-none">
-                        🕒 {panchangInfo.hinduDate.karana.endTime} तक
+                        🕒 {panchangInfo.hinduDate.karana1?.endTime || ''}
+                      </span>
+                    </div>
+
+                    {/* Karana 2 */}
+                    <div className="flex flex-col bg-amber-50/20 dark:bg-orange-950/5 border border-orange-100/30 dark:border-orange-950/15 rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px] col-span-2 sm:col-span-1">
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">द्वितीय करण</span>
+                      <span className="text-sm sm:text-base font-black font-serif text-orange-655 leading-tight my-1.5 break-words">
+                        {panchangInfo.hinduDate.karana2 ? translateKarana(panchangInfo.hinduDate.karana2.hindiName) : ''}
+                      </span>
+                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-0.5 font-sans leading-none">
+                        🕒 {panchangInfo.hinduDate.karana2?.endTime || ''}
                       </span>
                     </div>
                   </div>
@@ -1329,142 +1340,7 @@ export default function App() {
                   );
                 })()}
 
-                {/* 5. LIVE ACTIVE TIME CYCLE CARD */}
-                {(() => {
-                  const currentMin = currentTime.getHours() * 60 + currentTime.getMinutes();
-                  const activeChoghadiya = (panchangInfo.choghadiya || []).find(
-                    (ch) => isTimeInInterval(currentMin, ch.startTime, ch.endTime)
-                  );
-                  
-                  const activeHora = (panchangInfo.hora || []).find(
-                    (h) => isTimeInInterval(currentMin, h.startTime, h.endTime)
-                  );
 
-                  const getChoghadiyaStatusText = (type: string) => {
-                    switch (type) {
-                      case 'Amrit': return 'अत्यंत शुभ (अमृत)';
-                      case 'Shubh': return 'शुभ (सभी कार्यों के लिए उत्तम)';
-                      case 'Labh': return 'लाभ (व्यवसाय और यात्रा के लिए शुभ)';
-                      case 'Chal': return 'सामान्य (चल)';
-                      case 'Udveg': return 'अशुभ (चिंताजनक)';
-                      case 'Kaal': return 'अशुभ (हानिकारक)';
-                      case 'Rog': return 'अत्यंत अशुभ (रोग कारक)';
-                      default: return 'सामान्य';
-                    }
-                  };
-
-                  const getChoghadiyaColorClass = (type: string) => {
-                    switch (type) {
-                      case 'Amrit': return 'bg-emerald-500/10 border-emerald-300 text-emerald-805 dark:text-emerald-300';
-                      case 'Shubh': return 'bg-emerald-500/10 border-emerald-300 text-emerald-805 dark:text-emerald-300';
-                      case 'Labh': return 'bg-emerald-500/10 border-emerald-300 text-emerald-805 dark:text-emerald-300';
-                      case 'Chal': return 'bg-blue-500/10 border-blue-300 text-blue-805 dark:text-blue-300';
-                      case 'Udveg': return 'bg-rose-500/10 border-rose-300 text-rose-805 dark:text-rose-300';
-                      case 'Kaal': return 'bg-red-500/10 border-red-300 text-red-805 dark:text-red-300';
-                      case 'Rog': return 'bg-red-500/10 border-red-300 text-red-805 dark:text-red-300';
-                      default: return 'bg-slate-500/10 border-slate-300 text-slate-805 dark:text-slate-300';
-                    }
-                  };
-
-                  const getHoraStatusText = (planet: string) => {
-                    switch (planet) {
-                      case 'Sun': return 'सामान्य (राजकीय कार्य और ऊर्जा के लिए शुभ)';
-                      case 'Moon': return 'शुभ (मानसिक शांति, जल कार्य और यात्रा के लिए उत्तम)';
-                      case 'Mars': return 'अशुभ (विवाद, खेल और तकनीकी कार्यों के लिए मध्यम)';
-                      case 'Mercury': return 'शुभ (व्यापार, पठन-पाठन और संचार के लिए श्रेष्ठ)';
-                      case 'Jupiter': return 'अत्यंत शुभ (गुरु कार्य, अध्ययन, देव दर्शन और धन निवेश)';
-                      case 'Venus': return 'शुभ (सौंदर्य, कला, प्रेम और नवीन वस्त्रों के लिए श्रेष्ठ)';
-                      case 'Saturn': return 'अशुभ (केवल स्थिर कार्य और निर्माण के लिए मध्यम)';
-                      default: return 'सामान्य';
-                    }
-                  };
-
-                  const getHoraColorClass = (planet: string) => {
-                    if (['Jupiter', 'Venus', 'Moon', 'Mercury'].includes(planet)) {
-                      return 'bg-emerald-500/10 border-emerald-300 text-emerald-805 dark:text-emerald-300';
-                    } else if (['Sun'].includes(planet)) {
-                      return 'bg-blue-500/10 border-blue-300 text-blue-805 dark:text-blue-300';
-                    } else {
-                      return 'bg-rose-500/10 border-rose-300 text-rose-850 dark:text-rose-300';
-                    }
-                  };
-
-                  return (
-                    <motion.div
-                      variants={itemVariants}
-                      className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left border border-orange-100/50 dark:border-orange-950/20 rounded-3xl space-y-4 shadow-sm"
-                    >
-                      {/* Tabs Header */}
-                      <div className="flex justify-between items-center border-b border-orange-100/20 dark:border-orange-950/10 pb-2 flex-wrap gap-2">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[13px] sm:text-[14px]">⚡</span>
-                          <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-amber-100 leading-none font-serif">
-                            सक्रिय वैदिक समय चक्र
-                          </h3>
-                        </div>
-                        <div className="flex bg-slate-500/5 dark:bg-zinc-950/40 p-0.5 rounded-full border border-orange-100/10 dark:border-zinc-800/30">
-                          <button
-                            onClick={() => setHomeTimeCycleTab('choghadiya')}
-                            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider cursor-pointer transition-all duration-300 ${
-                              homeTimeCycleTab === 'choghadiya'
-                                ? 'bg-orange-500 text-white shadow-xs'
-                                : 'text-slate-400 hover:text-slate-500'
-                            }`}
-                          >
-                            चौघड़िया
-                          </button>
-                          <button
-                            onClick={() => setHomeTimeCycleTab('hora')}
-                            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider cursor-pointer transition-all duration-300 ${
-                              homeTimeCycleTab === 'hora'
-                                ? 'bg-orange-500 text-white shadow-xs'
-                                : 'text-slate-400 hover:text-slate-500'
-                            }`}
-                          >
-                            होरा
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Active Status Box */}
-                      {homeTimeCycleTab === 'choghadiya' ? (
-                        activeChoghadiya ? (
-                          <div className={`flex flex-col p-4 rounded-2xl border ${getChoghadiyaColorClass(activeChoghadiya.type)} gap-1.5`}>
-                            <div className="flex justify-between items-center text-[10px] uppercase font-mono font-bold tracking-wider opacity-85">
-                              <span>अभी सक्रिय (Active Choghadiya)</span>
-                              <span>{activeChoghadiya.startTime} - {activeChoghadiya.endTime}</span>
-                            </div>
-                            <h4 className="text-base sm:text-lg font-black font-serif mt-1">
-                              {activeChoghadiya.name} चौघड़िया ({activeChoghadiya.isDay ? 'दिन' : 'रात्रि'})
-                            </h4>
-                            <p className="text-xs sm:text-[12.5px] leading-relaxed font-sans opacity-95">
-                              {getChoghadiyaStatusText(activeChoghadiya.type)}
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="text-center py-6 text-xs text-slate-500">चौघड़िया उपलब्ध नहीं है।</div>
-                        )
-                      ) : (
-                        activeHora ? (
-                          <div className={`flex flex-col p-4 rounded-2xl border ${getHoraColorClass(activeHora.lord)} gap-1.5`}>
-                            <div className="flex justify-between items-center text-[10px] uppercase font-mono font-bold tracking-wider opacity-85">
-                              <span>अभी सक्रिय (Active Hora Hour)</span>
-                              <span>{activeHora.startTime} - {activeHora.endTime}</span>
-                            </div>
-                            <h4 className="text-base sm:text-lg font-black font-serif mt-1">
-                              {activeHora.lordHindi} की होरा
-                            </h4>
-                            <p className="text-xs sm:text-[12.5px] leading-relaxed font-sans opacity-95">
-                              {getHoraStatusText(activeHora.lord)}
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="text-center py-6 text-xs text-slate-500">होरा उपलब्ध नहीं है।</div>
-                        )
-                      )}
-                    </motion.div>
-                  );
-                })()}
 
                 {/* 6. FESTIVAL CARD */}
                 {(() => {

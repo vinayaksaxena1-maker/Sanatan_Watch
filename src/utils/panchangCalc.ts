@@ -1209,6 +1209,60 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
     description: karanaDescription
   };
 
+  const totalKaranaIdx1 = tithiIdx * 2;
+  const totalKaranaIdx2 = tithiIdx * 2 + 1;
+  const isFirstHalfActive = positions.tithiPercent < 0.5;
+
+  let k1EndTime = '';
+  let k2EndTime = '';
+
+  if (isFirstHalfActive) {
+    k1EndTime = subHoursToTimeStr(date, positions.karanaRemainingHours) + " तक";
+    k2EndTime = tithi.endTime;
+  } else {
+    const totalTithiHours = positions.tithiRemainingHours + positions.tithiPassedHours;
+    const firstKaranaEndHoursAgo = positions.tithiPassedHours - totalTithiHours / 2;
+    if (firstKaranaEndHoursAgo > 0) {
+      k1EndTime = subHoursToTimeStr(date, -firstKaranaEndHoursAgo) + " पर (समाप्त)";
+    } else {
+      k1EndTime = "व्यतीत";
+    }
+    k2EndTime = subHoursToTimeStr(date, positions.karanaRemainingHours) + " तक";
+  }
+
+  const getKaranaObject = (totalIdx: number, endTimeStr: string): Karana => {
+    let val = 0;
+    if (totalIdx === 0) val = 10;
+    else if (totalIdx === 57) val = 7;
+    else if (totalIdx === 58) val = 8;
+    else if (totalIdx === 59) val = 9;
+    else val = (totalIdx - 1) % 7;
+
+    const name = KARANA_DETAILS[val];
+    const isAusp = !ASHUBH_KARANA_INDICES.includes(val);
+    const classif = isAusp ? "Shubh" : "Ashubh";
+    const isSth = STHIRA_KARANA_INDICES.includes(val);
+    const nat = isSth ? "Fixed" : "Movable";
+    const natHindi = isSth ? "स्थिर" : "चर";
+    const desc = karanaDescriptions[val] || (isAusp ? "Auspicious daily karana." : "Inauspicious daily karana.");
+
+    return {
+      name,
+      hindiName: name,
+      value: val + 1,
+      endTime: endTimeStr,
+      type: nat,
+      isAuspicious: isAusp,
+      classification: classif,
+      nature: nat,
+      natureHindi: natHindi,
+      description: desc
+    };
+  };
+
+  const karana1 = getKaranaObject(totalKaranaIdx1, k1EndTime);
+  const karana2 = getKaranaObject(totalKaranaIdx2, k2EndTime);
+
 
 
   const monthIdx = (positions.monthsSinceEpoch % 12 + 12) % 12;
@@ -1248,6 +1302,8 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
     nakshatra,
     yoga,
     karana,
+    karana1,
+    karana2,
     paksha,
     month: monthInfo.eng,
     monthHindi: monthInfo.hin,
