@@ -6,13 +6,11 @@
 import React, { useState, useEffect } from 'react';
 import {
   Clock,
-  CircleAlert,
   Sparkles,
   CheckCircle2,
   AlertTriangle,
   Flame,
-  Heart,
-  Share2
+  Heart
 } from 'lucide-react';
 import { MuhuratItem, HoraInterval, ChoghadiyaInterval } from '../types';
 import { AnalogClock } from './AnalogClock';
@@ -53,6 +51,42 @@ const translateTimeStr = (timeStr: string) => {
     .replace(' - ', ' से ');
 };
 
+const getHoraAdvice = (quality: string) => {
+  if (quality === 'Inauspicious') {
+    return 'यह होरा क्रूर या अशुभ मानी जाती है। इसमें नए या मांगलिक कार्यों की शुरुआत टालना ही हितैषी है। वाद-विवाद से दूर रहें।';
+  } else if (quality === 'Auspicious') {
+    return 'यह एक अमृत या सौम्य होरा है। इस काल में किए गए प्रयास प्रायः फलदायी और शुभ होते हैं।';
+  } else {
+    return 'यह सामान्य फल देने वाली होरा है। इसमें दैनिक व सामान्य सांसारिक कार्य आसानी से संपन्न किए जा सकते हैं।';
+  }
+};
+
+const getChoghadiyaUpyuktKarya = (type: string) => {
+  const map: Record<string, string> = {
+    Amrit: 'धार्मिक, मांगलिक व आध्यात्मिक कार्य, यज्ञ-अनुष्ठान, नया कार्य प्रारंभ।',
+    Labh: 'व्यापारिक शुरुआत, नया निवेश, नौकरी प्रारंभ, आर्थिक लेन-देन।',
+    Shubh: 'शुभ संस्कार, गृह प्रवेश, विवाह चर्चा, पारिवारिक मंगल कार्य, देव पूजन।',
+    Chal: 'यात्रा की शुरुआत, वाहन या गैजेट क्रय, खेलकूद, दैनिक सामान्य कार्य।',
+    Kaal: 'मशीनरी कार्य, विवाद निपटाना, कोर्ट-कचहरी (अन्य सभी शुभ कार्य वर्जित)।',
+    Rog: 'शारीरिक विश्राम, शल्य चिकित्सा, बीमारी का उपचार (अन्य सभी शुभ व मांगलिक कार्य वर्जित)।',
+    Udveg: 'सरकारी या प्रशासनिक कार्य, मुकदमेबाजी, संपत्ति के विवाद।'
+  };
+  return map[type] || 'दैनिक सामान्य कार्य।';
+};
+
+const getChoghadiyaAdvice = (type: string) => {
+  const map: Record<string, string> = {
+    Amrit: 'यह अत्यंत शुभ और उन्नतिदायक समय है। इस अवधि में किए गए मांगलिक कार्य अत्यंत सफल होते हैं।',
+    Labh: 'यह अत्यंत शुभ और धन-लाभदायक समय है। नए उद्यम या व्यापारिक सौदे करने के लिए श्रेष्ठ काल है।',
+    Shubh: 'यह एक अत्यंत मंगलकारी समय है। कोई भी पारिवारिक मंगल कार्य या संस्कार करने के लिए यह समय सर्वोत्तम है।',
+    Chal: 'यह एक गतिशील और सामान्य समय है। यात्रा शुरू करने या सामान्य कार्य निपटाने के लिए अनुकूल रहता है।',
+    Kaal: 'यह राहु के समान प्रभाव वाला अशुभ समय है। नए कार्यों का आरंभ न करें, विवाद और नुकसान की आशंका रहती है।',
+    Rog: 'यह अशुभ चौघड़िया माना जाता है। इस अवधि में मांगलिक कार्य या नए कार्य की शुरुआत वर्जित है।',
+    Udveg: 'यह उद्वेग कारक समय मानसिक अशांति दे सकता है। विशेष प्रशासनिक कार्यों के अतिरिक्त अन्य शुभ कार्यों को टालें।'
+  };
+  return map[type] || 'सामान्य काल। नियमित कार्य किए जा सकते हैं।';
+};
+
 export function LiveMuhuratWatch({ 
   muhurats, 
   sunriseTimeStr, 
@@ -69,7 +103,6 @@ export function LiveMuhuratWatch({
   const [nextMuhurat, setNextMuhurat] = useState<MuhuratItem | null>(null);
   const [timeRemainingStr, setTimeRemainingStr] = useState('');
   const [progressVal, setProgressVal] = useState(0);
-  const [showHelp, setShowHelp] = useState(false);
   const [dialTheme, setDialTheme] = useState<'amber' | 'gold' | 'emerald'>('amber');
   const [vibrationActive, setVibrationActive] = useState(false);
   const [viewMode, setViewMode] = useState<'smartwatch' | 'analog'>('analog');
@@ -259,248 +292,16 @@ export function LiveMuhuratWatch({
     return 'stroke-orange-500';
   };
 
-  const handleShareWatchDial = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 600;
-    canvas.height = 600;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
 
-    // 1. Draw Background Gradient directly
-    const bgGradient = ctx.createLinearGradient(0, 0, 0, 600);
-    bgGradient.addColorStop(0, '#FF8008'); // Vibrant Saffron
-    bgGradient.addColorStop(1, '#9E1F00'); // Deep Temple Red
-    ctx.fillStyle = bgGradient;
-    ctx.fillRect(0, 0, 600, 600);
-
-    const shareCanvasImage = () => {
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        const file = new File([blob], `SanatanWatch_${selectedThemeDateStr()}.png`, { type: 'image/png' });
-        const shareData = {
-          title: 'सनातन लाइव मुहूर्त वॉच',
-          files: [file]
-        };
-
-        if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-          try {
-            await navigator.share(shareData);
-          } catch (error) {
-            triggerDirectDownload();
-          }
-        } else {
-          triggerDirectDownload();
-        }
-      }, 'image/png');
-    };
-
-    const triggerDirectDownload = () => {
-      try {
-        const url = canvas.toDataURL('image/png');
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `SanatanWatch_${selectedThemeDateStr()}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    const selectedThemeDateStr = () => {
-      return time.toISOString().split('T')[0];
-    };
-
-    // 2. Draw Watch Dial
-    if (viewMode === 'analog') {
-      const svgEl = document.getElementById('vedic-analog-clock-svg');
-      if (svgEl) {
-        const svgString = new XMLSerializer().serializeToString(svgEl);
-        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-        const blobURL = window.URL.createObjectURL(svgBlob);
-        
-        const tempImg = new Image();
-        tempImg.onload = () => {
-          ctx.drawImage(tempImg, 60, 60, 480, 480);
-          window.URL.revokeObjectURL(blobURL);
-          shareCanvasImage();
-        };
-        tempImg.onerror = () => {
-          window.URL.revokeObjectURL(blobURL);
-          shareCanvasImage();
-        };
-        tempImg.src = blobURL;
-      } else {
-        shareCanvasImage();
-      }
-    } else {
-      // DRAW SMARTWATCH DIAL ON CANVAS DYNAMICALLY
-      ctx.strokeStyle = '#D4AF37';
-      ctx.lineWidth = 12;
-      ctx.strokeRect(60, 60, 480, 480);
-      
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(70, 70, 460, 460);
-
-      ctx.fillStyle = '#C9A227';
-      ctx.beginPath();
-      ctx.arc(66, 66, 4, 0, Math.PI * 2);
-      ctx.arc(534, 66, 4, 0, Math.PI * 2);
-      ctx.arc(66, 534, 4, 0, Math.PI * 2);
-      ctx.arc(534, 534, 4, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#FF9933';
-      ctx.font = 'bold 15px serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(`।। 🌅 सूर्योदय ${sunriseTimeStr} | 🌇 सूर्यास्त ${sunsetTimeStr} ।।`, 300, 50);
-
-      ctx.fillStyle = '#1A0F0A';
-      ctx.fillRect(80, 80, 440, 440);
-
-      ctx.strokeStyle = '#D4AF37';
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(90, 90, 420, 420);
-
-      ctx.fillStyle = '#D4AF37';
-      ctx.font = 'bold 13px serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('वि.सं. ' + samvatVikram, 105, 115);
-      ctx.textAlign = 'right';
-      ctx.fillText('श.सं. ' + samvatShaka, 495, 115);
-      ctx.textAlign = 'center';
-      ctx.font = 'bold 24px serif';
-      ctx.fillText('ॐ', 300, 118);
-
-      ctx.textAlign = 'left';
-      ctx.fillStyle = '#8E8E93';
-      ctx.font = 'bold 9px "Inter", sans-serif';
-      ctx.fillText('वर्तमान तिथि', 110, 155);
-      ctx.fillStyle = '#FFF5C3';
-      ctx.font = 'bold 15px serif';
-      ctx.fillText(tithiHindiName, 110, 175);
-
-      ctx.textAlign = 'right';
-      ctx.fillStyle = '#8E8E93';
-      ctx.font = 'bold 9px "Inter", sans-serif';
-      ctx.fillText('नक्षत्र', 490, 155);
-      ctx.fillStyle = '#FFF5C3';
-      ctx.font = 'bold 15px serif';
-      ctx.fillText(nakshatraHindiName, 490, 175);
-
-      const displayHours = time.getHours() % 12 || 12;
-      const displayMins = time.getMinutes().toString().padStart(2, '0');
-      const displaySecs = time.getSeconds().toString().padStart(2, '0');
-      const ampmStr = time.getHours() >= 12 ? 'PM' : 'AM';
-      
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#FF9900';
-      ctx.font = 'bold 44px monospace';
-      ctx.fillText(`${displayHours}:${displayMins}`, 300, 170);
-      ctx.font = 'bold 13px monospace';
-      ctx.fillText(ampmStr + ' ' + displaySecs, 385, 170);
-
-      ctx.fillStyle = '#8E8E93';
-      ctx.font = 'bold 11px monospace';
-      ctx.fillText(`📍 वैदिक काल • ${hindiDayOfWeek}`, 300, 205);
-
-      const boxWidth = 120;
-      const boxHeight = 70;
-      const boxY = 230;
-      
-      ctx.fillStyle = 'rgba(255, 153, 0, 0.08)';
-      ctx.fillRect(110, boxY, boxWidth, boxHeight);
-      ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)';
-      ctx.strokeRect(110, boxY, boxWidth, boxHeight);
-      ctx.fillStyle = '#8E8E93';
-      ctx.font = 'bold 10px "Inter", sans-serif';
-      ctx.fillText('होरा', 170, boxY + 20);
-      ctx.fillStyle = '#FFF5C3';
-      ctx.font = 'bold 15px serif';
-      ctx.fillText(activeHora ? activeHora.lordHindi : '-', 170, boxY + 42);
-      ctx.fillStyle = '#8E8E93';
-      ctx.font = 'normal 9px monospace';
-      ctx.fillText(activeHora ? `${activeHora.startTime}-${activeHora.endTime}` : '-', 170, boxY + 58);
-
-      ctx.fillStyle = 'rgba(255, 153, 0, 0.08)';
-      ctx.fillRect(240, boxY, boxWidth, boxHeight);
-      ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)';
-      ctx.strokeRect(240, boxY, boxWidth, boxHeight);
-      ctx.fillStyle = '#FF9900';
-      ctx.font = 'bold 10px "Inter", sans-serif';
-      ctx.fillText('सक्रीय काल', 300, boxY + 20);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 13px serif';
-      ctx.fillText(currentMuhurat ? currentMuhurat.hindiName || currentMuhurat.name : 'सामान्य', 300, boxY + 42);
-
-      ctx.fillStyle = 'rgba(255, 153, 0, 0.08)';
-      ctx.fillRect(370, boxY, boxWidth, boxHeight);
-      ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)';
-      ctx.strokeRect(370, boxY, boxWidth, boxHeight);
-      ctx.fillStyle = '#8E8E93';
-      ctx.font = 'bold 10px "Inter", sans-serif';
-      ctx.fillText('चौघड़िया', 430, boxY + 20);
-      ctx.fillStyle = '#FFF5C3';
-      ctx.font = 'bold 15px serif';
-      ctx.fillText(currentChoghadiya ? currentChoghadiya.hindiName || currentChoghadiya.name : '-', 430, boxY + 42);
-      ctx.fillStyle = '#8E8E93';
-      ctx.font = 'normal 9px monospace';
-      ctx.fillText(currentChoghadiya ? `${currentChoghadiya.startTime}-${currentChoghadiya.endTime}` : '-', 430, boxY + 58);
-
-      const sensorY = 360;
-      ctx.fillStyle = '#FF9933';
-      ctx.font = 'bold 12px "Inter", sans-serif';
-      ctx.fillText('ब्रह्म', 170, sensorY);
-      ctx.fillText('अभिजीत', 300, sensorY);
-      ctx.fillText('गोधूलि', 430, sensorY);
-      
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 14px monospace';
-      ctx.fillText(brahmaMuh ? brahmaMuh.startTime.replace(' AM', '').replace(' PM', '') : '4:24', 170, sensorY + 22);
-      ctx.fillText('卐', 300, sensorY + 22);
-      ctx.fillText(godhuliMuh ? godhuliMuh.startTime.replace(' AM', '').replace(' PM', '') : '18:40', 430, sensorY + 22);
-
-      ctx.fillStyle = '#8E8E93';
-      ctx.font = 'bold 9px "Inter", sans-serif';
-      ctx.fillText('मुहूर्त', 170, sensorY + 36);
-      ctx.fillText(abhijitMuh ? abhijitMuh.startTime.replace(' AM', '').replace(' PM', '') : '11:48', 300, sensorY + 36);
-      ctx.fillText('मुहूर्त', 430, sensorY + 36);
-
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.font = 'bold 10px monospace';
-      ctx.fillText('।। वैदिक समय दिखाने वाला यंत्र ।।', 300, 460);
-
-      shareCanvasImage();
-    }
-  };
 
   return (
-    <div id="live_muhurat_watch_container" className="relative flex flex-col items-center justify-between p-8 sm:p-10 glass-card-light dark:glass-card-dark w-full h-full shadow-xl">
+    <div id="live_muhurat_watch_container" className="relative flex flex-col items-center justify-between px-3 py-5 sm:p-8 md:p-10 glass-card-light dark:glass-card-dark w-full h-full shadow-xl">
       
       {/* HEADER BAR */}
       <div className="flex items-center justify-between w-full mb-3">
         <div className="flex items-center gap-1.5">
           <Clock className="w-4 h-4 text-orange-600 animate-pulse" />
           <span className="font-mono text-[11px] font-bold tracking-wider text-orange-950 dark:text-orange-300 uppercase">सनातन वॉच</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={handleShareWatchDial}
-            className="flex items-center gap-1 px-2.5 py-0.5 text-[9.5px] font-black text-orange-700 bg-orange-50 dark:bg-orange-950/40 dark:text-orange-300 border border-orange-200/30 rounded-full cursor-pointer transition-all hover:scale-103 active:scale-97 select-none"
-            title="वॉच डायल साझा करें (Share Watch Dial)"
-          >
-            <Share2 className="w-3 h-3 text-orange-600 animate-pulse" />
-            साझा करें
-          </button>
-          <button
-            onClick={() => setShowHelp(!showHelp)}
-            className="flex items-center gap-1 px-2 py-0.5 text-[9.5px] font-black text-orange-700 bg-orange-50 dark:bg-orange-950/40 dark:text-orange-300 border border-orange-200/30 rounded-full cursor-pointer transition-all hover:scale-103"
-          >
-            <CircleAlert className="w-3 h-3 text-orange-600" />
-            डायोड गाइड
-          </button>
         </div>
       </div>
 
@@ -530,53 +331,14 @@ export function LiveMuhuratWatch({
         </button>
       </div>
 
-      {/* RE-DIRECTION INSTRUCTIONS */}
-      {showHelp && (
-        <div className="absolute inset-0 bg-white/98 dark:bg-[#1E1713]/98 rounded-3xl p-5 flex flex-col justify-between z-30 border border-orange-300/40 shadow-2xl">
-          <div className="overflow-y-auto custom-scrollbar max-h-[85%] pr-1">
-            <div className="flex justify-between items-center pb-2 border-b border-orange-100 dark:border-amber-950/40 mb-3">
-              <span className="text-[11px] font-black uppercase tracking-wider text-orange-600 flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5" />
-                ॥ स्मार्टवॉच निर्देश ॥
-              </span>
-              <button 
-                onClick={() => setShowHelp(false)}
-                className="text-xs font-bold text-slate-500 hover:text-slate-850 px-2 py-0.5 bg-slate-150 rounded-full"
-              >
-                X
-              </button>
-            </div>
 
-            <div className="space-y-3.5 text-left text-xs text-slate-600 dark:text-slate-300">
-              <div>
-                <strong className="text-slate-900 dark:text-amber-100">१. लाइव वल्य प्रोग्रेस (Progress Ring)</strong>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                  स्मार्टवॉच के डायल स्क्रीन के चारों तरफ घूमती हुई रंग-बिरंगी चमकीली धारी (Halo) वर्तमान मुहूर्त की पूर्णता प्रतिशत को दर्शाती है।
-                </p>
-              </div>
-              <div>
-                <strong className="text-slate-900 dark:text-amber-100">२. स्पर्श प्रतिक्रिया (Tactile Touch)</strong>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                  डायल के दाहिने भाग में स्थित मेटल रोटरी क्राउन बटन को दबाकर आप स्क्रीन थीम (Gold / Emerald / Slate) बदल सकते हैं।
-                </p>
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowHelp(false)}
-            className="w-full py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs rounded-xl shadow-md"
-          >
-            वापस डायल देखें
-          </button>
-        </div>
-      )}
 
       {/* WATCH AREA: Smartwatch or Analog based on viewMode */}
-      <div className="relative flex items-center justify-center w-[300px] h-[300px] sm:w-[330px] sm:h-[330px] md:w-[360px] md:h-[360px] m-auto">
+      <div className="relative flex items-center justify-center w-full max-w-[420px] aspect-square sm:max-w-[440px] md:max-w-[460px] mx-auto my-0">
         
         {viewMode === 'analog' ? (
           /* ANALOG CLOCK MODE */
-          <div className="w-full h-full">
+          <div className="w-full h-full flex items-center justify-center">
             <AnalogClock 
               time={time} 
               size={340} 
@@ -809,49 +571,66 @@ export function LiveMuhuratWatch({
         </div>
       </div>
 
-      {/* UPCOMING MUHURATS MATRIX LIST */}
+      {/* TWO DETAILED CARDS: HORA & CHOGHADIYA */}
       <div className="w-full mt-4 border-t border-orange-100 dark:border-orange-950/40 pt-3">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">आगामी वैदिक मुहूर्त</span>
-          {nextMuhurat && (
-            <span className="text-[9px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-950/30 px-2 py-0.5 border border-orange-200/20 rounded-md">
-              अगला: {nextMuhurat.hindiName || nextMuhurat.name} ({translateTimeStr(nextMuhurat.startTime)})
-            </span>
-          )}
-        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full text-left">
+          {/* Card 1: Current Hora */}
+          <div className="p-3.5 rounded-2xl border border-orange-200/40 dark:border-orange-950/45 bg-orange-50/10 dark:bg-[#1E1713]/40 backdrop-blur-xs flex flex-col justify-between space-y-2 text-left">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black text-rose-600 dark:text-amber-500 uppercase tracking-widest font-mono">सक्रिय होरा</span>
+              <span className="text-[11px] font-black text-slate-850 dark:text-orange-100 font-serif">
+                {activeHora ? `${activeHora.lordHindi} की होरा` : '-'}
+              </span>
+            </div>
+            
+            <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-zinc-450 font-mono">
+              <span>समय:</span>
+              <span>{activeHora ? `${activeHora.startTime} से ${activeHora.endTime}` : '-'}</span>
+            </div>
+            
+            <div className="border-t border-orange-100/30 dark:border-zinc-800/40 pt-1.5">
+              <span className="text-[9px] font-black text-orange-850 dark:text-amber-300 uppercase tracking-widest block mb-0.5 font-mono">उपयुक्त कार्य:</span>
+              <p className="text-[11px] text-slate-650 dark:text-zinc-400 font-medium leading-relaxed">
+                {activeHora ? activeHora.benefits : '-'}
+              </p>
+            </div>
+            
+            <div className="border-t border-orange-100/30 dark:border-zinc-800/40 pt-1.5">
+              <span className="text-[9px] font-black text-slate-650 dark:text-slate-450 uppercase tracking-widest block mb-0.5 font-mono">वैदिक परामर्श:</span>
+              <p className="text-[11px] text-slate-650 dark:text-zinc-400 font-medium leading-relaxed">
+                {activeHora ? getHoraAdvice(activeHora.quality) : '-'}
+              </p>
+            </div>
+          </div>
 
-        {/* Rapid Horizontal Cards */}
-        <div className="grid grid-cols-3 gap-1.5 w-full">
-          {muhurats.slice(0, 3).map((item) => {
-            const tempConf = statusConfig[item.type] || statusConfig['Samanya'];
-            return (
-              <div 
-                key={item.id} 
-                className={`flex flex-col p-2 rounded-xl border text-left transition-all hover:scale-101 min-h-[64px] justify-between ${
-                  currentMuhurat?.id === item.id 
-                    ? 'bg-orange-100/60 dark:bg-orange-950/40 border-[#FF6F00]' 
-                    : 'bg-white/90 dark:bg-[#231E1A]/80 border-slate-100 dark:border-zinc-800'
-                }`}
-                style={currentMuhurat?.id === item.id ? { boxShadow: '0 0 10px rgba(255,111,0,0.30)' } : undefined}
-              >
-                <div className="flex items-start justify-between gap-1">
-                  <span className="text-[9.5px] font-black text-slate-800 dark:text-orange-100 tracking-tight leading-tight block truncate w-full">
-                    {item.hindiName || item.name.replace(' Choghadiya', '').replace(' (Avoid)', '')}
-                  </span>
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${tempConf.glow}`}></span>
-                </div>
-                
-                <div className="mt-0.5 flex flex-col">
-                  <span className="text-[9px] text-slate-800 dark:text-slate-300 font-extrabold font-mono tracking-tighter leading-none">
-                    {item.startTime}
-                  </span>
-                  <span className="text-[7.5px] text-slate-400 dark:text-slate-500 font-semibold uppercase font-sans mt-0.5 leading-none block">
-                    {translateType(item.type).split(' ')[0]}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
+          {/* Card 2: Current Choghadiya */}
+          <div className="p-3.5 rounded-2xl border border-orange-200/40 dark:border-orange-950/45 bg-orange-50/10 dark:bg-[#1E1713]/40 backdrop-blur-xs flex flex-col justify-between space-y-2 text-left">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black text-rose-600 dark:text-amber-500 uppercase tracking-widest font-mono">सक्रिय चौघड़िया</span>
+              <span className="text-[11px] font-black text-slate-850 dark:text-orange-100 font-serif">
+                {currentChoghadiya ? `${currentChoghadiya.hindiName || currentChoghadiya.name} चौघड़िया` : '-'}
+              </span>
+            </div>
+            
+            <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-zinc-450 font-mono">
+              <span>समय:</span>
+              <span>{currentChoghadiya ? `${currentChoghadiya.startTime} से ${currentChoghadiya.endTime}` : '-'}</span>
+            </div>
+            
+            <div className="border-t border-orange-100/30 dark:border-zinc-800/40 pt-1.5">
+              <span className="text-[9px] font-black text-orange-850 dark:text-amber-300 uppercase tracking-widest block mb-0.5 font-mono">उपयुक्त कार्य:</span>
+              <p className="text-[11px] text-slate-655 dark:text-zinc-400 font-medium leading-relaxed">
+                {currentChoghadiya ? getChoghadiyaUpyuktKarya(currentChoghadiya.type) : '-'}
+              </p>
+            </div>
+            
+            <div className="border-t border-orange-100/30 dark:border-zinc-800/40 pt-1.5">
+              <span className="text-[9px] font-black text-slate-655 dark:text-slate-450 uppercase tracking-widest block mb-0.5 font-mono">वैदिक परामर्श:</span>
+              <p className="text-[11px] text-slate-655 dark:text-zinc-400 font-medium leading-relaxed">
+                {currentChoghadiya ? getChoghadiyaAdvice(currentChoghadiya.type) : '-'}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

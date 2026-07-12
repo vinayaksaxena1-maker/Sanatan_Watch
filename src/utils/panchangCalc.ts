@@ -1238,6 +1238,11 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   const solarMonth = SOLAR_MONTHS[solarMonthIdx];
   const ayana = (positions.sunSidereal >= 90 && positions.sunSidereal < 270) ? "Dakshinayana" : "Uttarayana";
 
+  const monthAmantaHindi = monthInfo.hin;
+  const purnimantaMonthIdx = paksha === 'Krishna' ? (monthIdx + 1) % 12 : monthIdx;
+  const monthPurnimantaHindi = MONTHS_ENGLISH_HINDI[purnimantaMonthIdx].hin;
+  const praviste = Math.floor((positions.sunSidereal || 0) % 30) + 1;
+
   const hinduDate: HinduDate = {
     tithi,
     nakshatra,
@@ -1246,13 +1251,16 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
     paksha,
     month: monthInfo.eng,
     monthHindi: monthInfo.hin,
+    monthAmantaHindi,
+    monthPurnimantaHindi,
     ritu: monthInfo.ritu,
     samvatVikram,
     samvatShaka,
     samvatGujarati,
     solarMonth,
     isLeapMonth: false,
-    ayana
+    ayana,
+    praviste
   };
 
   const day = date.getDay();

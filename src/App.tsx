@@ -610,6 +610,23 @@ export default function App() {
     return map[cleanYoga] || yoga;
   };
 
+  const getPlanetRemainingTime = (planet: any) => {
+    if (!planet || !planet.speed) return '';
+    const degInSign = planet.longitude % 30;
+    const remDeg = 30 - degInSign;
+    const speedPerHour = Math.abs(planet.speed) / 24;
+    if (speedPerHour === 0) return '';
+    const remHours = remDeg / speedPerHour;
+    const hours = Math.floor(remHours);
+    const minutes = Math.floor((remHours - hours) * 60);
+    if (hours > 24) {
+      const days = Math.floor(hours / 24);
+      const leftHours = hours % 24;
+      return `${days} दिन, ${leftHours} घंटे तक`;
+    }
+    return `${hours} घंटे, ${minutes} मिनट तक`;
+  };
+
   const getDishaShoolInfo = (day: number) => {
     switch (day) {
       case 0:
@@ -935,11 +952,30 @@ export default function App() {
           <div className="absolute inset-0 sacred-motif-overlay pointer-events-none z-0 opacity-[0.03] dark:opacity-[0.05]"></div>
           
           {/* MAIN BRAND HEADER BANNER */}
-          <header className={`p-4 border-b flex justify-between items-center gap-4 ${
+          <header className={`p-4 border-b flex flex-col gap-2 sm:gap-3 ${
             settings.theme === 'light' ? 'bg-orange-50/20 border-orange-100' : 'bg-orange-950/10 border-orange-950/20'
           }`}>
-            {/* Simulated Live Location and Clock stats */}
-            <div className="flex flex-wrap gap-1.5 sm:gap-2.5 items-center w-full justify-between select-none">
+            {/* ROW 1: Logo, Title & Tagline */}
+            <div className="flex items-center gap-3 w-full justify-between sm:justify-start">
+              <div className="flex items-center gap-3">
+                <img 
+                  src="/LOGO4.png" 
+                  alt="सनातन घड़ी लोगो" 
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain drop-shadow-md rounded-xl"
+                />
+                <div className="flex flex-col text-left">
+                  <h1 className="text-base sm:text-lg font-serif font-black text-orange-900 dark:text-amber-100 tracking-wider leading-tight">
+                    सनातन घड़ी
+                  </h1>
+                  <span className="text-[9px] sm:text-[10px] font-serif font-bold text-orange-700/80 dark:text-amber-500/80 tracking-wide mt-0.5">
+                    ।। कालचक्र ज्ञान यंत्र ।।
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* ROW 2: Location and Clock (exactly 16px space from Row 1 on mobile due to gap-2 (8px) + pt-2 (8px)) */}
+            <div className="flex flex-wrap gap-1.5 sm:gap-2.5 items-center w-full justify-between select-none pt-2 border-t border-orange-100/10 dark:border-orange-950/5">
               <div 
                 onClick={() => setIsCityModalOpen(true)}
                 className="flex items-center gap-1 rounded-full px-2 py-0.5 bg-orange-100/50 border border-orange-200/30 hover:bg-orange-200/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
@@ -948,13 +984,6 @@ export default function App() {
                 <MapPin className="w-2.5 h-2.5 text-orange-600 animate-pulse" />
                 <span className="text-[6px] font-extrabold text-orange-900 uppercase font-mono tracking-tight leading-none truncate max-w-[120px]">
                   {coords.city}
-                </span>
-              </div>
-
-              {/* App Title in Center */}
-              <div className="flex items-center gap-1">
-                <span className="text-[11px] font-serif font-black text-orange-900 dark:text-amber-100 tracking-widest uppercase">
-                  सनातन घड़ी
                 </span>
               </div>
 
@@ -1021,48 +1050,32 @@ export default function App() {
                   variants={itemVariants}
                   className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left flex flex-col gap-3 relative overflow-hidden border border-orange-100/50 dark:border-orange-950/20 rounded-3xl"
                 >
-                  {/* Share Button in Top-Right Corner */}
-                  <button
-                    onClick={handleShareDailyPanchang}
-                    className="absolute top-4 right-4 flex flex-col items-center justify-center gap-0.5 p-1 bg-orange-500/10 hover:bg-orange-500/20 text-[#ea580c] dark:text-orange-400 border border-orange-500/20 rounded-xl cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-3xs z-10"
-                    title="पंचांग साझा करें (Share Daily Panchang)"
-                  >
-                    <Share2 className="w-3.5 h-3.5" />
-                    <span className="text-[7.5px] font-black tracking-tight leading-none uppercase">साझा करें</span>
-                  </button>
-
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block">॥ सनातन पंचांग कल्याणम ॥</span>
-                      {panchangInfo.hinduDate.ayana && (
-                        <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded-md border ${
-                          panchangInfo.hinduDate.ayana === 'Uttarayana'
-                            ? 'bg-amber-100 dark:bg-amber-950/40 border-amber-300 text-amber-800 dark:text-amber-350'
-                            : 'bg-indigo-100 dark:bg-indigo-950/40 border-indigo-300 text-indigo-850 dark:text-indigo-350'
-                        } font-sans uppercase tracking-wider flex items-center gap-0.5 shadow-3xs`}>
-                          {panchangInfo.hinduDate.ayana === 'Uttarayana' ? '🌞 उत्तरायण' : '🌙 दक्षिणायन'}
-                        </span>
-                      )}
                     </div>
-                    {/* Header Row: Date & Day & Moon Rashi */}
+                    {/* Header Row: Date & Day */}
                     <div className="flex justify-between items-baseline gap-2 border-b border-orange-100/20 dark:border-orange-950/10 pb-2 flex-wrap">
                       <h2 className="text-base sm:text-lg font-bold font-serif text-slate-800 dark:text-amber-100">
                         {selectedDate.toLocaleDateString('hi-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                       </h2>
-                      {panchangInfo.planets?.find(p => p.name === 'Moon') && (
-                        <span className="text-[10px] font-bold text-orange-655 font-serif">
-                          🌙 चन्द्र राशि: {panchangInfo.planets.find(p => p.name === 'Moon')?.signHindi || ''}
-                        </span>
-                      )}
                     </div>
                   </div>
 
                   {/* Details Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs leading-tight">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs leading-tight">
                     <div className="flex flex-col p-2 bg-orange-500/5 dark:bg-zinc-950/20 border border-orange-100/10 dark:border-zinc-800/10 rounded-2xl justify-center min-h-[52px]">
-                      <span className="text-[9px] text-slate-400 uppercase font-mono tracking-wider">हिन्दू मास</span>
+                      <span className="text-[9px] text-slate-400 uppercase font-mono tracking-wider">अमान्त महीना</span>
                       <span className="font-serif font-bold text-orange-700 dark:text-orange-350 mt-0.5 truncate">
-                        {panchangInfo.hinduDate.monthHindi}
+                        {panchangInfo.hinduDate.monthAmantaHindi || panchangInfo.hinduDate.monthHindi}
+                        {panchangInfo.hinduDate.isLeapMonth ? ' (अधिमास)' : ''}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col p-2 bg-orange-500/5 dark:bg-zinc-950/20 border border-orange-100/10 dark:border-zinc-800/10 rounded-2xl justify-center min-h-[52px]">
+                      <span className="text-[9px] text-slate-400 uppercase font-mono tracking-wider">पूर्णिमान्त महीना</span>
+                      <span className="font-serif font-bold text-orange-700 dark:text-orange-350 mt-0.5 truncate">
+                        {panchangInfo.hinduDate.monthPurnimantaHindi || panchangInfo.hinduDate.monthHindi}
                         {panchangInfo.hinduDate.isLeapMonth ? ' (अधिमास)' : ''}
                       </span>
                     </div>
@@ -1084,9 +1097,9 @@ export default function App() {
                     </div>
 
                     <div className="flex flex-col p-2 bg-orange-500/5 dark:bg-zinc-950/20 border border-orange-100/10 dark:border-zinc-800/10 rounded-2xl justify-center min-h-[52px]">
-                      <span className="text-[9px] text-slate-400 uppercase font-mono tracking-wider">विक्रम / शक संवत्</span>
-                      <span className="font-mono font-bold text-slate-700 dark:text-slate-350 mt-0.5">
-                        {panchangInfo.hinduDate.samvatVikram} / {panchangInfo.hinduDate.samvatShaka}
+                      <span className="text-[9px] text-slate-400 uppercase font-mono tracking-wider">वि. / शक / गु. संवत्</span>
+                      <span className="font-mono font-bold text-slate-700 dark:text-slate-350 mt-0.5 text-[10px] sm:text-xs">
+                        {panchangInfo.hinduDate.samvatVikram} / {panchangInfo.hinduDate.samvatShaka} / {panchangInfo.hinduDate.samvatGujarati || panchangInfo.hinduDate.samvatVikram - 1}
                       </span>
                     </div>
 
@@ -1098,7 +1111,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Live Ishtakala & Disha Shool Row */}
+                  {/* Live Ishtakala, Ayana, Moon Sign, Sun Sign, Praviste & Disha Shool Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1 select-none">
                     {/* Live Ishtakala */}
                     {panchangInfo.ishtakala && (
@@ -1108,14 +1121,77 @@ export default function App() {
                       </div>
                     )}
 
-                    {/* Disha Shool */}
+                    {/* Ayana */}
+                    {panchangInfo.hinduDate.ayana && (
+                      <div className="flex justify-between items-center bg-orange-50/30 dark:bg-orange-950/5 border border-orange-100/30 dark:border-orange-950/10 rounded-2xl p-2 px-3 text-left">
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold font-serif">🌞 अयन (Ayana):</span>
+                        <span className={`text-[10.5px] font-black font-serif ${
+                          panchangInfo.hinduDate.ayana === 'Uttarayana' ? 'text-amber-600 dark:text-amber-400' : 'text-indigo-600 dark:text-indigo-400'
+                        }`}>
+                          {panchangInfo.hinduDate.ayana === 'Uttarayana' ? 'उत्तरायण' : 'दक्षिणायन'}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Moon Sign */}
+                    {panchangInfo.planets?.find(p => p.name === 'Moon') && (() => {
+                      const moonPlanet = panchangInfo.planets.find(p => p.name === 'Moon')!;
+                      const remTime = getPlanetRemainingTime(moonPlanet);
+                      return (
+                        <div className="flex justify-between items-center bg-orange-50/30 dark:bg-orange-950/5 border border-orange-100/30 dark:border-orange-950/10 rounded-2xl p-2 px-3 text-left">
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold font-serif">🌙 चन्द्र राशि:</span>
+                          <div className="flex flex-col items-end">
+                            <span className="font-serif font-black text-orange-655 text-xs sm:text-sm">
+                              {moonPlanet.signHindi || ''}
+                            </span>
+                            {remTime && (
+                              <span className="text-[8px] text-slate-500 dark:text-slate-400 font-medium">
+                                ⏳ {remTime}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Sun Sign */}
+                    {panchangInfo.planets?.find(p => p.name === 'Sun') && (() => {
+                      const sunPlanet = panchangInfo.planets.find(p => p.name === 'Sun')!;
+                      const remTime = getPlanetRemainingTime(sunPlanet);
+                      return (
+                        <div className="flex justify-between items-center bg-orange-50/30 dark:bg-orange-950/5 border border-orange-100/30 dark:border-orange-950/10 rounded-2xl p-2 px-3 text-left">
+                          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold font-serif">🔆 सूर्य राशि:</span>
+                          <div className="flex flex-col items-end">
+                            <span className="font-serif font-black text-orange-655 text-xs sm:text-sm">
+                              {sunPlanet.signHindi || ''}
+                            </span>
+                            {remTime && (
+                              <span className="text-[8px] text-slate-500 dark:text-slate-400 font-medium">
+                                ⏳ {remTime}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Praviste/Gate */}
+                    {panchangInfo.hinduDate.praviste !== undefined && (
+                      <div className="flex justify-between items-center bg-orange-50/30 dark:bg-orange-950/5 border border-orange-100/30 dark:border-orange-950/10 rounded-2xl p-2 px-3 text-left">
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold font-serif">📅 प्रविष्टे / गते:</span>
+                        <span className="font-serif font-black text-orange-655 text-xs sm:text-sm">
+                          {panchangInfo.hinduDate.praviste} प्रविष्टे (गते)
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Disha Shool (Spans full width on desktop) */}
                     {(() => {
                       const dsh = getDishaShoolInfo(selectedDate.getDay());
                       return (
-                        <div className="flex justify-between items-center bg-rose-50/20 dark:bg-rose-950/5 border border-rose-100/30 dark:border-rose-950/10 rounded-2xl p-2 px-3 text-left gap-1">
-                          <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-bold shrink-0 font-serif">🚫 दिशा शूल ({dsh.directionHindi}):</span>
-                          <span className="font-serif font-black text-rose-600 dark:text-rose-400 text-[10px] leading-tight text-right max-w-[65%] break-words">
-                            निवारण: {dsh.remedyHindi}
+                        <div className="flex items-center bg-rose-50/20 dark:bg-rose-950/5 border border-rose-100/30 dark:border-rose-950/10 rounded-2xl p-2 px-3 text-left gap-2 w-full col-span-1 sm:col-span-2">
+                          <span className="text-[10px] text-slate-555 dark:text-slate-400 font-serif leading-relaxed">
+                            <strong className="text-slate-700 dark:text-slate-200">🚫 दिशा शूल ({dsh.directionHindi}):</strong> <span className="font-semibold text-rose-600 dark:text-rose-400">निवारण: {dsh.remedyHindi}</span>
                           </span>
                         </div>
                       );

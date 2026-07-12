@@ -210,6 +210,8 @@ export interface HinduDate {
   paksha: PakshaType;
   month: string;
   monthHindi: string;
+  monthAmantaHindi?: string;
+  monthPurnimantaHindi?: string;
   ritu: string;
   samvatVikram: number;
   samvatShaka: number;
@@ -217,6 +219,7 @@ export interface HinduDate {
   solarMonth?: string;
   isLeapMonth?: boolean;
   ayana?: string;
+  praviste?: number;
 }
 
 import { PlanetPosition } from './utils/astronomicalEngine';
