@@ -978,11 +978,11 @@ export default function App() {
             <div className="flex flex-wrap gap-1.5 sm:gap-2.5 items-center w-full justify-between select-none pt-2 border-t border-orange-100/10 dark:border-orange-950/5">
               <div 
                 onClick={() => setIsCityModalOpen(true)}
-                className="flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-orange-100/50 border border-orange-200/30 hover:bg-orange-200/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-orange-100/50 border border-orange-200/30 hover:bg-orange-200/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                 title="स्थान बदलें (Change Location)"
               >
-                <MapPin className="w-3 h-3 text-orange-600 animate-pulse" />
-                <span className="text-[8px] font-extrabold text-orange-900 uppercase font-mono tracking-tight leading-none truncate max-w-[150px]">
+                <MapPin className="w-3.5 h-3.5 text-orange-600 animate-pulse" />
+                <span className="text-[9px] font-extrabold text-orange-900 uppercase font-mono tracking-tight leading-none truncate max-w-[160px]">
                   {coords.city}
                 </span>
               </div>
@@ -990,16 +990,16 @@ export default function App() {
               {/* Precise clock */}
               <div 
                 id="header_clock_wrapper"
-                className="flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-slate-100 dark:bg-stone-900/60 border border-slate-200 dark:border-zinc-800/40 transition-all duration-300 shadow-3xs shrink-0"
+                className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-slate-100 dark:bg-stone-900/60 border border-slate-200 dark:border-zinc-800/40 transition-all duration-300 shadow-3xs shrink-0"
               >
-                <Clock className="w-3 h-3 text-slate-500 transition-colors drop-shadow-3xs" />
+                <Clock className="w-3.5 h-3.5 text-slate-500 transition-colors drop-shadow-3xs" />
                 <span 
-                  className="text-[8px] font-black text-slate-700 dark:text-slate-300 tracking-tight font-mono whitespace-nowrap leading-none [text-shadow:0_1px_1px_rgba(0,0,0,0.12)] dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.45)]"
+                  className="text-[9px] font-black text-slate-700 dark:text-slate-300 tracking-tight font-mono whitespace-nowrap leading-none [text-shadow:0_1px_1px_rgba(0,0,0,0.12)] dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.45)]"
                 >
                   {formattedClockStr}
                 </span>
                 {trendInfo.icon && (
-                  <span className={`inline-flex items-center gap-0.5 px-1 py-[2px] rounded-md border text-[8px] font-black leading-none shadow-3xs hover:shadow-2xs transition-shadow duration-300 ${trendInfo.colorClass}`}>
+                  <span className={`inline-flex items-center gap-0.5 px-1 py-[2px] rounded-md border text-[9px] font-black leading-none shadow-3xs hover:shadow-2xs transition-shadow duration-300 ${trendInfo.colorClass}`}>
                     {trendInfo.icon}
                     <span className="font-serif [text-shadow:0_0.5px_1px_rgba(255,255,255,0.45)] dark:[text-shadow:0_0.5px_1px_rgba(0,0,0,0.35)]">{activeChoghadiya?.hindiName}</span>
                   </span>
