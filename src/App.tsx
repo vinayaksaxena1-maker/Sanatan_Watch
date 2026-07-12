@@ -1434,8 +1434,6 @@ export default function App() {
                   const hasPushkar = panchangInfo.pushkarYog?.active;
                   const hasAlerts = hasPanchak || hasBhadra || hasDagda || hasPushkar;
 
-                  if (!hasAlerts) return null;
-
                   return (
                     <motion.div
                       variants={itemVariants}
@@ -1449,6 +1447,20 @@ export default function App() {
                       </div>
 
                       <div className="space-y-2 select-none">
+                        {!hasAlerts && (
+                          <div className="flex items-center gap-3 p-3.5 bg-emerald-500/5 dark:bg-emerald-950/10 border border-emerald-500/10 dark:border-emerald-900/20 rounded-2xl">
+                            <span className="text-xl">🟢</span>
+                            <div className="flex flex-col gap-0.5 text-left">
+                              <span className="text-xs font-serif font-black text-emerald-805 dark:text-emerald-300">
+                                कोई प्रतिकूल अलर्ट नहीं
+                              </span>
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium font-sans">
+                                आज कोई भद्रा, पंचक या अशुभ तिथि योग सक्रिय नहीं है। दिन सामान्य कार्यों के लिए शुभ है।
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
                         {/* Bhadra Alert */}
                         {hasBhadra && panchangInfo.bhadra && (
                           <div className="flex flex-col p-3 bg-red-500/5 dark:bg-rose-950/10 border border-red-500/20 rounded-2xl gap-1">
