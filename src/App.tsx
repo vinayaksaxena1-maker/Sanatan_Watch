@@ -952,7 +952,7 @@ export default function App() {
           <div className="absolute inset-0 sacred-motif-overlay pointer-events-none z-0 opacity-[0.03] dark:opacity-[0.05]"></div>
           
           {/* MAIN BRAND HEADER BANNER */}
-          <header className={`p-4 border-b flex flex-col gap-2 sm:gap-3 ${
+          <header className={`p-4 border-b-2 flex flex-col gap-2 sm:gap-3 ${
             settings.theme === 'light' ? 'bg-orange-50/20 border-orange-100' : 'bg-orange-950/10 border-orange-950/20'
           }`}>
             {/* ROW 1: Logo, Title & Tagline */}
