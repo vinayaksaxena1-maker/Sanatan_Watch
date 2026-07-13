@@ -5,6 +5,8 @@
  * to block UI render during Web Worker compilation.
  */
 
+import AstroWorker from './astroWorker?worker&inline';
+
 export interface SolarTimes {
   sunrise: string;
   sunset: string;
@@ -238,10 +240,7 @@ class MockAstronomicalEngine implements AstronomicalEngine {
 // ---------------------------------------------------------------------------
 let worker: Worker | null = null;
 try {
-  worker = new Worker(
-    new URL('./astroWorker.ts', import.meta.url),
-    { type: 'module' }
-  );
+  worker = new AstroWorker();
 } catch (e) {
   console.error('[AstronomicalEngine] Failed to create Web Worker:', e);
 }
@@ -267,11 +266,11 @@ if (typeof window !== 'undefined') {
   if (worker) {
     // Fetch ephemeris files on the main thread to completely bypass Web Worker CORS/protocol restrictions in WebViews
     Promise.all([
-      fetch('/ephe/sepl_18.se1').then(r => {
+      fetch('ephe/sepl_18.se1').then(r => {
         if (!r.ok) throw new Error(`sepl_18.se1 fetch failed: ${r.status}`);
         return r.arrayBuffer();
       }),
-      fetch('/ephe/semo_18.se1').then(r => {
+      fetch('ephe/semo_18.se1').then(r => {
         if (!r.ok) throw new Error(`semo_18.se1 fetch failed: ${r.status}`);
         return r.arrayBuffer();
       })
