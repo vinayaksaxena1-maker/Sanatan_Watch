@@ -4,10 +4,9 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { Search, Calendar, Smile, Download, ExternalLink, Sparkles } from 'lucide-react';
+import { Calendar, Smile, Sparkles } from 'lucide-react';
 import { Festival } from '../types';
 import { getFestivalsForYear } from '../utils/festivalEngine';
-import { generateGoogleCalendarUrl, exportToIcsFile } from '../utils/calendarSync';
 
 interface FestivalScreenProps {
   lat: number;
@@ -27,8 +26,6 @@ const WEEKDAYS = {
 };
 
 export function FestivalScreen({ lat, lon, year, language = 'English' }: FestivalScreenProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedType, setSelectedType] = useState<string>('all');
   const [currentMonth, setCurrentMonth] = useState(() => new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(() => year);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
@@ -87,20 +84,6 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
     });
   }, [festivals, currentMonth]);
 
-  const filteredFestivals = useMemo(() => {
-    return monthlyFestivals.filter((fest) => {
-      const matchesSearch =
-        fest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        fest.hindiName.includes(searchQuery) ||
-        fest.month.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        fest.tithi.toLowerCase().includes(searchQuery.toLowerCase());
-
-      const matchesType = selectedType === 'all' || fest.type === selectedType;
-
-      return matchesSearch && matchesType;
-    });
-  }, [monthlyFestivals, searchQuery, selectedType]);
-
   const selectedDayFestivals = useMemo(() => {
     if (selectedDay === null) return [];
     return getFestivalsForDay(selectedDay);
@@ -147,34 +130,6 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
         default: return type;
       }
     }
-  };
-
-  const handleIcsExport = (fest: Festival) => {
-    const sD = new Date(fest.date);
-    const eD = new Date(sD);
-    eD.setDate(eD.getDate() + 1);
-
-    exportToIcsFile({
-      title: language === 'Hindi' ? fest.hindiName : fest.name,
-      description: fest.description,
-      startDate: fest.date,
-      endDate: eD.toISOString().split('T')[0],
-      location: 'India'
-    });
-  };
-
-  const getGoogleUrl = (fest: Festival) => {
-    const sD = new Date(fest.date);
-    const eD = new Date(sD);
-    eD.setDate(eD.getDate() + 1);
-
-    return generateGoogleCalendarUrl({
-      title: language === 'Hindi' ? fest.hindiName : fest.name,
-      description: fest.description,
-      startDate: fest.date,
-      endDate: eD.toISOString().split('T')[0],
-      location: 'India'
-    });
   };
 
   return (
@@ -329,12 +284,6 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
               </p>
             ) : (
               selectedDayFestivals.map((fest) => {
-                const formattedDateStr = new Date(fest.date).toLocaleDateString(language === 'Hindi' ? 'hi-IN' : 'en-IN', {
-                  weekday: 'short',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                });
                 return (
                   <div key={fest.id} className="p-3.5 rounded-2xl bg-white/10 dark:bg-[#120B08]/40 border border-orange-100/10 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                     <div className="space-y-1.5 flex-1 min-w-0">
@@ -352,22 +301,6 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
                       <p className="text-[10px] text-slate-600 dark:text-slate-455 leading-relaxed">
                         {fest.description}
                       </p>
-                      <div className="flex gap-2 pt-1">
-                        <a
-                          href={getGoogleUrl(fest)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-[9px] font-bold text-orange-600 dark:text-orange-400 hover:underline"
-                        >
-                          <ExternalLink className="w-2.5 h-2.5" /> {language === 'Hindi' ? "गूगल कैलेंडर में जोड़ें" : "Google Calendar"}
-                        </a>
-                        <button
-                          onClick={() => handleIcsExport(fest)}
-                          className="flex items-center gap-1 text-[9px] font-bold text-orange-655 hover:underline cursor-pointer bg-transparent border-0"
-                        >
-                          <Download className="w-2.5 h-2.5" /> {language === 'Hindi' ? "कैलेंडर फ़ाइल (.ics)" : "export iCal"}
-                        </button>
-                      </div>
                     </div>
                   </div>
                 );
@@ -377,41 +310,7 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
         </div>
       )}
 
-      {/* 4. Search Filter Controls Bar */}
-      <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left">
-        <label className="text-xs font-bold text-slate-400 dark:text-amber-500 uppercase tracking-wider mb-2 font-mono block">
-          {language === 'Hindi' ? "त्यौहार और व्रत खोजें" : "Search Festivals & Fasts"}
-        </label>
-        
-        <div className="relative flex items-center mb-4">
-          <input
-            type="text"
-            placeholder={language === 'Hindi' ? "त्यौहार खोजें जैसे दीवाली, होली, एकादशी..." : "Search festivals e.g. Diwali, Holi, Ekadashi..."}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full text-xs p-3.5 pl-11 rounded-2xl bg-slate-500/5 dark:bg-zinc-950/40 border border-slate-200/55 dark:border-zinc-850 focus:bg-white dark:focus:bg-zinc-950 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-slate-800 dark:text-slate-100"
-          />
-          <Search className="w-5 h-5 text-slate-400 absolute left-4 pointer-events-none" />
-        </div>
-
-        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-          {['all', 'Major', 'Ekadashi', 'Purnima', 'Amavasya', 'Sankashti', 'Jayanti'].map((type) => (
-            <button
-              key={type}
-              onClick={() => setSelectedType(type)}
-              className={"px-3.5 py-1.5 sm:py-2 rounded-xl text-2xs font-extrabold whitespace-nowrap transition-all cursor-pointer border " + (
-                selectedType === type
-                  ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
-                  : 'bg-white/80 dark:bg-zinc-900/60 hover:bg-slate-50 dark:hover:bg-zinc-850 border-orange-100 dark:border-orange-950/45 text-slate-700 dark:text-slate-350'
-              )}
-            >
-              {getTypeName(type)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 5. Festivals List (Current Month's Festivals) */}
+      {/* 4. Festivals List (Current Month's Festivals) */}
       <div className="space-y-3.5 sm:space-y-4">
         <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono text-left pl-1">
           {language === 'Hindi' 
@@ -419,7 +318,7 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
             : 'Major Festivals in ' + MONTH_NAMES.English[currentMonth]}
         </h3>
 
-        {filteredFestivals.length === 0 ? (
+        {monthlyFestivals.length === 0 ? (
           <div className="glass-card-light dark:glass-card-dark p-10 sm:p-12 text-center h-48 flex flex-col justify-center items-center">
             <Smile className="w-8 h-8 text-orange-400 mb-2 animate-bounce" />
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-350 block">
@@ -427,7 +326,7 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
             </span>
           </div>
         ) : (
-          filteredFestivals.map((fest) => {
+          monthlyFestivals.map((fest) => {
             const formattedDateStr = new Date(fest.date).toLocaleDateString(language === 'Hindi' ? 'hi-IN' : 'en-IN', {
               weekday: 'short',
               year: 'numeric',
@@ -457,23 +356,6 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
                   <p className="text-[11px] sm:text-2xs text-slate-650 dark:text-slate-400 leading-relaxed font-sans max-w-2xl">
                     {fest.description}
                   </p>
-                  
-                  <div className="flex gap-2 pt-1">
-                    <a
-                      href={getGoogleUrl(fest)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-[10px] font-bold text-orange-600 dark:text-orange-400 hover:underline"
-                    >
-                      <ExternalLink className="w-3 h-3" /> {language === 'Hindi' ? "गूगल कैलेंडर में जोड़ें" : "Google Calendar"}
-                    </a>
-                    <button
-                      onClick={() => handleIcsExport(fest)}
-                      className="flex items-center gap-1 text-[10px] font-bold text-orange-655 hover:underline cursor-pointer bg-transparent border-0"
-                    >
-                      <Download className="w-3 h-3" /> {language === 'Hindi' ? "कैलेंडर फ़ाइल (.ics)" : "export iCal"}
-                    </button>
-                  </div>
                 </div>
 
                 <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center border-t md:border-t-0 border-slate-100 dark:border-slate-800/50 pt-2.5 md:pt-0 w-full md:w-auto mt-1 md:mt-0 flex-shrink-0">
