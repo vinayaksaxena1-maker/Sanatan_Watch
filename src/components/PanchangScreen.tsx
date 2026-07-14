@@ -483,10 +483,12 @@ interface PanchangScreenProps {
   panchang: PanchangInfo;
   currentTime?: Date;
   onShare?: () => void;
+  selectedDate: Date;
+  onDateChange: (date: Date) => void;
   language?: 'English' | 'Hindi';
 }
 
-export function PanchangScreen({ panchang, currentTime, onShare, language = 'English' }: PanchangScreenProps) {
+export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, onDateChange, language = 'English' }: PanchangScreenProps) {
   const [showHoraModal, setShowHoraModal] = useState(false);
   const [showChoghadiyaModal, setShowChoghadiyaModal] = useState(false);
   const [showAllNakshatrasModal, setShowAllNakshatrasModal] = useState(false);
@@ -694,18 +696,43 @@ export function PanchangScreen({ panchang, currentTime, onShare, language = 'Eng
       <div id="panchang_main_card" className="glass-card-light dark:glass-card-dark p-4 sm:p-6 text-left space-y-6">
         
         {/* Header section (Aligns to Name/Grec status card) */}
-        <div className="space-y-1 pb-3 border-b border-orange-100/60 dark:border-zinc-800/80">
-          <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block">
-            {language === 'Hindi' ? "॥ संपूर्ण विवरण ॥" : "|| Detailed Breakdown ||"}
-          </span>
-          <h2 className="text-lg sm:text-xl font-bold font-serif text-slate-800 dark:text-amber-100">
-            {language === 'Hindi' ? "वैदिक पंचांग संपूर्ण गणना" : "Vedic Panchang Complete Calculations"}
-          </h2>
-          <p className="text-[10.5px] sm:text-[11.5px] text-slate-500 dark:text-slate-400">
-            {language === 'Hindi' 
-              ? "सूर्योदय, सूर्यास्त, तिथि, नक्षत्र, योग, करण और संवत् का वैज्ञानिक एवं आध्यात्मिक संयोजन।" 
-              : "Scientific and spiritual combination of sunrise, sunset, tithi, nakshatra, yoga, karana, and samvat."}
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-orange-100/60 dark:border-zinc-800/80">
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block">
+              {language === 'Hindi' ? "॥ संपूर्ण विवरण ॥" : "|| Detailed Breakdown ||"}
+            </span>
+            <h2 className="text-lg sm:text-xl font-bold font-serif text-slate-800 dark:text-amber-100">
+              {language === 'Hindi' ? "वैदिक पंचांग संपूर्ण गणना" : "Vedic Panchang Complete Calculations"}
+            </h2>
+            <p className="text-[10.5px] sm:text-[11.5px] text-slate-500 dark:text-slate-400">
+              {language === 'Hindi' 
+                ? "सूर्योदय, सूर्यास्त, तिथि, नक्षत्र, योग, करण और संवत् का वैज्ञानिक एवं आध्यात्मिक संयोजन।" 
+                : "Scientific and spiritual combination of sunrise, sunset, tithi, nakshatra, yoga, karana, and samvat."}
+            </p>
+          </div>
+
+          {/* Premium Date Input Picker for Isolated Panchang Calculation */}
+          <div className="flex items-center gap-2 bg-slate-500/5 dark:bg-zinc-950/40 border border-slate-200/55 dark:border-zinc-850 rounded-xl p-2 shrink-0 self-start sm:self-center">
+            <span className="text-[10px] font-bold text-slate-450 dark:text-slate-400 uppercase font-mono tracking-wider">
+              {language === 'Hindi' ? 'तिथि चुनें:' : 'Select Date:'}
+            </span>
+            <input
+              type="date"
+              value={(() => {
+                const year = selectedDate.getFullYear();
+                const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                const day = String(selectedDate.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+              })()}
+              onChange={(e) => {
+                if (e.target.value) {
+                  const [y, m, d] = e.target.value.split('-').map(Number);
+                  onDateChange(new Date(y, m - 1, d));
+                }
+              }}
+              className="text-xs text-slate-800 dark:text-slate-100 bg-transparent outline-none font-mono font-bold cursor-pointer"
+            />
+          </div>
         </div>
 
         {/* A. Astronomical Timings Section */}
