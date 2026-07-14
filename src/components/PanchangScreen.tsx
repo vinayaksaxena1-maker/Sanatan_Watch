@@ -12,14 +12,19 @@ import {
   Share2,
   Clock,
   CalendarRange,
-  ChevronRight
+  ChevronRight,
+  TrendingUp,
+  Search,
+  CheckCircle2,
+  XCircle,
+  Sparkles
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { PanchangInfo } from '../types';
 import { MoonPhaseVisualizer } from './MoonPhaseVisualizer';
 import { HoraSystem } from './HoraSystem';
 import { getTranslation } from '../utils/translations';
-import { getMuhuratsForPanchang } from '../utils/panchangCalc';
+import { getMuhuratsForPanchang, NAKSHATRA_DETAILS } from '../utils/panchangCalc';
 
 const translatePlanetNameHindi = (name: string): string => {
   const map: Record<string, string> = {
@@ -369,6 +374,33 @@ const translateKaranaHindi = (name: string): string => {
   return map[cleanName] || name;
 };
 
+const translateNatureHindi = (nature: string): string => {
+  const cleanNature = nature.toLowerCase();
+  if (cleanNature.includes('kshipra') || cleanNature.includes('light')) return 'लघु और क्षिप्र (तेज)';
+  if (cleanNature.includes('ugra') || cleanNature.includes('fierce')) return 'उग्र (क्रूर)';
+  if (cleanNature.includes('dhruva') || cleanNature.includes('fixed')) return 'स्थिर (ध्रुव)';
+  if (cleanNature.includes('mridu') || cleanNature.includes('soft')) return 'मृदु (कोमल)';
+  if (cleanNature.includes('chara') || cleanNature.includes('movable')) return 'चर (गतिशील)';
+  if (cleanNature.includes('teekshna') || cleanNature.includes('sharp')) return 'तीक्ष्ण (उग्र/दारुण)';
+  if (cleanNature.includes('mishra') || cleanNature.includes('mixed')) return 'मिश्र (साधारण)';
+  return nature;
+};
+
+const getPlanetColor = (lord: string) => {
+  switch (lord.toLowerCase()) {
+    case 'ketu': return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 dark:border-purple-900/50';
+    case 'venus': return 'bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-950/30 dark:text-pink-400 dark:border-pink-900/50';
+    case 'sun': return 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50';
+    case 'moon': return 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-950/30 dark:text-sky-400 dark:border-sky-900/50';
+    case 'mars': return 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950/30 dark:text-rose-455 dark:border-rose-900/50';
+    case 'rahu': return 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-900/30 dark:text-slate-400 dark:border-slate-850';
+    case 'jupiter': return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-950/30 dark:text-yellow-400 dark:border-yellow-900/50';
+    case 'saturn': return 'bg-zinc-100 text-zinc-800 border-zinc-200 dark:bg-zinc-900/30 dark:text-zinc-400 dark:border-zinc-800';
+    case 'mercury': return 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50';
+    default: return 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-900/50';
+  }
+};
+
 const translateYogaNameHindi = (name: string): string => {
   const cleanName = name.split(' ')[0].split('(')[0].trim();
   const map: Record<string, string> = {
@@ -457,6 +489,8 @@ interface PanchangScreenProps {
 export function PanchangScreen({ panchang, currentTime, onShare, language = 'English' }: PanchangScreenProps) {
   const [showHoraModal, setShowHoraModal] = useState(false);
   const [showChoghadiyaModal, setShowChoghadiyaModal] = useState(false);
+  const [showAllNakshatrasModal, setShowAllNakshatrasModal] = useState(false);
+  const [nakshatraModalSearchQuery, setNakshatraModalSearchQuery] = useState('');
   const hDate = panchang.hinduDate;
 
   const getPlanetCombustionState = (planetName: string) => {
@@ -622,10 +656,42 @@ export function PanchangScreen({ panchang, currentTime, onShare, language = 'Eng
 
   return (
     <div id="panchang_screen_root" className="space-y-4 sm:space-y-6">
+      
+      {/* Quick Section Navigation Bar */}
+      <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 text-left shadow-xs border border-orange-100/30 dark:border-zinc-800/40">
+        <span className="text-[9px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block mb-2 leading-none">
+          {language === 'Hindi' ? "॥ त्वरित नेविगेशन ॥" : "|| Quick Navigation ||"}
+        </span>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { id: 'panchang_main_card', labelHindi: 'पंचांग मुख्य गणना', labelEng: 'Panchang Main' },
+            { id: 'astro_attributes_card', labelHindi: 'ज्योतिषीय विवरण', labelEng: 'Astrological Details' },
+            { id: 'muhurat_time_cycles_card', labelHindi: 'शुभ-अशुभ मुहूर्त', labelEng: 'Muhurat Cycles' },
+            { id: 'active_live_hora', labelHindi: 'लाइव होरा', labelEng: 'Live Hora' },
+            { id: 'active_live_choghadiya', labelHindi: 'लाइव चौघड़िया', labelEng: 'Live Choghadiya' },
+            { id: 'moon_phase_section', labelHindi: 'चन्द्र कलाएं', labelEng: 'Moon Phase' },
+            { id: 'navagraha_positions_card', labelHindi: 'ग्रह स्पष्ट डिग्री', labelEng: 'Navagraha Longitude' },
+            { id: 'grah_gochar_phal_card', labelHindi: 'ग्रह गोचर व फल', labelEng: 'Planet Transits' }
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                const element = document.getElementById(item.id);
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+              className="py-1.5 px-3 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer bg-white/70 hover:bg-orange-50/50 dark:bg-zinc-900/60 dark:hover:bg-zinc-800/80 border-orange-100/50 dark:border-zinc-800/60 text-slate-750 dark:text-slate-350 hover:border-orange-300 shadow-3xs"
+            >
+              {language === 'Hindi' ? item.labelHindi : item.labelEng}
+            </button>
+          ))}
+        </div>
+      </div>
 
 
       {/* COMPACT & INTEGRATED SINGLE PANCHANG CARD - Styled exactly like Welcome Card */}
-      <div className="glass-card-light dark:glass-card-dark p-4 sm:p-6 text-left space-y-6">
+      <div id="panchang_main_card" className="glass-card-light dark:glass-card-dark p-4 sm:p-6 text-left space-y-6">
         
         {/* Header section (Aligns to Name/Grec status card) */}
         <div className="space-y-1 pb-3 border-b border-orange-100/60 dark:border-zinc-800/80">
@@ -892,7 +958,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, language = 'Eng
       </div>
 
       {/* PHASE 12: DETAILED ASTROLOGICAL ATTRIBUTES CARD */}
-      <div className="glass-card-light dark:glass-card-dark p-4 sm:p-6 text-left space-y-6">
+      <div id="astro_attributes_card" className="glass-card-light dark:glass-card-dark p-4 sm:p-6 text-left space-y-6">
         <div className="space-y-1 pb-3 border-b border-orange-100/60 dark:border-zinc-800/80">
           <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block">{language === 'Hindi' ? "॥ अयन, ऋतु, पाया व नक्षत्र विशेष ॥" : "|| Ayana, Ritu, Paya & Nakshatra ||"}</span>
           <h2 className="text-lg sm:text-xl font-bold font-serif text-slate-800 dark:text-amber-100">{language === 'Hindi' ? "सूक्ष्म ज्योतिषीय विवरण" : "Detailed Astrological Attributes"}</h2>
@@ -1074,7 +1140,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, language = 'Eng
       </div>
 
       {/* DAILY MUHURAT & TIME CYCLES CARD */}
-      <div className="glass-card-light dark:glass-card-dark p-4 sm:p-6 text-left space-y-4 shadow-sm">
+      <div id="muhurat_time_cycles_card" className="glass-card-light dark:glass-card-dark p-4 sm:p-6 text-left space-y-4 shadow-sm">
         <div className="space-y-1 pb-3 border-b border-orange-100/60 dark:border-zinc-800/80">
           <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block">
             {language === 'Hindi' ? "॥ शुभ-अशुभ काल चक्र ॥" : "|| Auspicious & Inauspicious Muhuratas ||"}
@@ -1242,7 +1308,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, language = 'Eng
 
       {/* Dynamic Active Live Hora Section Card (Only currently active Hora is shown) */}
       {activeHora && (
-        <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left relative overflow-hidden mt-4">
+        <div id="active_live_hora" className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left relative overflow-hidden mt-4">
           {/* Subtle design aura */}
           <div className="absolute right-0 top-0 -mt-10 -mr-10 w-36 h-36 bg-orange-500/8 dark:bg-orange-600/8 blur-2xl rounded-full pointer-events-none"></div>
 
@@ -1319,7 +1385,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, language = 'Eng
 
       {/* Dynamic Active Live Choghadiya Section Card (Only currently active Choghadiya is shown) */}
       {activeChoghadiya && (
-        <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left relative overflow-hidden mt-4">
+        <div id="active_live_choghadiya" className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left relative overflow-hidden mt-4">
           {/* Subtle design aura */}
           <div className="absolute right-0 top-0 -mt-10 -mr-10 w-36 h-36 bg-orange-500/8 dark:bg-orange-600/8 blur-2xl rounded-full pointer-events-none"></div>
 
@@ -1459,7 +1525,9 @@ export function PanchangScreen({ panchang, currentTime, onShare, language = 'Eng
       )}
 
       {/* Interactive D3.js Moon Phase & Paksha Orbit representation */}
-      <MoonPhaseVisualizer panchang={panchang} />
+      <div id="moon_phase_section">
+        <MoonPhaseVisualizer panchang={panchang} />
+      </div>
 
       {/* Bhadra (Vishti Karana) Engine details card */}
       {panchang.bhadra && panchang.bhadra.active && (
@@ -1538,7 +1606,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, language = 'Eng
 
       {/* Navagraha Planetary Degrees details card */}
       {panchang.planets && (
-        <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 border border-orange-100/50 dark:border-orange-950/20 rounded-3xl mt-4 text-left shadow-md">
+        <div id="navagraha_positions_card" className="glass-card-light dark:glass-card-dark p-4 sm:p-5 border border-orange-100/50 dark:border-orange-950/20 rounded-3xl mt-4 text-left shadow-md">
           <div className="flex items-center gap-2 mb-3 pb-1.5 border-b border-orange-100/20 dark:border-orange-950/10">
             <Feather className="w-4 h-4 text-orange-500" />
             <span className="text-[10px] font-black text-slate-400 dark:text-amber-500 uppercase tracking-widest font-mono">{language === 'Hindi' ? "नवग्रह स्पष्ट स्थिति" : "Navagraha Planetary Positions"}</span>
@@ -1597,6 +1665,203 @@ export function PanchangScreen({ panchang, currentTime, onShare, language = 'Eng
         </div>
       )}
 
+
+      {/* PHASE 13: GRAH GOCHAR & BHAVISHYA PHAL CARD */}
+      <div id="grah_gochar_phal_card" className="glass-card-light dark:glass-card-dark p-4 sm:p-5 border border-orange-100/50 dark:border-orange-950/20 rounded-3xl mt-4 text-left shadow-md">
+        <div className="flex items-center gap-2 mb-3 pb-1.5 border-b border-orange-100/20 dark:border-orange-950/10">
+          <TrendingUp className="w-4 h-4 text-orange-500" />
+          <span className="text-[10px] font-black text-slate-400 dark:text-amber-500 uppercase tracking-widest font-mono">
+            {language === 'Hindi' ? "ग्रह गोचर एवं दैनिक भविष्यफल" : "Planet Transit & Astrological Prediction"}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Left Column: Grah Gochar List */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-extrabold text-slate-700 dark:text-amber-100 font-serif flex items-center gap-1">
+              {language === 'Hindi' ? "🌌 वर्तमान ग्रह गोचर" : "🌌 Current Planet Transits"}
+            </h4>
+            <div className="grid grid-cols-2 gap-2 text-2xs">
+              {panchang.planets?.map((p, idx) => (
+                <div key={idx} className="p-2 rounded-xl bg-white/5 dark:bg-[#120B08]/20 border border-white/5 flex items-center justify-between gap-2">
+                  <span className="font-bold text-slate-800 dark:text-orange-100">{language === 'Hindi' ? p.hindiName : p.name}</span>
+                  <span className="text-slate-550 dark:text-slate-400">➔ {language === 'Hindi' ? p.signHindi : p.sign}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Column: Bhavishya Phal Reading */}
+          <div className="space-y-3 flex flex-col justify-between">
+            <div>
+              <h4 className="text-xs font-extrabold text-slate-700 dark:text-amber-100 font-serif flex items-center gap-1">
+                {language === 'Hindi' ? "🔮 आज का भविष्यफल (फलकथन)" : "🔮 Daily Astrological Prediction"}
+              </h4>
+              
+              <div className="mt-2.5 p-3 rounded-2xl bg-orange-500/5 dark:bg-orange-500/3 border border-orange-150/15 dark:border-orange-950/20 text-[11px] leading-relaxed text-slate-650 dark:text-zinc-355">
+                {language === 'Hindi' ? (
+                  <p>
+                    आज चंद्रमा <strong>{panchang.planets?.find(p => p.name === 'Moon')?.signHindi || 'चन्द्र'}</strong> राशि और <strong>{hDate.nakshatra.hindiName}</strong> नक्षत्र में गोचर कर रहे हैं। 
+                    {hDate.nakshatra.lord === 'Sun' || hDate.nakshatra.lord === 'Jupiter' || hDate.nakshatra.lord === 'Moon' || hDate.nakshatra.lord === 'Venus' || hDate.nakshatra.lord === 'Mercury' ? (
+                      <span> यह एक शुभ और रचनात्मक प्रभाव लेकर आ रहा है। नए कार्यों की शुरुआत, विद्यारंभ, एवं व्यावसायिक लेन-देन के लिए आज का दिन अत्यंत अनुकूल है।</span>
+                    ) : (
+                      <span> आज के ग्रह-गोचर मध्यम व संवेदनशील प्रभाव दे रहे हैं। किसी भी महत्वपूर्ण निर्णय में जल्दबाजी से बचें, वाणी पर संयम रखें और नियमित कार्यों पर ध्यान दें।</span>
+                    )}
+                  </p>
+                ) : (
+                  <p>
+                    Today, the Moon transits in <strong>{panchang.planets?.find(p => p.name === 'Moon')?.sign || 'Moon sign'}</strong> and <strong>{hDate.nakshatra.name}</strong> Nakshatra. 
+                    {hDate.nakshatra.lord === 'Sun' || hDate.nakshatra.lord === 'Jupiter' || hDate.nakshatra.lord === 'Moon' || hDate.nakshatra.lord === 'Venus' || hDate.nakshatra.lord === 'Mercury' ? (
+                      <span> This transit brings positive and creative energies. It is a highly favorable day for starting new initiatives, learning, and business activities.</span>
+                    ) : (
+                      <span> The current planetary transit suggests a moderate and sensitive period. Avoid rushing into major decisions, maintain patience, and focus on routine activities.</span>
+                    )}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-[10px]">
+              <div className="p-2 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-emerald-800 dark:text-emerald-400">
+                <span className="font-bold block mb-0.5">{language === 'Hindi' ? "👍 अनुकूल:" : "👍 Favorable:"}</span>
+                <span>{language === 'Hindi' ? "लेखन, आध्यात्मिक साधना, सामान्य खरीदारी।" : "Writing, spiritual practice, routine buying."}</span>
+              </div>
+              <div className="p-2 rounded-xl bg-rose-500/5 border border-rose-500/10 text-rose-800 dark:text-rose-455">
+                <span className="font-bold block mb-0.5">{language === 'Hindi' ? "👎 वर्जित:" : "👎 Avoid:"}</span>
+                <span>{language === 'Hindi' ? "नया विवाद, भूमि क्रय, यात्रा आरंभ।" : "New conflicts, land purchases, long travels."}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Full Table text-link in card footer */}
+        <div className="mt-4 pt-3.5 border-t border-slate-100/10 dark:border-zinc-850/30 flex justify-between items-center text-[10px]">
+          <span className="text-slate-400 dark:text-slate-500 font-mono">
+            {language === 'Hindi' ? "* नक्षत्र ज्योतिष गणना पद्धति" : "* Vedic Nakshatra System"}
+          </span>
+          <span 
+            className="font-extrabold text-orange-655 dark:text-amber-400 hover:underline cursor-pointer flex items-center gap-0.5 font-sans"
+            onClick={() => setShowAllNakshatrasModal(true)}
+          >
+            {language === 'Hindi' ? "सम्पूर्ण नक्षत्र विवरण" : "Full Nakshatra Details"} <ChevronRight className="w-2.5 h-2.5" />
+          </span>
+        </div>
+      </div>
+
+      {/* All Nakshatras Details Modal */}
+      {showAllNakshatrasModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div className="bg-[#120B08] border border-white/10 rounded-3xl p-5 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative text-left">
+            <button 
+              onClick={() => {
+                setShowAllNakshatrasModal(false);
+                setNakshatraModalSearchQuery('');
+              }}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white font-mono font-bold text-lg cursor-pointer bg-white/5 w-8 h-8 rounded-full flex items-center justify-center border border-white/5"
+            >
+              ✕
+            </button>
+            <div className="pb-3 border-b border-orange-100/10 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-amber-500 block">
+                  {language === 'Hindi' ? "॥ ज्योतिष शास्त्र नक्षत्र संदर्भ ॥" : "|| Vedic Nakshatra Reference ||"}
+                </span>
+                <h3 className="text-lg font-bold font-serif text-amber-100">
+                  {language === 'Hindi' ? "२७ नक्षत्र सम्पूर्ण विवरण" : "27 Nakshatras Complete Details"}
+                </h3>
+              </div>
+              
+              <div className="relative min-w-[200px] w-full sm:w-auto">
+                <input
+                  type="text"
+                  placeholder={language === 'Hindi' ? "नक्षत्र खोजें..." : "Search Nakshatras..."}
+                  value={nakshatraModalSearchQuery}
+                  onChange={(e) => setNakshatraModalSearchQuery(e.target.value)}
+                  className="w-full text-xs p-2 pl-8 rounded-xl bg-white/5 border border-white/10 outline-none text-slate-100 focus:border-orange-500"
+                />
+                <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              {NAKSHATRA_DETAILS.filter(nak => {
+                const query = nakshatraModalSearchQuery.toLowerCase();
+                return (
+                  nak.name.toLowerCase().includes(query) ||
+                  nak.hindiName.includes(query) ||
+                  nak.lord.toLowerCase().includes(query) ||
+                  nak.deity.toLowerCase().includes(query)
+                );
+              }).map((nak, idx) => {
+                const planetColor = getPlanetColor(nak.lord);
+                const lordNameTranslated = language === 'Hindi' ? translateLordHindi(nak.lord) : nak.lord;
+                const deityTranslated = language === 'Hindi' ? translateDeityHindi(nak.deity) : nak.deity;
+                const symbolTranslated = language === 'Hindi' ? translateSymbolHindi(nak.symbol) : nak.symbol;
+                const natureTranslated = language === 'Hindi' ? translateNatureHindi(nak.nature) : nak.nature;
+
+                return (
+                  <div key={nak.name} className="p-4 rounded-2xl bg-orange-50/20 dark:bg-orange-950/5 border border-orange-100/15 dark:border-zinc-850/45 flex flex-col justify-between text-left relative overflow-hidden">
+                    <div className="absolute right-3 top-2 text-3xl font-mono font-black text-slate-500/5 select-none pointer-events-none">
+                      #{idx + 1}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <h4 className="text-sm sm:text-base font-black text-slate-850 dark:text-amber-100 font-serif leading-none">
+                          {language === 'Hindi' ? nak.hindiName : nak.name}
+                        </h4>
+                        <span className={"text-[8px] font-extrabold px-2 py-0.5 rounded-full border tracking-wide font-mono uppercase " + planetColor}>
+                          {language === 'Hindi' ? "स्वामी" : "Ruler"}: {lordNameTranslated}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-x-2 gap-y-1 py-2 border-t border-b border-orange-100/10 dark:border-zinc-800/20 my-2 text-[10px]">
+                        <div>
+                          <span className="text-slate-400 dark:text-slate-500 uppercase font-bold tracking-tight block text-[8px]">{language === 'Hindi' ? "प्रतीक:" : "Symbol:"}</span>
+                          <span className="font-extrabold text-slate-800 dark:text-amber-100 mt-0.5 block">{symbolTranslated}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 dark:text-slate-500 uppercase font-bold tracking-tight block text-[8px]">{language === 'Hindi' ? "देवता:" : "Deity:"}</span>
+                          <span className="font-extrabold text-slate-800 dark:text-amber-100 mt-0.5 block truncate">{deityTranslated}</span>
+                        </div>
+                        <div className="col-span-2">
+                          <span className="text-slate-400 dark:text-slate-500 uppercase font-bold tracking-tight block text-[8px]">{language === 'Hindi' ? "प्रवृत्ति (स्वभाव):" : "Nature:"}</span>
+                          <span className="font-extrabold text-[#7c2d12] dark:text-amber-200 flex items-center gap-1 mt-0.5">
+                            <Sparkles className="w-2.5 h-2.5 text-orange-500 shrink-0 animate-pulse" />
+                            {natureTranslated}
+                          </span>
+                        </div>
+                      </div>
+
+                      <p className="text-[10px] text-slate-650 dark:text-slate-350 leading-normal mb-3 font-sans">
+                        {nak.description}
+                      </p>
+                    </div>
+
+                    <div className="space-y-1.5 pt-2 border-t border-dotted border-orange-100/10">
+                      <div className="flex items-start gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0 mt-0.5" />
+                        <span className="text-[9.5px] text-slate-650 dark:text-slate-350 leading-tight">
+                          <strong className="text-emerald-700 dark:text-emerald-455 mr-1">{language === 'Hindi' ? "अनुकूल कार्य:" : "Suitable Acts:"}</strong>
+                          {nak.suitableActivities.join(', ')}
+                        </span>
+                      </div>
+                      {nak.avoidActivities && nak.avoidActivities.length > 0 && (
+                        <div className="flex items-start gap-1">
+                          <XCircle className="w-3 h-3 text-rose-500 shrink-0 mt-0.5" />
+                          <span className="text-[9.5px] text-slate-650 dark:text-slate-350 leading-tight">
+                            <strong className="text-rose-700 dark:text-rose-455 mr-1">{language === 'Hindi' ? "वर्जित कार्य:" : "Avoid Acts:"}</strong>
+                            {nak.avoidActivities.join(', ')}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hora Table Modal */}
       {showHoraModal && (
