@@ -1,212 +1,401 @@
-import React, { useState } from 'react';
-import { Bell, Plus, Trash2, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Trash2, Clock, Volume2, ShieldAlert } from 'lucide-react';
 import { AppNotification } from '../types';
+import { getMuhuratsForPanchang } from '../utils/panchangCalc';
 
 interface NotificationSimulatorProps {
   notificationsList: AppNotification[];
   setNotificationsList: React.Dispatch<React.SetStateAction<AppNotification[]>>;
   onPushToast: (title: string, body: string) => void;
+  panchangInfo?: any;
 }
 
-export function NotificationSimulator({ notificationsList, setNotificationsList, onPushToast }: NotificationSimulatorProps) {
+export function NotificationSimulator({ notificationsList, setNotificationsList, onPushToast, panchangInfo }: NotificationSimulatorProps) {
   const [customTitle, setCustomTitle] = useState('');
   const [customBody, setCustomBody] = useState('');
   const [customTime, setCustomTime] = useState('06:00 AM');
+  const [customEndTime, setCustomEndTime] = useState('');
   
-  // Quick preferences state preloaded
-  const [prefPanchang, setPrefPanchang] = useState(true);
-  const [prefFestival, setPrefFestival] = useState(true);
-  const [prefEkadashi, setPrefEkadashi] = useState(true);
-  const [prefPurnima, setPrefPurnima] = useState(true);
-  const [prefMuhurat, setPrefMuhurat] = useState(true);
+  // Custom Alarm Settings states
+  const [customVibrate, setCustomVibrate] = useState(true);
+  const [customSnooze, setCustomSnooze] = useState(2); // default 2 minutes
+  const [ringtoneType, setRingtoneType] = useState<'default' | 'system' | 'custom'>('default');
+  const [ringtoneUri, setRingtoneUri] = useState('');
+  const [ringtoneTitle, setRingtoneTitle] = useState('');
 
-  // Clear single or all logs
-  const handleClearAll = () => {
-    setNotificationsList([]);
+  // Modals state for Shubh/Ashubh picker
+  const [showAdverseModal, setShowAdverseModal] = useState(false);
+  const [showAuspiciousModal, setShowAuspiciousModal] = useState(false);
+
+  // Register JS bridge callback for Custom Ringtone picking
+  useEffect(() => {
+    window.onRingtonePicked = (alarmId, uri, title) => {
+      setRingtoneUri(uri);
+      setRingtoneTitle(title);
+      onPushToast("🎵 टोन सेट की गई", `${title} को अलार्म टोन सेट किया गया!`);
+    };
+    return () => {
+      window.onRingtonePicked = undefined;
+    };
+  }, [onPushToast]);
+
+  const handleSelectCustomRingtone = () => {
+    if (window.AndroidAlarm) {
+      window.AndroidAlarm.selectRingtone("custom_reminder_id");
+    } else {
+      onPushToast("⚠️ सुविधा अनुपलब्ध", "कस्टम टोन केवल एंड्रॉइड मोबाइल ऐप पर चुना जा सकता है।");
+    }
+  };
+
+  // Cancel alarm from active list
+  const handleDeleteAlert = (id: string) => {
+    if (window.AndroidAlarm) {
+      window.AndroidAlarm.cancelAlarm(id);
+    }
+    setNotificationsList(prev => prev.filter(alert => alert.id !== id));
+    onPushToast("🗑️ अलार्म हटाया गया", "अलार्म सफलतापूर्वक रद्द कर दिया गया है।");
+  };
+
+  const parseTimeToMs = (timeStr: string): number => {
+    const cleanStr = timeStr.trim().toUpperCase();
+    const match = cleanStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/);
+    const now = new Date();
+    
+    if (match) {
+      let hours = parseInt(match[1], 10);
+      const minutes = parseInt(match[2], 10);
+      const ampm = match[3];
+
+      if (ampm === 'PM' && hours < 12) hours += 12;
+      if (ampm === 'AM' && hours === 12) hours = 0;
+
+      const alarmDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
+      if (alarmDate.getTime() <= now.getTime()) {
+        alarmDate.setDate(alarmDate.getDate() + 1);
+      }
+      return alarmDate.getTime();
+    }
+    return now.getTime() + 10000; // fallback 10s
   };
 
   const handleCreateCustom = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customTitle || !customBody) return;
 
+    // Vibration and Snooze tags representation for UI
+    const detailsSuffix = ` (कंपन: ${customVibrate ? 'हाँ' : 'नहीं'}, सूनोज़: ${customSnooze} मिनट)`;
+
     const newAlert: AppNotification = {
       id: `alert_${Date.now()}`,
       title: customTitle,
-      body: customBody,
+      body: customBody + detailsSuffix,
       time: customTime,
+      endTime: customEndTime || undefined,
       type: 'custom',
       isRead: false
     };
 
     setNotificationsList([newAlert, ...notificationsList]);
     onPushToast(customTitle, `[समय: ${customTime}] ${customBody}`);
+
+    if (window.AndroidAlarm) {
+      const triggerTimeMs = parseTimeToMs(customTime);
+      let finalUri = '';
+      if (ringtoneType === 'system') {
+        finalUri = 'SYSTEM_DEFAULT';
+      } else if (ringtoneType === 'custom') {
+        finalUri = ringtoneUri;
+      }
+      
+      window.AndroidAlarm.scheduleAlarm(
+        newAlert.id,
+        customTitle,
+        triggerTimeMs,
+        customVibrate,
+        customSnooze,
+        finalUri
+      );
+    }
     
     setCustomTitle('');
     setCustomBody('');
+    setCustomEndTime('');
   };
 
-  // Simulates a test immediate push
-  const handleTestTrigger = (type: 'morning' | 'festival' | 'ekadashi' | 'muhurat') => {
-    let title = '';
-    let body = '';
-    switch(type) {
-      case 'morning':
-        title = '🌅 आज का शुभ पंचांग';
-        body = 'आज शुक्ल पक्ष की एकादशी है। शुभ समय अभिजीत मुहूर्त दोपहर 11:45 से प्रारंभ होगा। प्रभु स्मरण करें!';
-        break;
-      case 'festival':
-        title = '🚩 आगामी त्योहार अनुस्मारक';
-        body = 'कल देवोत्थान एकादशी का पावन पर्व है। व्रत संकल्प की तैयारी करें एवं हरि कथा सुनें।';
-        break;
-      case 'ekadashi':
-        title = '🥛 व्रत एकादशी सूचना';
-        body = 'आज निर्जला एकादशी व्रत है! बिना जल ग्रहण किए अन्न त्याग कर ध्यान लगाना उत्तम फलदायी है।';
-        break;
-      default:
-        title = '🔔 शुभ मुहूर्त प्रारंभ';
-        body = 'अमृत चौघड़िया मुहूर्त प्रारंभ हो गया है। मांगलिक कार्यों के अनुबंध हेतु समय सर्वोत्तम है!';
-        break;
+  // Extract Adverse periods list
+  const getAdverseTimesList = () => {
+    if (!panchangInfo) return [];
+    const list: { name: string; time: string; start: string; end: string; desc: string }[] = [];
+
+    // 1. Rahu Kaal
+    if (panchangInfo.rahuKaal) {
+      list.push({
+        name: 'राहुकाल',
+        time: `${panchangInfo.rahuKaal.start} - ${panchangInfo.rahuKaal.end}`,
+        start: panchangInfo.rahuKaal.start,
+        end: panchangInfo.rahuKaal.end,
+        desc: 'राहुकाल के दौरान कोई भी नया या मांगलिक कार्य शुरू करना वर्जित है।'
+      });
     }
 
-    const testAlert: AppNotification = {
-      id: `alert_${Date.now()}`,
-      title,
-      body,
-      time: new Date().toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' }),
-      type: type === 'ekadashi' ? 'festival' : type,
-      isRead: false
-    };
+    // 2. Yamagandam
+    if (panchangInfo.yamagandam) {
+      list.push({
+        name: 'यमगण्डम काल',
+        time: `${panchangInfo.yamagandam.start} - ${panchangInfo.yamagandam.end}`,
+        start: panchangInfo.yamagandam.start,
+        end: panchangInfo.yamagandam.end,
+        desc: 'यमगण्डम में मांगलिक कार्य करने पर अशुभ परिणाम प्राप्त होते हैं।'
+      });
+    }
 
-    setNotificationsList([testAlert, ...notificationsList]);
-    onPushToast(title, body);
+    // 3. Gulik Kaal
+    if (panchangInfo.gulikKaal) {
+      list.push({
+        name: 'गुलिक काल',
+        time: `${panchangInfo.gulikKaal.start} - ${panchangInfo.gulikKaal.end}`,
+        start: panchangInfo.gulikKaal.start,
+        end: panchangInfo.gulikKaal.end,
+        desc: 'गुलिक काल के प्रभाव में शुभ और संचय कार्य टालना चाहिए।'
+      });
+    }
+
+    // 4. Durmuhurat
+    if (panchangInfo.durmuhurat && panchangInfo.durmuhurat.length > 0) {
+      panchangInfo.durmuhurat.forEach((dm: any, idx: number) => {
+        list.push({
+          name: `दुर्मुहूर्त ${idx + 1}`,
+          time: `${dm.start} - ${dm.end}`,
+          start: dm.start,
+          end: dm.end,
+          desc: 'दुर्मुहूर्त काल ज्योतिषीय दृष्टि से प्रतिकूल समय माना जाता है।'
+        });
+      });
+    }
+
+    // 5. Varjyam
+    if (panchangInfo.varjyam && panchangInfo.varjyam.length > 0) {
+      panchangInfo.varjyam.forEach((vj: any, idx: number) => {
+        list.push({
+          name: `वर्ज्यम काल ${idx + 1}`,
+          time: `${vj.start} - ${vj.end}`,
+          start: vj.start,
+          end: vj.end,
+          desc: 'वर्ज्यम काल में यात्रा, शुभ कार्य और गृह प्रवेश वर्जित हैं।'
+        });
+      });
+    }
+
+    // 6. Inauspicious Choghadiyas
+    if (panchangInfo.choghadiya) {
+      panchangInfo.choghadiya.forEach((chog: any) => {
+        if (chog.type === 'Kaal' || chog.type === 'Rog' || chog.type === 'Udveg') {
+          const typeMap: Record<string, string> = { 'Kaal': 'काल', 'Rog': 'रोग', 'Udveg': 'उद्वेग' };
+          const name = `${typeMap[chog.type]} चौघड़िया (${chog.isDay ? 'दिन' : 'रात्रि'})`;
+          list.push({
+            name,
+            time: `${chog.startTime} - ${chog.endTime}`,
+            start: chog.startTime,
+            end: chog.endTime,
+            desc: `${chog.type === 'Rog' ? 'स्वास्थ्य हानि' : chog.type === 'Kaal' ? 'कलह' : 'चिंता'} कारक चौघड़िया मुहूर्त।`
+          });
+        }
+      });
+    }
+
+    return list;
+  };
+
+  // Extract Auspicious periods list
+  const getAuspiciousTimesList = () => {
+    if (!panchangInfo) return [];
+    const list: { name: string; time: string; start: string; end: string; desc: string }[] = [];
+
+    // 1. Core Muhurats (Brahma, Abhijit, Godhuli) using getMuhuratsForPanchang
+    try {
+      const muhurats = getMuhuratsForPanchang(panchangInfo);
+      muhurats.forEach(muh => {
+        if (muh.type === 'Amrit' || muh.type === 'Shubh') {
+          list.push({
+            name: muh.hindiName || muh.name,
+            time: `${muh.startTime} - ${muh.endTime}`,
+            start: muh.startTime,
+            end: muh.endTime,
+            desc: muh.description || 'मांगलिक कार्यों और नवीन शुरुआत के लिए अत्यंत शुभ काल।'
+          });
+        }
+      });
+    } catch (e) {
+      console.error("Error fetching muhurats", e);
+    }
+
+    // 2. Auspicious Choghadiyas
+    if (panchangInfo.choghadiya) {
+      panchangInfo.choghadiya.forEach((chog: any) => {
+        if (chog.type === 'Shubh' || chog.type === 'Amrit' || chog.type === 'Labh') {
+          const typeMap: Record<string, string> = { 'Shubh': 'शुभ', 'Amrit': 'अमृत', 'Labh': 'लाभ' };
+          const name = `${typeMap[chog.type]} चौघड़िया (${chog.isDay ? 'दिन' : 'रात्रि'})`;
+          list.push({
+            name,
+            time: `${chog.startTime} - ${chog.endTime}`,
+            start: chog.startTime,
+            end: chog.endTime,
+            desc: 'उन्नति, समृद्धि और शुभ कार्यों के संपादन के लिए सर्वोत्तम समय।'
+          });
+        }
+      });
+    }
+
+    // 3. Purnima or Amavasya tithi check
+    if (panchangInfo.hinduDate?.tithi?.hindiName) {
+      const tithiHindi = panchangInfo.hinduDate.tithi.hindiName;
+      if (tithiHindi.includes("पूर्णिमा") || tithiHindi.includes("अमावस्या")) {
+        list.push({
+          name: `${tithiHindi} व्रत/स्नान-दान`,
+          time: `सूर्योदय: ${panchangInfo.sunrise}`,
+          start: panchangInfo.sunrise,
+          end: panchangInfo.sunset, // defaults to sunset for duration representation
+          desc: `आज पवित्र ${tithiHindi} तिथि है। गंगा स्नान, तर्पण, पूजा और व्रत अनुष्ठान के लिए सर्वोत्तम समय।`
+        });
+      }
+    }
+
+    return list;
   };
 
   return (
-    <div id="notification_simulator_root" className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left font-sans">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-6">
-        
-        {/* Toggle Notification settings (Left Pane) */}
-        <div className="md:col-span-7 space-y-4 sm:space-y-5">
-          <div>
-            <h2 className="text-base sm:text-lg font-black text-slate-800 dark:text-amber-100 flex items-center gap-2 font-serif">
-              <Bell className="w-5 h-5 text-orange-600 animate-bounce" />
-              भक्ति मय सूचना और अलार्म
-            </h2>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-normal">
-              शुभ समय, आगामी त्योहारों और महत्वपूर्ण एकादशी व्रत के लिए सूचनाएं (रिमाइंडर) सेट करें और धर्म-कर्म संबधी सूचनाओं से हमेशा जुड़े रहें।
-            </p>
-          </div>
-
-          {/* Preferences Switches List */}
-          <div className="space-y-2.5 bg-orange-500/5 dark:bg-orange-950/10 p-3 sm:p-4 rounded-2xl border border-orange-100/30">
-            <h3 className="text-xs font-bold text-orange-900 dark:text-orange-400 uppercase tracking-wider mb-1 font-mono flex items-center gap-1">
-              <ShieldCheck className="w-4 h-4 text-orange-600" />
-              अलार्म सेटिंग्स चालू/बंद करें
-            </h3>
-
-            {/* Switch Items */}
-            <div className="flex items-center justify-between p-1.5 hover:bg-orange-500/5 rounded-xl transition-all">
-              <div>
-                <span className="text-xs font-bold text-slate-800 dark:text-amber-100 block">प्रातःकाल पंचांग सूचना</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">उदयकाल सूर्योदय के समय दैनिक पंचांग और आज का संदेश पाएं</span>
-              </div>
-              <input
-                type="checkbox"
-                checked={prefPanchang}
-                onChange={(e) => setPrefPanchang(e.target.checked)}
-                className="w-9 h-5 rounded-full bg-slate-200 dark:bg-zinc-800 checked:bg-orange-650 appearance-none cursor-pointer relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-all checked:after:translate-x-4 border border-slate-350 dark:border-zinc-700 checked:border-orange-600 shrink-0"
-              />
-            </div>
-
-            <div className="flex items-center justify-between p-1.5 hover:bg-orange-550/5 rounded-xl transition-all">
-              <div>
-                <span className="text-xs font-bold text-slate-800 dark:text-amber-100 block">आगामी त्योहार की पूर्व सूचना</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">मुख्य त्योहारों से ३ दिन पहले तैयारी की जानकारी एवं अलार्म</span>
-              </div>
-              <input
-                type="checkbox"
-                checked={prefFestival}
-                onChange={(e) => setPrefFestival(e.target.checked)}
-                className="w-9 h-5 rounded-full bg-slate-200 dark:bg-zinc-800 checked:bg-orange-655 appearance-none cursor-pointer relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-all checked:after:translate-x-4 border border-slate-350 dark:border-zinc-700 checked:border-orange-600 shrink-0"
-              />
-            </div>
-
-            <div className="flex items-center justify-between p-1.5 hover:bg-orange-550/5 rounded-xl transition-all">
-              <div>
-                <span className="text-xs font-bold text-slate-800 dark:text-amber-100 block">एकादशी व्रत अनुस्मारक</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">हर महीने आने वाली पावन एकादशी व्रत के दिन प्रभु स्मरण सूचना</span>
-              </div>
-              <input
-                type="checkbox"
-                checked={prefEkadashi}
-                onChange={(e) => setPrefEkadashi(e.target.checked)}
-                className="w-9 h-5 rounded-full bg-slate-200 dark:bg-zinc-800 checked:bg-orange-655 appearance-none cursor-pointer relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-all checked:after:translate-x-4 border border-slate-350 dark:border-zinc-700 checked:border-orange-600 shrink-0"
-              />
-            </div>
-
-            <div className="flex items-center justify-between p-1.5 hover:bg-orange-550/5 rounded-xl transition-all">
-              <div>
-                <span className="text-xs font-bold text-slate-800 dark:text-amber-100 block">पूर्णिमा और अमावस्या तिथि</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">चंद्र चक्र, स्नान-दान पर्व और महत्वपूर्ण हिंदू तिथियों की सूचना</span>
-              </div>
-              <input
-                type="checkbox"
-                checked={prefPurnima}
-                onChange={(e) => setPrefPurnima(e.target.checked)}
-                className="w-9 h-5 rounded-full bg-slate-200 dark:bg-zinc-800 checked:bg-orange-655 appearance-none cursor-pointer relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-all checked:after:translate-x-4 border border-slate-350 dark:border-zinc-700 checked:border-orange-600 shrink-0"
-              />
-            </div>
-
-            <div className="flex items-center justify-between p-1.5 hover:bg-orange-550/5 rounded-xl transition-all">
-              <div>
-                <span className="text-xs font-bold text-slate-800 dark:text-amber-100 block">शुभ मुहूर्त प्रारंभ अनुस्मारक</span>
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">अभिजीत और अमृत काल चौघड़िया मुहूर्त शुरू होने से १० मिनट पहले सूचना</span>
-              </div>
-              <input
-                type="checkbox"
-                checked={prefMuhurat}
-                onChange={(e) => setPrefMuhurat(e.target.checked)}
-                className="w-9 h-5 rounded-full bg-slate-200 dark:bg-zinc-800 checked:bg-orange-655 appearance-none cursor-pointer relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-all checked:after:translate-x-4 border border-slate-350 dark:border-zinc-700 checked:border-orange-600 shrink-0"
-              />
-            </div>
-          </div>
-
-          {/* Quick Sandbox Tools */}
-          <div className="space-y-2.5">
-            <h3 className="text-xs font-bold text-slate-400 dark:text-amber-500 uppercase tracking-wider font-mono">टेस्ट नोटिफिकेशन सैंडबॉक्स</h3>
-            <div className="grid grid-cols-2 gap-1.5">
-              <button
-                onClick={() => handleTestTrigger('morning')}
-                className="p-2.5 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 text-orange-900 dark:text-orange-400 rounded-xl font-bold cursor-pointer text-2xs transition-all"
+    <div id="notification_simulator_root" className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left font-sans relative">
+      
+      {/* Adverse Times Modal */}
+      {showAdverseModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-[#1C1714] border border-red-950/40 rounded-3xl w-full max-w-md p-5 shadow-2xl max-h-[80vh] flex flex-col">
+            <div className="flex justify-between items-center border-b border-red-950/20 pb-3 mb-3">
+              <h3 className="text-sm font-bold text-red-500 font-serif flex items-center gap-1.5">
+                <span>🔴</span> आज के अशुभ काल (Adverse Periods)
+              </h3>
+              <button 
+                onClick={() => setShowAdverseModal(false)}
+                className="text-slate-400 hover:text-white cursor-pointer font-bold text-base px-2"
               >
-                🌄 दैनिक पंचांग भेजें
+                ✕
               </button>
-              <button
-                onClick={() => handleTestTrigger('festival')}
-                className="p-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-amber-950 dark:text-amber-300 rounded-xl font-bold cursor-pointer text-2xs transition-all"
-              >
-                🚩 कल का त्योहार भेजें
-              </button>
-              <button
-                onClick={() => handleTestTrigger('ekadashi')}
-                className="p-2.5 bg-emerald-550/5 hover:bg-emerald-500/15 border border-emerald-500/20 text-emerald-950 dark:text-emerald-400 rounded-xl font-bold cursor-pointer text-2xs transition-all"
-              >
-                🥛 एकादशी व्रत भेजें
-              </button>
-              <button
-                onClick={() => handleTestTrigger('muhurat')}
-                className="p-2.5 bg-sky-550/5 hover:bg-sky-500/15 border border-sky-500/20 text-sky-950 dark:text-sky-400 rounded-xl font-bold cursor-pointer text-2xs transition-all"
-              >
-                🔔 मुहूर्त सूचना भेजें
-              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
+              {getAdverseTimesList().length === 0 ? (
+                <div className="text-center py-6 text-xs text-slate-500 italic">
+                  कोई अशुभ काल डेटा उपलब्ध नहीं है।
+                </div>
+              ) : (
+                getAdverseTimesList().map((item, idx) => (
+                  <div key={idx} className="p-3 bg-red-950/10 hover:bg-red-950/20 border border-red-900/10 rounded-2xl flex justify-between items-center gap-3">
+                    <div className="text-left flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-xs font-bold text-red-400 truncate">{item.name}</span>
+                        <span className="text-[10px] font-mono text-slate-400 bg-red-950/30 px-2 py-0.5 rounded-full shrink-0">{item.time}</span>
+                      </div>
+                      <p className="text-[10px] text-slate-455 mt-1 leading-normal">{item.desc}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setCustomTitle(`${item.name} प्रारंभ`);
+                        setCustomBody(`${item.name} प्रारंभ हो रहा है. ${item.desc}`);
+                        setCustomTime(item.start);
+                        setCustomEndTime(item.end);
+                        setShowAdverseModal(false);
+                        onPushToast("✍️ फॉर्म भरा गया", `${item.name} का समय सेट हो गया है!`);
+                      }}
+                      className="px-2.5 py-1.5 bg-red-900/40 hover:bg-red-900/60 active:bg-red-900 text-red-200 text-2xs font-bold rounded-xl cursor-pointer transition-all flex-shrink-0"
+                    >
+                      सेट करें
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
+      )}
 
-        {/* Custom Alarm creator + log display (Right Pane) */}
-        <div className="md:col-span-5 space-y-4">
+      {/* Auspicious Times Modal */}
+      {showAuspiciousModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-[#1C1714] border border-amber-950/40 rounded-3xl w-full max-w-md p-5 shadow-2xl max-h-[80vh] flex flex-col">
+            <div className="flex justify-between items-center border-b border-amber-950/20 pb-3 mb-3">
+              <h3 className="text-sm font-bold text-emerald-400 font-serif flex items-center gap-1.5">
+                <span>🟢</span> आज के शुभ काल एवं मुहूर्त
+              </h3>
+              <button 
+                onClick={() => setShowAuspiciousModal(false)}
+                className="text-slate-400 hover:text-white cursor-pointer font-bold text-base px-2"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
+              {getAuspiciousTimesList().length === 0 ? (
+                <div className="text-center py-6 text-xs text-slate-500 italic">
+                  कोई शुभ काल डेटा उपलब्ध नहीं है।
+                </div>
+              ) : (
+                getAuspiciousTimesList().map((item, idx) => (
+                  <div key={idx} className="p-3 bg-emerald-950/10 hover:bg-emerald-950/20 border border-emerald-900/10 rounded-2xl flex justify-between items-center gap-3">
+                    <div className="text-left flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-xs font-bold text-emerald-455 truncate">{item.name}</span>
+                        <span className="text-[10px] font-mono text-slate-400 bg-emerald-950/30 px-2 py-0.5 rounded-full shrink-0">{item.time}</span>
+                      </div>
+                      <p className="text-[10px] text-slate-455 mt-1 leading-normal">{item.desc}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setCustomTitle(`${item.name} प्रारंभ`);
+                        setCustomBody(`${item.name} प्रारंभ हो रहा है. ${item.desc}`);
+                        setCustomTime(item.start);
+                        setCustomEndTime(item.end);
+                        setShowAuspiciousModal(false);
+                        onPushToast("✍️ फॉर्म भरा गया", `${item.name} का समय set हो गया है!`);
+                      }}
+                      className="px-2.5 py-1.5 bg-emerald-900/40 hover:bg-emerald-900/60 active:bg-emerald-900 text-emerald-250 text-2xs font-bold rounded-xl cursor-pointer transition-all flex-shrink-0"
+                    >
+                      सेट करें
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-6">
+        
+        {/* COLUMN 1: Custom Alarm creator (Left Side on Desktop) */}
+        <div className="md:col-span-6 space-y-4">
           <div className="bg-slate-500/5 dark:bg-zinc-900/30 p-4 rounded-2xl border border-slate-250/30 dark:border-zinc-800/80">
-            <h3 className="text-xs font-bold text-slate-700 dark:text-amber-500 uppercase tracking-wider mb-3 font-mono">कस्टम रिमाइंडर बनाएं</h3>
+            <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
+              <h3 className="text-xs font-bold text-slate-700 dark:text-amber-500 uppercase tracking-wider font-mono">कस्टम रिमाइंडर बनाएं</h3>
+              
+              {/* Shubh/Ashubh quick selectors */}
+              <div className="flex gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setShowAdverseModal(true)}
+                  className="px-2 py-1 bg-red-950/20 hover:bg-red-950/40 text-red-500 text-3xs font-bold rounded-lg border border-red-900/20 cursor-pointer transition-all"
+                >
+                  🔴 अशुभ काल
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAuspiciousModal(true)}
+                  className="px-2 py-1 bg-emerald-950/20 hover:bg-emerald-950/40 text-emerald-500 text-3xs font-bold rounded-lg border border-emerald-900/20 cursor-pointer transition-all"
+                >
+                  🟢 शुभ काल/मुहूर्त
+                </button>
+              </div>
+            </div>
             
             <form onSubmit={handleCreateCustom} className="space-y-3 font-sans">
               <div>
@@ -233,63 +422,156 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                 />
               </div>
 
-              <div>
-                <label className="text-[9.5px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">समय सेट करें</label>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[9.5px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">समय सेट करें</label>
+                  <input
+                    type="text"
+                    placeholder="जैसे: 06:45 PM"
+                    value={customTime}
+                    onChange={(e) => {
+                      setCustomTime(e.target.value);
+                      setCustomEndTime(''); // reset selected end time on manual input
+                    }}
+                    className="w-full text-xs p-2.5 rounded-xl bg-white dark:bg-zinc-950 border border-slate-205/50 dark:border-zinc-800 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-550 outline-none font-mono"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[9.5px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">सूनोज़ अवधि</label>
+                  <select
+                    value={customSnooze}
+                    onChange={(e) => setCustomSnooze(parseInt(e.target.value, 10))}
+                    className="w-full text-xs p-2.5 rounded-xl bg-white dark:bg-zinc-950 border border-slate-205/50 dark:border-zinc-800 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-550 outline-none"
+                  >
+                    <option value={1}>1 मिनट</option>
+                    <option value={2}>2 मिनट</option>
+                    <option value={3}>3 मिनट</option>
+                    <option value={5}>5 minute</option>
+                    <option value={10}>10 minute</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-1 bg-slate-500/5 dark:bg-zinc-900/50 rounded-xl px-2">
+                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-350">अलार्म कंपन (Vibrate)</span>
                 <input
-                  type="text"
-                  placeholder="जैसे: 06:45 PM"
-                  value={customTime}
-                  onChange={(e) => setCustomTime(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl bg-white dark:bg-zinc-950 border border-slate-205/50 dark:border-zinc-800 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-550 outline-none font-mono"
-                  required
+                  type="checkbox"
+                  checked={customVibrate}
+                  onChange={(e) => setCustomVibrate(e.target.checked)}
+                  className="w-9 h-5 rounded-full bg-slate-200 dark:bg-zinc-800 checked:bg-orange-600 appearance-none cursor-pointer relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-all checked:after:translate-x-4 border border-slate-300 dark:border-zinc-700 checked:border-orange-600 shrink-0"
                 />
               </div>
 
+              <div>
+                <label className="text-[9.5px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">अलार्म रिंगटोन</label>
+                <select
+                  value={ringtoneType}
+                  onChange={(e) => setRingtoneType(e.target.value as any)}
+                  className="w-full text-xs p-2.5 rounded-xl bg-white dark:bg-zinc-950 border border-slate-205/50 dark:border-zinc-800 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-550 outline-none"
+                >
+                  <option value="default">ऐप डिफ़ॉल्ट टोन (Flute)</option>
+                  <option value="system">सिस्टम अलार्म टोन</option>
+                  <option value="custom">फ़ोन स्टोरेज से चुनें...</option>
+                </select>
+              </div>
+
+              {ringtoneType === 'custom' && (
+                <div className="p-2 bg-orange-500/5 dark:bg-orange-950/10 rounded-xl border border-orange-200/20 flex flex-col gap-1.5">
+                  <div className="flex justify-between items-center text-[10px]">
+                    <span className="text-slate-555 dark:text-slate-400">चुनी हुई टोन:</span>
+                    <span className="font-bold text-orange-900 dark:text-orange-400 truncate max-w-[120px]">{ringtoneTitle || 'कोई नहीं'}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSelectCustomRingtone}
+                    className="p-1.5 bg-orange-600 text-white font-bold text-2xs rounded-lg cursor-pointer hover:bg-orange-700 transition-all"
+                  >
+                    फ़ोन से टोन फ़ाइल चुनें
+                  </button>
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="w-full h-10 bg-orange-650 hover:bg-orange-700 active:bg-orange-800 text-white font-bold rounded-xl shadow-xs text-xs flex items-center justify-center gap-1 cursor-pointer transition-all"
+                className="w-full h-10 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold rounded-xl shadow-xs text-xs flex items-center justify-center gap-1 cursor-pointer transition-all"
               >
                 <Plus className="w-4 h-4" />
                 रिमाइंडर शेड्यूल करें
               </button>
             </form>
           </div>
+        </div>
 
-          {/* Alarm log history */}
-          <div className="bg-slate-500/5 dark:bg-zinc-900/30 rounded-2xl border border-slate-250/30 dark:border-zinc-800/80 p-3.5 space-y-3">
+        {/* COLUMN 2: Active Scheduled Alarms Manager (Right Side on Desktop) */}
+        <div className="md:col-span-6 space-y-4">
+          
+          <div className="bg-slate-500/5 dark:bg-zinc-900/30 rounded-2xl border border-slate-250/30 dark:border-zinc-800/80 p-4 space-y-3">
             <div className="flex justify-between items-center">
-              <h3 className="text-xs font-bold text-slate-700 dark:text-amber-500 uppercase tracking-wider font-mono">सूचना इतिहास (लॉग)</h3>
+              <h3 className="text-xs font-bold text-slate-700 dark:text-amber-500 uppercase tracking-wider font-mono flex items-center gap-1">
+                <Clock className="w-4 h-4 text-orange-550" />
+                सक्रिय अलार्म सूची (Active Scheduled Alarms)
+              </h3>
               {notificationsList.length > 0 && (
-                <button
-                  onClick={handleClearAll}
-                  className="text-[10px] font-bold text-red-650 flex items-center gap-1 hover:underline cursor-pointer"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  साफ़ करें
-                </button>
+                <span className="text-[10px] font-bold bg-orange-500/10 text-orange-600 px-2 py-0.5 rounded-full font-mono">
+                  {notificationsList.length} सेट हैं
+                </span>
               )}
             </div>
 
-            {/* Listed Logs */}
-            <div className="space-y-2 max-h-[140px] overflow-y-auto pr-1">
+            {/* List of active scheduled alarms */}
+            <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
               {notificationsList.length === 0 ? (
-                <div className="text-center py-4">
-                  <span className="text-[11px] text-slate-400 italic">अभी तक कोई अलर्ट शुरू नहीं हुआ है। टेस्ट नोटिफिकेशन दबाकर देखें!</span>
+                <div className="text-center py-10 flex flex-col items-center justify-center gap-2">
+                  <ShieldAlert className="w-8 h-8 text-slate-350 dark:text-zinc-700" />
+                  <span className="text-[11px] text-slate-455 italic">अभी कोई अलार्म सक्रिय नहीं है।</span>
+                  <span className="text-[10px] text-slate-400">ऊपर दिए फॉर्म से या Shubh/Ashubh काल से नया अलार्म सेट करें।</span>
                 </div>
               ) : (
                 notificationsList.map((alert) => (
-                  <div key={alert.id} className="p-2.5 rounded-xl bg-white/60 dark:bg-zinc-950/40 border border-slate-100 dark:border-zinc-800/80 text-left">
-                    <div className="flex justify-between items-start gap-1">
-                      <span className="text-2xs font-extrabold text-slate-850 dark:text-amber-100 leading-normal">{alert.title}</span>
-                      <span className="text-[9px] text-slate-400 dark:text-slate-500 font-mono flex-shrink-0">{alert.time}</span>
+                  <div key={alert.id} className="p-3 rounded-2xl bg-white dark:bg-zinc-950 border border-slate-200/50 dark:border-zinc-800/80 text-left flex justify-between items-start gap-2 shadow-3xs relative overflow-hidden group">
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500" />
+                    
+                    <div className="flex-1 min-w-0 pl-1.5 space-y-1">
+                      <div className="flex justify-between items-start gap-1 flex-wrap">
+                        <span className="text-xs font-black text-slate-800 dark:text-amber-100">{alert.title}</span>
+                        
+                        {/* Alarm Time duration details */}
+                        <span className="text-[10px] font-bold text-orange-600 dark:text-amber-500 font-mono bg-orange-500/5 dark:bg-orange-950/20 px-2 py-0.5 rounded-lg shrink-0">
+                          {alert.time}
+                          {alert.endTime ? ` से ${alert.endTime}` : ''}
+                        </span>
+                      </div>
+                      
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal">{alert.body}</p>
+                      
+                      {/* Sub-config display */}
+                      <div className="flex items-center gap-2 text-[9px] text-slate-400 dark:text-zinc-500 font-mono pt-1">
+                        <span className="flex items-center gap-0.5">
+                          <Volume2 className="w-3 h-3" />
+                          {ringtoneTitle || 'डिफ़ॉल्ट टोन'}
+                        </span>
+                        <span>•</span>
+                        <span className="text-emerald-600 dark:text-emerald-500 font-bold bg-emerald-500/5 dark:bg-emerald-950/25 px-1.5 py-0.2 rounded">सक्रिय</span>
+                      </div>
                     </div>
-                    <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-normal mt-0.5">{alert.body}</p>
+
+                    <button
+                      onClick={() => handleDeleteAlert(alert.id)}
+                      className="text-slate-400 hover:text-red-650 cursor-pointer p-1.5 rounded-xl hover:bg-red-500/5 transition-all flex-shrink-0"
+                      title="अलार्म रद्द करें"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 ))
               )}
             </div>
           </div>
+
         </div>
+        
       </div>
     </div>
   );

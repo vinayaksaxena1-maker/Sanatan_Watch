@@ -62,11 +62,9 @@ import { LiveMuhuratWatch } from './components/LiveMuhuratWatch';
 import { PanchangScreen } from './components/PanchangScreen';
 import { MuhuratScreen } from './components/MuhuratScreen';
 import { FestivalScreen } from './components/FestivalScreen';
-import { HoraSystem } from './components/HoraSystem';
 import { PosterGenerator } from './components/PosterGenerator';
 import { WidgetSimulator } from './components/WidgetSimulator';
 import { NotificationSimulator } from './components/NotificationSimulator';
-import { CitySelector } from './components/CitySelector';
 import { MonetizationSimulator } from './components/MonetizationSimulator';
 import { SettingsScreen } from './components/SettingsScreen';
 import { SplashScreen, SplashStyle } from './components/SplashScreen';
@@ -78,7 +76,6 @@ import { MoonPhaseVisualizer } from './components/MoonPhaseVisualizer';
 
 // Hindu Dharmik Sacred Additions
 import { MantraJapa } from './components/MantraJapa';
-import { LiveLagna } from './components/LiveLagna';
 import { StotraSangrah } from './components/StotraSangrah';
 import dialBg from './components/VintageDialBackground.png';
 import { getTranslation } from './utils/translations';
@@ -139,6 +136,7 @@ const DEFAULT_COORDS: Coords = {
 const DEFAULT_SETTINGS: SettingsState = {
   theme: 'light',
   language: 'Hindi',
+  fontSize: 'medium',
   locationMode: 'GPS',
   notifications: {
     morningPanchang: true,
@@ -210,9 +208,8 @@ const itemVariants = {
 export default function App() {
 
   // Navigation State
-  const [activeTab, setActiveTab ] = useState<'home' | 'panchang' | 'muhurat' | 'festival' | 'nakshatra' | 'sadhana' | 'tools' | 'alerts'>('home');
-  const [toolsSubSection, setToolsSubSection] = useState<'picker' | 'widgets' | 'plans' | 'settings'>('widgets');
-  const [sadhanaSubSection, setSadhanaSubSection] = useState<'japa' | 'lagna' | 'stotra' | 'hora' | 'poster'>('japa');
+  const [activeTab, setActiveTab ] = useState<'home' | 'panchang' | 'muhurat' | 'festival' | 'nakshatra' | 'tools' | 'alerts'>('home');
+
 
   // Splash Screen State
   const [isSplashActive, setIsSplashActive] = useState<boolean>(true);
@@ -249,6 +246,19 @@ export default function App() {
   const [settings, setSettings] = useState<SettingsState>(DEFAULT_SETTINGS);
   const [notificationsList, setNotificationsList] = useState<AppNotification[]>([]);
 
+  // Dynamically set root HTML font size for scaling rem units
+  useEffect(() => {
+    const root = document.documentElement;
+    const size = settings.fontSize || 'medium';
+    if (size === 'small') {
+      root.style.fontSize = '14px';
+    } else if (size === 'large') {
+      root.style.fontSize = '18px';
+    } else {
+      root.style.fontSize = '16px';
+    }
+  }, [settings.fontSize]);
+
   // Push Alert Toast States
   const [toastMessage, setToastMessage] = useState<{ title: string; body: string } | null>(null);
   const [showToast, setShowToast] = useState(false);
@@ -273,7 +283,7 @@ export default function App() {
       const timer = setTimeout(() => {
         console.warn('[App] Splash screen safety timeout triggered. Force dismissing splash screen.');
         setIsSplashActive(false);
-      }, 7000);
+      }, 22000);
       return () => clearTimeout(timer);
     }
   }, [isSplashActive]);
@@ -378,6 +388,30 @@ export default function App() {
   };
 
   const activeChoghadiya = getActiveChoghadiya();
+
+  // Synchronize Widget Data on Android
+  useEffect(() => {
+    if (window.AndroidAlarm && typeof window.AndroidAlarm.updateWidgetData === 'function' && panchangInfo) {
+      try {
+        const tithi = panchangInfo.hinduDate.tithi.hindiName.split(' ')[0];
+        const nakshatra = panchangInfo.hinduDate.nakshatra.hindiName;
+        
+        // Find current active Choghadiya
+        const currentMin = currentTime.getHours() * 60 + currentTime.getMinutes();
+        const activeChog = panchangInfo.choghadiya?.find((ch: any) => 
+          isTimeInInterval(currentMin, ch.startTime, ch.endTime)
+        );
+
+        const choghadiyaName = activeChog ? `${activeChog.hindiName || activeChog.name} (${activeChog.isDay ? 'दिन' : 'रात्रि'})` : '—';
+        const choghadiyaTime = activeChog ? `${activeChog.startTime} - ${activeChog.endTime}` : '—';
+        const rahuKaalStr = panchangInfo.rahuKaal ? `${panchangInfo.rahuKaal.start} - ${panchangInfo.rahuKaal.end}` : '—';
+
+        window.AndroidAlarm.updateWidgetData(tithi, nakshatra, choghadiyaName, choghadiyaTime, rahuKaalStr);
+      } catch (e) {
+        console.error("Failed to sync widget data", e);
+      }
+    }
+  }, [panchangInfo, currentTime]);
 
   // Find rolling chronological Hora list and current active Hora
   const getHoraPresentationData = () => {
@@ -983,9 +1017,9 @@ export default function App() {
               <div className="flex items-center justify-between w-full gap-3">
                 <div className="flex items-center gap-3">
                   <img 
-                    src="/LOGO4.png" 
+                    src="/App1.png" 
                     alt="सनातन घड़ी लोगो" 
-                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-orange-200/50 p-0.5 object-cover drop-shadow-sm"
+                    className="w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow-sm"
                   />
                   <div className="flex flex-col text-left">
                     <h1 className="text-base sm:text-lg font-serif font-black text-orange-900 dark:text-amber-100 tracking-wider leading-tight">
@@ -1583,200 +1617,107 @@ export default function App() {
 
 
 
-            {/* 5.5 SADHANA SCREEN */}
-            {activeTab === 'sadhana' && (
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                {/* Sadhana Header card */}
-                <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left border border-orange-100/50 dark:border-orange-950/20 rounded-3xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="w-5 h-5 text-orange-655" />
-                    <label className="text-xs font-black text-slate-400 dark:text-amber-500 uppercase tracking-widest font-mono">नित्य आराधना व साधना वर्ग</label>
-                  </div>
-                  <h2 className="text-lg font-bold text-slate-800 dark:text-white leading-tight font-sans">साधना मार्ग एवं आत्मिक शांति</h2>
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-1 italic">
-                    "मन की शुद्धि, मन्त्र एकाग्रता और दिव्य आत्मज्ञान की ओर अग्रसर होने वाले पवित्र साधन।"
-                  </p>
-                </div>
 
-                {/* Sub-navigation switcher tabs for Sadhana */}
-                <div className="grid grid-cols-6 md:grid-cols-5 gap-1.5 sm:gap-2 border-b border-orange-100/35 pb-3">
-                  <button
-                    onClick={() => setSadhanaSubSection('japa')}
-                    className={`col-span-2 md:col-span-1 px-2.5 py-2.5 rounded-2xl text-[10px] sm:text-[11px] font-black leading-snug transition-all cursor-pointer border flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 ${
-                      sadhanaSubSection === 'japa'
-                        ? 'bg-orange-500 text-white border-orange-600 shadow-sm'
-                        : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 dark:hover:bg-zinc-800 border-orange-100 dark:border-zinc-800 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    <span>📿</span>
-                    <span className="text-center">मन्त्र जाप व ध्यान</span>
-                  </button>
-                  <button
-                    onClick={() => setSadhanaSubSection('lagna')}
-                    className={`col-span-2 md:col-span-1 px-2.5 py-2.5 rounded-2xl text-[10px] sm:text-[11px] font-black leading-snug transition-all cursor-pointer border flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 ${
-                      sadhanaSubSection === 'lagna'
-                        ? 'bg-orange-500 text-white border-orange-600 shadow-sm'
-                        : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 dark:hover:bg-zinc-800 border-orange-100 dark:border-zinc-800 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    <span>🧭</span>
-                    <span className="text-center">लाइव लग्न कुंडली</span>
-                  </button>
-                  <button
-                    onClick={() => setSadhanaSubSection('stotra')}
-                    className={`col-span-2 md:col-span-1 px-2.5 py-2.5 rounded-2xl text-[10px] sm:text-[11px] font-black leading-snug transition-all cursor-pointer border flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 ${
-                      sadhanaSubSection === 'stotra'
-                        ? 'bg-orange-500 text-white border-orange-600 shadow-sm'
-                        : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 dark:hover:bg-zinc-800 border-orange-100 dark:border-zinc-800 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    <span>📖</span>
-                    <span className="text-center">आरती व स्तोत्र संग्रह</span>
-                  </button>
-                  <button
-                    onClick={() => setSadhanaSubSection('hora')}
-                    className={`col-span-3 md:col-span-1 px-2.5 py-2.5 rounded-2xl text-[10px] sm:text-[11px] font-black leading-snug transition-all cursor-pointer border flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 ${
-                      sadhanaSubSection === 'hora'
-                        ? 'bg-orange-500 text-white border-orange-600 shadow-sm'
-                        : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 dark:hover:bg-zinc-800 border-orange-100 dark:border-zinc-800 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    <span>⏰</span>
-                    <span className="text-center">लाइव होरा चक्र</span>
-                  </button>
-                  <button
-                    onClick={() => setSadhanaSubSection('poster')}
-                    className={`col-span-3 md:col-span-1 px-2.5 py-2.5 rounded-2xl text-[10px] sm:text-[11px] font-black leading-snug transition-all cursor-pointer border flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 ${
-                      sadhanaSubSection === 'poster'
-                        ? 'bg-orange-500 text-white border-orange-600 shadow-sm'
-                        : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 dark:hover:bg-zinc-800 border-orange-100 dark:border-zinc-800 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    <span>🎨</span>
-                    <span className="text-center">पोस्टर मेकर</span>
-                  </button>
-                </div>
-
-                {/* Sadhana Contents */}
-                {sadhanaSubSection === 'japa' && (
-                  <div className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs">
-                    <MantraJapa language={settings.language} />
-                  </div>
-                )}
-
-                {sadhanaSubSection === 'lagna' && (
-                  <div className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs">
-                    <LiveLagna panchang={panchangInfo} currentTime={currentTime} />
-                  </div>
-                )}
-
-                {sadhanaSubSection === 'stotra' && (
-                  <div className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs">
-                    <StotraSangrah language={settings.language} />
-                  </div>
-                )}
-
-                {sadhanaSubSection === 'hora' && (
-                  <div className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs">
-                    <HoraSystem panchang={panchangInfo} currentTime={currentTime} />
-                  </div>
-                )}
-
-                {sadhanaSubSection === 'poster' && (
-                  <div className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs">
-                    <PosterGenerator panchang={panchangInfo} city={coords.city} />
-                  </div>
-                )}
-              </motion.div>
-            )}
 
             {/* 6. TOOLS & PREVIEWS CONSOLE (WIDGETS, POSTERS, SETTINGS, NOTIFICATIONS) */}
             {activeTab === 'tools' && (
               <div className="space-y-6">
                 
-                {/* Tools sub-navigation switcher tabs (Organized in exactly two clean lines) */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 border-b border-orange-100/35 pb-3">
-                  <button
-                    onClick={() => setToolsSubSection('widgets')}
-                    className={`px-2.5 py-3 rounded-2xl text-[10px] sm:text-[11px] font-black leading-snug transition-all cursor-pointer border flex flex-col items-center justify-center gap-1 ${
-                      toolsSubSection === 'widgets'
-                        ? 'bg-orange-500 text-white border-orange-600 shadow-sm'
-                        : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 dark:hover:bg-zinc-800 border-orange-100 dark:border-zinc-800 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    <span>📱</span>
-                    <span className="text-center font-bold">होम विजेट्स</span>
-                  </button>
-                  <button
-                    onClick={() => setToolsSubSection('picker')}
-                    className={`px-2.5 py-3 rounded-2xl text-[10px] sm:text-[11px] font-black leading-snug transition-all cursor-pointer border flex flex-col items-center justify-center gap-1 ${
-                      toolsSubSection === 'picker'
-                        ? 'bg-orange-500 text-white border-orange-600 shadow-sm'
-                        : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 dark:hover:bg-zinc-800 border-orange-100 dark:border-zinc-800 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    <span>⚙️</span>
-                    <span className="text-center font-bold">स्थान व जीपीएस</span>
-                  </button>
-                  <button
-                    onClick={() => setToolsSubSection('plans')}
-                    className={`px-2.5 py-3 rounded-2xl text-[10px] sm:text-[11px] font-black leading-snug transition-all cursor-pointer border flex flex-col items-center justify-center gap-1 ${
-                      toolsSubSection === 'plans'
-                        ? 'bg-orange-500 text-white border-orange-600 shadow-sm'
-                        : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 dark:hover:bg-zinc-800 border-orange-100 dark:border-zinc-800 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    <span>⭐</span>
-                    <span className="text-center font-bold">प्रीमियम</span>
-                  </button>
-                  <button
-                    onClick={() => setToolsSubSection('settings')}
-                    className={`px-2.5 py-3 rounded-2xl text-[10px] sm:text-[11px] font-black leading-snug transition-all cursor-pointer border flex flex-col items-center justify-center gap-1 ${
-                      toolsSubSection === 'settings'
-                        ? 'bg-orange-500 text-white border-orange-600 shadow-sm'
-                        : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 dark:hover:bg-zinc-800 border-orange-100 dark:border-zinc-800 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    <span>⚙️</span>
-                    <span className="text-center font-bold">सेटिंग्स</span>
-                  </button>
+                {/* Tools Quick Section Navigation Bar */}
+                <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 text-left shadow-xs border border-orange-100/30 dark:border-zinc-800/40 rounded-3xl">
+                  <span className="text-[9px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block mb-2 leading-none">
+                    {settings.language === 'Hindi' ? "॥ त्वरित सुविधा नेविगेशन ॥" : "|| Quick Tools Navigation ||"}
+                  </span>
+                  <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[11px] font-bold">
+                    {[
+                      { id: 'tools_japa_card', labelHindi: 'मन्त्र व ध्यान', labelEng: 'Mantra & Meditation' },
+                      { id: 'tools_poster_card', labelHindi: 'पोस्टर मेकर', labelEng: 'Poster Maker' },
+                      { id: 'tools_widgets_card', labelHindi: 'होम विजेट्स', labelEng: 'Home Widgets' },
+                      { id: 'tools_plans_card', labelHindi: 'प्रीमियम योजनाएं', labelEng: 'Premium Plans' },
+                      { id: 'tools_settings_card', labelHindi: 'सेटिंग्स', labelEng: 'App Settings' }
+                    ].map((item, index, arr) => (
+                      <React.Fragment key={item.id}>
+                        <span
+                          onClick={() => {
+                            const element = document.getElementById(item.id);
+                            if (element) {
+                              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                          }}
+                          className="cursor-pointer text-slate-750 hover:text-orange-655 dark:text-slate-350 dark:hover:text-amber-400 hover:underline transition-all"
+                        >
+                          {settings.language === 'Hindi' ? item.labelHindi : item.labelEng}
+                        </span>
+                        {index < arr.length - 1 && (
+                          <span className="text-slate-300 dark:text-zinc-800 select-none">|</span>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Subsections contents */}
-                {toolsSubSection === 'picker' && (
-                  <CitySelector
-                    currentCoords={coords}
-                    onSelectCity={setCoords}
-                    gpsActive={gpsActive}
-                    setGpsActive={setGpsActive}
-                  />
-                )}
+                {/* Subsections contents stacked vertically */}
+                <div id="tools_japa_card" className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs text-left">
+                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-zinc-800/40 pb-2">
+                    <span className="text-lg">📿</span>
+                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-amber-100">
+                      {settings.language === 'Hindi' ? 'मन्त्र जाप व ध्यान साधना' : 'Mantra Japa & Meditation'}
+                    </h3>
+                  </div>
+                  <MantraJapa language={settings.language} />
+                </div>
 
-                {toolsSubSection === 'widgets' && (
+
+
+                <div id="tools_poster_card" className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs text-left">
+                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-zinc-800/40 pb-2">
+                    <span className="text-lg">🎨</span>
+                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-amber-100">
+                      {settings.language === 'Hindi' ? 'धार्मिक पोस्टर मेकर' : 'Dharmik Poster Maker'}
+                    </h3>
+                  </div>
+                  <PosterGenerator panchang={panchangInfo} city={coords.city} activeMuhurats={activeMuhurats} />
+                </div>
+
+                <div id="tools_widgets_card" className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs text-left">
+                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-zinc-800/40 pb-2">
+                    <span className="text-lg">📱</span>
+                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-amber-100">
+                      {settings.language === 'Hindi' ? 'होम स्क्रीन विजेट्स' : 'Home Screen Widgets'}
+                    </h3>
+                  </div>
                   <WidgetSimulator panchang={panchangInfo} muhurats={activeMuhurats} city={coords.city} />
-                )}
+                </div>
 
-                {toolsSubSection === 'plans' && (
+
+
+                <div id="tools_plans_card" className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs text-left">
+                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-zinc-800/40 pb-2">
+                    <span className="text-lg">⭐</span>
+                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-amber-100">
+                      {settings.language === 'Hindi' ? 'प्रीमियम योजनाएं' : 'Premium Plans'}
+                    </h3>
+                  </div>
                   <MonetizationSimulator
                     settings={settings}
                     onToggleSubscription={handleToggleSubscription}
                     onPushToast={handlePushNotificationToast}
                   />
-                )}
+                </div>
 
-                {toolsSubSection === 'settings' && (
+                <div id="tools_settings_card" className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs text-left">
+                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-zinc-800/40 pb-2">
+                    <span className="text-lg">⚙️</span>
+                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-amber-100">
+                      {settings.language === 'Hindi' ? 'ऐप सेटिंग्स' : 'App Settings'}
+                    </h3>
+                  </div>
                   <SettingsScreen
                     settings={settings}
                     setSettings={setSettings}
                     onPushToast={handlePushNotificationToast}
                   />
-                )}
+                </div>
 
               </div>
             )}
@@ -1806,6 +1747,7 @@ export default function App() {
                     notificationsList={notificationsList}
                     setNotificationsList={setNotificationsList}
                     onPushToast={handlePushNotificationToast}
+                    panchangInfo={panchangInfo}
                   />
                 </div>
               </motion.div>
@@ -1814,7 +1756,7 @@ export default function App() {
           </main>
 
           {/* BOTTOM PREMIUM TAB BAR NAVIGATION */}
-          <footer className={`border-t flex justify-between sm:justify-around items-center py-2 px-1 sm:px-3 fixed bottom-0 left-0 right-0 w-full z-40 select-none shadow-[0_-4px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] overflow-x-auto scrollbar-hide flex-nowrap ${
+          <footer className={`border-t flex justify-between sm:justify-around items-center py-3 px-2 sm:px-4 fixed bottom-0 left-0 right-0 w-full z-40 select-none shadow-[0_-4px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] overflow-x-auto scrollbar-hide flex-nowrap ${
             settings.theme === 'light' 
               ? 'bg-[#FFFBF5]/95 backdrop-blur-md border-orange-100/70' 
               : 'bg-[#1D1713]/95 backdrop-blur-md border-[var(--card-border-dark)]' // using dark card border variables
@@ -1822,86 +1764,74 @@ export default function App() {
             
             <button
               onClick={() => setActiveTab('home')}
-              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-11 sm:w-14 transition-all flex-shrink-0 ${
+              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'home'
                   ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
                   : 'text-slate-400 hover:text-slate-500'
               }`}
             >
-              <Home className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'homeTab')}</span>
+              <Home className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
+              <span className="text-[10.5px] sm:text-[12px] mt-1 font-mono tracking-tight leading-none uppercase font-semibold">{getTranslation(settings.language, 'homeTab')}</span>
             </button>
 
             <button
               onClick={() => setActiveTab('panchang')}
-              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-11 sm:w-14 transition-all flex-shrink-0 ${
+              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'panchang'
                   ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
                   : 'text-slate-400 hover:text-slate-500'
               }`}
             >
-              <Landmark className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase font-semibold">{getTranslation(settings.language, 'panchangTab')}</span>
+              <Landmark className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
+              <span className="text-[10.5px] sm:text-[12px] mt-1 font-mono tracking-tight leading-none uppercase font-semibold">{getTranslation(settings.language, 'panchangTab')}</span>
             </button>
 
             <button
               onClick={() => setActiveTab('muhurat')}
-              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-11 sm:w-14 transition-all flex-shrink-0 ${
+              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'muhurat'
                   ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
                   : 'text-slate-400 hover:text-slate-500'
               }`}
             >
-              <Clock className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'muhuratTab')}</span>
+              <Clock className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
+              <span className="text-[10.5px] sm:text-[12px] mt-1 font-mono tracking-tight leading-none uppercase font-semibold">{getTranslation(settings.language, 'muhuratTab')}</span>
             </button>
 
             <button
               onClick={() => setActiveTab('festival')}
-              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-11 sm:w-14 transition-all flex-shrink-0 ${
+              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'festival'
                   ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
                   : 'text-slate-400 hover:text-slate-500'
               }`}
             >
-              <Calendar className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'festivalTab')}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('sadhana')}
-              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-11 sm:w-14 transition-all flex-shrink-0 ${
-                activeTab === 'sadhana'
-                  ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
-                  : 'text-slate-400 hover:text-slate-500'
-              }`}
-            >
-              <Sparkles className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'sadhanaTab')}</span>
+              <Calendar className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
+              <span className="text-[10.5px] sm:text-[12px] mt-1 font-mono tracking-tight leading-none uppercase font-semibold">{getTranslation(settings.language, 'festivalTab')}</span>
             </button>
 
             <button
               onClick={() => setActiveTab('alerts')}
-              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-11 sm:w-14 transition-all flex-shrink-0 ${
+              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'alerts'
                   ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
                   : 'text-slate-400 hover:text-slate-500'
               }`}
             >
-              <Bell className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'alarmsTab')}</span>
+              <Bell className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
+              <span className="text-[10.5px] sm:text-[12px] mt-1 font-mono tracking-tight leading-none uppercase font-semibold">{getTranslation(settings.language, 'alarmsTab')}</span>
             </button>
 
             <button
               onClick={() => setActiveTab('tools')}
-              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-11 sm:w-14 transition-all flex-shrink-0 ${
+              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'tools'
                   ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
                   : 'text-slate-400 hover:text-slate-500'
               }`}
             >
-              <Settings className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'toolsTab')}</span>
+              <Settings className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
+              <span className="text-[10.5px] sm:text-[12px] mt-1 font-mono tracking-tight leading-none uppercase font-semibold">{getTranslation(settings.language, 'toolsTab')}</span>
             </button>
 
           </footer>
@@ -1911,10 +1841,10 @@ export default function App() {
         {/* Outer footer branding */}
         <div className="hidden md:block mt-4 text-center select-none mb-6">
           <p className="text-[10px] text-slate-400 tracking-wider uppercase font-mono font-bold">
-            आज का धर्मिक समय प्रीमियम v2.4.0
+            आज का धार्मिक समय - Innovix Solutions v1.0.0
           </p>
           <span className="text-[9px] text-slate-400 mt-0.5 block italic font-sans font-medium">
-            प्राचीन सूर्य सिद्धांत और सटीक सौर गणनाओं द्वारा स्थापित।
+            🇮🇳 Proudly Made in India | Make for India • प्राचीन सूर्य सिद्धांत और सटीक सौर गणनाओं द्वारा स्थापित।
           </span>
         </div>
 

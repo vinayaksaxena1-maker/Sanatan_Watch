@@ -11,7 +11,8 @@ import {
   Globe,
   Check,
   Sparkles,
-  Bell
+  Bell,
+  Type
 } from 'lucide-react';
 import { SettingsState } from '../types';
 import { getTranslation } from '../utils/translations';
@@ -49,6 +50,17 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
     onPushToast(
       lang === 'Hindi' ? '🌐 भाषा बदली गई' : '🌐 Language Changed',
       lang === 'Hindi' ? 'ऐप की भाषा को सफलतापूर्वक बदल दिया गया है।' : 'App language has been changed successfully.'
+    );
+  };
+
+  const handleChangeFontSize = (size: 'small' | 'medium' | 'large') => {
+    setSettings(prev => ({
+      ...prev,
+      fontSize: size
+    }));
+    onPushToast(
+      language === 'Hindi' ? '🔍 फ़ॉन्ट आकार बदला गया' : '🔍 Font Size Changed',
+      language === 'Hindi' ? 'टेक्स्ट का आकार सफलतापूर्वक बदल दिया गया है।' : 'Text size has been changed successfully.'
     );
   };
 
@@ -164,7 +176,7 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
                 <button
                   key={lang}
                   onClick={() => handleChangeLanguage(lang)}
-                  className={`flex-1 py-1.5 rounded-xl text-3xs font-extrabold border transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                  className={`flex-1 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer flex items-center justify-center gap-1 ${
                     settings.language === lang
                       ? 'bg-orange-100 border-orange-400 text-orange-950 font-black'
                       : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 border-orange-100/35 text-slate-600 dark:text-slate-350'
@@ -176,71 +188,35 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
               ))}
             </div>
           </div>
-        </div>
 
-        {/* Notification Settings Block */}
-        <div className="glass-card-light dark:glass-card-dark p-5 space-y-5">
-          <h3 className="text-xs font-black text-slate-700 dark:text-amber-100 uppercase tracking-wider border-b border-orange-100/35 pb-2 flex items-center gap-1.5">
-            <Bell className="w-4 h-4 text-orange-600 animate-pulse" />
-            <span>{getTranslation(language, 'alerts')}</span>
-          </h3>
-          
-          <div className="space-y-3.5">
-            {[
-              { 
-                key: 'morningPanchang', 
-                name: language === 'Hindi' ? 'सूर्योदय पंचांग सूचना' : 'Morning Panchang Info', 
-                desc: language === 'Hindi' ? 'हर सुबह सूर्योदय के समय विस्तृत दैनिक पंचांग अलर्ट।' : 'Daily detailed panchang alerts every morning at sunrise.' 
-              },
-              { 
-                key: 'festivalReminder', 
-                name: language === 'Hindi' ? 'त्यौहार अलर्ट' : 'Festival Reminder', 
-                desc: language === 'Hindi' ? 'व्रत और मुख्य त्यौहारों की अग्रिम सूचना।' : 'Advance alerts for fasts and key festivals.' 
-              },
-              { 
-                key: 'ekadashiReminder', 
-                name: language === 'Hindi' ? 'एकादशी अनुस्मारक' : 'Ekadashi Reminder', 
-                desc: language === 'Hindi' ? 'एकादशी व्रत तिथि की सूचना और नियम।' : 'Reminders and rules for Ekadashi fasting.' 
-              },
-              { 
-                key: 'purnimaReminder', 
-                name: language === 'Hindi' ? 'पूर्णिमा अनुस्मारक' : 'Purnima Reminder', 
-                desc: language === 'Hindi' ? 'पूर्णिमा तिथि के आगमन की सूचना।' : 'Advance notification for Purnima Tithi.' 
-              },
-              { 
-                key: 'muhuratReminder', 
-                name: language === 'Hindi' ? 'शुभ मुहूर्त अलार्म' : 'Auspicious Muhurat Alarms', 
-                desc: language === 'Hindi' ? 'अभिजीत मुहूर्त और शुभ चौघड़िया समय प्रारंभ होने पर सूचना।' : 'Alerts when Abhijit muhurat or auspicious Choghadiya starts.' 
-              }
-            ].map(({ key, name, desc }) => {
-              const isActive = settings.notifications?.[key as keyof SettingsState['notifications']] ?? false;
-              return (
-                <div key={key} className="flex items-center justify-between gap-4 py-2 border-b border-dashed border-orange-100/10 last:border-0 pb-3 last:pb-0">
-                  <div className="text-left space-y-0.5">
-                    <span className="text-[11px] font-extrabold text-slate-800 dark:text-slate-200 block">{name}</span>
-                    <span className="text-[9.5px] text-slate-450 dark:text-slate-400 block leading-normal">{desc}</span>
-                  </div>
-                  
-                  {/* Switch */}
-                  <button
-                    type="button"
-                    onClick={() => handleToggleNotification(key as keyof SettingsState['notifications'])}
-                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      isActive ? 'bg-orange-500' : 'bg-slate-200 dark:bg-zinc-800'
-                    }`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
-                        isActive ? 'translate-x-4' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
-                </div>
-              );
-            })}
+          {/* Font Size Settings */}
+          <div className="space-y-2 pt-1 border-t border-dashed border-orange-100/35 pt-4">
+            <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 font-mono flex items-center gap-1">
+              <Type className="w-3.5 h-3.5 text-slate-400" /> {language === 'Hindi' ? 'फ़ॉन्ट आकार' : 'Font Size Preference'}
+            </label>
+            <div className="flex gap-2">
+              {[
+                { id: 'small', labelHindi: 'छोटा', labelEng: 'Small' },
+                { id: 'medium', labelHindi: 'मध्यम', labelEng: 'Medium' },
+                { id: 'large', labelHindi: 'बड़ा', labelEng: 'Large' }
+              ].map((size) => (
+                <button
+                  key={size.id}
+                  onClick={() => handleChangeFontSize(size.id as 'small' | 'medium' | 'large')}
+                  className={`flex-1 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                    (settings.fontSize || 'medium') === size.id
+                      ? 'bg-orange-100 border-orange-400 text-orange-950 font-black'
+                      : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 border-orange-100/35 text-slate-600 dark:text-slate-350'
+                  }`}
+                >
+                  {(settings.fontSize || 'medium') === size.id && <Check className="w-3 h-3 text-orange-600 shrink-0" />}
+                  {language === 'Hindi' ? size.labelHindi : size.labelEng}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
+        </div>
       </div>
 
       {/* Astro computation engine metrics */}
@@ -292,6 +268,23 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
             >
               Privacy Policy
             </a>
+          </div>
+
+          <div className="border-t border-dashed border-orange-100/20 pt-2.5 flex flex-col gap-1.5 text-[10px] text-slate-500 dark:text-zinc-400">
+            <div className="flex justify-between items-center">
+              <span>{language === 'Hindi' ? 'कंपनी / संगठन:' : 'Company / Organization:'}</span>
+              <span className="font-bold text-slate-700 dark:text-slate-200">Innovix Solutions</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>{language === 'Hindi' ? 'एप्लीकेशन संस्करण:' : 'App Version:'}</span>
+              <span className="font-mono font-bold text-slate-700 dark:text-slate-200">v1.0.0 (First Edition)</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>{language === 'Hindi' ? 'पहल / निर्माण:' : 'Initiative:'}</span>
+              <span className="font-bold text-orange-600 dark:text-amber-400 flex items-center gap-1">
+                🇮🇳 Proudly Made in India | Make for India
+              </span>
+            </div>
           </div>
         </div>
       </div>

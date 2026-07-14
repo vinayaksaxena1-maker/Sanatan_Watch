@@ -355,35 +355,36 @@ export function MantraJapa({ language = 'English' }: MantraJapaProps) {
     <div id="mantra_japa_root" className="space-y-6 text-left animate-fade-in font-sans">
       
       {/* Sadhana Navigation Tabs */}
-      <div className="flex gap-2 pb-1.5 border-b border-orange-100/50 dark:border-zinc-800/60 mb-1.5">
-        <button
+      <div className="flex items-center gap-x-2.5 pb-1.5 border-b border-orange-100/50 dark:border-zinc-800/60 mb-1.5 text-[11px] font-bold">
+        <span
           onClick={() => {
             setSadhanaTab('japa');
             stopAmbientSynth();
             setIsTimerRunning(false);
           }}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+          className={`cursor-pointer transition-all hover:underline ${
             sadhanaTab === 'japa'
-              ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
-              : 'bg-white/80 dark:bg-zinc-900/60 text-slate-700 dark:text-slate-300 border-orange-105/30 hover:bg-slate-50'
+              ? 'text-orange-655 font-extrabold dark:text-amber-400'
+              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
           }`}
         >
           {getTranslation(language, 'sadhanaTabJapa')}
-        </button>
-        <button
+        </span>
+        <span className="text-slate-300 dark:text-zinc-800 select-none">|</span>
+        <span
           onClick={() => {
             setSadhanaTab('meditation');
             stopAmbientSynth();
             setIsTimerRunning(false);
           }}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+          className={`cursor-pointer transition-all hover:underline ${
             sadhanaTab === 'meditation'
-              ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
-              : 'bg-white/80 dark:bg-zinc-900/60 text-slate-700 dark:text-slate-300 border-orange-105/30 hover:bg-slate-50'
+              ? 'text-orange-655 font-extrabold dark:text-amber-400'
+              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
           }`}
         >
           {getTranslation(language, 'sadhanaTabMeditation')}
-        </button>
+        </span>
       </div>
 
       {/* Dynamic Sound Controls Container with Japa Tuner */}

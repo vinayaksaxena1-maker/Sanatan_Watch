@@ -27,6 +27,9 @@ interface LiveMuhuratWatchProps {
   activeChoghadiyaIndex?: number;
   displayStartTime?: string;
   displayEndTime?: string;
+  viewModeOverride?: 'smartwatch' | 'analog';
+  hideSelectors?: boolean;
+  minimalMode?: boolean;
 }
 
 const translateType = (type: string) => {
@@ -96,7 +99,10 @@ export function LiveMuhuratWatch({
   activeHora,
   choghadiyaList,
   activeChoghadiyaIndex,
-  horaList
+  horaList,
+  viewModeOverride,
+  hideSelectors = false,
+  minimalMode = false
 }: LiveMuhuratWatchProps) {
   const [time, setTime] = useState(new Date());
   const [currentMuhurat, setCurrentMuhurat] = useState<MuhuratItem | null>(null);
@@ -106,6 +112,8 @@ export function LiveMuhuratWatch({
   const [dialTheme, setDialTheme] = useState<'amber' | 'gold' | 'emerald'>('amber');
   const [vibrationActive, setVibrationActive] = useState(false);
   const [viewMode, setViewMode] = useState<'smartwatch' | 'analog'>('analog');
+  
+  const effectiveViewMode = viewModeOverride || viewMode;
 
   const brahmaMuh = muhurats.find(m => m.id === 'brahma');
   const abhijitMuh = muhurats.find(m => m.id === 'abhijit');
@@ -294,6 +302,155 @@ export function LiveMuhuratWatch({
 
 
 
+  // Render watch dial directly if minimalMode is requested
+  if (minimalMode) {
+    return (
+      <div className="relative flex items-center justify-center w-full h-full aspect-square [&_svg]:overflow-visible">
+        {effectiveViewMode === 'analog' ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <AnalogClock 
+              time={time} 
+              choghadiyaList={choghadiyaList}
+              activeChoghadiyaIndex={activeChoghadiyaIndex}
+              activeHora={activeHora}
+              horaList={horaList}
+              sunriseTimeStr={sunriseTimeStr}
+              sunsetTimeStr={sunsetTimeStr}
+            />
+          </div>
+        ) : (
+          /* SMARTWATCH MODE */
+          <div className="relative w-full h-full flex items-center justify-center">
+            {/* SVG OUTER SQUARE INFORMATION FRAME */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none z-20" viewBox="0 0 400 400">
+              <defs>
+                <linearGradient id="widgetGoldenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#FFF5C3" />
+                  <stop offset="50%" stopColor="#D4AF37" />
+                  <stop offset="100%" stopColor="#AA7C11" />
+                </linearGradient>
+              </defs>
+              {/* Left - Sunset */}
+              <text transform="translate(14,200) rotate(-90)" textAnchor="middle" dominantBaseline="central" fill="#C2410C" fontSize="11" fontFamily="monospace" fontWeight="900">।। 🌇 सूर्यास्त {sunsetTimeStr} ।।</text>
+              {/* Right - Sunrise */}
+              <text transform="translate(386,200) rotate(90)" textAnchor="middle" dominantBaseline="central" fill="#C2410C" fontSize="11" fontFamily="monospace" fontWeight="900">।। 🌅 सूर्योदय {sunriseTimeStr} ।।</text>
+            </svg>
+
+            {/* Shadow Drop Element representing watch bezel profile */}
+            <div className="absolute inset-[8%] rounded-[16px] bg-gradient-to-b from-[#32231A] via-[#1A0F0A] to-[#251710] border-[8px] sm:border-[10px] border-[#3E2D24] flex items-center justify-center">
+              
+              {/* Bezel Ring outer border representing minutes dial frame */}
+              <div className="absolute inset-1 rounded-[12px] border border-orange-500/10 pointer-events-none"></div>
+
+              {/* Interactive Rotary Button on side */}
+              <button 
+                type="button"
+                onClick={() => {
+                  triggerVibe();
+                  if (dialTheme === 'amber') setDialTheme('gold');
+                  else if (dialTheme === 'gold') setDialTheme('emerald');
+                  else setDialTheme('amber');
+                }}
+                className="absolute right-[-11px] top-[48%] -translate-y-1/2 w-4 h-8 rounded-r-lg bg-gradient-to-b from-[#5C4538] to-[#271A12] border-r border-[#6C5548] flex flex-col items-center justify-center p-0.5 cursor-pointer shadow-lg active:scale-95 transition-all select-none gap-0.5 hover:brightness-110"
+                title="क्लिक करके वॉच फेस की थीम बदलें"
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping"></div>
+              </button>
+
+              {/* WATCH DIAL / SCREEN */}
+              <div className="w-[94%] h-[93%] rounded-[12px] bg-black overflow-hidden relative border border-orange-950 flex flex-col items-center justify-between p-4 py-5 text-center">
+                
+                {/* Subtle digital interface wireframe grid */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(251,146,60,0.08)_0%,transparent_70%)] pointer-events-none" />
+
+                {/* Premium Gold Radial Glow for Center Core */}
+                <div 
+                  className="absolute inset-0 pointer-events-none z-0" 
+                  style={{
+                    background: 'radial-gradient(circle, rgba(255,213,79,0.18) 0%, rgba(216,155,0,0.06) 65%, transparent 100%)'
+                  }} 
+                />
+
+                {/* Top Row: Dial Sacred symbol (OM) with Vikram and Shak Samvat */}
+                <div className="flex justify-between items-center w-full px-3 text-orange-400 text-3xs mt-0.5 relative z-10 select-none">
+                  <span className="font-serif font-black text-[8px] sm:text-[9.5px] text-[#A67E5D] tracking-wide leading-none">
+                    वि.सं. {samvatVikram}
+                  </span>
+                  <span className="font-serif font-black text-[15px] sm:text-[18px] leading-none hover:rotate-12 transition-transform cursor-pointer" onClick={triggerVibe}>ॐ</span>
+                  <span className="font-serif font-black text-[8px] sm:text-[9.5px] text-[#A67E5D] tracking-wide leading-none">
+                    श.सं. {samvatShaka}
+                  </span>
+                </div>
+
+                {/* COMPLICATIONS & TIME ROW */}
+                <div className="w-full flex items-center justify-between px-1.5 my-1.5 relative z-10 select-none">
+                  {/* Left Complication: Tithi */}
+                  <div className="flex flex-col items-start justify-center text-left w-[27%] shrink-0">
+                    <span className="text-[6.5px] sm:text-[7.5px] text-stone-500 font-bold tracking-wider uppercase leading-none mb-0.5">वर्तमान तिथि</span>
+                    <span className="text-[10px] sm:text-[11px] font-black text-amber-300 font-serif leading-tight whitespace-pre-line w-[45px] sm:w-[50px] text-center">
+                      {tithiHindiName.replace(' ', '\n')}
+                    </span>
+                  </div>
+
+                  {/* Center Core: Analog style Choghadiya ring */}
+                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                      <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" />
+                      <circle 
+                        cx="50" 
+                        cy="50" 
+                        r="44" 
+                        fill="none" 
+                        className={`transition-all duration-1000 ${getCircleGlowColorClass()}`}
+                        strokeWidth="6.5" 
+                        strokeDasharray="276.4" 
+                        strokeDashoffset={276.4 - (276.4 * progressVal) / 100}
+                        strokeLinecap="round"
+                        style={{ filter: dialTheme !== 'amber' ? 'drop-shadow(0 0 2px rgba(251,146,60,0.5))' : 'none' }}
+                      />
+                    </svg>
+                    
+                    {/* Time display at core */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center leading-none mt-1">
+                      <span className="text-[11px] sm:text-[13px] font-bold text-white font-mono tracking-tight">
+                        {time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                      </span>
+                      <span className="text-[7px] sm:text-[8px] font-extrabold text-[#E2C7A9] font-mono tracking-wide mt-1">
+                        {time.toLocaleTimeString('en-IN', { second: '2-digit' })}s
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Right Complication: Nakshatra */}
+                  <div className="flex flex-col items-end justify-center text-right w-[27%] shrink-0">
+                    <span className="text-[6.5px] sm:text-[7.5px] text-stone-500 font-bold tracking-wider uppercase leading-none mb-0.5">सक्रिय नक्षत्र</span>
+                    <span className="text-[10px] sm:text-[11px] font-black text-amber-300 font-serif leading-tight whitespace-pre-line w-[45px] sm:w-[50px] text-center">
+                      {nakshatraHindiName.replace(' ', '\n')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Bottom Row: Dynamic Muhurat / Choghadiya Label */}
+                <div className="w-full flex flex-col items-center gap-0.5 select-none relative z-10 mb-0.5">
+                  <div className="flex items-center gap-1">
+                    <Sparkles className="w-2.5 h-2.5 text-orange-500 animate-spin-slow" />
+                    <span className="text-[8px] sm:text-[9.5px] font-black text-orange-400 font-serif uppercase tracking-wider">
+                      {currentChoghadiya ? `${currentChoghadiya.hindiName || currentChoghadiya.name} चौघड़िया` : '—'}
+                    </span>
+                  </div>
+                  <div className="text-[8px] sm:text-[9.5px] font-black text-[#27AE60] font-mono leading-none mt-0.5">
+                    {timeRemainingStr}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div id="live_muhurat_watch_container" className="relative flex flex-col items-center justify-between px-3 py-5 sm:p-8 md:p-10 glass-card-light dark:glass-card-dark w-full h-full shadow-xl">
       
@@ -306,37 +463,39 @@ export function LiveMuhuratWatch({
       </div>
 
       {/* VIEW MODE TOGGLE */}
-      <div className="flex items-center gap-1 p-0.5 bg-orange-950/10 dark:bg-orange-950/40 border border-orange-200/30 rounded-lg self-start mb-3">
-        <button
-          type="button"
-          onClick={() => setViewMode('smartwatch')}
-          className={`px-3 py-1 text-[9.5px] font-black rounded-md transition-all cursor-pointer ${
-            viewMode === 'smartwatch'
-              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm'
-              : 'text-orange-950 dark:text-orange-200 opacity-60 hover:opacity-100'
-          }`}
-        >
-          सनातन स्मार्टवॉच
-        </button>
-        <button
-          type="button"
-          onClick={() => setViewMode('analog')}
-          className={`px-3 py-1 text-[9.5px] font-black rounded-md transition-all cursor-pointer ${
-            viewMode === 'analog'
-              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm'
-              : 'text-orange-950 dark:text-orange-200 opacity-60 hover:opacity-100'
-          }`}
-        >
-          एनालॉग वॉच
-        </button>
-      </div>
+      {!hideSelectors && (
+        <div className="flex items-center gap-1 p-0.5 bg-orange-950/10 dark:bg-orange-950/40 border border-orange-200/30 rounded-lg self-start mb-3">
+          <button
+            type="button"
+            onClick={() => setViewMode('smartwatch')}
+            className={`px-3 py-1 text-[9.5px] font-black rounded-md transition-all cursor-pointer ${
+              viewMode === 'smartwatch'
+                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm'
+                : 'text-orange-950 dark:text-orange-200 opacity-60 hover:opacity-100'
+            }`}
+          >
+            सनातन स्मार्टवॉच
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('analog')}
+            className={`px-3 py-1 text-[9.5px] font-black rounded-md transition-all cursor-pointer ${
+              viewMode === 'analog'
+                ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-sm'
+                : 'text-orange-950 dark:text-orange-200 opacity-60 hover:opacity-100'
+            }`}
+          >
+            एनालॉग वॉच
+          </button>
+        </div>
+      )}
 
 
 
       {/* WATCH AREA: Smartwatch or Analog based on viewMode */}
       <div className="relative flex items-center justify-center w-full max-w-[420px] aspect-square sm:max-w-[440px] md:max-w-[460px] mx-auto my-0">
         
-        {viewMode === 'analog' ? (
+        {effectiveViewMode === 'analog' ? (
           /* ANALOG CLOCK MODE */
           <div className="w-full h-full flex items-center justify-center">
             <AnalogClock 

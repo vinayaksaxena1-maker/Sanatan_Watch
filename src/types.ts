@@ -287,6 +287,7 @@ export interface AppNotification {
   title: string;
   body: string;
   time: string;
+  endTime?: string;
   type: 'morning' | 'festival' | 'muhurat' | 'custom';
   isRead: boolean;
 }
@@ -297,6 +298,7 @@ export type LogoStyle = 'om' | 'swastika' | 'trishul' | 'kalash' | 'diya';
 export interface SettingsState {
   theme: 'light' | 'dark';
   language: 'English' | 'Hindi';
+  fontSize?: 'small' | 'medium' | 'large';
   locationMode: 'GPS' | 'Manual';
   notifications: {
     morningPanchang: boolean;
@@ -319,3 +321,31 @@ export interface ChoghadiyaPresentationData {
   displayStartTime: string;
   displayEndTime: string;
 }
+
+declare global {
+  interface Window {
+    AndroidAlarm?: {
+      scheduleAlarm: (
+        id: string,
+        label: string,
+        triggerTimeMs: number,
+        vibrate: boolean,
+        snoozeMinutes: number,
+        ringtoneUri: string
+      ) => void;
+      cancelAlarm: (id: string) => void;
+      selectRingtone: (alarmId: string) => void;
+      getSystemWallpaperBase64?: () => string;
+      updateWidgetData?: (
+        tithi: string,
+        nakshatra: string,
+        choghadiya: string,
+        choghadiyaTime: string,
+        rahuKaal: string
+      ) => void;
+    };
+    onRingtonePicked?: (alarmId: string, uri: string, title: string) => void;
+  }
+}
+
+
