@@ -44,8 +44,6 @@ Do not include any other sections in the audit report.
 ## 10. Panchang Page UI Lock (STRICT)
 - The Panchang Page UI components and layouts in `src/components/PanchangScreen.tsx` are strictly LOCKED.
 - No modifications, refactoring, styling adjustments, or layout changes can be made to the Panchang Page UI without explicit, written user approval in the chat.
-
-
-
-
-
+## 11. Festival Screen UI Lock (STRICT)
+- The Festival Screen UI component and layouts in `src/components/FestivalScreen.tsx` are strictly LOCKED.
+- No modifications, refactoring, styling adjustments, or layout changes can be made to the Festival Screen UI without explicit, written user approval in the chat.
