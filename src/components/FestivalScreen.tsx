@@ -271,7 +271,7 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
         </div>
       </div>
 
-      {/* 2. 7x5 Calendar Grid with Thin Bhagua (Saffron) Borders */}
+      {/* 2. 7x5 Calendar Grid with Centered Date and Saffron Borders */}
       <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left space-y-4">
         {/* Weekday Labels (7 Horizontal boxes) */}
         <div className="grid grid-cols-7 gap-1.5 text-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono">
@@ -287,7 +287,7 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
               return (
                 <div 
                   key={idx} 
-                  className="rounded-xl border border-dashed border-orange-500/10 dark:border-orange-500/5 bg-slate-500/2 dark:bg-zinc-950/5 min-h-[52px] sm:min-h-[60px]"
+                  className="rounded-xl border border-dashed border-orange-500/20 dark:border-orange-500/10 bg-slate-500/2 dark:bg-zinc-950/5 min-h-[52px] sm:min-h-[60px]"
                 ></div>
               );
             }
@@ -297,7 +297,7 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
               return (
                 <div 
                   key={idx} 
-                  className="p-1 rounded-2xl bg-white/40 dark:bg-zinc-950/20 border border-orange-500/25 dark:border-orange-500/15 shadow-xs min-h-[52px] sm:min-h-[60px] flex flex-col justify-between hover:scale-102 hover:border-orange-500/55 transition-all duration-300"
+                  className="p-1 rounded-2xl bg-white/40 dark:bg-zinc-950/20 border border-orange-500/45 dark:border-orange-500/35 shadow-xs min-h-[52px] sm:min-h-[60px] flex flex-col justify-between hover:scale-102 hover:border-orange-500/60 transition-all duration-300"
                 >
                   {cell.map(d => {
                     const dayFests = getFestivalsForDay(d);
@@ -307,7 +307,7 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
                       <div 
                         key={d} 
                         onClick={() => setSelectedDay(isSelected ? null : d)}
-                        className={"flex justify-between items-center px-1.5 py-1 rounded-lg cursor-pointer text-[9px] font-mono font-black leading-none transition-all " + (
+                        className={"flex justify-center items-center gap-1.5 px-1.5 py-1 rounded-lg cursor-pointer text-[9px] font-mono font-black leading-none transition-all " + (
                           isSelected 
                             ? 'bg-orange-500 text-white font-extrabold shadow-sm' 
                             : dIsToday
@@ -335,24 +335,22 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
               <div 
                 key={idx}
                 onClick={() => setSelectedDay(isSelected ? null : cell)}
-                className={"p-2 rounded-2xl border transition-all duration-300 cursor-pointer min-h-[52px] sm:min-h-[60px] flex flex-col justify-between text-left shadow-xs hover:scale-102 hover:border-orange-500/55 " + (
+                className={"p-2 rounded-2xl border transition-all duration-300 cursor-pointer min-h-[52px] sm:min-h-[60px] flex flex-col justify-between items-center text-center shadow-xs hover:scale-102 hover:border-orange-500/65 " + (
                   isSelected
                     ? 'bg-gradient-to-br from-orange-500 to-amber-600 text-white border-orange-500 shadow-md font-bold scale-102'
                     : cellIsToday
-                      ? 'bg-amber-500/10 dark:bg-amber-950/30 border-amber-500 dark:border-amber-400/80 ring-1 ring-amber-500/40 shadow-sm text-slate-900 dark:text-amber-100 font-extrabold'
-                      : 'bg-white/60 dark:bg-zinc-950/30 border-orange-500/25 dark:border-orange-500/15 hover:bg-orange-500/5 dark:hover:bg-zinc-900/30 text-slate-750 dark:text-slate-300'
+                      ? 'bg-amber-500/10 dark:bg-amber-950/30 border-orange-500 dark:border-orange-500 ring-1 ring-orange-500/40 shadow-sm text-slate-900 dark:text-amber-100 font-extrabold'
+                      : 'bg-white/60 dark:bg-zinc-950/30 border-orange-500/45 dark:border-orange-500/35 hover:bg-orange-500/5 dark:hover:bg-zinc-900/30 text-slate-750 dark:text-slate-350'
                 )}
               >
-                <div className="flex justify-between items-center w-full">
-                  <span className="text-[10px] sm:text-xs font-mono font-black leading-none">{cell}</span>
-                  {cellIsToday && (
-                    <span className="text-[7px] bg-amber-500 text-white dark:bg-amber-500/20 dark:text-amber-350 px-1 py-0.5 rounded-md font-bold font-mono">
-                      {language === 'Hindi' ? 'आज' : 'TODAY'}
-                    </span>
-                  )}
-                </div>
+                {cellIsToday && (
+                  <span className="text-[7px] bg-amber-500 text-white dark:bg-amber-500/20 dark:text-amber-350 px-1 py-0.5 rounded-md font-bold font-mono">
+                    {language === 'Hindi' ? 'आज' : 'TODAY'}
+                  </span>
+                )}
+                <span className="text-[10px] sm:text-xs font-mono font-black leading-none text-center my-auto">{cell}</span>
                 {dayFests.length > 0 && (
-                  <div className="flex flex-wrap gap-0.5 justify-end mt-1">
+                  <div className="flex flex-wrap gap-0.5 justify-center mt-1">
                     {dayFests.map((f, fIdx) => (
                       <span 
                         key={fIdx} 
@@ -493,7 +491,7 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
               ? "वर्ष " + currentYear + " के समस्त व्रत एवं त्यौहार" 
               : "All Festivals of the Year " + currentYear}
           </h3>
-          <p className="text-[10px] text-slate-450 dark:text-slate-550 font-sans mt-0.5">
+          <p className="text-[10px] text-slate-455 dark:text-slate-550 font-sans mt-0.5">
             {language === 'Hindi'
               ? 'वर्षभर के सभी प्रमुख व्रत, एकादशी, पूर्णिमा और राष्ट्रीय त्यौहारों की समय-सारणी।'
               : 'Complete schedule of all major fasts, Ekadashi, Purnima, and national festivals for the year.'}
