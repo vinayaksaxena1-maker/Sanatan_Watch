@@ -458,7 +458,7 @@ export function MuhuratScreen({
                         ? 'bg-emerald-100 border-emerald-250 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
                         : 'bg-rose-100 border-rose-250 text-rose-800 dark:bg-rose-950/30 dark:text-rose-455'
                     }`}>
-                      {panchang.shivaVaas.isAuspicious ? (language === 'Hindi' ? 'शुभ (Auspicious)' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ (Avoid)' : 'Avoid')}
+                      {panchang.shivaVaas.isAuspicious ? (language === 'Hindi' ? 'शुभ' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ' : 'Avoid')}
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1 leading-normal font-sans">
@@ -479,7 +479,7 @@ export function MuhuratScreen({
                         ? 'bg-emerald-100 border-emerald-250 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
                         : 'bg-rose-100 border-rose-250 text-rose-800 dark:bg-rose-950/30 dark:text-rose-455'
                     }`}>
-                      {panchang.agniVaas.isAuspicious ? (language === 'Hindi' ? 'शुभ (Auspicious)' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ (Avoid)' : 'Avoid')}
+                      {panchang.agniVaas.isAuspicious ? (language === 'Hindi' ? 'शुभ' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ' : 'Avoid')}
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1 leading-normal font-sans">

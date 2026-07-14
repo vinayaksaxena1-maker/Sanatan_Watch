@@ -8,8 +8,28 @@ import {
   Star
 } from 'lucide-react';
 import { NAKSHATRA_DETAILS } from '../utils/panchangCalc';
+import { getTranslation, Language } from '../utils/translations';
 
-export function NakshatraScreen() {
+interface NakshatraScreenProps {
+  language?: Language;
+}
+
+const translatePlanetNameHindi = (lord: string): string => {
+  const map: Record<string, string> = {
+    'ketu': 'केतु',
+    'venus': 'शुक्र',
+    'sun': 'सूर्य',
+    'moon': 'चंद्र',
+    'mars': 'मंगल',
+    'rahu': 'राहु',
+    'jupiter': 'गुरु',
+    'saturn': 'शनि',
+    'mercury': 'बुध'
+  };
+  return map[lord.toLowerCase()] || lord;
+};
+
+export function NakshatraScreen({ language = 'English' }: NakshatraScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedNature, setSelectedNature] = useState<string>('all');
 
@@ -48,17 +68,19 @@ export function NakshatraScreen() {
       <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left">
         <div className="flex items-center gap-2 mb-2">
           <Compass className="w-5 h-5 text-orange-655" />
-          <label className="text-xs font-black text-slate-400 dark:text-amber-500 uppercase tracking-widest font-mono">२७ नक्षत्र मार्गदर्शिका</label>
+          <label className="text-xs font-black text-slate-400 dark:text-amber-500 uppercase tracking-widest font-mono">
+            {getTranslation(language, 'nakshatraGuide')}
+          </label>
         </div>
         <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 leading-normal mb-4">
-          नक्षत्रों के स्वामी, प्रतीक, प्रकृति और वैदिक दिशानिर्देशों के बारे में जानें।
+          {getTranslation(language, 'nakshatraIntro')}
         </p>
 
         {/* Search */}
         <div className="relative flex items-center mb-4">
           <input
             type="text"
-            placeholder="नक्षत्र खोजें जैसे अश्विनी, पुष्य..."
+            placeholder={getTranslation(language, 'searchNakshatra')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full text-xs p-3.5 pl-11 rounded-2xl bg-slate-500/5 dark:bg-zinc-950/40 border border-slate-200/50 dark:border-zinc-800/60 focus:bg-white dark:focus:bg-zinc-950 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-slate-800 dark:text-slate-100"
@@ -69,13 +91,13 @@ export function NakshatraScreen() {
         {/* Action Nature Filters */}
         <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
           {[
-            { id: 'all', label: 'सभी प्रकृति' },
-            { id: 'kshipra', label: 'तीव्र (क्षिप्र)' },
-            { id: 'ugra', label: 'उग्र' },
-            { id: 'dhruva', label: 'स्थिर (ध्रुव)' },
-            { id: 'mridu', label: 'मृदु' },
-            { id: 'chara', label: 'चर' },
-            { id: 'teekshna', label: 'तीक्ष्ण' }
+            { id: 'all', label: getTranslation(language, 'natureAll') },
+            { id: 'kshipra', label: getTranslation(language, 'natureKshipra') },
+            { id: 'ugra', label: getTranslation(language, 'natureUgra') },
+            { id: 'dhruva', label: getTranslation(language, 'natureDhruva') },
+            { id: 'mridu', label: getTranslation(language, 'natureMridu') },
+            { id: 'chara', label: getTranslation(language, 'natureChara') },
+            { id: 'teekshna', label: getTranslation(language, 'natureTeekshna') }
           ].map((nat) => (
             <button
               key={nat.id}
@@ -97,8 +119,12 @@ export function NakshatraScreen() {
         {filteredNakshatras.length === 0 ? (
           <div className="col-span-full glass-card-light dark:glass-card-dark p-10 sm:p-12 text-center h-48 flex flex-col justify-center items-center">
             <Star className="w-8 h-8 text-orange-400 mb-2 animate-pulse" />
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">आपकी खोज से मेल खाने वाला कोई नक्षत्र नहीं मिला।</span>
-            <span className="text-3xs text-slate-400 mt-1">कृपया अपने खोज शब्द बदलें।</span>
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 block">
+              {getTranslation(language, 'nakshatraNotFound')}
+            </span>
+            <span className="text-3xs text-slate-400 mt-1">
+              {getTranslation(language, 'tryAnotherSearch')}
+            </span>
           </div>
         ) : (
           filteredNakshatras.map((nak, idx) => (
@@ -115,25 +141,31 @@ export function NakshatraScreen() {
                 {/* Heading details */}
                 <div className="flex items-center gap-1.5 mb-2 flex-wrap sm:flex-nowrap">
                   <h3 className="text-base sm:text-lg font-black text-slate-800 dark:text-amber-100 font-serif leading-none">
-                    {nak.hindiName}
+                    {language === 'Hindi' ? nak.hindiName : nak.name}
                   </h3>
                   <span className={`text-[8.5px] font-extrabold px-2 py-0.5 rounded-full border tracking-wide font-mono uppercase shrink-0 ${getPlanetColor(nak.lord)}`}>
-                    स्वामी: {nak.lord}
+                    {getTranslation(language, 'ruler')}: {language === 'Hindi' ? translatePlanetNameHindi(nak.lord) : nak.lord}
                   </span>
                 </div>
 
                 {/* Symbol, Deity, Nature list */}
                 <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 py-2.5 sm:py-3 border-t border-b border-orange-100/35 dark:border-zinc-800/40 my-2.5 text-[10px]">
                   <div>
-                    <span className="text-slate-400 dark:text-slate-500 uppercase font-bold tracking-tight block text-3xs">प्रतीक:</span>
+                    <span className="text-slate-400 dark:text-slate-500 uppercase font-bold tracking-tight block text-3xs">
+                      {getTranslation(language, 'symbol')}:
+                    </span>
                     <span className="font-extrabold text-slate-800 dark:text-amber-100 mt-0.5 block">{nak.symbol}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 dark:text-slate-500 uppercase font-bold tracking-tight block text-3xs">देवता:</span>
+                    <span className="text-slate-400 dark:text-slate-500 uppercase font-bold tracking-tight block text-3xs">
+                      {getTranslation(language, 'deity')}:
+                    </span>
                     <span className="font-extrabold text-slate-800 dark:text-amber-100 mt-0.5 block truncate">{nak.deity}</span>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-slate-400 dark:text-slate-500 uppercase font-bold tracking-tight block text-3xs">प्रकृति:</span>
+                    <span className="text-slate-400 dark:text-slate-500 uppercase font-bold tracking-tight block text-3xs">
+                      {getTranslation(language, 'nature')}:
+                    </span>
                     <span className="font-extrabold text-[#7c2d12] dark:text-amber-200 flex items-center gap-1 mt-0.5">
                       <Sparkles className="w-3 h-3 text-orange-500 shrink-0" />
                       {nak.nature}
@@ -152,7 +184,9 @@ export function NakshatraScreen() {
                 <div className="flex items-start gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
                   <span className="text-[10px] sm:text-[9.5px] text-slate-650 dark:text-slate-350 leading-tight">
-                    <strong className="text-emerald-700 dark:text-emerald-450 mr-1">शुभ कार्य:</strong>
+                    <strong className="text-emerald-700 dark:text-emerald-450 mr-1">
+                      {getTranslation(language, 'suitableActs')}:
+                    </strong>
                     {nak.suitableActivities.join(', ')}
                   </span>
                 </div>
@@ -160,7 +194,9 @@ export function NakshatraScreen() {
                   <div className="flex items-start gap-1">
                     <XCircle className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
                     <span className="text-[10px] sm:text-[9.5px] text-slate-650 dark:text-slate-350 leading-tight">
-                      <strong className="text-rose-700 dark:text-rose-450 mr-1">वर्जित कार्य:</strong>
+                      <strong className="text-rose-700 dark:text-rose-450 mr-1">
+                        {getTranslation(language, 'avoidActs')}:
+                      </strong>
                       {nak.avoidActivities.join(', ')}
                     </span>
                   </div>

@@ -41,6 +41,11 @@ Do not include any other sections in the audit report.
 - The Panchang calculation file `src/utils/panchangCalc.ts` is strictly LOCKED.
 - No modifications, refactoring, or adjustments can be made to this file without explicit, written user approval in the chat.
 
+## 10. Panchang Page UI Lock (STRICT)
+- The Panchang Page UI components and layouts in `src/components/PanchangScreen.tsx` are strictly LOCKED.
+- No modifications, refactoring, styling adjustments, or layout changes can be made to the Panchang Page UI without explicit, written user approval in the chat.
+
+
 
 
 

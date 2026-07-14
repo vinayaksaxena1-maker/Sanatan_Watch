@@ -27,7 +27,28 @@ import {
 } from 'lucide-react';
 
 import { Coords, SettingsState, AppNotification, ChoghadiyaInterval, HoraInterval } from './types';
-import { getPanchangForDate, getMuhuratsForPanchang, getChoghadiyaPresentationData } from './utils/panchangCalc';
+import { getPanchangForDate as originalGetPanchangForDate, getMuhuratsForPanchang, getChoghadiyaPresentationData } from './utils/panchangCalc';
+
+const getPanchangForDate = (lat: number, lon: number, date: Date) => {
+  const info = originalGetPanchangForDate(lat, lon, date);
+  if (info && info.hora) {
+    const planetMap: Record<string, string> = {
+      'Sun': 'सूर्य',
+      'Moon': 'चन्द्र',
+      'Mars': 'मंगल',
+      'Mercury': 'बुध',
+      'Jupiter': 'गुरु',
+      'Venus': 'शुक्र',
+      'Saturn': 'शनि',
+    };
+    info.hora.forEach(h => {
+      if (h.lord && planetMap[h.lord]) {
+        h.lordHindi = planetMap[h.lord];
+      }
+    });
+  }
+  return info;
+};
 
 import { registerEngineListener, isReady } from './utils/astronomicalEngine';
 
@@ -119,7 +140,7 @@ const DEFAULT_COORDS: Coords = {
 
 const DEFAULT_SETTINGS: SettingsState = {
   theme: 'light',
-  language: 'English',
+  language: 'Hindi',
   locationMode: 'GPS',
   notifications: {
     morningPanchang: true,
@@ -966,10 +987,10 @@ export default function App() {
                   />
                   <div className="flex flex-col text-left">
                     <h1 className="text-base sm:text-lg font-serif font-black text-orange-900 dark:text-amber-100 tracking-wider leading-tight">
-                      सनातन घड़ी
+                      {getTranslation(settings.language, 'home')}
                     </h1>
                     <span className="text-[9px] sm:text-[10px] font-serif font-bold text-orange-700/80 dark:text-amber-500/80 tracking-wide mt-0.5">
-                      ।। कालचक्र ज्ञान यंत्र ।।
+                      {getTranslation(settings.language, 'tagline')}
                     </span>
                   </div>
                 </div>
@@ -978,7 +999,7 @@ export default function App() {
                 <div 
                   onClick={() => setIsCityModalOpen(true)}
                   className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-orange-100/50 dark:bg-zinc-900/40 border border-orange-200/30 dark:border-zinc-800/30 hover:bg-orange-200/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shrink-0"
-                  title="स्थान बदलें (Change Location)"
+                  title={settings.language === 'Hindi' ? "स्थान बदलें" : "Change Location"}
                 >
                   <MapPin className="w-3.5 h-3.5 text-orange-600 animate-pulse" />
                   <span className="text-[9px] font-extrabold text-orange-900 dark:text-amber-100 uppercase font-mono tracking-tight leading-none truncate max-w-[120px]">
@@ -997,7 +1018,7 @@ export default function App() {
                   <span 
                     className="text-[9px] font-black text-slate-700 dark:text-slate-300 tracking-tight font-mono whitespace-nowrap leading-none [text-shadow:0_1px_1px_rgba(0,0,0,0.12)] dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.45)]"
                   >
-                    {selectedDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} • {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                    {selectedDate.toLocaleDateString(settings.language === 'Hindi' ? 'hi-IN' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })} • {currentTime.toLocaleTimeString(settings.language === 'Hindi' ? 'hi-IN' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
                   </span>
                 </div>
                 {trendInfo.icon && (
@@ -1565,7 +1586,7 @@ export default function App() {
 
             {/* 5. NAKSHATRA SCREEN */}
             {activeTab === 'nakshatra' && (
-              <NakshatraScreen />
+              <NakshatraScreen language={settings.language} />
             )}
 
             {/* 5.5 SADHANA SCREEN */}
@@ -1651,7 +1672,7 @@ export default function App() {
                 {/* Sadhana Contents */}
                 {sadhanaSubSection === 'japa' && (
                   <div className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs">
-                    <MantraJapa />
+                    <MantraJapa language={settings.language} />
                   </div>
                 )}
 
@@ -1663,7 +1684,7 @@ export default function App() {
 
                 {sadhanaSubSection === 'stotra' && (
                   <div className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs">
-                    <StotraSangrah />
+                    <StotraSangrah language={settings.language} />
                   </div>
                 )}
 
@@ -1944,6 +1965,7 @@ export default function App() {
         isOpen={isHelpOpen} 
         onClose={() => setIsHelpOpen(false)} 
         theme={settings.theme} 
+        language={settings.language}
       />
 
     </div>

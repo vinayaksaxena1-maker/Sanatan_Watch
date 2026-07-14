@@ -6,12 +6,13 @@ import {
   ChevronRight,
   BookMarked
 } from 'lucide-react';
+import { getTranslation, Language } from '../utils/translations';
 
 interface StotraItem {
   id: string;
   title: string;
   hindiTitle: string;
-  category: 'Chalisa' | 'Stotram' | 'Aarti' | 'Sanskrit_Path';
+  category: 'Chalisa' | 'Stotram' | 'Aarti' | 'Sanskrit_Path' | 'Daily_Path';
   categoryHindi: string;
   deity: string;
   recommendedDay: number; // 0 to 6 (Sunday to Saturday)
@@ -104,7 +105,7 @@ const STOTRAS: StotraItem[] = [
     id: 'pratah_smaran',
     title: 'Daily Pratah Smaran Stuti',
     hindiTitle: 'दैनिक वैदिक प्रातः स्मरण श्लोक',
-    category: 'Sanskrit_Path',
+    category: 'Daily_Path',
     categoryHindi: 'दैनिक पाठ',
     deity: 'त्रिमूर्ति व आदि शक्ति (Universal Deities)',
     recommendedDay: 7, // Any day
@@ -156,7 +157,11 @@ const STOTRAS: StotraItem[] = [
   }
 ];
 
-export function StotraSangrah() {
+interface StotraSangrahProps {
+  language?: Language;
+}
+
+export function StotraSangrah({ language = 'English' }: StotraSangrahProps) {
   const [selectedStotra, setSelectedStotra] = useState<StotraItem>(STOTRAS[0]);
   const [fontSize, setFontSize] = useState<number>(15); // 12 to 24px
   const [currentPrahar, setCurrentPrahar] = useState<'Pratah' | 'Madhyahna' | 'Sandhya' | 'Ratri'>('Pratah');
@@ -181,6 +186,36 @@ export function StotraSangrah() {
   const dailyRecommendation = STOTRAS.find(s => s.recommendedDay === currentDay) || STOTRAS[4];
   const praharRecommendation = STOTRAS.find(s => s.recommendedPrahar === currentPrahar) || STOTRAS[4];
 
+  const getDayName = (dayIdx: number): string => {
+    const maps: Record<number, string> = {
+      0: getTranslation(language, 'dayNameSun'),
+      1: getTranslation(language, 'dayNameMon'),
+      2: getTranslation(language, 'dayNameTue'),
+      3: getTranslation(language, 'dayNameWed'),
+      4: getTranslation(language, 'dayNameThu'),
+      5: getTranslation(language, 'dayNameFri'),
+      6: getTranslation(language, 'dayNameSat'),
+      7: getTranslation(language, 'dayNameDaily')
+    };
+    return maps[dayIdx] || String(dayIdx);
+  };
+
+  const praharNameMap: Record<string, string> = {
+    'Pratah': getTranslation(language, 'praharPratah'),
+    'Madhyahna': getTranslation(language, 'praharMadhyahna'),
+    'Sandhya': getTranslation(language, 'praharSandhya'),
+    'Ratri': getTranslation(language, 'praharRatri'),
+    'All': getTranslation(language, 'praharAll')
+  };
+
+  const categoryNameMap: Record<string, string> = {
+    'Chalisa': getTranslation(language, 'categoryChalisa'),
+    'Stotram': getTranslation(language, 'categoryStotram'),
+    'Aarti': getTranslation(language, 'categoryAarti'),
+    'Sanskrit_Path': getTranslation(language, 'categorySanskritPath'),
+    'Daily_Path': getTranslation(language, 'categoryDailyPath')
+  };
+
   return (
     <div id="stotra_sangrah_root" className="space-y-6 text-left animate-fade-in font-sans">
       
@@ -195,13 +230,13 @@ export function StotraSangrah() {
           <div className="space-y-1.5 text-left">
             <span className="text-[9.5px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5" />
-              आज का सिद्ध वार सुझाव (Day's recommendation)
+              {getTranslation(language, 'stotraDailyRecommend')}
             </span>
             <h4 className="text-sm font-serif font-black text-slate-800 dark:text-orange-50">
-              {dailyRecommendation.hindiTitle}
+              {language === 'Hindi' ? dailyRecommendation.hindiTitle : dailyRecommendation.title}
             </h4>
             <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-semibold block leading-none">
-              वार: {dailyRecommendation.recommendedDayName} | देव: {dailyRecommendation.deity}
+              {language === 'Hindi' ? 'वार' : 'Day'}: {getDayName(dailyRecommendation.recommendedDay)} | {getTranslation(language, 'deityLabel')}: {dailyRecommendation.deity}
             </span>
           </div>
           <ChevronRight className="w-5 h-5 text-orange-500" />
@@ -215,13 +250,13 @@ export function StotraSangrah() {
           <div className="space-y-1.5 text-left">
             <span className="text-[9.5px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 flex items-center gap-1">
               {currentPrahar === 'Pratah' || currentPrahar === 'Madhyahna' ? <Sun className="w-3.5 h-3.5 text-amber-550" /> : <Moon className="w-3.5 h-3.5 text-indigo-400" />}
-              वर्तमान प्रहर ई-साधना (Prahar Devotion)
+              {getTranslation(language, 'stotraPraharRecommend')}
             </span>
             <h4 className="text-sm font-serif font-black text-slate-800 dark:text-orange-50">
-              {praharRecommendation.hindiTitle}
+              {language === 'Hindi' ? praharRecommendation.hindiTitle : praharRecommendation.title}
             </h4>
             <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-semibold block leading-none">
-              प्रहर: {currentPrahar === 'Pratah' ? '🌅 प्रातःकालीन' : currentPrahar === 'Madhyahna' ? '🌞 मध्याह्न' : currentPrahar === 'Sandhya' ? '🌇 सायंकालीन (संध्या)' : '🌃 रात्रिकालीन'}
+              {language === 'Hindi' ? 'प्रहर' : 'Prahar'}: {praharNameMap[praharRecommendation.recommendedPrahar] || praharRecommendation.recommendedPraharName}
             </span>
           </div>
           <ChevronRight className="w-5 h-5 text-orange-500" />
@@ -235,7 +270,7 @@ export function StotraSangrah() {
         {/* Left Side: Stotras Collection List */}
         <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
           <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-slate-400 dark:text-zinc-500 block mb-2">
-            संपूर्ण स्तोत्र व आरती संग्रह (Collection)
+            {getTranslation(language, 'stotraCollection')}
           </span>
 
           {STOTRAS.map((s) => {
@@ -252,15 +287,15 @@ export function StotraSangrah() {
               >
                 <div className="flex justify-between items-center gap-1.5">
                   <h4 className="text-xs font-serif font-black text-slate-800 dark:text-slate-200">
-                    {s.hindiTitle}
+                    {language === 'Hindi' ? s.hindiTitle : s.title}
                   </h4>
                   <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-orange-100/55 dark:bg-zinc-900 text-orange-655 dark:text-amber-500 font-mono flex items-center shrink-0">
-                    {s.categoryHindi}
+                    {categoryNameMap[s.category]}
                   </span>
                 </div>
                 
                 <p className="text-[9.5px] text-slate-400 dark:text-zinc-500 font-medium font-sans mt-1">
-                  देव: {s.deity}
+                  {getTranslation(language, 'deityLabel')}: {s.deity}
                 </p>
               </div>
             );
@@ -272,10 +307,12 @@ export function StotraSangrah() {
           
           <div className="w-full text-left flex justify-between items-center pb-3 border-b border-orange-100/35">
             <div>
-              <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-orange-600 dark:text-amber-500 block">॥ श्री देव पूजनम् पाठ ॥</span>
+              <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-orange-600 dark:text-amber-500 block">
+                {getTranslation(language, 'stotraReaderTitle')}
+              </span>
               <h3 className="text-base sm:text-lg font-serif font-black text-slate-800 dark:text-orange-50 flex items-center gap-1.5">
                 <BookMarked className="w-5 h-5 text-orange-550 shrink-0" />
-                {selectedStotra.hindiTitle}
+                {language === 'Hindi' ? selectedStotra.hindiTitle : selectedStotra.title}
               </h3>
             </div>
 
@@ -284,17 +321,17 @@ export function StotraSangrah() {
               <button 
                 onClick={() => setFontSize(prev => Math.max(12, prev - 1))}
                 className="w-6 h-6 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-900 text-slate-500 font-black cursor-pointer text-xs"
-                title="अक्षर घटाएं (Decrease font)"
+                title={language === 'Hindi' ? "अक्षर घटाएं" : "Decrease font"}
               >
-                अ-
+                {getTranslation(language, 'decreaseFont')}
               </button>
               <span className="text-[9px] font-bold text-slate-505 dark:text-zinc-400 font-mono w-4 text-center">{fontSize}</span>
               <button 
                 onClick={() => setFontSize(prev => Math.min(24, prev + 1))}
                 className="w-6 h-6 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-900 text-slate-505 font-black cursor-pointer text-xs"
-                title="अक्षर बढ़ाएं (Increase font)"
+                title={language === 'Hindi' ? "अक्षर बढ़ाएं" : "Increase font"}
               >
-                अ+
+                {getTranslation(language, 'increaseFont')}
               </button>
             </div>
           </div>
@@ -332,10 +369,10 @@ export function StotraSangrah() {
           {/* Meaning / Translation */}
           <div className="border-t border-dashed border-orange-100/60 dark:border-zinc-800/60 pt-3.5 text-left bg-orange-50/10 dark:bg-zinc-950/10 p-3 rounded-xl border border-slate-100 dark:border-zinc-900/30">
             <span className="text-[10px] font-black text-[#FF9933] uppercase tracking-widest block mb-1 font-mono">
-              स्तोत्र महात्म्य व भावार्थ (Sacred Meaning):
+              {getTranslation(language, 'sacredMeaning')}
             </span>
             <p className="text-[11.5px] text-slate-650 dark:text-zinc-400 font-medium leading-relaxed font-serif">
-              {selectedStotra.meaning}
+              {language === 'Hindi' ? selectedStotra.meaning : 'This sacred text brings peace, protection, and spiritual strength. Reciting it daily enhances devotion and divine connection.'}
             </p>
           </div>
 

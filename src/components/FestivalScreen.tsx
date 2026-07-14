@@ -200,13 +200,13 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
                       rel="noopener noreferrer"
                       className="flex items-center gap-1 text-[10px] font-bold text-orange-600 dark:text-orange-400 hover:underline"
                     >
-                      <ExternalLink className="w-3 h-3" /> Google Calendar
+                      <ExternalLink className="w-3 h-3" /> {language === 'Hindi' ? "गूगल कैलेंडर में जोड़ें" : "Google Calendar"}
                     </a>
                     <button
                       onClick={() => handleIcsExport(fest)}
                       className="flex items-center gap-1 text-[10px] font-bold text-orange-655 hover:underline cursor-pointer bg-transparent border-0"
                     >
-                      <Download className="w-3 h-3" /> export iCal
+                      <Download className="w-3 h-3" /> {language === 'Hindi' ? "कैलेंडर फ़ाइल (.ics)" : "export iCal"}
                     </button>
                   </div>
                 </div>

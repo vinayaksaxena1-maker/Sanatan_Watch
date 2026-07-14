@@ -11,6 +11,7 @@ import {
   Activity,
   Award
 } from 'lucide-react';
+import { getTranslation, Language } from '../utils/translations';
 
 interface MantraItem {
   id: string;
@@ -64,7 +65,11 @@ const MANTRAS: MantraItem[] = [
   }
 ];
 
-export function MantraJapa() {
+interface MantraJapaProps {
+  language?: Language;
+}
+
+export function MantraJapa({ language = 'English' }: MantraJapaProps) {
   const [sadhanaTab, setSadhanaTab] = useState<'japa' | 'meditation'>('japa');
   const [selectedMantra, setSelectedMantra] = useState<MantraItem>(MANTRAS[0]);
   const [count, setCount] = useState<number>(0);
@@ -363,7 +368,7 @@ export function MantraJapa() {
               : 'bg-white/80 dark:bg-zinc-900/60 text-slate-700 dark:text-slate-300 border-orange-105/30 hover:bg-slate-50'
           }`}
         >
-          📿 मंत्र जप साधना (Mantra Japa)
+          {getTranslation(language, 'sadhanaTabJapa')}
         </button>
         <button
           onClick={() => {
@@ -377,7 +382,7 @@ export function MantraJapa() {
               : 'bg-white/80 dark:bg-zinc-900/60 text-slate-700 dark:text-slate-300 border-orange-105/30 hover:bg-slate-50'
           }`}
         >
-          🧘 ध्यान योग टाइमर (Meditation Timer)
+          {getTranslation(language, 'sadhanaTabMeditation')}
         </button>
       </div>
 
@@ -386,28 +391,28 @@ export function MantraJapa() {
         <div className="space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="p-1 px-2.5 bg-orange-600 text-white font-extrabold text-[9px] rounded-full uppercase tracking-wider font-mono">
-              वैदिक ध्यान नाद (Cosmic Tuner)
+              {getTranslation(language, 'cosmicTuner')}
             </span>
             {isSynthPlaying && (
               <span className="text-[10px] text-emerald-500 font-black animate-pulse flex items-center gap-0.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 block animate-ping"></span>
-                सक्रिय ({tunerPitch === '136.1' ? '136.1Hz OM' : tunerPitch === '432' ? '432Hz Cosmic' : '528Hz Miracle'})
+                {getTranslation(language, 'activePitch')} ({tunerPitch === '136.1' ? '136.1Hz OM' : tunerPitch === '432' ? '432Hz Cosmic' : '528Hz Miracle'})
               </span>
             )}
           </div>
           <p className="text-xs font-serif font-black text-slate-800 dark:text-orange-50">
-            ॐ उच्चारण और ब्रह्मांडीय ध्वनि (Spiritual Tuned Sound Bed)
+            {getTranslation(language, 'tunerDescription')}
           </p>
           
           {/* Tuner Pitch Buttons */}
           <div className="flex items-center gap-1.5 pt-1">
-            <span className="text-[9px] text-slate-400 font-mono uppercase">पिच ट्यूनर:</span>
+            <span className="text-[9px] text-slate-400 font-mono uppercase">{getTranslation(language, 'tunerPitchLabel')}</span>
             <button
               onClick={() => setTunerPitch('136.1')}
               className={`text-[9.5px] font-black px-2 py-0.5 rounded border transition-all cursor-pointer ${
                 tunerPitch === '136.1'
                   ? 'bg-orange-500 text-white border-orange-500'
-                  : 'bg-white/60 dark:bg-zinc-950/20 text-slate-600 dark:text-slate-400 border-slate-200/40'
+                  : 'bg-white/60 dark:bg-zinc-955/20 text-slate-600 dark:text-slate-400 border-slate-200/40'
               }`}
             >
               136.1Hz (OM)
@@ -417,7 +422,7 @@ export function MantraJapa() {
               className={`text-[9.5px] font-black px-2 py-0.5 rounded border transition-all cursor-pointer ${
                 tunerPitch === '432'
                   ? 'bg-orange-500 text-white border-orange-500'
-                  : 'bg-white/60 dark:bg-zinc-950/20 text-slate-600 dark:text-slate-400 border-slate-200/40'
+                  : 'bg-white/60 dark:bg-zinc-955/20 text-slate-600 dark:text-slate-400 border-slate-200/40'
               }`}
             >
               432Hz (Cosmic)
@@ -427,7 +432,7 @@ export function MantraJapa() {
               className={`text-[9.5px] font-black px-2 py-0.5 rounded border transition-all cursor-pointer ${
                 tunerPitch === '528'
                   ? 'bg-orange-500 text-white border-orange-500'
-                  : 'bg-white/60 dark:bg-zinc-950/20 text-slate-600 dark:text-slate-400 border-slate-200/40'
+                  : 'bg-white/60 dark:bg-zinc-955/20 text-slate-600 dark:text-slate-400 border-slate-200/40'
               }`}
             >
               528Hz (Healing)
@@ -462,11 +467,11 @@ export function MantraJapa() {
           >
             {isSynthPlaying ? (
               <>
-                <Pause className="w-3.5 h-3.5 fill-current" /> नाद बंद करें
+                <Pause className="w-3.5 h-3.5 fill-current" /> {getTranslation(language, 'soundMute')}
               </>
             ) : (
               <>
-                <Play className="w-3.5 h-3.5 fill-current" /> नाद बजाएं
+                <Play className="w-3.5 h-3.5 fill-current" /> {getTranslation(language, 'soundPlay')}
               </>
             )}
           </button>
@@ -481,7 +486,7 @@ export function MantraJapa() {
           <div className="md:col-span-2 space-y-4">
             <div className="flex justify-between items-center pb-1">
               <h3 className="font-serif font-black text-slate-800 dark:text-amber-100 text-sm sm:text-base">
-                जप एवं ध्यान हेतु मंत्र का चयन करें (Select Mantra)
+                {getTranslation(language, 'selectMantra')}
               </h3>
             </div>
 
@@ -504,10 +509,10 @@ export function MantraJapa() {
                   >
                     <div className="flex justify-between items-start mb-1 gap-2">
                       <h4 className="text-sm font-serif font-black text-slate-850 dark:text-orange-50">
-                        {m.hindiName}
+                        {language === 'Hindi' ? m.hindiName : m.name}
                       </h4>
                       <span className="text-[9.5px] font-extrabold uppercase bg-orange-100/50 dark:bg-zinc-905 text-orange-655 dark:text-amber-505 px-2.5 py-0.5 rounded-full font-mono">
-                        लक्ष्य: {m.defaultTarget}
+                        {getTranslation(language, 'targetLabel')} {m.defaultTarget}
                       </span>
                     </div>
 
@@ -516,7 +521,7 @@ export function MantraJapa() {
                     </p>
 
                     <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-relaxed font-sans mt-1">
-                      <span className="font-bold text-slate-700 dark:text-slate-300">भावार्थ:</span> {m.meaning}
+                      <span className="font-bold text-slate-700 dark:text-slate-300">{getTranslation(language, 'meaningLabel')}</span> {language === 'Hindi' ? m.meaning : 'Cosmic vibration chanting for inner peace and concentration.'}
                     </p>
                   </div>
                 );
@@ -529,14 +534,18 @@ export function MantraJapa() {
             
             <div className="w-full text-left flex justify-between items-center mb-3">
               <div>
-                <span className="text-[10px] tracking-widest text-[#FF9933] font-bold uppercase block font-mono">॥ सिद्ध जप माला ॥</span>
-                <h4 className="text-xs font-serif font-black text-slate-800 dark:text-slate-200">ध्यान व गणना चक्र</h4>
+                <span className="text-[10px] tracking-widest text-[#FF9933] font-bold uppercase block font-mono">
+                  {getTranslation(language, 'japaMalaTitle')}
+                </span>
+                <h4 className="text-xs font-serif font-black text-slate-800 dark:text-slate-200">
+                  {getTranslation(language, 'japaMalaDesc')}
+                </h4>
               </div>
               
               <button 
                 onClick={handleReset}
                 className="p-1.5 rounded-xl border border-slate-200 hover:border-orange-400 dark:border-zinc-800 text-slate-450 hover:text-orange-500 transition-colors shadow-3xs hover:bg-slate-50 dark:hover:bg-zinc-900/60 cursor-pointer"
-                title="पुनः स्थापित करें (Reset)"
+                title={language === 'Hindi' ? 'पुनः स्थापित करें' : 'Reset'}
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
@@ -550,7 +559,7 @@ export function MantraJapa() {
 
               <button 
                 onClick={handleTap}
-                className={`w-40 h-40 rounded-full border-4 border-amber-500/45 bg-linear-to-br from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 shadow-md flex flex-col items-center justify-center text-white transition-all transform active:scale-95 z-10 cursor-pointer relative ${
+                className={`w-40 h-40 rounded-full border-4 border-amber-500/45 bg-linear-to-br from-orange-400 to-amber-50 hover:from-orange-500 hover:to-amber-600 shadow-md flex flex-col items-center justify-center text-white transition-all transform active:scale-95 z-10 cursor-pointer relative ${
                   isRippling ? 'ring-8 ring-amber-500/20 scale-[1.01]' : ''
                 }`}
               >
@@ -563,11 +572,11 @@ export function MantraJapa() {
                 </span>
                 
                 <span className="text-[10px] font-black uppercase tracking-wider text-amber-50 font-sans mt-1">
-                  स्पर्श करें (Tap bead)
+                  {getTranslation(language, 'tapBead')}
                 </span>
 
                 <div className="absolute bottom-4 flex items-center gap-1 text-[8px] bg-amber-955/20 px-2 py-0.5 rounded-full font-black uppercase tracking-widest font-mono text-amber-100 w-auto">
-                  {count}/{targetCount} जप
+                  {count}/{targetCount} {language === 'Hindi' ? 'जप' : 'Japa'}
                 </div>
               </button>
             </div>
@@ -575,15 +584,19 @@ export function MantraJapa() {
             {/* Stats Summary Panel */}
             <div className="w-full bg-slate-50 dark:bg-zinc-900/30 rounded-2xl p-3 border border-slate-100 dark:border-zinc-800/40 grid grid-cols-2 gap-2 mt-2">
               <div className="text-left border-r border-slate-200/50 dark:border-zinc-800/50 pr-2">
-                <span className="text-[9px] text-slate-400 dark:text-zinc-500 uppercase tracking-wider block font-mono">मर्यादा माला (Rotations):</span>
+                <span className="text-[9px] text-slate-400 dark:text-zinc-500 uppercase tracking-wider block font-mono">
+                  {getTranslation(language, 'rotations')}:
+                </span>
                 <span className="text-base font-bold text-orange-655 dark:text-amber-400 font-mono flex items-center gap-1 mt-0.5">
                   <Sparkles className="w-4 h-4 text-orange-500 animate-spin" style={{ animationDuration: '6s' }} />
-                  {malaCount} माला
+                  {malaCount} {getTranslation(language, 'rotationsUnit')}
                 </span>
               </div>
 
               <div className="text-left pl-1">
-                <span className="text-[9px] text-slate-400 dark:text-zinc-500 uppercase tracking-wider block font-mono">जप लक्ष्य (Mala Bead Goal):</span>
+                <span className="text-[9px] text-slate-400 dark:text-zinc-500 uppercase tracking-wider block font-mono">
+                  {getTranslation(language, 'beadGoal')}
+                </span>
                 <div className="flex bg-slate-100 dark:bg-zinc-900 rounded-md p-0.5 mt-1 border border-slate-200/30 gap-1 w-full text-center">
                   <button 
                     onClick={() => setTargetCount(27)}
@@ -624,14 +637,14 @@ export function MantraJapa() {
           <div className="md:col-span-2 space-y-5">
             
             {/* Meditation Duration Selection */}
-            <div className="bg-white dark:bg-zinc-950/20 border border-slate-105 dark:border-zinc-900/45 p-5 rounded-3xl text-left space-y-4">
+            <div className="bg-white dark:bg-zinc-955/20 border border-slate-100 dark:border-zinc-900/45 p-5 rounded-3xl text-left space-y-4">
               <div>
                 <h3 className="font-serif font-black text-slate-850 dark:text-orange-50 text-sm sm:text-base flex items-center gap-1.5">
                   <Timer className="w-5 h-5 text-orange-505" />
-                  ध्यान की अवधि चुनें (Meditation Duration)
+                  {getTranslation(language, 'meditationDuration')}
                 </h3>
                 <p className="text-[10.5px] text-slate-500 mt-1 leading-normal">
-                  शांत मन से बैठने के लिए अवधि चुनें। प्रारंभ होने पर पृष्ठभूमि नाद (Cosmic Drone) सक्रिय हो जाएगा।
+                  {getTranslation(language, 'meditationIntro')}
                 </p>
               </div>
 
@@ -644,10 +657,10 @@ export function MantraJapa() {
                     className={`p-2.5 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer text-center ${
                       meditationTime === t
                         ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
-                        : 'bg-white/80 dark:bg-zinc-900/40 text-slate-700 dark:text-slate-350 border-slate-200/40 hover:bg-slate-50 disabled:opacity-40'
+                        : 'bg-white/80 dark:bg-zinc-900/40 text-slate-700 dark:text-slate-355 border-slate-200/40 hover:bg-slate-50 disabled:opacity-40'
                     }`}
                   >
-                    {t} मि.
+                    {t} {getTranslation(language, 'minutesUnit')}
                   </button>
                 ))}
               </div>
@@ -656,31 +669,31 @@ export function MantraJapa() {
             {/* Statistics & Achievements Panel */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 p-4 rounded-3xl flex gap-3.5 items-start">
-                <div className="p-2.5 rounded-xl bg-orange-50 dark:bg-orange-950/30 text-orange-655 shrink-0">
+                <div className="p-2.5 rounded-xl bg-orange-50 dark:bg-orange-955/30 text-orange-655 shrink-0">
                   <Activity className="w-5 h-5 animate-pulse" />
                 </div>
                 <div>
-                  <span className="text-[9.5px] text-slate-400 uppercase font-mono block">कुल साधना समय:</span>
+                  <span className="text-[9.5px] text-slate-400 uppercase font-mono block">{getTranslation(language, 'totalSadhanaTime')}</span>
                   <span className="text-lg font-black text-slate-800 dark:text-orange-200 font-mono block mt-0.5">
-                    {totalMeditationMinutes} मिनट (Minutes)
+                    {totalMeditationMinutes} {getTranslation(language, 'minutesLongUnit')}
                   </span>
                   <p className="text-[9.5px] text-slate-500 leading-tight mt-1 font-sans">
-                    आपके दैनिक अभ्यास का एकत्रित ध्यान रिकॉर्ड।
+                    {getTranslation(language, 'dailyPracticeRecord')}
                   </p>
                 </div>
               </div>
 
               <div className="bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 p-4 rounded-3xl flex gap-3.5 items-start">
-                <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 text-amber-550 shrink-0">
+                <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-955/30 text-amber-550 shrink-0">
                   <Award className="w-5 h-5" />
                 </div>
                 <div>
-                  <span className="text-[9.5px] text-slate-400 uppercase font-mono block">ध्यान स्तर (Level):</span>
+                  <span className="text-[9.5px] text-slate-400 uppercase font-mono block">{getTranslation(language, 'meditationLevel')}</span>
                   <span className="text-lg font-black text-slate-800 dark:text-orange-200 font-serif block mt-0.5">
-                    {totalMeditationMinutes >= 120 ? 'उत्कृष्ट ध्यानी (Sadhak)' : totalMeditationMinutes >= 30 ? 'जिज्ञासु (Seeker)' : 'नव-साधक (Novice)'}
+                    {totalMeditationMinutes >= 120 ? getTranslation(language, 'meditationLevelSadhak') : totalMeditationMinutes >= 30 ? getTranslation(language, 'meditationLevelSeeker') : getTranslation(language, 'meditationLevelNovice')}
                   </span>
                   <p className="text-[9.5px] text-slate-500 leading-tight mt-1 font-sans">
-                    {totalMeditationMinutes >= 120 ? 'अनुभवी ध्यान स्तर।' : 'साधना बढ़ाएं और अगले स्तर पर पहुंचें।'}
+                    {totalMeditationMinutes >= 120 ? getTranslation(language, 'levelSadhakDesc') : totalMeditationMinutes >= 30 ? getTranslation(language, 'levelSeekerDesc') : getTranslation(language, 'levelNoviceDesc')}
                   </p>
                 </div>
               </div>
@@ -692,14 +705,18 @@ export function MantraJapa() {
           <div className="bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 p-5 rounded-3xl shadow-xs text-center flex flex-col justify-between items-center relative overflow-hidden min-h-[380px]">
             <div className="w-full text-left flex justify-between items-center mb-3">
               <div>
-                <span className="text-[10px] tracking-widest text-[#FF9933] font-bold uppercase block font-mono">॥ ध्यान चक्र ॥</span>
-                <h4 className="text-xs font-serif font-black text-slate-800 dark:text-slate-200">मन:स्थिति शांति उल्टी गिनती</h4>
+                <span className="text-[10px] tracking-widest text-[#FF9933] font-bold uppercase block font-mono">
+                  {getTranslation(language, 'meditationCycle')}
+                </span>
+                <h4 className="text-xs font-serif font-black text-slate-800 dark:text-slate-200">
+                  {getTranslation(language, 'meditationCycleDesc')}
+                </h4>
               </div>
               
               <button 
                 onClick={handleResetTimer}
                 className="p-1.5 rounded-xl border border-slate-200 hover:border-orange-400 dark:border-zinc-800 text-slate-450 hover:text-orange-500 transition-colors shadow-3xs hover:bg-slate-50 dark:hover:bg-zinc-900/60 cursor-pointer"
-                title="टाइमर रीसेट करें"
+                title={language === 'Hindi' ? 'रीसेट करें' : 'Reset'}
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
@@ -736,7 +753,7 @@ export function MantraJapa() {
                   {formatTimerStr(timeLeft)}
                 </span>
                 <span className="text-[8px] font-black uppercase tracking-widest text-slate-405 dark:text-zinc-550 mt-1 font-mono">
-                  शेष समय (Left)
+                  {getTranslation(language, 'timerRemaining')}
                 </span>
               </div>
             </div>
@@ -752,11 +769,11 @@ export function MantraJapa() {
             >
               {isTimerRunning ? (
                 <>
-                  <Pause className="w-4 h-4 fill-current" /> ध्यान रोकें (Pause)
+                  <Pause className="w-4 h-4 fill-current" /> {getTranslation(language, 'pauseMeditation')}
                 </>
               ) : (
                 <>
-                  <Play className="w-4 h-4 fill-current" /> ध्यान शुरू करें (Start)
+                  <Play className="w-4 h-4 fill-current" /> {getTranslation(language, 'startMeditation')}
                 </>
               )}
             </button>

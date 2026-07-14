@@ -52,6 +52,7 @@ export interface ChandraNakshatraDetail {
   name: string;
   hindiName: string;
   pada: number;
+  padaEndTime?: string;
   lord: string;
   deity: string;
 }

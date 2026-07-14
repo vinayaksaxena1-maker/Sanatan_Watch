@@ -161,7 +161,7 @@ export function TransitScreen({ language, theme }: TransitScreenProps) {
                   {/* Top line: Planet and Date */}
                   <div className="flex justify-between items-start gap-2">
                     <div>
-                      <span className="text-[9px] uppercase font-mono font-bold tracking-wider text-slate-400 dark:text-slate-500 block">Planet Transit</span>
+                      <span className="text-[9px] uppercase font-mono font-bold tracking-wider text-slate-400 dark:text-slate-500 block">{language === 'Hindi' ? "ग्रह गोचर" : "Planet Transit"}</span>
                       <h4 className="text-base font-black text-slate-800 dark:text-orange-100 font-serif leading-tight">
                         {language === 'Hindi' ? item.planetHindi : item.planetName}
                       </h4>
@@ -188,14 +188,14 @@ export function TransitScreen({ language, theme }: TransitScreenProps) {
                   {/* Transition path */}
                   <div className="flex items-center gap-2 bg-white/45 dark:bg-zinc-900/40 p-2 rounded-xl border border-orange-100/10 dark:border-zinc-800/20 select-none">
                     <div className="min-w-0 pr-1">
-                      <span className="text-[8px] text-slate-400 uppercase tracking-widest block font-mono">From (से)</span>
+                      <span className="text-[8px] text-slate-400 uppercase tracking-widest block font-mono">{language === 'Hindi' ? "प्रस्थान राशि" : "From (से)"}</span>
                       <span className="text-xs font-bold text-slate-600 dark:text-slate-300 block font-serif truncate">
                         {language === 'Hindi' ? item.fromSignHindi : item.fromSign}
                       </span>
                     </div>
                     <span className="text-orange-500 font-bold shrink-0">➔</span>
                     <div className="min-w-0 pl-1">
-                      <span className="text-[8px] text-slate-400 uppercase tracking-widest block font-mono">To (में)</span>
+                      <span className="text-[8px] text-slate-400 uppercase tracking-widest block font-mono">{language === 'Hindi' ? "प्रवेश राशि" : "To (में)"}</span>
                       <span className="text-xs font-black text-orange-700 dark:text-orange-300 block font-serif truncate">
                         {language === 'Hindi' ? item.toSignHindi : item.toSign}
                       </span>
