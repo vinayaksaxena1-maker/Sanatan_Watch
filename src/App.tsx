@@ -62,11 +62,9 @@ import { LiveMuhuratWatch } from './components/LiveMuhuratWatch';
 import { PanchangScreen } from './components/PanchangScreen';
 import { MuhuratScreen } from './components/MuhuratScreen';
 import { FestivalScreen } from './components/FestivalScreen';
-import { NakshatraScreen } from './components/NakshatraScreen';
 import { HoraSystem } from './components/HoraSystem';
 import { PosterGenerator } from './components/PosterGenerator';
 import { WidgetSimulator } from './components/WidgetSimulator';
-import { TransitScreen } from './components/TransitScreen';
 import { NotificationSimulator } from './components/NotificationSimulator';
 import { CitySelector } from './components/CitySelector';
 import { MonetizationSimulator } from './components/MonetizationSimulator';
@@ -1572,22 +1570,7 @@ export default function App() {
               <FestivalScreen lat={coords.latitude} lon={coords.longitude} year={selectedDate.getFullYear()} language={settings.language} />
             )}
 
-            {/* 4.5 GOCHAR (TRANSIT) SCREEN */}
-            {activeTab === 'gochar' && (
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.3 }}
-              >
-                <TransitScreen language={settings.language} theme={settings.theme} />
-              </motion.div>
-            )}
 
-            {/* 5. NAKSHATRA SCREEN */}
-            {activeTab === 'nakshatra' && (
-              <NakshatraScreen language={settings.language} />
-            )}
 
             {/* 5.5 SADHANA SCREEN */}
             {activeTab === 'sadhana' && (
@@ -1872,30 +1855,6 @@ export default function App() {
             >
               <Calendar className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
               <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'festivalTab')}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('gochar')}
-              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-11 sm:w-14 transition-all flex-shrink-0 ${
-                activeTab === 'gochar'
-                  ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
-                  : 'text-slate-400 hover:text-slate-500'
-              }`}
-            >
-              <Compass className="w-4.5 h-4.5 sm:w-5 sm:h-5 animate-spin-slow" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'gocharTab')}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('nakshatra')}
-              className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-11 sm:w-14 transition-all flex-shrink-0 ${
-                activeTab === 'nakshatra'
-                  ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
-                  : 'text-slate-400 hover:text-slate-500'
-              }`}
-            >
-              <Map className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              <span className="text-[9px] mt-1 font-mono tracking-tight leading-none uppercase">{getTranslation(settings.language, 'nakshatraTab')}</span>
             </button>
 
             <button
