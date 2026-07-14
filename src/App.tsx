@@ -221,6 +221,7 @@ export default function App() {
 
   // Core Astro State
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [muhuratSelectedDate, setMuhuratSelectedDate] = useState<Date>(new Date());
   const [coords, setCoords] = useState<Coords>(DEFAULT_COORDS);
   const [gpsActive, setGpsActive] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
@@ -357,6 +358,7 @@ export default function App() {
 
   // Real-time calculated Panchang and Muhurats
   const panchangInfo = getPanchangForDate(coords.latitude, coords.longitude, selectedDate);
+  const muhuratPanchangInfo = getPanchangForDate(coords.latitude, coords.longitude, muhuratSelectedDate);
   const activeMuhurats = getMuhuratsForPanchang(panchangInfo);
 
   // Find current active Choghadiya based on actual currentTime (today)
@@ -1556,11 +1558,11 @@ export default function App() {
             {/* 3. MUHURAT SCREEN */}
             {activeTab === 'muhurat' && (
               <MuhuratScreen 
-                panchang={panchangInfo} 
+                panchang={muhuratPanchangInfo} 
                 onViewAstrologyChart={() => setActiveTab('panchang')} 
                 currentTime={currentTime} 
-                selectedDate={selectedDate}
-                onDateChange={setSelectedDate}
+                selectedDate={muhuratSelectedDate}
+                onDateChange={setMuhuratSelectedDate}
                 language={settings.language}
               />
             )}
