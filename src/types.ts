@@ -341,8 +341,13 @@ declare global {
         nakshatra: string,
         choghadiya: string,
         choghadiyaTime: string,
-        rahuKaal: string
+        rahuKaal: string,
+        brahma: string,
+        abhijit: string,
+        city: string
       ) => void;
+      setPermanentNotificationEnabled?: (enabled: boolean) => void;
+      isPermanentNotificationEnabled?: () => boolean;
     };
     onRingtonePicked?: (alarmId: string, uri: string, title: string) => void;
   }

@@ -191,12 +191,14 @@ class MockAstronomicalEngine implements AstronomicalEngine {
     }
     const karanaPercent = ((lunarMonthAge / lunarCycle) * 60) - karanaTotalSec;
     const karanaRemainingHours = (1 - karanaPercent) * 11.8;
-
-    const monthsSinceEpoch = Math.floor(diffDays / lunarCycle);
-
     const sunSidereal = (diffDays * 0.9856) % 360;
     const moonSidereal = (diffDays * 13.176) % 360;
     const ayanamsa = 24.2;
+
+    const diffNorm = (lunarMonthAge / lunarCycle) * 360;
+    const daysSinceNewMoon = diffNorm / 12.190749;
+    const sunLonAtNewMoon = (sunSidereal - daysSinceNewMoon + 360) % 360;
+    const monthsSinceEpoch = (Math.floor(sunLonAtNewMoon / 30) + 1) % 12;
     
     const mockPlanets: PlanetPosition[] = [
       { name: 'Sun', hindiName: 'सूर्य', longitude: sunSidereal, speed: 0.9856, isRetrograde: false, sign: 'Aries', signHindi: 'मेष' },
@@ -253,24 +255,27 @@ const pendingQueries = new Set<string>();
 const mockEngine = new MockAstronomicalEngine();
 let updateListener: (() => void) | null = null;
 let isEngineReady = false;
+let isInitialLoadComplete = false;
+const initialKeys = new Set<string>();
 
 export function registerEngineListener(callback: () => void) {
   updateListener = callback;
 }
 
 export function isReady(): boolean {
-  return isEngineReady;
+  return isEngineReady && isInitialLoadComplete;
 }
 
 if (typeof window !== 'undefined') {
   if (worker) {
     // Fetch ephemeris files on the main thread to completely bypass Web Worker CORS/protocol restrictions in WebViews
+    const origin = window.location.origin;
     Promise.all([
-      fetch('ephe/sepl_18.se1').then(r => {
+      fetch(`${origin}/ephe/sepl_18.se1`).then(r => {
         if (!r.ok) throw new Error(`sepl_18.se1 fetch failed: ${r.status}`);
         return r.arrayBuffer();
       }),
-      fetch('ephe/semo_18.se1').then(r => {
+      fetch(`${origin}/ephe/semo_18.se1`).then(r => {
         if (!r.ok) throw new Error(`semo_18.se1 fetch failed: ${r.status}`);
         return r.arrayBuffer();
       })
@@ -297,6 +302,7 @@ if (typeof window !== 'undefined') {
       if (!isEngineReady) {
         console.warn('[AstronomicalEngine] Worker initialization timed out. Falling back to Mock Engine.');
         isEngineReady = true;
+        isInitialLoadComplete = true;
         if (updateListener) {
           updateListener();
         }
@@ -305,6 +311,7 @@ if (typeof window !== 'undefined') {
   } else {
     // If worker couldn't be spawned, mark ready immediately to fallback to mock
     isEngineReady = true;
+    isInitialLoadComplete = true;
   }
 }
 
@@ -323,20 +330,20 @@ if (worker) {
 
       const cacheKeySolar = `SOLAR_${lat.toFixed(4)}_${lon.toFixed(4)}_${today.toDateString()}`;
       const cacheKeyMoon = `MOON_${lat.toFixed(4)}_${lon.toFixed(4)}_${today.toDateString()}`;
-      const cacheKeyPos = `POS_${today.toDateString()}`;
+      const cacheKeyPos = `POS_${today.toDateString()}_${today.getHours()}_${today.getMinutes()}`;
 
       pendingQueries.add(cacheKeySolar);
       pendingQueries.add(cacheKeyMoon);
       pendingQueries.add(cacheKeyPos);
 
+      initialKeys.add(cacheKeySolar);
+      initialKeys.add(cacheKeyMoon);
+      initialKeys.add(cacheKeyPos);
+
       if (worker) {
         worker.postMessage({ type: 'CALCULATE_SOLAR', key: cacheKeySolar, lat, lon, date: today.toISOString() });
         worker.postMessage({ type: 'CALCULATE_MOON', key: cacheKeyMoon, lat, lon, date: today.toISOString() });
         worker.postMessage({ type: 'CALCULATE_COORDINATES', key: cacheKeyPos, date: today.toISOString() });
-      }
-
-      if (updateListener) {
-        updateListener();
       }
       return;
     }
@@ -347,6 +354,7 @@ if (worker) {
     }
 
     if (type === 'RESULT') {
+      console.log('[AstronomicalEngine] Received RESULT for key:', key, data);
       if (key.startsWith('SOLAR_')) {
         solarCache.set(key, data);
       } else if (key.startsWith('MOON_')) {
@@ -356,8 +364,17 @@ if (worker) {
       }
       pendingQueries.delete(key);
 
+      // Track completion of initial pre-fetch queries
+      if (initialKeys.has(key)) {
+        initialKeys.delete(key);
+        if (initialKeys.size === 0) {
+          isInitialLoadComplete = true;
+          console.log('[AstronomicalEngine] Initial calculations pre-fetch completed. Ready to dismiss splash.');
+        }
+      }
+
       if (updateListener) {
-        updateListener();
+        setTimeout(updateListener, 0);
       }
     }
   };
@@ -420,7 +437,7 @@ class SwissEphemerisAstronomicalEngine implements AstronomicalEngine {
   }
 
   getPanchangPositions(date: Date): PanchangPositions {
-    const cacheKey = `POS_${date.toDateString()}`;
+    const cacheKey = `POS_${date.toDateString()}_${date.getHours()}_${date.getMinutes()}`;
     const cached = positionCache.get(cacheKey);
 
     if (cached) {

@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Minute Hand pointing straight up, pivot at (100,100) -->
+    <path
+        android:fillColor="#E0E0E0"
+        android:pathData="M 98 100 L 99 25 L 100 20 L 101 25 L 102 100 Z" />
+</vector>

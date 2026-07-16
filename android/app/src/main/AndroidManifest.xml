@@ -38,6 +38,27 @@
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info" />
         </receiver>
 
+        <receiver android:name=".SanatanSmallWidget" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_small" />
+        </receiver>
+
+        <receiver android:name=".SanatanLargeWidget" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_large" />
+        </receiver>
+
+        <receiver android:name=".SanatanAnalogWidget" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info_analog" />
+        </receiver>
+
         <activity
             android:name=".AlarmRingerActivity"
             android:showWhenLocked="true"

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:id="@+id/widget_container_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/widget_background"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:elevation="4dp"
+        android:gravity="center">
+
+        <!-- Analog Clock View -->
+        <AnalogClock
+            android:id="@+id/widget_analog_clock"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:dial="@drawable/widget_clock_dial"
+            android:hand_hour="@drawable/widget_clock_hour"
+            android:hand_minute="@drawable/widget_clock_minute"
+            android:layout_gravity="center"
+            android:layout_marginBottom="6dp" />
+
+        <!-- Current Choghadiya Label below clock -->
+        <TextView
+            android:id="@+id/widget_choghadiya_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="लोअडिंग..."
+            android:textColor="#FF9933"
+            android:textSize="9sp"
+            android:textStyle="bold"
+            android:layout_gravity="center" />
+
+    </LinearLayout>
+</LinearLayout>

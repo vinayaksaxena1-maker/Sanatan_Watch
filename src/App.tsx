@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
+import { HeaderClock } from './components/HeaderClock';
 import { 
   Home, 
   Map, 
@@ -27,7 +28,7 @@ import {
 } from 'lucide-react';
 
 import { Coords, SettingsState, AppNotification, ChoghadiyaInterval, HoraInterval } from './types';
-import { getPanchangForDate as originalGetPanchangForDate, getMuhuratsForPanchang, getChoghadiyaPresentationData } from './utils/panchangCalc';
+import { getPanchangForDate as originalGetPanchangForDate, getMuhuratsForPanchang, getChoghadiyaPresentationData, clearPanchangCache } from './utils/panchangCalc';
 
 const getPanchangForDate = (lat: number, lon: number, date: Date) => {
   const info = originalGetPanchangForDate(lat, lon, date);
@@ -215,6 +216,18 @@ export default function App() {
   const [isSplashActive, setIsSplashActive] = useState<boolean>(true);
   const [splashAnimationCompleted, setSplashAnimationCompleted] = useState<boolean>(false);
   const [previewSplashStyle, setPreviewSplashStyle] = useState<SplashStyle | null>(null);
+  
+  // Permanent Notification State
+  const [notificationEnabled, setNotificationEnabled] = useState<boolean>(false);
+  useEffect(() => {
+    if (window.AndroidAlarm && typeof window.AndroidAlarm.isPermanentNotificationEnabled === 'function') {
+      try {
+        setNotificationEnabled(window.AndroidAlarm.isPermanentNotificationEnabled());
+      } catch (e) {
+        console.error("Failed to load permanent notification state", e);
+      }
+    }
+  }, []);
 
   // Core Astro State
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -222,7 +235,7 @@ export default function App() {
   const [panchangSelectedDate, setPanchangSelectedDate] = useState<Date>(new Date());
   const [coords, setCoords] = useState<Coords>(DEFAULT_COORDS);
   const [gpsActive, setGpsActive] = useState<boolean>(false);
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [currentMinuteTime, setCurrentMinuteTime] = useState<Date>(new Date());
   const [homeTimeCycleTab, setHomeTimeCycleTab] = useState<'choghadiya' | 'hora'>('choghadiya');
 
   // Birth Details for Personalized Tara Bala / Chandra Bala
@@ -267,10 +280,11 @@ export default function App() {
   const dateInputRef = React.useRef<HTMLInputElement>(null);
 
   // Force update trigger on astronomical calculation changes
-  const [, forceUpdate] = useState({});
+  const [updateTrigger, setUpdateTrigger] = useState({});
   useEffect(() => {
     registerEngineListener(() => {
-      forceUpdate({});
+      clearPanchangCache();
+      setUpdateTrigger({});
       if (splashAnimationCompleted && isReady()) {
         setIsSplashActive(false);
       }
@@ -283,7 +297,7 @@ export default function App() {
       const timer = setTimeout(() => {
         console.warn('[App] Splash screen safety timeout triggered. Force dismissing splash screen.');
         setIsSplashActive(false);
-      }, 22000);
+      }, 7000);
       return () => clearTimeout(timer);
     }
   }, [isSplashActive]);
@@ -359,35 +373,55 @@ export default function App() {
     } catch {}
   }, [notificationsList]);
 
-  // Keep ticking Clock
+  // Keep ticking Clock once a minute at the minute boundary
   useEffect(() => {
-    const clockTimer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(clockTimer);
+    const now = new Date();
+    const msToNextMinute = 60000 - (now.getSeconds() * 1000 + now.getMilliseconds());
+    
+    let intervalId: any;
+    const timeoutId = setTimeout(() => {
+      setCurrentMinuteTime(new Date());
+      intervalId = setInterval(() => {
+        setCurrentMinuteTime(new Date());
+      }, 60000);
+    }, msToNextMinute);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (intervalId) clearInterval(intervalId);
+    };
   }, []);
 
-  // Real-time calculated Panchang and Muhurats
-  const panchangInfo = getPanchangForDate(coords.latitude, coords.longitude, selectedDate);
-  const muhuratPanchangInfo = getPanchangForDate(coords.latitude, coords.longitude, muhuratSelectedDate);
-  const panchangScreenInfo = getPanchangForDate(coords.latitude, coords.longitude, panchangSelectedDate);
-  const activeMuhurats = getMuhuratsForPanchang(panchangInfo);
-
-  // Find current active Choghadiya based on actual currentTime (today)
-  const getActiveChoghadiya = () => {
-    try {
-      const todayPanchang = getPanchangForDate(coords.latitude, coords.longitude, new Date());
-      const currentMin = currentTime.getHours() * 60 + currentTime.getMinutes();
-
-      return todayPanchang.choghadiya.find(ch => 
-        isTimeInInterval(currentMin, ch.startTime, ch.endTime)
-      );
-    } catch {
-      return undefined;
+  // Helper to merge live ticking time when date is today
+  const getQueryDate = (baseDate: Date) => {
+    const now = new Date();
+    if (baseDate.toDateString() === now.toDateString()) {
+      const query = new Date(baseDate);
+      query.setHours(currentMinuteTime.getHours());
+      query.setMinutes(currentMinuteTime.getMinutes());
+      query.setSeconds(currentMinuteTime.getSeconds());
+      return query;
     }
+    return baseDate;
   };
 
-  const activeChoghadiya = getActiveChoghadiya();
+  // Real-time calculated Panchang and Muhurats
+  const panchangInfo = useMemo(() => {
+    const qDate = getQueryDate(selectedDate);
+    return getPanchangForDate(coords.latitude, coords.longitude, qDate);
+  }, [coords.latitude, coords.longitude, selectedDate, currentMinuteTime, updateTrigger]);
+
+  const muhuratPanchangInfo = useMemo(() => {
+    const qDate = getQueryDate(muhuratSelectedDate);
+    return getPanchangForDate(coords.latitude, coords.longitude, qDate);
+  }, [coords.latitude, coords.longitude, muhuratSelectedDate, currentMinuteTime, updateTrigger]);
+
+  const panchangScreenInfo = useMemo(() => {
+    const qDate = getQueryDate(panchangSelectedDate);
+    return getPanchangForDate(coords.latitude, coords.longitude, qDate);
+  }, [coords.latitude, coords.longitude, panchangSelectedDate, currentMinuteTime, updateTrigger]);
+
+  const activeMuhurats = useMemo(() => getMuhuratsForPanchang(panchangInfo), [panchangInfo]);
 
   // Synchronize Widget Data on Android
   useEffect(() => {
@@ -397,7 +431,8 @@ export default function App() {
         const nakshatra = panchangInfo.hinduDate.nakshatra.hindiName;
         
         // Find current active Choghadiya
-        const currentMin = currentTime.getHours() * 60 + currentTime.getMinutes();
+        const now = new Date();
+        const currentMin = now.getHours() * 60 + now.getMinutes();
         const activeChog = panchangInfo.choghadiya?.find((ch: any) => 
           isTimeInInterval(currentMin, ch.startTime, ch.endTime)
         );
@@ -406,17 +441,22 @@ export default function App() {
         const choghadiyaTime = activeChog ? `${activeChog.startTime} - ${activeChog.endTime}` : '—';
         const rahuKaalStr = panchangInfo.rahuKaal ? `${panchangInfo.rahuKaal.start} - ${panchangInfo.rahuKaal.end}` : '—';
 
-        window.AndroidAlarm.updateWidgetData(tithi, nakshatra, choghadiyaName, choghadiyaTime, rahuKaalStr);
+        const abhijit = activeMuhurats.find((m: any) => m.id === 'abhijit');
+        const abhijitStr = abhijit ? `${abhijit.startTime} - ${abhijit.endTime}` : '—';
+        const brahma = activeMuhurats.find((m: any) => m.id === 'brahma');
+        const brahmaStr = brahma ? `${brahma.startTime} - ${brahma.endTime}` : '—';
+
+        window.AndroidAlarm.updateWidgetData(tithi, nakshatra, choghadiyaName, choghadiyaTime, rahuKaalStr, brahmaStr, abhijitStr, coords.city);
       } catch (e) {
         console.error("Failed to sync widget data", e);
       }
     }
-  }, [panchangInfo, currentTime]);
+  }, [panchangInfo, activeMuhurats, coords.city]);
 
   // Find rolling chronological Hora list and current active Hora
-  const getHoraPresentationData = () => {
+  const { rollingHoraList, rollingActiveHora } = useMemo(() => {
     try {
-      const curDateObj = new Date(currentTime);
+      const curDateObj = new Date(currentMinuteTime);
       const selDateObj = new Date(selectedDate);
       const currentMin = curDateObj.getHours() * 60 + curDateObj.getMinutes();
 
@@ -430,7 +470,7 @@ export default function App() {
       };
 
       // Get sunrise for selectedDate
-      const pRef = getPanchangForDate(coords.latitude, coords.longitude, selDateObj);
+      const pRef = panchangInfo;
       const sunriseMin = parseTimeToMinutes(pRef.sunrise);
 
       // Determine active and next Vedic days
@@ -509,8 +549,6 @@ export default function App() {
 
       const rollingList = upcomingHoraItems.map(item => item.hora);
       
-      console.log("Calculated rolling Hora list:", rollingList.map(h => `${h.number}: ${h.lordHindi} (${h.startTime} - ${h.endTime})`));
-
       return {
         rollingHoraList: rollingList,
         rollingActiveHora: activeItem ? activeItem.hora : (panchangInfo.hora?.[0] || null)
@@ -522,54 +560,18 @@ export default function App() {
         rollingActiveHora: panchangInfo.hora?.[0] || null
       };
     }
-  };
-
-  const { rollingHoraList, rollingActiveHora } = getHoraPresentationData();
+  }, [currentMinuteTime, selectedDate, coords.latitude, coords.longitude, panchangInfo]);
   const activeHora = rollingActiveHora;
 
-  // Chaughadiya Ring presentation data consumed directly from the Sanatan Engine
+  // Choghadiya Ring presentation data consumed directly from the Sanatan Engine
   const {
     choghadiyaList,
     activeIndex,
     displayStartTime,
     displayEndTime
-  } = getChoghadiyaPresentationData(panchangInfo, currentTime);
-
-
-  const getChoghadiyaTrendInfo = () => {
-    if (!activeChoghadiya) {
-      return {
-        icon: null,
-        colorClass: '',
-        tooltip: 'Click to toggle digital/analog format'
-      };
-    }
-    
-    const { quality, hindiName, name } = activeChoghadiya;
-    const label = hindiName || name;
-    
-    if (quality === 'Excellent' || quality === 'Good') {
-      return {
-        icon: <TrendingUp className="w-2 h-2 text-emerald-600 dark:text-emerald-400 shrink-0" />,
-        colorClass: 'border-emerald-200/50 dark:border-emerald-950/40 bg-emerald-50/65 dark:bg-emerald-950/25 text-emerald-800 dark:text-emerald-300',
-        tooltip: `शुभ चौघड़िया: ${label} (उत्तम/शुभ समय) - Click to toggle format`
-      };
-    } else if (quality === 'Inauspicious' || quality === 'Bad') {
-      return {
-        icon: <TrendingDown className="w-2 h-2 text-rose-600 dark:text-rose-450 shrink-0" />,
-        colorClass: 'border-rose-200/50 dark:border-rose-950/40 bg-rose-50/65 dark:bg-rose-950/25 text-rose-850 dark:text-rose-350',
-        tooltip: `अशुभ चौघड़िया: ${label} (वर्जित/अशुभ समय) - Click to toggle format`
-      };
-    } else {
-      return {
-        icon: <Minus className="w-2 h-2 text-blue-500 dark:text-blue-400 shrink-0" />,
-        colorClass: 'border-blue-100/50 dark:border-zinc-800/40 bg-blue-50/40 dark:bg-zinc-900/30 text-blue-600 dark:text-blue-300',
-        tooltip: `मध्यम चौघड़िया: ${label} (सामान्य/चल समय) - Click to toggle format`
-      };
-    }
-  };
-
-  const trendInfo = getChoghadiyaTrendInfo();
+  } = useMemo(() => {
+    return getChoghadiyaPresentationData(panchangInfo, currentMinuteTime);
+  }, [panchangInfo, currentMinuteTime]);
 
   // Triggering the visual toast slide-in
   const handlePushNotificationToast = (title: string, body: string) => {
@@ -930,7 +932,7 @@ export default function App() {
     }
   };
 
-  const formattedClockStr = currentTime.toLocaleTimeString('en-IN', {
+  const formattedClockStr = new Date().toLocaleTimeString('en-IN', {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
@@ -1045,25 +1047,7 @@ export default function App() {
               </div>
 
               {/* ROW 2: Precise clock & Choghadiya Trend Badge */}
-              <div 
-                id="header_clock_wrapper"
-                className="flex items-center justify-between w-full rounded-full px-4 py-2 bg-slate-50/50 dark:bg-stone-900/60 border border-slate-200/60 dark:border-zinc-800/40 shadow-3xs"
-              >
-                <div className="flex items-center gap-2">
-                  <Clock className="w-3.5 h-3.5 text-orange-500 transition-colors drop-shadow-3xs" />
-                  <span 
-                    className="text-[9px] font-black text-slate-700 dark:text-slate-300 tracking-tight font-mono whitespace-nowrap leading-none [text-shadow:0_1px_1px_rgba(0,0,0,0.12)] dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.45)]"
-                  >
-                    {selectedDate.toLocaleDateString(settings.language === 'Hindi' ? 'hi-IN' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })} • {currentTime.toLocaleTimeString(settings.language === 'Hindi' ? 'hi-IN' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
-                  </span>
-                </div>
-                {trendInfo.icon && (
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[9px] font-black leading-none shadow-3xs hover:shadow-2xs transition-shadow duration-300 ${trendInfo.colorClass}`}>
-                    {trendInfo.icon}
-                    <span className="font-serif [text-shadow:0_0.5px_1px_rgba(255,255,255,0.45)] dark:[text-shadow:0_0.5px_1px_rgba(0,0,0,0.35)]">{activeChoghadiya?.hindiName}</span>
-                  </span>
-                )}
-              </div>
+              <HeaderClock selectedDate={selectedDate} panchangInfo={panchangInfo} language={settings.language} />
             </header>
           </div>
 
@@ -1591,7 +1575,7 @@ export default function App() {
               <PanchangScreen 
                 panchang={panchangScreenInfo} 
                 onShare={handleShareDailyPanchang} 
-                currentTime={currentTime} 
+                currentTime={currentMinuteTime} 
                 selectedDate={panchangSelectedDate}
                 onDateChange={setPanchangSelectedDate}
                 language={settings.language} 
@@ -1603,8 +1587,8 @@ export default function App() {
               <MuhuratScreen 
                 panchang={muhuratPanchangInfo} 
                 onViewAstrologyChart={() => setActiveTab('panchang')} 
-                currentTime={currentTime} 
-                selectedDate={muhuratSelectedDate}
+                currentTime={currentMinuteTime} 
+                selectedDate={muhuratSelectedDate || selectedDate} // Keep fallback if undefined
                 onDateChange={setMuhuratSelectedDate}
                 language={settings.language}
               />
@@ -1689,7 +1673,43 @@ export default function App() {
                   <WidgetSimulator panchang={panchangInfo} muhurats={activeMuhurats} city={coords.city} />
                 </div>
 
-
+                {/* Permanent Notification Toggle Card */}
+                <div id="tools_notification_card" className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs text-left">
+                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-zinc-800/40 pb-2">
+                    <span className="text-lg">🔔</span>
+                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-amber-100">
+                      {settings.language === 'Hindi' ? 'स्थायी पंचांग नोटिफिकेशन' : 'Permanent Panchang Notification'}
+                    </h3>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 rounded-2xl bg-orange-500/5 dark:bg-orange-950/10 border border-orange-100/20">
+                    <div className="pr-4">
+                      <h4 className="text-xs font-bold text-slate-800 dark:text-amber-100">
+                        {settings.language === 'Hindi' ? 'स्थायी पंचांग सूचना चालू करें' : 'Enable Permanent Notification'}
+                      </h4>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                        {settings.language === 'Hindi' 
+                          ? 'मोबाइल के नोटिफिकेशन बार में आज का पंचांग और वर्तमान शुभ-अशुभ काल हमेशा पिन रहेगा।'
+                          : 'Keep today\'s Panchang and current Shubh-Ashubh times pinned in your notification drawer.'}
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input 
+                        type="checkbox" 
+                        checked={notificationEnabled} 
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setNotificationEnabled(val);
+                          if (window.AndroidAlarm && typeof window.AndroidAlarm.setPermanentNotificationEnabled === 'function') {
+                            window.AndroidAlarm.setPermanentNotificationEnabled(val);
+                          }
+                        }}
+                        className="sr-only peer" 
+                      />
+                      <div className="w-9 h-5 bg-slate-200 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500"></div>
+                    </label>
+                  </div>
+                </div>
 
                 <div id="tools_plans_card" className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs text-left">
                   <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-zinc-800/40 pb-2">

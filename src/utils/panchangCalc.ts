@@ -12,6 +12,12 @@ import { Coords, PanchangInfo, HinduDate, Tithi, Nakshatra, Yoga, Karana, Chogha
 
 import { astronomicalEngine } from './astronomicalEngine';
 
+const panchangCache = new Map<string, PanchangInfo>();
+
+export function clearPanchangCache() {
+  panchangCache.clear();
+}
+
 
 
 /**
@@ -1053,9 +1059,13 @@ const SOLAR_MONTHS = [
 ];
 
 export function getPanchangForDate(lat: number, lon: number, date: Date): PanchangInfo {
+  const cacheKey = `${lat.toFixed(4)}_${lon.toFixed(4)}_${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}_${date.getHours()}_${date.getMinutes()}`;
+  if (panchangCache.has(cacheKey)) {
+    return panchangCache.get(cacheKey)!;
+  }
 
-  // Normalize date to local midnight for stable computations
-  const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+  // Use passed date directly for real-time live computations
+  const normalizedDate = date;
 
   const solarTimes = calculateSolarTimes(lat, lon, normalizedDate);
 
@@ -1646,13 +1656,13 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   ];
 
   const choghadiyaNightSeqs = [
-    ["Amrit", "Chal", "Rog", "Kaal", "Labh", "Udveg", "Shubh", "Amrit"],
-    ["Chal", "Rog", "Kaal", "Labh", "Udveg", "Shubh", "Amrit", "Chal"],
-    ["Rog", "Kaal", "Labh", "Udveg", "Shubh", "Amrit", "Chal", "Rog"],
-    ["Kaal", "Labh", "Udveg", "Shubh", "Amrit", "Chal", "Rog", "Kaal"],
-    ["Labh", "Udveg", "Shubh", "Amrit", "Chal", "Rog", "Kaal", "Labh"],
-    ["Udveg", "Shubh", "Amrit", "Chal", "Rog", "Kaal", "Labh", "Udveg"],
-    ["Shubh", "Amrit", "Chal", "Rog", "Kaal", "Labh", "Udveg", "Shubh"]
+    ["Shubh", "Amrit", "Chal", "Rog", "Kaal", "Labh", "Udveg", "Shubh"], // Sunday (0)
+    ["Chal", "Rog", "Kaal", "Labh", "Udveg", "Shubh", "Amrit", "Chal"],  // Monday (1)
+    ["Kaal", "Labh", "Udveg", "Shubh", "Amrit", "Chal", "Rog", "Kaal"],  // Tuesday (2)
+    ["Udveg", "Shubh", "Amrit", "Chal", "Rog", "Kaal", "Labh", "Udveg"],  // Wednesday (3)
+    ["Amrit", "Chal", "Rog", "Kaal", "Labh", "Udveg", "Shubh", "Amrit"], // Thursday (4)
+    ["Rog", "Kaal", "Labh", "Udveg", "Shubh", "Amrit", "Chal", "Rog"],   // Friday (5)
+    ["Labh", "Udveg", "Shubh", "Amrit", "Chal", "Rog", "Kaal", "Labh"]   // Saturday (6)
   ];
 
   const daySeq = choghadiyaDaySeqs[day];
@@ -1832,7 +1842,7 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
     };
   }
 
-  return {
+  const result: PanchangInfo = {
     date: date.toISOString().split("T")[0],
     hinduDate,
     sunrise: solarTimes.sunrise,
@@ -1863,28 +1873,20 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
     ishtakala: calculateIshtakala(date, solarTimes.sunriseRaw)
   };
 
+  panchangCache.set(cacheKey, result);
+  return result;
+
 }
 
 function subHoursToTimeStr(date: Date, hours: number, isSwiss: boolean = false): string {
-
   const baseHours = isSwiss ? 5.5 : 0.0;
-
-  const localMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
-
-  const targetDate = new Date(localMidnight.getTime() + (baseHours + hours) * 36e5);
-
+  const targetDate = new Date(date.getTime() + (baseHours + hours) * 36e5);
   let hrs = targetDate.getHours();
-
   const mins = targetDate.getMinutes();
-
   const ampm = hrs >= 12 ? "PM" : "AM";
-
   hrs = hrs % 12;
-
   if (hrs === 0) hrs = 12;
-
   return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")} ${ampm}`;
-
 }
 
 export function getMuhuratsForPanchang(panchang: PanchangInfo): MuhuratItem[] {

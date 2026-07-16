@@ -3,6 +3,11 @@ import SwissEph from 'swisseph-wasm';
 let swe: any = null;
 let isReady = false;
 
+// Global persistent pointers to avoid malloc/free overhead in getRiseTrans
+let globalGeoposPtr = 0;
+let globalTretPtr = 0;
+let globalSerrPtr = 0;
+
 // ---------------------------------------------------------------------------
 // Julian Day Helpers
 // ---------------------------------------------------------------------------
@@ -46,14 +51,10 @@ function formatRawMin(m: number): string {
 // Rise / Set calculation helper
 // ---------------------------------------------------------------------------
 function getRiseTrans(swe: any, jd: number, planet: number, lon: number, lat: number, alt: number, isRise: boolean): number {
-  const geoposPtr = swe.SweModule._malloc(3 * 8);
-  const tretPtr = swe.SweModule._malloc(4 * 8);
-  const serrPtr = swe.SweModule._malloc(256);
-
   // Set geopos [lon, lat, alt]
-  swe.SweModule.HEAPF64[geoposPtr / 8] = lon;
-  swe.SweModule.HEAPF64[geoposPtr / 8 + 1] = lat;
-  swe.SweModule.HEAPF64[geoposPtr / 8 + 2] = alt;
+  swe.SweModule.HEAPF64[globalGeoposPtr / 8] = lon;
+  swe.SweModule.HEAPF64[globalGeoposPtr / 8 + 1] = lat;
+  swe.SweModule.HEAPF64[globalGeoposPtr / 8 + 2] = alt;
 
   const epheflag = 2; // SEFLG_SWIEPH (Strictly use Swiss Ephemeris)
   const rsmi = isRise ? 1 : 2; // 1 = SE_CALC_RISE, 2 = SE_CALC_SET
@@ -62,15 +63,11 @@ function getRiseTrans(swe: any, jd: number, planet: number, lon: number, lat: nu
     'swe_rise_trans',
     'number',
     ['number', 'number', 'pointer', 'number', 'number', 'pointer', 'number', 'number', 'pointer', 'pointer'],
-    [jd, planet, 0, epheflag, rsmi, geoposPtr, 0, 0, tretPtr, serrPtr]
+    [jd, planet, 0, epheflag, rsmi, globalGeoposPtr, 0, 0, globalTretPtr, globalSerrPtr]
   );
 
-  const start = tretPtr / 8;
+  const start = globalTretPtr / 8;
   const results = swe.SweModule.HEAPF64.slice(start, start + 4);
-
-  swe.SweModule._free(geoposPtr);
-  swe.SweModule._free(tretPtr);
-  swe.SweModule._free(serrPtr);
 
   if (retFlag < 0) {
     throw new Error(`Swiss Ephemeris rise_trans failed with code ${retFlag}`);
@@ -93,11 +90,12 @@ function findBoundaryCrossing(
   if (type === 'nakshatra') speed = 13.176;
   if (type === 'yoga') speed = 14.176;
 
+  const ayanamsa = swe.get_ayanamsa(jdMidnight + 0.5);
+
   // Maximum 5 iterations of Newton's method for rapid convergence
   for (let iter = 0; iter < 5; iter++) {
     const sun = swe.calc_ut(jd, 0, ephFlag | 256); // 256 = SEFLG_SPEED
     const moon = swe.calc_ut(jd, 1, ephFlag | 256);
-    const ayanamsa = swe.get_ayanamsa(jd);
 
     let val = 0;
     let currentSpeed = speed;
@@ -144,6 +142,11 @@ async function initWorker(seplBuf: ArrayBuffer, semoBuf: ArrayBuffer) {
     swe.SweModule.FS.writeFile('/sweph/sepl_18.se1', new Uint8Array(seplBuf));
     swe.SweModule.FS.writeFile('/sweph/semo_18.se1', new Uint8Array(semoBuf));
 
+    // Allocate global pointers once during initialization
+    globalGeoposPtr = swe.SweModule._malloc(3 * 8);
+    globalTretPtr   = swe.SweModule._malloc(4 * 8);
+    globalSerrPtr   = swe.SweModule._malloc(256);
+
     isReady = true;
     self.postMessage({ type: 'READY' });
   } catch (error: any) {
@@ -173,6 +176,7 @@ self.onmessage = async (event: MessageEvent) => {
   }
 
   const parsedDate = new Date(date);
+  const jdQuery = dateToJulianDay(parsedDate);
   const today0h = new Date(Date.UTC(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate(), 0, 0, 0));
   const jdMidnight = dateToJulianDay(today0h);
 
@@ -219,9 +223,9 @@ self.onmessage = async (event: MessageEvent) => {
 
     if (type === 'CALCULATE_COORDINATES') {
       // 0 = SE_SUN, 1 = SE_MOON, 2 = SEFLG_SWIEPH, 256 = SEFLG_SPEED
-      const sunPos = swe.calc_ut(jdMidnight, 0, 2 | 256);
-      const moonPos = swe.calc_ut(jdMidnight, 1, 2 | 256);
-      const ayanamsa = swe.get_ayanamsa(jdMidnight);
+      const sunPos = swe.calc_ut(jdQuery, 0, 2 | 256);
+      const moonPos = swe.calc_ut(jdQuery, 1, 2 | 256);
+      const ayanamsa = swe.get_ayanamsa(jdQuery);
 
       const sunLon = sunPos[0];
       const moonLon = moonPos[0];
@@ -239,7 +243,7 @@ self.onmessage = async (event: MessageEvent) => {
 
       const nextTithiTarget = (Math.floor(diffNorm / 12) + 1) * 12;
       const tithiCrossingJd = findBoundaryCrossing(swe, jdMidnight, 'tithi', nextTithiTarget, 2);
-      const tithiRemainingHours = (tithiCrossingJd - jdMidnight) * 24;
+      const tithiRemainingHours = (tithiCrossingJd - jdQuery) * 24;
 
       // 2. Nakshatra Index & Crossover Solver
       let naksIdx = Math.floor(moonSidereal / 13.333333333333334);
@@ -249,7 +253,7 @@ self.onmessage = async (event: MessageEvent) => {
 
       const nextNaksTarget = (Math.floor(moonSidereal / 13.333333333333334) + 1) * 13.333333333333334;
       const naksCrossingJd = findBoundaryCrossing(swe, jdMidnight, 'nakshatra', nextNaksTarget, 2);
-      const naksRemainingHours = (naksCrossingJd - jdMidnight) * 24;
+      const naksRemainingHours = (naksCrossingJd - jdQuery) * 24;
 
       // 3. Yoga Index & Crossover Solver
       const yogaLon = (moonSidereal + sunSidereal) % 360;
@@ -260,7 +264,7 @@ self.onmessage = async (event: MessageEvent) => {
 
       const nextYogaTarget = (Math.floor(yogaLon / 13.333333333333334) + 1) * 13.333333333333334;
       const yogaCrossingJd = findBoundaryCrossing(swe, jdMidnight, 'yoga', nextYogaTarget, 2);
-      const yogaRemainingHours = (yogaCrossingJd - jdMidnight) * 24;
+      const yogaRemainingHours = (yogaCrossingJd - jdQuery) * 24;
 
       // 4. Karana Index & Crossover Solver
       let karanaTotalSec = Math.floor(diffNorm / 6);
@@ -281,12 +285,12 @@ self.onmessage = async (event: MessageEvent) => {
 
       const nextKaranaTarget = (Math.floor(diffNorm / 6) + 1) * 6;
       const karanaCrossingJd = findBoundaryCrossing(swe, jdMidnight, 'tithi', nextKaranaTarget, 2);
-      const karanaRemainingHours = (karanaCrossingJd - jdMidnight) * 24;
+      const karanaRemainingHours = (karanaCrossingJd - jdQuery) * 24;
 
       // 5. Month Index derivation
       const daysSinceNewMoon = diffNorm / 12.190749;
       const sunLonAtNewMoon = (sunSidereal - daysSinceNewMoon + 360) % 360;
-      const monthIdx = Math.floor(sunLonAtNewMoon / 30);
+      const monthIdx = (Math.floor(sunLonAtNewMoon / 30) + 1) % 12;
 
       // 6. Calculate Navagraha Positions
       const Grahas = [
@@ -317,7 +321,7 @@ self.onmessage = async (event: MessageEvent) => {
 
       const planetsResult: any[] = [];
       for (const g of Grahas) {
-        const pos = swe.calc_ut(jdMidnight, g.id, 2 | 256);
+        const pos = swe.calc_ut(jdQuery, g.id, 2 | 256);
         const lon = pos[0];
         const speed = pos[3];
         const siderealLon = (lon - ayanamsa + 360) % 360;

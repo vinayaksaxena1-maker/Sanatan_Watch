@@ -285,7 +285,7 @@ export function AnalogClock({
         </g>
 
         {/* Scale Roman Numerals and Clock Hands to fit inside the new 159 radius inner clock face */}
-        <g transform="scale(0.78)" transform-origin="200 200">
+        <g transform="scale(0.78)" transformOrigin="200 200">
           {/* Sapphire Crystal Glass Highlight Reflection Overlay */}
           <circle cx="200" cy="200" r="148" fill="url(#glassReflectionGrad)" pointerEvents="none" />
 

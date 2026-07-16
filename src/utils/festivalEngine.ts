@@ -192,9 +192,11 @@ function getPanchangForFestivalDay(date: Date): PanchangInfo {
   let tithiIdx = Math.floor((lunarMonthAge / lunarCycle) * 30);
   if (tithiIdx < 0) tithiIdx += 30;
   if (tithiIdx >= 30) tithiIdx = 29;
-
-  const monthsSinceEpoch = Math.floor(diffDays / lunarCycle);
-  const monthIdx = (monthsSinceEpoch % 12 + 12) % 12;
+  const sunSidereal = (diffDays * 0.9856) % 360;
+  const diffNorm = (lunarMonthAge / lunarCycle) * 360;
+  const daysSinceNewMoon = diffNorm / 12.190749;
+  const sunLonAtNewMoon = (sunSidereal - daysSinceNewMoon + 360) % 360;
+  const monthIdx = (Math.floor(sunLonAtNewMoon / 30) + 1) % 12;
   const monthInfo = MONTHS_ENGLISH_HINDI[monthIdx] || MONTHS_ENGLISH_HINDI[0];
 
   const tithiName = tithiIdx < 15 ? `Shukla ${tithiIdx + 1}` : `Krishna ${tithiIdx - 14}`;

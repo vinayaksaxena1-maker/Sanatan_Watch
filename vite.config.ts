@@ -37,7 +37,7 @@ export default defineConfig(() => {
       exclude: ['swisseph-wasm'],
     },
     worker: {
-      format: 'es',
+      format: 'iife',
     },
     build: {
       chunkSizeWarningLimit: 1600,

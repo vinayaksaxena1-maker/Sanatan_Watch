@@ -61,34 +61,41 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
     onCompleteRef.current = onComplete;
   }, [onComplete]);
 
-  // Manage progress and isLoaded state for custom splash screen (20 seconds duration)
+  // Manage progress and isLoaded state for custom splash screen (6 seconds duration)
   useEffect(() => {
     if (!customSplash) return;
     setProgress(0);
     setIsLoaded(false);
 
     const interval = setInterval(() => {
+      let isDone = false;
       setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsLoaded(true);
-          if (!isDemoMode && onCompleteRef.current) {
-            onCompleteRef.current();
-          }
+        const next = prev + 1;
+        if (next >= 100) {
+          isDone = true;
           return 100;
         }
-        return prev + 1;
+        return next;
       });
-    }, 200);
+
+      // Execute side-effects safely outside the state updater function to prevent React warnings
+      if (isDone) {
+        clearInterval(interval);
+        setIsLoaded(true);
+        if (!isDemoMode && onCompleteRef.current) {
+          onCompleteRef.current();
+        }
+      }
+    }, 60);
 
     return () => clearInterval(interval);
   }, [customSplash, isDemoMode, key]);
 
-  // Handle auto-timeout for non-demo mode (20 seconds duration)
+  // Handle auto-timeout for non-demo mode (6 seconds duration)
   useEffect(() => {
     if (isDemoMode) return;
-    if (customSplash) return; // Custom splash progress bar will handle auto-completion at 20s
-    const duration = 20000;
+    if (customSplash) return; // Custom splash progress bar will handle auto-completion at 6s
+    const duration = 6000;
     const timer = setTimeout(() => {
       if (onCompleteRef.current) onCompleteRef.current();
     }, duration);

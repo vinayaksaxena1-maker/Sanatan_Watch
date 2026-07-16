@@ -28,29 +28,53 @@ export function CitySelector({ currentCoords, onSelectCity, gpsActive, setGpsAct
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = parseFloat(position.coords.latitude.toFixed(4));
-        const lon = parseFloat(position.coords.longitude.toFixed(4));
-        
-        // 100% offline reverse geocoding
-        const matched = findClosestCity(lat, lon);
-        
-        onSelectCity({
-          latitude: lat,
-          longitude: lon,
-          city: matched.name,
-          state: matched.state
-        });
-        setGpsActive(true);
-      },
-      (error) => {
-        console.error('GPS trigger failed', error);
-        setErrorMessage('भौगोलिक स्थान की अनुमति अस्वीकार कर दी गई या समय समाप्त हो गया। कृपया नीचे से मैन्युअल रूप से एक शहर का चयन करें।');
+    const optionsHigh = { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 };
+    const optionsLow = { enableHighAccuracy: false, timeout: 12000, maximumAge: 5 * 60 * 1000 };
+
+    const successCallback = (position: GeolocationPosition) => {
+      const lat = parseFloat(position.coords.latitude.toFixed(4));
+      const lon = parseFloat(position.coords.longitude.toFixed(4));
+      
+      // 100% offline reverse geocoding
+      const matched = findClosestCity(lat, lon);
+      
+      onSelectCity({
+        latitude: lat,
+        longitude: lon,
+        city: matched.name,
+        state: matched.state
+      });
+      setGpsActive(true);
+    };
+
+    const errorCallback = (error: GeolocationPositionError) => {
+      console.warn('GPS High Accuracy failed, trying Low Accuracy...', error);
+      
+      if (error.code === 1) { // PERMISSION_DENIED
+        setErrorMessage('भौगोलिक स्थान की अनुमति अस्वीकार कर दी गई है। कृपया ब्राउज़र या मोबाइल सेटिंग्स में स्थान अनुमति चालू करें।');
         setGpsActive(false);
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
+        return;
+      }
+
+      // Fallback to low accuracy (Wi-Fi/Cell towers/IP Geo, which is fast and works indoors)
+      navigator.geolocation.getCurrentPosition(
+        successCallback,
+        (err) => {
+          console.error('GPS Low Accuracy failed as well', err);
+          if (err.code === 1) {
+            setErrorMessage('भौगोलिक स्थान की अनुमति अस्वीकार कर दी गई है। कृपया ब्राउज़र या मोबाइल सेटिंग्स में स्थान अनुमति चालू करें।');
+          } else if (err.code === 3) {
+            setErrorMessage('भौगोलिक स्थान प्राप्त करने में समय समाप्त हो गया (Timeout)। कृपया नीचे से मैन्युअल रूप से एक शहर का चयन करें।');
+          } else {
+            setErrorMessage('भौगोलिक स्थान प्राप्त करने में कोई त्रुटि हुई। कृपया नीचे से मैन्युअल रूप से एक शहर का चयन करें।');
+          }
+          setGpsActive(false);
+        },
+        optionsLow
+      );
+    };
+
+    navigator.geolocation.getCurrentPosition(successCallback, errorCallback, optionsHigh);
   };
 
   const handleManualSelect = (city: Coords) => {

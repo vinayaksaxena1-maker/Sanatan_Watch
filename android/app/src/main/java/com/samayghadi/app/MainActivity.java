@@ -27,6 +27,9 @@ import java.io.ByteArrayOutputStream;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.SharedPreferences;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import androidx.core.app.NotificationCompat;
 
 public class MainActivity extends BridgeActivity {
     private static final int RINGTONE_PICKER_REQUEST_CODE = 999;
@@ -191,7 +194,7 @@ public class MainActivity extends BridgeActivity {
                 }
 
                 @JavascriptInterface
-                public void updateWidgetData(String tithi, String nakshatra, String choghadiya, String choghadiyaTime, String rahuKaal) {
+                public void updateWidgetData(String tithi, String nakshatra, String choghadiya, String choghadiyaTime, String rahuKaal, String brahma, String abhijit, String city) {
                     try {
                         SharedPreferences sharedPref = getSharedPreferences("SanatanWidgetPrefs", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPref.edit();
@@ -200,21 +203,79 @@ public class MainActivity extends BridgeActivity {
                         editor.putString("choghadiya", choghadiya);
                         editor.putString("choghadiyaTime", choghadiyaTime);
                         editor.putString("rahuKaal", rahuKaal);
+                        editor.putString("brahma", brahma);
+                        editor.putString("abhijit", abhijit);
+                        editor.putString("city", city);
                         editor.apply();
 
-                        // Trigger widget broadcast update
                         Context appCtx = getApplicationContext();
-                        Intent intent = new Intent(appCtx, SanatanAppWidget.class);
-                        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-                        int[] ids = AppWidgetManager.getInstance(appCtx)
-                                .getAppWidgetIds(new ComponentName(appCtx, SanatanAppWidget.class));
-                        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-                        sendBroadcast(intent);
+                        AppWidgetManager widgetManager = AppWidgetManager.getInstance(appCtx);
+
+                        // 1. Update Medium Widget (SanatanAppWidget)
+                        Intent intentApp = new Intent(appCtx, SanatanAppWidget.class);
+                        intentApp.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+                        int[] idsApp = widgetManager.getAppWidgetIds(new ComponentName(appCtx, SanatanAppWidget.class));
+                        intentApp.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, idsApp);
+                        sendBroadcast(intentApp);
+
+                        // 2. Update Small Widget (SanatanSmallWidget)
+                        Intent intentSmall = new Intent(appCtx, SanatanSmallWidget.class);
+                        intentSmall.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+                        int[] idsSmall = widgetManager.getAppWidgetIds(new ComponentName(appCtx, SanatanSmallWidget.class));
+                        intentSmall.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, idsSmall);
+                        sendBroadcast(intentSmall);
+
+                        // 3. Update Large Widget (SanatanLargeWidget)
+                        Intent intentLarge = new Intent(appCtx, SanatanLargeWidget.class);
+                        intentLarge.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+                        int[] idsLarge = widgetManager.getAppWidgetIds(new ComponentName(appCtx, SanatanLargeWidget.class));
+                        intentLarge.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, idsLarge);
+                        sendBroadcast(intentLarge);
+
+                        // 4. Update Analog Widget (SanatanAnalogWidget)
+                        Intent intentAnalog = new Intent(appCtx, SanatanAnalogWidget.class);
+                        intentAnalog.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+                        int[] idsAnalog = widgetManager.getAppWidgetIds(new ComponentName(appCtx, SanatanAnalogWidget.class));
+                        intentAnalog.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, idsAnalog);
+                        sendBroadcast(intentAnalog);
+
+                        // 5. Update Permanent Notification
+                        updatePermanentNotification();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
+
+                @JavascriptInterface
+                public void setPermanentNotificationEnabled(boolean enabled) {
+                    try {
+                        SharedPreferences sharedPref = getSharedPreferences("SanatanWidgetPrefs", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putBoolean("permanentNotificationEnabled", enabled);
+                        editor.apply();
+
+                        if (enabled) {
+                            updatePermanentNotification();
+                        } else {
+                            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                            if (notificationManager != null) {
+                                notificationManager.cancel(45678);
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @JavascriptInterface
+                public boolean isPermanentNotificationEnabled() {
+                    SharedPreferences sharedPref = getSharedPreferences("SanatanWidgetPrefs", Context.MODE_PRIVATE);
+                    return sharedPref.getBoolean("permanentNotificationEnabled", false);
+                }
             }, "AndroidAlarm");
+            
+            // Refresh permanent notification on app start
+            updatePermanentNotification();
         }
     }
 
@@ -285,6 +346,65 @@ public class MainActivity extends BridgeActivity {
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
             );
+        }
+    }
+    private void updatePermanentNotification() {
+        try {
+            SharedPreferences sharedPref = getSharedPreferences("SanatanWidgetPrefs", Context.MODE_PRIVATE);
+            boolean enabled = sharedPref.getBoolean("permanentNotificationEnabled", false);
+            if (!enabled) return;
+
+            String tithi = sharedPref.getString("tithi", "लोअडिंग...");
+            String nakshatra = sharedPref.getString("nakshatra", "लोअडिंग...");
+            String choghadiya = sharedPref.getString("choghadiya", "—");
+            String choghadiyaTime = sharedPref.getString("choghadiyaTime", "—");
+            String rahuKaal = sharedPref.getString("rahuKaal", "—");
+            String brahma = sharedPref.getString("brahma", "—");
+            String abhijit = sharedPref.getString("abhijit", "—");
+            String city = sharedPref.getString("city", "सटीक स्थान");
+
+            String channelId = "sanatan_panchang_permanent";
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationManager != null) {
+                CharSequence name = "ॐ सनातन पंचांग अपडेट्स";
+                String description = "स्थायी दैनिक पंचांग और शुभ-अशुभ समय नोटिफिकेशन";
+                int importance = NotificationManager.IMPORTANCE_LOW;
+                NotificationChannel channel = new NotificationChannel(channelId, name, importance);
+                channel.setDescription(description);
+                channel.setSound(null, null);
+                channel.enableVibration(false);
+                notificationManager.createNotificationChannel(channel);
+            }
+
+            Intent launchIntent = new Intent(this, MainActivity.class);
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                flags |= PendingIntent.FLAG_IMMUTABLE;
+            }
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 999, launchIntent, flags);
+
+            String title = "⛩️ आज का धार्मिक समय: " + city;
+            String text = "तिथि: " + tithi + " | नक्षत्र: " + nakshatra;
+            String bigText = "सक्रिय चौघड़िया: " + choghadiya + " (" + choghadiyaTime + ")\n" +
+                             "⚠️ राहुकाल: " + rahuKaal + "\n" +
+                             "ब्रह्म मुहूर्त: " + brahma + " | अभिजीत: " + abhijit;
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
+                    .setSmallIcon(android.R.drawable.ic_menu_compass)
+                    .setContentTitle(title)
+                    .setContentText(text)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(bigText))
+                    .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .setOngoing(true)
+                    .setContentIntent(pendingIntent)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+
+            if (notificationManager != null) {
+                notificationManager.notify(45678, builder.build());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
