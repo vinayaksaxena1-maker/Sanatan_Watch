@@ -1,0 +1,24 @@
+[
+  {
+    "caseId": "golden_0",
+    "date": "2026-03-20T12:00:00.000Z",
+    "lat": 28.6139,
+    "lon": 77.209,
+    "timezoneOffset": 5.5,
+    "planets": {
+      "Sun": { "lon": 335.795, "speed": 0.996, "isRetro": false },
+      "Moon": { "lon": 7.345, "speed": 12.543, "isRetro": false }
+    },
+    "panchang": {
+      "tithi": 2,
+      "nakshatra": 1,
+      "yoga": 3,
+      "karana": 2,
+      "lunarMonth": 11
+    },
+    "solarTimes": {
+      "sunrise": 378.2,
+      "sunset": 1104.5
+    }
+  }
+]

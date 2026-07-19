@@ -31,7 +31,7 @@ function julDayUT(year: number, month: number, day: number, hour: number): numbe
   return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + hour / 24.0 + B - 1524.5;
 }
 
-function jdToLocalMinutes(jd: number, offsetHours: number = 5.5): number {
+function jdToLocalMinutes(jd: number, offsetHours: number = -new Date().getTimezoneOffset() / 60): number {
   const utHours = (jd - Math.floor(jd) - 0.5) * 24;
   const localHours = ((utHours + offsetHours) % 24 + 24) % 24;
   return localHours * 60;
@@ -46,6 +46,32 @@ function formatRawMin(m: number): string {
   if (hrs === 0) hrs = 12;
   return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')} ${ampm}`;
 }
+
+const Grahas = [
+  { id: 0, name: 'Sun', hindiName: 'सूर्य' },
+  { id: 1, name: 'Moon', hindiName: 'चन्द्र' },
+  { id: 4, name: 'Mars', hindiName: 'मंगल' },
+  { id: 2, name: 'Mercury', hindiName: 'बुध' },
+  { id: 5, name: 'Jupiter', hindiName: 'गुरु' },
+  { id: 3, name: 'Venus', hindiName: 'शुक्र' },
+  { id: 6, name: 'Saturn', hindiName: 'शनि' },
+  { id: 10, name: 'Rahu', hindiName: 'राहु' }
+];
+
+const zodiacSigns = [
+  { eng: 'Aries', hin: 'मेष' },
+  { eng: 'Taurus', hin: 'वृषभ' },
+  { eng: 'Gemini', hin: 'मिथुन' },
+  { eng: 'Cancer', hin: 'कर्क' },
+  { eng: 'Leo', hin: 'सिंह' },
+  { eng: 'Virgo', hin: 'कन्या' },
+  { eng: 'Libra', hin: 'तुला' },
+  { eng: 'Scorpio', hin: 'वृश्चिक' },
+  { eng: 'Sagittarius', hin: 'धनु' },
+  { eng: 'Capricorn', hin: 'मकर' },
+  { eng: 'Aquarius', hin: 'कुम्भ' },
+  { eng: 'Pisces', hin: 'मीन' }
+];
 
 // ---------------------------------------------------------------------------
 // Rise / Set calculation helper
@@ -75,6 +101,26 @@ function getRiseTrans(swe: any, jd: number, planet: number, lon: number, lat: nu
   return results[0];
 }
 
+function findNewMoonJd(swe: any, guessJd: number): number {
+  let jd = guessJd;
+  const ephFlag = 2; // SEFLG_SWIEPH
+  for (let iter = 0; iter < 5; iter++) {
+    const sun = swe.calc_ut(jd, 0, ephFlag | 256);
+    const moon = swe.calc_ut(jd, 1, ephFlag | 256);
+    const val = (moon[0] - sun[0] + 360) % 360;
+    const currentSpeed = moon[3] - sun[3];
+    
+    let err = 0 - val;
+    err = ((err + 180) % 360 + 360) % 360 - 180;
+    
+    if (Math.abs(err) < 0.0001) {
+      return jd;
+    }
+    jd += err / currentSpeed;
+  }
+  return jd;
+}
+
 // ---------------------------------------------------------------------------
 // High-Performance Iterative Boundary Crossing Solver
 // ---------------------------------------------------------------------------
@@ -90,12 +136,11 @@ function findBoundaryCrossing(
   if (type === 'nakshatra') speed = 13.176;
   if (type === 'yoga') speed = 14.176;
 
-  const ayanamsa = swe.get_ayanamsa(jdMidnight + 0.5);
-
-  // Maximum 5 iterations of Newton's method for rapid convergence
-  for (let iter = 0; iter < 5; iter++) {
+  // Maximum 10 iterations of Newton's method for high precision
+  for (let iter = 0; iter < 10; iter++) {
     const sun = swe.calc_ut(jd, 0, ephFlag | 256); // 256 = SEFLG_SPEED
     const moon = swe.calc_ut(jd, 1, ephFlag | 256);
+    const ayanamsa = swe.get_ayanamsa(jd);
 
     let val = 0;
     let currentSpeed = speed;
@@ -112,13 +157,14 @@ function findBoundaryCrossing(
     }
 
     let err = targetVal - val;
-    // Normalize angular difference to shortest arc [-180, 180]
-    err = (err + 180) % 360 - 180;
+    // Normalize angular difference to shortest arc [-180, 180] with JS modulo safety
+    err = ((err + 180) % 360 + 360) % 360 - 180;
 
-    if (Math.abs(err) < 0.0001) { // Error under 1 second of time
+    if (Math.abs(err) < 0.00001) { // High precision threshold
       return jd;
     }
 
+    if (Math.abs(currentSpeed) < 0.0001) break;
     jd += err / currentSpeed;
   }
   return jd;
@@ -158,7 +204,7 @@ async function initWorker(seplBuf: ArrayBuffer, semoBuf: ArrayBuffer) {
 // Worker Message Handler
 // ---------------------------------------------------------------------------
 self.onmessage = async (event: MessageEvent) => {
-  const { type, key, seplBuf, semoBuf, error, lat, lon, date } = event.data;
+  const { type, key, seplBuf, semoBuf, error, lat, lon, date, offsetHours } = event.data;
 
   if (type === 'INIT') {
     await initWorker(seplBuf, semoBuf);
@@ -177,45 +223,61 @@ self.onmessage = async (event: MessageEvent) => {
 
   const parsedDate = new Date(date);
   const jdQuery = dateToJulianDay(parsedDate);
-  const today0h = new Date(Date.UTC(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate(), 0, 0, 0));
+  const today0h = new Date(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate(), 0, 0, 0);
   const jdMidnight = dateToJulianDay(today0h);
 
   try {
     if (type === 'CALCULATE_SOLAR') {
-      const sunriseJd = getRiseTrans(swe, jdMidnight, 0, lon, lat, 0, true);
-      const sunsetJd = getRiseTrans(swe, jdMidnight, 0, lon, lat, 0, false);
+      let sunriseJd = 0;
+      let sunsetJd = 0;
+      let isPolar = false;
+      try {
+        sunriseJd = getRiseTrans(swe, jdMidnight, 0, lon, lat, 0, true);
+        sunsetJd = getRiseTrans(swe, jdMidnight, 0, lon, lat, 0, false);
+      } catch (e) {
+        isPolar = true;
+      }
 
-      const sunriseRaw = jdToLocalMinutes(sunriseJd);
-      const sunsetRaw = jdToLocalMinutes(sunsetJd);
+      const sunriseRaw = isPolar ? 0 : jdToLocalMinutes(sunriseJd, offsetHours);
+      const sunsetRaw = isPolar ? 0 : jdToLocalMinutes(sunsetJd, offsetHours);
 
       self.postMessage({
         type: 'RESULT',
         key,
         data: {
-          sunrise: formatRawMin(sunriseRaw),
-          sunset: formatRawMin(sunsetRaw),
+          sunrise: isPolar ? 'No Sunrise' : formatRawMin(sunriseRaw),
+          sunset: isPolar ? 'No Sunset' : formatRawMin(sunsetRaw),
           sunriseRaw,
-          sunsetRaw
+          sunsetRaw,
+          isPolar
         }
       });
       return;
     }
 
     if (type === 'CALCULATE_MOON') {
-      const moonriseJd = getRiseTrans(swe, jdMidnight, 1, lon, lat, 0, true);
-      const moonsetJd = getRiseTrans(swe, jdMidnight, 1, lon, lat, 0, false);
+      let moonriseJd = 0;
+      let moonsetJd = 0;
+      let isPolar = false;
+      try {
+        moonriseJd = getRiseTrans(swe, jdMidnight, 1, lon, lat, 0, true);
+        moonsetJd = getRiseTrans(swe, jdMidnight, 1, lon, lat, 0, false);
+      } catch (e) {
+        isPolar = true;
+      }
 
-      const moonriseRaw = jdToLocalMinutes(moonriseJd);
-      const moonsetRaw = jdToLocalMinutes(moonsetJd);
+      const moonriseRaw = isPolar ? 0 : jdToLocalMinutes(moonriseJd, offsetHours);
+      const moonsetRaw = isPolar ? 0 : jdToLocalMinutes(moonsetJd, offsetHours);
 
       self.postMessage({
         type: 'RESULT',
         key,
         data: {
-          moonrise: formatRawMin(moonriseRaw),
-          moonset: formatRawMin(moonsetRaw),
+          moonrise: isPolar ? 'No Moonrise' : formatRawMin(moonriseRaw),
+          moonset: isPolar ? 'No Moonset' : formatRawMin(moonsetRaw),
           moonriseRaw,
-          moonsetRaw
+          moonsetRaw,
+          isPolar
         }
       });
       return;
@@ -239,11 +301,14 @@ self.onmessage = async (event: MessageEvent) => {
       if (tithiIdx < 0) tithiIdx += 30;
       if (tithiIdx >= 30) tithiIdx = 29;
       const tithiPercent = (diffNorm % 12) / 12;
-      const tithiPassedHours = tithiPercent * 23.6;
-
       const nextTithiTarget = (Math.floor(diffNorm / 12) + 1) * 12;
+      const prevTithiTarget = Math.floor(diffNorm / 12) * 12;
+
       const tithiCrossingJd = findBoundaryCrossing(swe, jdMidnight, 'tithi', nextTithiTarget, 2);
       const tithiRemainingHours = (tithiCrossingJd - jdQuery) * 24;
+
+      const tithiStartJd = findBoundaryCrossing(swe, jdMidnight, 'tithi', prevTithiTarget, 2);
+      const tithiPassedHours = Math.max(0, (jdQuery - tithiStartJd) * 24);
 
       // 2. Nakshatra Index & Crossover Solver
       let naksIdx = Math.floor(moonSidereal / 13.333333333333334);
@@ -287,37 +352,26 @@ self.onmessage = async (event: MessageEvent) => {
       const karanaCrossingJd = findBoundaryCrossing(swe, jdMidnight, 'tithi', nextKaranaTarget, 2);
       const karanaRemainingHours = (karanaCrossingJd - jdQuery) * 24;
 
-      // 5. Month Index derivation
-      const daysSinceNewMoon = diffNorm / 12.190749;
-      const sunLonAtNewMoon = (sunSidereal - daysSinceNewMoon + 360) % 360;
-      const monthIdx = (Math.floor(sunLonAtNewMoon / 30) + 1) % 12;
+      // 5. Precise Month Index & Adhik Maas derivation
+      const approxDaysAgo = diffNorm / 12.190749;
+      const prevNewMoonJd = findNewMoonJd(swe, jdQuery - approxDaysAgo);
+      const nextNewMoonJd = findNewMoonJd(swe, prevNewMoonJd + 29.530589);
+
+      const sunPosPrev = swe.calc_ut(prevNewMoonJd, 0, 2);
+      const ayanamsaPrev = swe.get_ayanamsa(prevNewMoonJd);
+      const sunLonPrev = (sunPosPrev[0] - ayanamsaPrev + 360) % 360;
+      const rashiPrev = Math.floor(sunLonPrev / 30);
+
+      const sunPosNext = swe.calc_ut(nextNewMoonJd, 0, 2);
+      const ayanamsaNext = swe.get_ayanamsa(nextNewMoonJd);
+      const sunLonNext = (sunPosNext[0] - ayanamsaNext + 360) % 360;
+      const rashiNext = Math.floor(sunLonNext / 30);
+
+      const isAdhik = (rashiPrev === rashiNext);
+      const monthIdx = (rashiPrev + 1) % 12;
 
       // 6. Calculate Navagraha Positions
-      const Grahas = [
-        { id: 0, name: 'Sun', hindiName: 'सूर्य' },
-        { id: 1, name: 'Moon', hindiName: 'चन्द्र' },
-        { id: 4, name: 'Mars', hindiName: 'मंगल' },
-        { id: 2, name: 'Mercury', hindiName: 'बुध' },
-        { id: 5, name: 'Jupiter', hindiName: 'गुरु' },
-        { id: 3, name: 'Venus', hindiName: 'शुक्र' },
-        { id: 6, name: 'Saturn', hindiName: 'शनि' },
-        { id: 10, name: 'Rahu', hindiName: 'राहु' }
-      ];
 
-      const zodiacSigns = [
-        { eng: 'Aries', hin: 'मेष' },
-        { eng: 'Taurus', hin: 'वृषभ' },
-        { eng: 'Gemini', hin: 'मिथुन' },
-        { eng: 'Cancer', hin: 'कर्क' },
-        { eng: 'Leo', hin: 'सिंह' },
-        { eng: 'Virgo', hin: 'कन्या' },
-        { eng: 'Libra', hin: 'तुला' },
-        { eng: 'Scorpio', hin: 'वृश्चिक' },
-        { eng: 'Sagittarius', hin: 'धनु' },
-        { eng: 'Capricorn', hin: 'मकर' },
-        { eng: 'Aquarius', hin: 'कुम्भ' },
-        { eng: 'Pisces', hin: 'मीन' }
-      ];
 
       const planetsResult: any[] = [];
       for (const g of Grahas) {
@@ -376,6 +430,7 @@ self.onmessage = async (event: MessageEvent) => {
           karanaRemainingHours,
           monthsSinceEpoch: monthIdx,
           diffDays: 0,
+          isAdhik,
           sunSidereal,
           moonSidereal,
           ayanamsa,

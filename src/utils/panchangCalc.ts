@@ -1296,9 +1296,19 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   const solarMonth = SOLAR_MONTHS[solarMonthIdx];
   const ayana = (positions.sunSidereal >= 90 && positions.sunSidereal < 270) ? "Dakshinayana" : "Uttarayana";
 
-  const monthAmantaHindi = monthInfo.hin;
+  let monthAmantaHindi = monthInfo.hin;
   const purnimantaMonthIdx = paksha === 'Krishna' ? (monthIdx + 1) % 12 : monthIdx;
-  const monthPurnimantaHindi = MONTHS_ENGLISH_HINDI[purnimantaMonthIdx].hin;
+  let monthPurnimantaHindi = MONTHS_ENGLISH_HINDI[purnimantaMonthIdx].hin;
+  let monthEng = monthInfo.eng;
+  let monthHin = monthInfo.hin;
+
+  if (positions.isAdhik) {
+    monthAmantaHindi = `अधिक ${monthAmantaHindi}`;
+    monthPurnimantaHindi = `अधिक ${monthPurnimantaHindi}`;
+    monthEng = `Adhik ${monthEng}`;
+    monthHin = `अधिक ${monthHin}`;
+  }
+
   const praviste = Math.floor((positions.sunSidereal || 0) % 30) + 1;
 
   const hinduDate: HinduDate = {
@@ -1309,8 +1319,8 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
     karana1,
     karana2,
     paksha,
-    month: monthInfo.eng,
-    monthHindi: monthInfo.hin,
+    month: monthEng,
+    monthHindi: monthHin,
     monthAmantaHindi,
     monthPurnimantaHindi,
     ritu: monthInfo.ritu,
@@ -1397,7 +1407,7 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   // 3. Shubh Yogas Calculation
   const shubhYogas: ShubhYogItem[] = [];
 
-  const baseHours = isSwiss ? 5.5 : 0.0;
+  const baseHours = 0.0;
   const sunriseOffsetBase = (sunriseMin / 60) - baseHours;
   const nextSunriseOffsetBase = sunriseOffsetBase + 24;
   const naksEndOffset = (1 - positions.naksPercent) * naksDuration;
@@ -1879,7 +1889,7 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
 }
 
 function subHoursToTimeStr(date: Date, hours: number, isSwiss: boolean = false): string {
-  const baseHours = isSwiss ? 5.5 : 0.0;
+  const baseHours = 0.0;
   const targetDate = new Date(date.getTime() + (baseHours + hours) * 36e5);
   let hrs = targetDate.getHours();
   const mins = targetDate.getMinutes();

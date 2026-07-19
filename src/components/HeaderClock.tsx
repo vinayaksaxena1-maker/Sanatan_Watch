@@ -4,8 +4,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Clock, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Clock, TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react';
 import { PanchangInfo } from '../types';
+import { isMockActive } from '../utils/astronomicalEngine';
 
 interface HeaderClockProps {
   selectedDate: Date;
@@ -92,6 +93,7 @@ export const HeaderClock: React.FC<HeaderClockProps> = React.memo(({ selectedDat
   };
 
   const trendInfo = getChoghadiyaTrendInfo();
+  const mockActive = isMockActive();
 
   return (
     <div 
@@ -105,6 +107,12 @@ export const HeaderClock: React.FC<HeaderClockProps> = React.memo(({ selectedDat
         >
           {selectedDate.toLocaleDateString(language === 'Hindi' ? 'hi-IN' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })} • {currentTime.toLocaleTimeString(language === 'Hindi' ? 'hi-IN' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
         </span>
+        {mockActive && (
+          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[8px] font-extrabold tracking-tight leading-none uppercase">
+            <AlertTriangle className="w-2.5 h-2.5 shrink-0 animate-pulse" />
+            {language === 'Hindi' ? 'लगभग' : 'Approx'}
+          </span>
+        )}
       </div>
       {trendInfo.icon && (
         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-black leading-none shadow-3xs hover:shadow-2xs transition-shadow duration-300 ${trendInfo.colorClass}`}>

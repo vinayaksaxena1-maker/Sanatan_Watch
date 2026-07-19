@@ -6,6 +6,7 @@
  */
 
 import AstroWorker from './astroWorker?worker&inline';
+import { getSeplBuffer, getSemoBuffer } from './epheAssets';
 
 export interface SolarTimes {
   sunrise: string;
@@ -52,6 +53,7 @@ export interface PanchangPositions {
 
   monthsSinceEpoch: number;
   diffDays: number;
+  isAdhik?: boolean;
 
   sunSidereal: number;
   moonSidereal: number;
@@ -81,7 +83,7 @@ function formatRawMin(m: number): string {
 // ---------------------------------------------------------------------------
 // Mock Implementation using original mathematical approximations
 // ---------------------------------------------------------------------------
-class MockAstronomicalEngine implements AstronomicalEngine {
+export class MockAstronomicalEngine implements AstronomicalEngine {
   isReady(): boolean {
     return true;
   }
@@ -229,6 +231,7 @@ class MockAstronomicalEngine implements AstronomicalEngine {
       karanaRemainingHours,
       monthsSinceEpoch,
       diffDays,
+      isAdhik: false,
       sunSidereal,
       moonSidereal,
       ayanamsa,
@@ -256,6 +259,7 @@ const mockEngine = new MockAstronomicalEngine();
 let updateListener: (() => void) | null = null;
 let isEngineReady = false;
 let isInitialLoadComplete = false;
+let isUsingMockFallback = false;
 const initialKeys = new Set<string>();
 
 export function registerEngineListener(callback: () => void) {
@@ -266,50 +270,47 @@ export function isReady(): boolean {
   return isEngineReady && isInitialLoadComplete;
 }
 
+export function isMockActive(): boolean {
+  return isUsingMockFallback;
+}
+
 if (typeof window !== 'undefined') {
   if (worker) {
-    // Fetch ephemeris files on the main thread to completely bypass Web Worker CORS/protocol restrictions in WebViews
-    const origin = window.location.origin;
-    Promise.all([
-      fetch(`${origin}/ephe/sepl_18.se1`).then(r => {
-        if (!r.ok) throw new Error(`sepl_18.se1 fetch failed: ${r.status}`);
-        return r.arrayBuffer();
-      }),
-      fetch(`${origin}/ephe/semo_18.se1`).then(r => {
-        if (!r.ok) throw new Error(`semo_18.se1 fetch failed: ${r.status}`);
-        return r.arrayBuffer();
-      })
-    ]).then(([seplBuf, semoBuf]) => {
-      if (worker) {
-        worker.postMessage({
-          type: 'INIT',
-          seplBuf,
-          semoBuf
-        }, [seplBuf, semoBuf]);
+    try {
+      // Load local packaged assets instantly from memory to bypass all CORS and HTTP server constraints
+      const seplBuf = getSeplBuffer().slice(0); // clone to allow transfer to worker thread
+      const semoBuf = getSemoBuffer().slice(0);
+      
+      worker.postMessage({
+        type: 'INIT',
+        seplBuf,
+        semoBuf
+      }, [seplBuf, semoBuf]);
+    } catch (err: any) {
+      console.error('[AstronomicalEngine] Failed to load inline ephemeris buffers:', err);
+      isUsingMockFallback = true;
+      isEngineReady = true;
+      isInitialLoadComplete = true;
+      if (updateListener) {
+        updateListener();
       }
-    }).catch(err => {
-      console.error('[AstronomicalEngine] Failed to fetch ephemeris files on main thread:', err);
-      if (worker) {
-        worker.postMessage({
-          type: 'INIT_FAIL',
-          error: err.message || String(err)
-        });
-      }
-    });
+    }
 
-    // Fallback timeout in case worker fails to initialize
+    // Timeout of 12 seconds to fall back to Mock Engine if WASM is too slow
     setTimeout(() => {
       if (!isEngineReady) {
-        console.warn('[AstronomicalEngine] Worker initialization timed out. Falling back to Mock Engine.');
+        console.warn('[AstronomicalEngine] Worker initialization timed out. Falling back to Mock Engine with warning.');
+        isUsingMockFallback = true;
         isEngineReady = true;
         isInitialLoadComplete = true;
         if (updateListener) {
           updateListener();
         }
       }
-    }, 4000);
+    }, 12000);
   } else {
     // If worker couldn't be spawned, mark ready immediately to fallback to mock
+    isUsingMockFallback = true;
     isEngineReady = true;
     isInitialLoadComplete = true;
   }
@@ -349,7 +350,20 @@ if (worker) {
     }
 
     if (type === 'ERROR') {
-      console.error('[AstronomicalEngine] Worker error:', message);
+      console.error('[AstronomicalEngine] Worker error for key:', key, message);
+      if (key) {
+        pendingQueries.delete(key);
+        if (initialKeys.has(key)) {
+          initialKeys.delete(key);
+          if (initialKeys.size === 0) {
+            isInitialLoadComplete = true;
+            console.log('[AstronomicalEngine] Initial pre-fetch settled after error.');
+          }
+        }
+      }
+      if (updateListener) {
+        updateListener();
+      }
       return;
     }
 
@@ -380,6 +394,19 @@ if (worker) {
   };
 }
 
+function calculateTimezoneOffset(lat: number, lon: number): number {
+  // India Bounding Box: Lat 8.0 to 37.0, Lon 68.0 to 97.0
+  if (lat >= 8.0 && lat <= 37.0 && lon >= 68.0 && lon <= 97.0) {
+    return 5.5; // IST
+  }
+  // Nepal check: Lat 26.0 to 31.0, Lon 80.0 to 89.0
+  if (lat >= 26.0 && lat <= 31.0 && lon >= 80.0 && lon <= 89.0) {
+    return 5.75; // Nepal Standard Time
+  }
+  // General longitude approximation rounded to nearest 0.5 hours
+  return Math.round(lon / 15 * 2) / 2;
+}
+
 class SwissEphemerisAstronomicalEngine implements AstronomicalEngine {
   isReady(): boolean {
     return isEngineReady;
@@ -401,7 +428,8 @@ class SwissEphemerisAstronomicalEngine implements AstronomicalEngine {
           key: cacheKey,
           lat,
           lon,
-          date: date.toISOString()
+          date: date.toISOString(),
+          offsetHours: calculateTimezoneOffset(lat, lon)
         });
       }
     }
@@ -428,7 +456,8 @@ class SwissEphemerisAstronomicalEngine implements AstronomicalEngine {
           date: date.toISOString(),
           sunriseMin,
           sunsetMin,
-          tithiIdx
+          tithiIdx,
+          offsetHours: calculateTimezoneOffset(lat, lon)
         });
       }
     }
