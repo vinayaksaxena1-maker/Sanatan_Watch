@@ -71,13 +71,29 @@ const getDishaShoolInfo = (day: number) => {
   }
 };
 
+const DEITY_THEMES = [
+  { id: 'shiva', name: 'शिव जी 🔱', file: './Shiva_Bg.png' },
+  { id: 'krishna', name: 'कृष्ण जी 🪶', file: './Krishna_Bg.png' },
+  { id: 'rama', name: 'श्री राम 🏹', file: './Rama_Bg.png' },
+  { id: 'ganesha', name: 'गणेश जी 🚩', file: './Ganesha_Bg.png' },
+  { id: 'lakshmi', name: 'लक्ष्मी जी 🪷', file: './Lakshmi_Bg.png' },
+  { id: 'saraswati', name: 'सरस्वती जी 🪕', file: './Saraswati_Bg.png' },
+  { id: 'durga', name: 'दुर्गा मां 🦁', file: './Durga_Bg.png' },
+  { id: 'hanuman', name: 'हनुमान जी 🚩', file: './Hanuman_Bg.png' },
+  { id: 'vishnu', name: 'विष्णु जी 🪷', file: './Vishnu_Bg.png' },
+  { id: 'surya', name: 'सूर्य देव ☀️', file: './Surya_Bg.png' },
+  { id: 'brahma', name: 'ब्रह्मा जी 🪷', file: './Brahma_Bg.png' },
+  { id: 'kali', name: 'काली मां 🌺', file: './Kali_Bg.png' },
+  { id: 'kartikeya', name: 'कार्तिकेय जी 🦚', file: './Kartikeya_Bg.png' },
+];
+
 export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGeneratorProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [copied, setCopied] = useState(false);
   const [sharing, setSharing] = useState(false);
   
   // Themes
-  const [selectedTheme, setSelectedTheme] = useState<'saffron' | 'golden' | 'crimson' | 'back1' | 'back2' | 'splash' | 'custom'>('saffron');
+  const [selectedTheme, setSelectedTheme] = useState<string>('saffron');
   const [customBgUrl, setCustomBgUrl] = useState<string>('');
 
   if (!panchang || !panchang.hinduDate) {
@@ -160,6 +176,10 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
       else if (selectedTheme === 'back2') imgSrc = './Back2.png';
       else if (selectedTheme === 'splash') imgSrc = './Splash2.0.png';
       else if (selectedTheme === 'custom') imgSrc = customBgUrl;
+      else {
+        const deity = DEITY_THEMES.find(d => d.id === selectedTheme);
+        if (deity) imgSrc = deity.file;
+      }
 
       if (imgSrc) {
         try {
@@ -420,10 +440,14 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
     if (selectedTheme === 'back2') return { backgroundImage: 'url(./Back2.png)', backgroundSize: 'cover', backgroundPosition: 'center' };
     if (selectedTheme === 'splash') return { backgroundImage: 'url(./Splash2.0.png)', backgroundSize: 'cover', backgroundPosition: 'center' };
     if (selectedTheme === 'custom' && customBgUrl) return { backgroundImage: `url(${customBgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' };
+    
+    const deity = DEITY_THEMES.find(d => d.id === selectedTheme);
+    if (deity) return { backgroundImage: `url(${deity.file})`, backgroundSize: 'cover', backgroundPosition: 'center' };
+
     return { backgroundImage: 'linear-gradient(to bottom, #FF8A00, #FF6B00, #9E2A00)' };
   };
 
-  const isImageTheme = ['back1', 'back2', 'splash', 'custom'].includes(selectedTheme);
+  const isImageTheme = ['back1', 'back2', 'splash', 'custom', ...DEITY_THEMES.map(d => d.id)].includes(selectedTheme);
 
   return (
     <div id="poster_generator_root" className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left font-sans">
@@ -493,6 +517,23 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
             >
               पैटर्न ३
             </button>
+          </div>
+
+          {/* Compact Space-Saving Bhagwat Themes Dropdown */}
+          <div className="flex items-center gap-1.5 border-r border-orange-150/20 pr-2">
+            <span className="text-[9px] font-black text-amber-500 uppercase tracking-wider">भगवद् थीम्स:</span>
+            <select
+              value={DEITY_THEMES.some(d => d.id === selectedTheme) ? selectedTheme : ''}
+              onChange={(e) => e.target.value && setSelectedTheme(e.target.value)}
+              className="bg-zinc-850 hover:bg-zinc-800 text-amber-300 text-[9px] font-bold py-1 px-2 rounded-lg border border-amber-500/40 cursor-pointer outline-none transition-all shadow-xs"
+            >
+              <option value="" disabled className="bg-zinc-900 text-slate-400">-- चुनिए (13) --</option>
+              {DEITY_THEMES.map((theme) => (
+                <option key={theme.id} value={theme.id} className="bg-zinc-900 text-amber-100 py-1">
+                  {theme.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <label className="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-amber-500 hover:brightness-110 active:scale-95 px-2.5 py-1 rounded-xl text-white text-[9px] font-black cursor-pointer shadow-xs transition-all select-none">

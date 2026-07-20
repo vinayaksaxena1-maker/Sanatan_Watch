@@ -76,7 +76,6 @@ import { SanatanTimeWheel } from './components/SanatanTimeWheel';
 import { MoonPhaseVisualizer } from './components/MoonPhaseVisualizer';
 
 // Hindu Dharmik Sacred Additions
-import { MantraJapa } from './components/MantraJapa';
 import { StotraSangrah } from './components/StotraSangrah';
 import dialBg from './components/VintageDialBackground.png';
 import { getTranslation } from './utils/translations';
@@ -1728,9 +1727,9 @@ export default function App() {
                   </span>
                   <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[11px] font-bold">
                     {[
-                      { id: 'tools_japa_card', labelHindi: 'मन्त्र व ध्यान', labelEng: 'Mantra & Meditation' },
                       { id: 'tools_poster_card', labelHindi: 'पोस्टर मेकर', labelEng: 'Poster Maker' },
                       { id: 'tools_widgets_card', labelHindi: 'होम विजेट्स', labelEng: 'Home Widgets' },
+                      { id: 'tools_notification_card', labelHindi: 'स्थायी नोटिफिकेशन', labelEng: 'Permanent Notification' },
                       { id: 'tools_plans_card', labelHindi: 'प्रीमियम योजनाएं', labelEng: 'Premium Plans' },
                       { id: 'tools_settings_card', labelHindi: 'सेटिंग्स', labelEng: 'App Settings' }
                     ].map((item, index, arr) => (
@@ -1754,16 +1753,7 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Subsections contents stacked vertically */}
-                <div id="tools_japa_card" className="p-4 bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl shadow-3xs text-left">
-                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-zinc-800/40 pb-2">
-                    <span className="text-lg">📿</span>
-                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-amber-100">
-                      {settings.language === 'Hindi' ? 'मन्त्र जाप व ध्यान साधना' : 'Mantra Japa & Meditation'}
-                    </h3>
-                  </div>
-                  <MantraJapa language={settings.language} />
-                </div>
+
 
 
 
