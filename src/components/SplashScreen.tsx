@@ -10,9 +10,10 @@ interface SplashScreenProps {
   selectedStyle?: SplashStyle;
   isDemoMode?: boolean;
   customSplash?: string;
+  statusMessage?: string;
 }
 
-export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode = false, customSplash }: SplashScreenProps) {
+export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode = false, customSplash, statusMessage }: SplashScreenProps) {
   const [style, setStyle] = useState<SplashStyle>(selectedStyle);
   const [dots, setDots] = useState<Array<{ id: number; left: number; top: number; delay: number; duration: number }>>([]);
   const [key, setKey] = useState(0); // To force replay of animations
@@ -68,28 +69,34 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
     setIsLoaded(false);
 
     const interval = setInterval(() => {
-      let isDone = false;
       setProgress((prev) => {
         const next = prev + 1;
         if (next >= 100) {
-          isDone = true;
+          clearInterval(interval);
+          setIsLoaded(true);
+          if (!isDemoMode && onCompleteRef.current) {
+            onCompleteRef.current();
+          }
           return 100;
         }
         return next;
       });
-
-      // Execute side-effects safely outside the state updater function to prevent React warnings
-      if (isDone) {
-        clearInterval(interval);
-        setIsLoaded(true);
-        if (!isDemoMode && onCompleteRef.current) {
-          onCompleteRef.current();
-        }
-      }
     }, 60);
 
     return () => clearInterval(interval);
   }, [customSplash, isDemoMode, key]);
+
+  useEffect(() => {
+    console.log('[SPLASH_TRACE] 1. Splash mounted at:', new Date().toISOString());
+  }, []);
+
+  // Progress logging every second
+  useEffect(() => {
+    const pTimer = setInterval(() => {
+      console.log('[SPLASH_TRACE] 2. Progress tick:', new Date().toISOString(), 'Progress state:', progress);
+    }, 1000);
+    return () => clearInterval(pTimer);
+  }, [progress]);
 
   // Handle auto-timeout for non-demo mode (6 seconds duration)
   useEffect(() => {
@@ -97,6 +104,7 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
     if (customSplash) return; // Custom splash progress bar will handle auto-completion at 6s
     const duration = 6000;
     const timer = setTimeout(() => {
+      console.log('[SPLASH_TRACE] 3. onComplete() called at:', new Date().toISOString());
       if (onCompleteRef.current) onCompleteRef.current();
     }, duration);
     return () => clearTimeout(timer);
@@ -550,7 +558,7 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
                 style === 'crimson' ? 'text-slate-500' : 'text-amber-100/75'
               }`}>
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                <span>पंचांग गणना लोड हो रही है...</span>
+                <span>{statusMessage || 'Initializing Astronomical Engine...'}</span>
               </div>
             </div>
           )}

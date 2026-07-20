@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChoghadiyaInterval } from '../types';
 
 interface ChaughadiyaRingProps {
@@ -16,6 +16,22 @@ export function ChaughadiyaRing({
   displayEndTime,
   currentTime
 }: ChaughadiyaRingProps) {
+  const [blurEnabled, setBlurEnabled] = useState(false);
+
+  useEffect(() => {
+    let timerId: ReturnType<typeof setTimeout>;
+    const rafId = requestAnimationFrame(() => {
+      timerId = setTimeout(() => {
+        setBlurEnabled(true);
+      }, 150);
+    });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      if (timerId) clearTimeout(timerId);
+    };
+  }, []);
+
   if (!choghadiyaList || choghadiyaList.length === 0) return null;
 
   const parseTimeToMinutes = (timeStr: string): number => {
@@ -540,7 +556,7 @@ export function ChaughadiyaRing({
                 strokeWidth="130"
                 strokeLinecap="butt"
                 className="animate-active-segment-glow-subtle"
-                style={{ filter: "blur(6px)" }}
+                style={blurEnabled ? { filter: "blur(6px)" } : undefined}
                 shapeRendering="geometricPrecision"
               />
             </g>

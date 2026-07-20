@@ -1,10 +1,28 @@
 <!doctype html>
-<html lang="en">
+<html lang="hi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>हिन्दू धर्मिक पंचांग</title>
     <link rel="icon" type="image/png" href="/App1.png" />
+    <script>
+      window.onerror = function(msg, url, line, col, error) {
+        var errBox = document.getElementById('global_error_overlay');
+        if (!errBox) {
+          errBox = document.createElement('div');
+          errBox.id = 'global_error_overlay';
+          errBox.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#0f172a;color:#f87171;padding:20px;z-index:999999;font-family:monospace;font-size:12px;overflow:auto;word-break:break-all;';
+          document.body.appendChild(errBox);
+        }
+        errBox.innerHTML = '<h3 style="color:#fbbf24;margin-top:0;">CRITICAL ENGINE / APP ERROR</h3>' +
+          '<p><b>Message:</b> ' + msg + '</p>' +
+          '<p><b>File:</b> ' + url + ':' + line + ':' + col + '</p>' +
+          '<pre style="background:#1e293b;padding:12px;border-radius:8px;color:#cbd5e1;">' + (error && error.stack ? error.stack : 'No stack trace available') + '</pre>';
+      };
+      window.onunhandledrejection = function(e) {
+        window.onerror(e.reason ? (e.reason.message || String(e.reason)) : 'Unhandled Promise Rejection', '', 0, 0, e.reason);
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>

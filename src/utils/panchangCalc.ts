@@ -10,13 +10,15 @@
 
 import { Coords, PanchangInfo, HinduDate, Tithi, Nakshatra, Yoga, Karana, ChoghadiyaInterval, HoraInterval, MuhuratItem, MuhuratType, Festival, ChoghadiyaPresentationData, TimeInterval, ShubhYogItem, PlanetCombustion, PanchakDetail, GandMoolDetail, SuryaNakshatraDetail, ChandraNakshatraDetail, RituDetail, PayaDetail, DagdaTithiDetail, AgniVaasDetail, ShivaVaasDetail, PushkarYogDetail } from '../types';
 
-import { astronomicalEngine } from './astronomicalEngine';
+import { astronomicalEngine, registerPanchangCacheClearer } from './astronomicalEngine';
 
 const panchangCache = new Map<string, PanchangInfo>();
 
 export function clearPanchangCache() {
   panchangCache.clear();
 }
+
+registerPanchangCacheClearer(clearPanchangCache);
 
 
 

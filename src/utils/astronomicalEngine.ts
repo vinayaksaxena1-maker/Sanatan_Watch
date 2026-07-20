@@ -5,8 +5,15 @@
  * to block UI render during Web Worker compilation.
  */
 
-import AstroWorker from './astroWorker?worker&inline';
+// Dedicated External Web Worker (Part B) via standard Vite ES module worker instantiation
+// This avoids Blob URL restrictions and memory crashes in mobile WebViews / Capacitor APK builds.
 import { getSeplBuffer, getSemoBuffer } from './epheAssets';
+import { EngineLogger } from './engineLogger';
+
+let panchangCacheClearer: (() => void) | null = null;
+export function registerPanchangCacheClearer(fn: () => void) {
+  panchangCacheClearer = fn;
+}
 
 export interface SolarTimes {
   sunrise: string;
@@ -243,11 +250,24 @@ export class MockAstronomicalEngine implements AstronomicalEngine {
 // ---------------------------------------------------------------------------
 // Isolated Web Worker Integration (Part B Boundary)
 // ---------------------------------------------------------------------------
+let tWorkerCreated = performance.now();
+let tInitStart = 0;
+let tEngineReady = 0;
+
+let lastErrorCode: string = 'ENG-006';
+let failureTimestamp: string = '';
+
+let cachedSeplBuf: ArrayBuffer | null = null;
+let cachedSemoBuf: ArrayBuffer | null = null;
+
 let worker: Worker | null = null;
 try {
-  worker = new AstroWorker();
-} catch (e) {
-  console.error('[AstronomicalEngine] Failed to create Web Worker:', e);
+  worker = new Worker(new URL('./astroWorker.ts', import.meta.url), { type: 'module' });
+  EngineLogger.pushLog('INFO', 'Dedicated ES Module Worker instantiated successfully');
+} catch (e: any) {
+  lastErrorCode = 'ENG-001';
+  failureTimestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+  EngineLogger.pushLog('ERROR', 'Failed to instantiate Web Worker', e?.message || e);
 }
 
 const solarCache = new Map<string, SolarTimes>();
@@ -260,6 +280,11 @@ let updateListener: (() => void) | null = null;
 let isEngineReady = false;
 let isInitialLoadComplete = false;
 let isUsingMockFallback = false;
+let isEngineTimeout = false;
+let engineProgressStage: 'WORKER_CREATED' | 'WASM_COMPILED' | 'EPHEMERIS_READY' | 'PANCHANG_PREFETCH' | 'ENGINE_READY' = 'WORKER_CREATED';
+let timeoutTimer: ReturnType<typeof setTimeout> | null = null;
+let retryCount = 0;
+const MAX_RETRIES = 3;
 const initialKeys = new Set<string>();
 
 export function registerEngineListener(callback: () => void) {
@@ -274,57 +299,212 @@ export function isMockActive(): boolean {
   return isUsingMockFallback;
 }
 
-if (typeof window !== 'undefined') {
+export function isTimeoutTriggered(): boolean {
+  return isEngineTimeout;
+}
+
+export function getEngineProgressStage() {
+  return engineProgressStage;
+}
+
+export function getRetryCount(): number {
+  return retryCount;
+}
+
+export function getLastDiagnosticInfo() {
+  const elapsedSec = ((performance.now() - tWorkerCreated) / 1000).toFixed(1);
+  return {
+    errorCode: lastErrorCode,
+    timestamp: failureTimestamp || new Date().toISOString().replace('T', ' ').substring(0, 19),
+    elapsedTime: `${elapsedSec}s`
+  };
+}
+
+export function isMaxRetriesReached(): boolean {
+  return retryCount >= MAX_RETRIES;
+}
+
+export function enableLimitedMode() {
+  EngineLogger.logDebug('User selected Limited Mode (Mock Data). Fallback activated.');
+  isUsingMockFallback = true;
+  isEngineReady = true;
+  isInitialLoadComplete = true;
+  isEngineTimeout = false;
+  if (timeoutTimer) {
+    clearTimeout(timeoutTimer);
+    timeoutTimer = null;
+  }
+  if (updateListener) {
+    updateListener();
+  }
+}
+
+export function extendInitializationTimeout() {
+  EngineLogger.logDebug('Extending initialization timeout window by 30 seconds.');
+  isEngineTimeout = false;
+  start30SecTimeout();
+  if (updateListener) {
+    updateListener();
+  }
+}
+
+export function retryEngineInitialization() {
+  if (retryCount >= MAX_RETRIES) {
+    lastErrorCode = 'ENG-003';
+    failureTimestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    EngineLogger.logCriticalFailure('ENG-003', 'Maximum Retry Limit Reached', { retryCount });
+    isEngineTimeout = true;
+    if (updateListener) {
+      updateListener();
+    }
+    return;
+  }
+
+  retryCount += 1;
+  EngineLogger.logDebug(`Retry Attempt ${retryCount}`);
+
+  isEngineTimeout = false;
+  isEngineReady = false;
+  isInitialLoadComplete = false;
+  engineProgressStage = 'WORKER_CREATED';
+  
   if (worker) {
     try {
-      // Load local packaged assets instantly from memory to bypass all CORS and HTTP server constraints
-      const seplBuf = getSeplBuffer().slice(0); // clone to allow transfer to worker thread
-      const semoBuf = getSemoBuffer().slice(0);
-      
+      tInitStart = performance.now();
+      if (!cachedSeplBuf || !cachedSemoBuf) {
+        lastErrorCode = 'ENG-002';
+        failureTimestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+        EngineLogger.logCriticalFailure('ENG-002', 'Retry failed: cached ephemeris buffers unavailable', {});
+        if (updateListener) updateListener();
+        return;
+      }
+      const seplBuf = cachedSeplBuf.slice(0);
+      const semoBuf = cachedSemoBuf.slice(0);
       worker.postMessage({
         type: 'INIT',
         seplBuf,
-        semoBuf
+        semoBuf,
+        appOrigin: window.location.origin
+      }, [seplBuf, semoBuf]);
+      start30SecTimeout();
+    } catch (err: any) {
+      lastErrorCode = 'ENG-002';
+      failureTimestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+      EngineLogger.logCriticalFailure('ENG-002', 'Retry init failed', { error: err });
+    }
+  }
+  if (updateListener) {
+    updateListener();
+  }
+}
+
+function start30SecTimeout() {
+  if (timeoutTimer) clearTimeout(timeoutTimer);
+  timeoutTimer = setTimeout(() => {
+    if (!isReady()) {
+      lastErrorCode = 'ENG-006';
+      failureTimestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+      EngineLogger.logDebug('30-second initialization timeout reached before application readiness. Prompting user decision.');
+      isEngineTimeout = true;
+      if (updateListener) {
+        updateListener();
+      }
+    }
+  }, 30000);
+}
+
+if (typeof window !== 'undefined') {
+  if (worker) {
+    try {
+      tInitStart = performance.now();
+      // Cache buffers BEFORE first transfer so retry can reuse them
+      cachedSeplBuf = getSeplBuffer().slice(0);
+      cachedSemoBuf = getSemoBuffer().slice(0);
+      const seplBuf = cachedSeplBuf.slice(0); // transfer a copy, keep cache intact
+      const semoBuf = cachedSemoBuf.slice(0);
+      
+      EngineLogger.pushLog('INFO', `Posting INIT message to Worker (sepl: ${(seplBuf.byteLength/1024).toFixed(0)}KB, semo: ${(semoBuf.byteLength/1024).toFixed(0)}KB)`);
+      worker.postMessage({
+        type: 'INIT',
+        seplBuf,
+        semoBuf,
+        appOrigin: window.location.origin
       }, [seplBuf, semoBuf]);
     } catch (err: any) {
-      console.error('[AstronomicalEngine] Failed to load inline ephemeris buffers:', err);
-      isUsingMockFallback = true;
-      isEngineReady = true;
-      isInitialLoadComplete = true;
+      lastErrorCode = 'ENG-005';
+      failureTimestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+      EngineLogger.logCriticalFailure('ENG-005', 'Failed to load inline ephemeris buffers', { error: err });
+      isEngineTimeout = true;
       if (updateListener) {
         updateListener();
       }
     }
 
-    // Timeout of 12 seconds to fall back to Mock Engine if WASM is too slow
-    setTimeout(() => {
-      if (!isEngineReady) {
-        console.warn('[AstronomicalEngine] Worker initialization timed out. Falling back to Mock Engine with warning.');
-        isUsingMockFallback = true;
-        isEngineReady = true;
-        isInitialLoadComplete = true;
-        if (updateListener) {
-          updateListener();
-        }
-      }
-    }, 12000);
+    start30SecTimeout();
   } else {
-    // If worker couldn't be spawned, mark ready immediately to fallback to mock
-    isUsingMockFallback = true;
-    isEngineReady = true;
-    isInitialLoadComplete = true;
+    lastErrorCode = 'ENG-001';
+    failureTimestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    EngineLogger.logCriticalFailure('ENG-001', 'Web Worker allocation blocked by browser/environment');
+    isEngineTimeout = true;
   }
 }
 
 if (worker) {
   worker.onmessage = (event: MessageEvent) => {
-    const { type, key, data, message } = event.data;
+    const { type, key, data, message, stage, timings } = event.data;
+
+    if (type === 'PROGRESS') {
+      if (stage === 'FETCHING_WASM') {
+        EngineLogger.pushLog('INFO', `[Stage] Fetching WASM Binary...`, message);
+      } else if (stage === 'WASM_FETCHED') {
+        EngineLogger.pushLog('INFO', `[Stage] WASM Downloaded successfully`, message);
+      } else if (stage === 'COMPILING_WASM') {
+        engineProgressStage = 'WORKER_CREATED';
+        EngineLogger.pushLog('INFO', `[Stage] Compiling WebAssembly module...`, message);
+      } else if (stage === 'WASM_PRINT') {
+        EngineLogger.pushLog('INFO', `[WASM Output] ${message}`);
+      } else if (stage === 'WASM_PRINT_ERR') {
+        EngineLogger.pushLog('WARN', `[WASM Err] ${message}`);
+      } else if (stage === 'WASM_COMPILED') {
+        engineProgressStage = 'WASM_COMPILED';
+        EngineLogger.pushLog('INFO', `[Stage] WASM Compiled`, message || `${timings?.wasmTime?.toFixed(2) || 0}ms`);
+      } else if (stage === 'WRITING_EPHEMERIS') {
+        EngineLogger.pushLog('INFO', `[Stage] Writing Ephemeris Files`, message);
+      } else if (stage === 'EPHEMERIS_READY') {
+        engineProgressStage = 'EPHEMERIS_READY';
+        EngineLogger.pushLog('INFO', `[Stage] Ephemeris Files Ready`, message || `${timings?.ephemerisTime?.toFixed(2) || 0}ms`);
+      } else if (stage === 'ALLOCATING_POINTERS') {
+        EngineLogger.pushLog('INFO', `[Stage] Allocating C Memory Pointers...`, message);
+      } else {
+        EngineLogger.pushLog('INFO', `[Stage] ${stage}`, message);
+      }
+      if (updateListener) {
+        updateListener();
+      }
+      return;
+    }
 
     if (type === 'READY') {
+      tEngineReady = performance.now();
       isEngineReady = true;
-      console.log('[AstronomicalEngine] Web Worker loaded and Swiss Ephemeris initialized successfully.');
-      
-      // Pre-fetch default location coordinates to completely avoid initial mock fallbacks
+      engineProgressStage = 'PANCHANG_PREFETCH';
+      isEngineTimeout = false;
+      retryCount = 0;
+
+      const totalDuration = tEngineReady - tWorkerCreated;
+      const workerCreationDuration = tInitStart - tWorkerCreated;
+      const readyDuration = tEngineReady - tInitStart;
+
+      EngineLogger.logDiagnostics({
+        workerCreationTime: workerCreationDuration,
+        wasmCompilationTime: timings?.wasmTime,
+        ephemerisLoadingTime: timings?.ephemerisTime,
+        engineReadyTime: readyDuration,
+        totalDuration: totalDuration,
+        retryCount: retryCount,
+        result: 'SUCCESS'
+      });
+
       const today = new Date();
       const lat = 28.6139; // New Delhi
       const lon = 77.2090;
@@ -346,20 +526,23 @@ if (worker) {
         worker.postMessage({ type: 'CALCULATE_MOON', key: cacheKeyMoon, lat, lon, date: today.toISOString() });
         worker.postMessage({ type: 'CALCULATE_COORDINATES', key: cacheKeyPos, date: today.toISOString() });
       }
+      if (updateListener) {
+        updateListener();
+      }
       return;
     }
 
     if (type === 'ERROR') {
-      console.error('[AstronomicalEngine] Worker error for key:', key, message);
+      if (message && message.includes('Engine not ready')) {
+        EngineLogger.pushLog('INFO', `Worker queued pre-ready query for [${key || 'GENERAL'}]`);
+        return;
+      }
+      lastErrorCode = 'ENG-004';
+      failureTimestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+      EngineLogger.logCriticalFailure('ENG-004', `Worker error for key: ${key || 'GENERAL'}`, { message });
+      isEngineTimeout = true;
       if (key) {
         pendingQueries.delete(key);
-        if (initialKeys.has(key)) {
-          initialKeys.delete(key);
-          if (initialKeys.size === 0) {
-            isInitialLoadComplete = true;
-            console.log('[AstronomicalEngine] Initial pre-fetch settled after error.');
-          }
-        }
       }
       if (updateListener) {
         updateListener();
@@ -368,7 +551,7 @@ if (worker) {
     }
 
     if (type === 'RESULT') {
-      console.log('[AstronomicalEngine] Received RESULT for key:', key, data);
+      EngineLogger.pushLog('INFO', `Received RESULT for [${key}] -> Saved to Cache & Cleared PanchangCache`);
       if (key.startsWith('SOLAR_')) {
         solarCache.set(key, data);
       } else if (key.startsWith('MOON_')) {
@@ -377,13 +560,26 @@ if (worker) {
         positionCache.set(key, data);
       }
       pendingQueries.delete(key);
+      if (panchangCacheClearer) {
+        try { panchangCacheClearer(); } catch {}
+      }
 
-      // Track completion of initial pre-fetch queries
+      // Auto-reset mock fallback whenever real Swiss Ephemeris data arrives
+      if (isUsingMockFallback && !isEngineTimeout) {
+        isUsingMockFallback = false;
+        EngineLogger.pushLog('INFO', 'Swiss Ephemeris calculation result received. Mock fallback auto-reset. Badge hidden.');
+      }
+
       if (initialKeys.has(key)) {
         initialKeys.delete(key);
         if (initialKeys.size === 0) {
           isInitialLoadComplete = true;
-          console.log('[AstronomicalEngine] Initial calculations pre-fetch completed. Ready to dismiss splash.');
+          engineProgressStage = 'ENGINE_READY';
+          if (timeoutTimer) {
+            clearTimeout(timeoutTimer);
+            timeoutTimer = null;
+          }
+          EngineLogger.logDebug('Initial calculations pre-fetch completed. Application is Ready. Clearing timeout.');
         }
       }
 
@@ -422,6 +618,7 @@ class SwissEphemerisAstronomicalEngine implements AstronomicalEngine {
 
     if (!pendingQueries.has(cacheKey)) {
       pendingQueries.add(cacheKey);
+      EngineLogger.pushLog('WARN', `Cache MISS [${cacheKey}] -> Sent CALCULATE_SOLAR to worker. Returning Mock Solar fallback temporarily.`);
       if (worker) {
         worker.postMessage({
           type: 'CALCULATE_SOLAR',
@@ -447,6 +644,7 @@ class SwissEphemerisAstronomicalEngine implements AstronomicalEngine {
 
     if (!pendingQueries.has(cacheKey)) {
       pendingQueries.add(cacheKey);
+      EngineLogger.pushLog('WARN', `Cache MISS [${cacheKey}] -> Sent CALCULATE_MOON to worker. Returning Mock Moon fallback temporarily.`);
       if (worker) {
         worker.postMessage({
           type: 'CALCULATE_MOON',
@@ -475,6 +673,7 @@ class SwissEphemerisAstronomicalEngine implements AstronomicalEngine {
 
     if (!pendingQueries.has(cacheKey)) {
       pendingQueries.add(cacheKey);
+      EngineLogger.pushLog('WARN', `Cache MISS [${cacheKey}] -> Sent CALCULATE_COORDINATES to worker. Returning Mock Positions (Sun/Moon: मेष) temporarily.`);
       if (worker) {
         worker.postMessage({
           type: 'CALCULATE_COORDINATES',

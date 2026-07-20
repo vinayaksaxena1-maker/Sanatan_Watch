@@ -51,7 +51,7 @@ const getPanchangForDate = (lat: number, lon: number, date: Date) => {
   return info;
 };
 
-import { registerEngineListener, isReady } from './utils/astronomicalEngine';
+import { registerEngineListener, isReady, getEngineProgressStage, isTimeoutTriggered, enableLimitedMode, retryEngineInitialization, extendInitializationTimeout, isMaxRetriesReached, getRetryCount, getLastDiagnosticInfo } from './utils/astronomicalEngine';
 
 
 
@@ -207,13 +207,12 @@ const itemVariants = {
 };
 
 export default function App() {
-
   // Navigation State
   const [activeTab, setActiveTab ] = useState<'home' | 'panchang' | 'muhurat' | 'festival' | 'nakshatra' | 'tools' | 'alerts'>('home');
 
-
   // Splash Screen State
   const [isSplashActive, setIsSplashActive] = useState<boolean>(true);
+  console.log('[SPLASH_TRACE] Render - isSplashActive state:', isSplashActive);
   const [splashAnimationCompleted, setSplashAnimationCompleted] = useState<boolean>(false);
   const [previewSplashStyle, setPreviewSplashStyle] = useState<SplashStyle | null>(null);
   
@@ -285,19 +284,18 @@ export default function App() {
     registerEngineListener(() => {
       clearPanchangCache();
       setUpdateTrigger({});
-      if (splashAnimationCompleted && isReady()) {
+      if (isReady()) {
         setIsSplashActive(false);
       }
     });
-  }, [splashAnimationCompleted]);
+  }, []);
 
   // Safety timeout to ensure Splash Screen is dismissed even if engine is slow or fails
   useEffect(() => {
     if (isSplashActive) {
       const timer = setTimeout(() => {
-        console.warn('[App] Splash screen safety timeout triggered. Force dismissing splash screen.');
         setIsSplashActive(false);
-      }, 7000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [isSplashActive]);
@@ -946,18 +944,123 @@ export default function App() {
     year: 'numeric'
   });
 
+  const getStageMessage = (stage: string) => {
+    switch (stage) {
+      case 'WORKER_CREATED':
+        return 'Initializing Astronomical Engine...';
+      case 'WASM_COMPILED':
+        return 'Loading Swiss Ephemeris...';
+      case 'EPHEMERIS_READY':
+        return 'Preparing Panchang...';
+      case 'PANCHANG_PREFETCH':
+        return 'Preparing Watch...';
+      case 'ENGINE_READY':
+        return 'Launching App...';
+      default:
+        return 'Initializing Astronomical Engine...';
+    }
+  };
+
   if (isSplashActive) {
+    const stage = getEngineProgressStage();
+    const statusMsg = getStageMessage(stage);
+    const showTimeoutModal = isTimeoutTriggered();
+    const diagInfo = getLastDiagnosticInfo();
+
     return (
-      <SplashScreen 
-        selectedStyle={settings.splashStyle || 'saffron'} 
-        onComplete={() => {
-          setSplashAnimationCompleted(true);
-          if (isReady()) {
+      <div className="relative w-full h-full min-h-screen">
+        <SplashScreen 
+          selectedStyle={settings.splashStyle || 'saffron'} 
+          onComplete={() => {
+            setSplashAnimationCompleted(true);
             setIsSplashActive(false);
-          }
-        }} 
-        customSplash={settings.customSplash}
-      />
+          }} 
+          customSplash={settings.customSplash}
+          statusMessage={statusMsg}
+        />
+
+        {showTimeoutModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in">
+            <div className="bg-slate-900 border border-amber-500/40 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl flex flex-col items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-xl shadow-inner">
+                ⚠️
+              </div>
+
+              {/* Central Diagnostic Metadata Box for Screenshots */}
+              <div className="w-full bg-slate-950/70 border border-slate-800 rounded-xl p-2.5 text-[10px] font-mono text-slate-400 text-left space-y-0.5 shadow-inner">
+                <div className="flex justify-between"><span>Engine Version:</span> <span className="text-amber-300 font-bold">{diagInfo.engineVersion}</span></div>
+                <div className="flex justify-between"><span>Error Code:</span> <span className="text-rose-400 font-bold">{diagInfo.errorCode}</span></div>
+                <div className="flex justify-between"><span>Time:</span> <span className="text-slate-300">{diagInfo.timestamp}</span></div>
+                <div className="flex justify-between"><span>Initialization Time:</span> <span className="text-slate-300">{diagInfo.elapsedTime}</span></div>
+              </div>
+              
+              {isMaxRetriesReached() ? (
+                <>
+                  <div className="space-y-1.5">
+                    <h3 className="text-sm font-bold text-amber-100 font-serif leading-snug">
+                      Unable to initialize the Astronomical Engine
+                    </h3>
+                    <p className="text-[11px] text-slate-300 font-sans leading-relaxed">
+                      The Astronomical Engine could not be started after multiple attempts. Please restart the application or start with Limited Features.
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2.5 w-full mt-1">
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="w-full py-2.5 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-98"
+                    >
+                      Restart App
+                    </button>
+                    <button
+                      onClick={() => {
+                        enableLimitedMode();
+                        setIsSplashActive(false);
+                      }}
+                      className="w-full py-2.5 px-3 rounded-xl bg-rose-950/50 hover:bg-rose-900/70 border border-rose-500/40 text-rose-300 text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-98"
+                    >
+                      Start with Limited Features (Mock Data)
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-bold text-amber-100 font-serif leading-snug">
+                      Astronomical Engine is taking longer than expected.
+                    </h3>
+                    <p className="text-[11px] text-slate-300 font-sans">
+                      Choose an option:
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2.5 w-full mt-1">
+                    <button
+                      onClick={() => extendInitializationTimeout()}
+                      className="w-full py-2.5 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-98"
+                    >
+                      Continue Waiting
+                    </button>
+                    <button
+                      onClick={() => retryEngineInitialization()}
+                      className="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-98"
+                    >
+                      Retry Initialization ({getRetryCount()}/3)
+                    </button>
+                    <button
+                      onClick={() => {
+                        enableLimitedMode();
+                        setIsSplashActive(false);
+                      }}
+                      className="w-full py-2.5 px-3 rounded-xl bg-rose-950/50 hover:bg-rose-900/70 border border-rose-500/40 text-rose-300 text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-98"
+                    >
+                      Start with Limited Features (Mock Data)
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     );
   }
 

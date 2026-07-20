@@ -51,3 +51,9 @@ Do not include any other sections in the audit report.
 ## 12. Muhurat Screen UI Lock (STRICT)
 - The Muhurat Screen UI component and layouts in `src/components/MuhuratScreen.tsx` are strictly LOCKED.
 - No modifications, refactoring, styling adjustments, or layout changes can be made to the Muhurat Screen UI without explicit, written user approval in the chat.
+
+## 13. "No Code" Instruction Rule (STRICT)
+- Whenever the user includes "No code" (or "no code") in their prompt, the agent MUST NOT make any code modifications, file edits, or execution changes.
+- In "No code" mode, the agent must ONLY explain reasons, technical analysis, or answers in Hinglish text format.
+- Coding or file edits can ONLY start after the user explicitly gives written approval in a subsequent prompt.
+

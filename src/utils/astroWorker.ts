@@ -1,7 +1,10 @@
 import SwissEph from 'swisseph-wasm';
+import WasmSwissEph from '../../node_modules/swisseph-wasm/wasm/swisseph.js';
+import swissephWasmUrl from '../../node_modules/swisseph-wasm/wasm/swisseph.wasm?url';
 
 let swe: any = null;
 let isReady = false;
+const pendingWorkerQueue: any[] = [];
 
 // Global persistent pointers to avoid malloc/free overhead in getRiseTrans
 let globalGeoposPtr = 0;
@@ -175,10 +178,67 @@ function findBoundaryCrossing(
 // ---------------------------------------------------------------------------
 async function initWorker(seplBuf: ArrayBuffer, semoBuf: ArrayBuffer) {
   try {
+    const tWasmStart = performance.now();
+    self.postMessage({ type: 'PROGRESS', stage: 'FETCHING_WASM', message: `Fetching ${swissephWasmUrl}` });
+
+    // 1. Explicitly fetch WASM binary into ArrayBuffer in memory
+    const wasmResponse = await fetch(swissephWasmUrl);
+    if (!wasmResponse.ok) {
+      throw new Error(`Failed to fetch WASM binary from ${swissephWasmUrl}: ${wasmResponse.status} ${wasmResponse.statusText}`);
+    }
+    const wasmBinary = await wasmResponse.arrayBuffer();
+    self.postMessage({ type: 'PROGRESS', stage: 'WASM_FETCHED', message: `WASM binary downloaded (${(wasmBinary.byteLength / 1024).toFixed(1)} KB)` });
+
+    // 2. Initialize SwissEph directly using pre-loaded in-memory WASM binary
+    self.postMessage({ type: 'PROGRESS', stage: 'COMPILING_WASM', message: 'Compiling WebAssembly module...' });
+    
     swe = new SwissEph();
-    await swe.initSwissEph();
+    const moduleFactory = typeof WasmSwissEph === 'function' ? WasmSwissEph : (WasmSwissEph as any).default || WasmSwissEph;
+
+    swe.SweModule = await new Promise<any>((resolve, reject) => {
+      try {
+        const config: any = {
+          wasmBinary,
+          getPreloadedPackage: () => new ArrayBuffer(0),
+          locateFile: (path: string) => path.endsWith('.wasm') ? swissephWasmUrl : path,
+          print: (text: string) => self.postMessage({ type: 'PROGRESS', stage: 'WASM_PRINT', message: text }),
+          printErr: (text: string) => self.postMessage({ type: 'PROGRESS', stage: 'WASM_PRINT_ERR', message: text }),
+          onAbort: (what: any) => {
+            reject(new Error(`WASM Emscripten Aborted: ${what}`));
+          },
+          onRuntimeInitialized: function() {
+            self.postMessage({ type: 'PROGRESS', stage: 'WASM_RUNTIME_INIT', message: 'Emscripten onRuntimeInitialized fired successfully!' });
+            resolve(this);
+          }
+        };
+
+        const inst = moduleFactory(config);
+        if (inst && typeof inst.then !== 'function') {
+          resolve(inst);
+        }
+      } catch (err) {
+        reject(err);
+      }
+    });
+
+    if (!swe.SweModule || !swe.SweModule.FS) {
+      throw new Error("WASM FS object not available on SweModule");
+    }
+
+    if (!swe.SweModule.HEAP32) {
+      swe.SweModule.HEAP32 = new Int32Array(swe.SweModule.HEAPF64.buffer);
+    }
+    swe.set_ephe_path('/sweph');
+
+    const tWasmEnd = performance.now();
+    const wasmTime = tWasmEnd - tWasmStart;
+
+    self.postMessage({ type: 'PROGRESS', stage: 'WASM_COMPILED', wasmTime, message: `WASM compiled in ${wasmTime.toFixed(1)}ms` });
+
     swe.set_sid_mode(1, 0, 0);
 
+    const tEphStart = performance.now();
+    self.postMessage({ type: 'PROGRESS', stage: 'WRITING_EPHEMERIS', message: 'Writing ephemeris files to Virtual Filesystem (/sweph)...' });
     try {
       swe.SweModule.FS.mkdir('/sweph');
     } catch (e) {
@@ -187,40 +247,38 @@ async function initWorker(seplBuf: ArrayBuffer, semoBuf: ArrayBuffer) {
 
     swe.SweModule.FS.writeFile('/sweph/sepl_18.se1', new Uint8Array(seplBuf));
     swe.SweModule.FS.writeFile('/sweph/semo_18.se1', new Uint8Array(semoBuf));
+    const tEphEnd = performance.now();
+    const ephemerisTime = tEphEnd - tEphStart;
 
-    // Allocate global pointers once during initialization
+    self.postMessage({ type: 'PROGRESS', stage: 'EPHEMERIS_READY', ephemerisTime, message: `Ephemeris files written in ${ephemerisTime.toFixed(1)}ms` });
+
+    self.postMessage({ type: 'PROGRESS', stage: 'ALLOCATING_POINTERS', message: 'Allocating persistent C memory pointers...' });
     globalGeoposPtr = swe.SweModule._malloc(3 * 8);
     globalTretPtr   = swe.SweModule._malloc(4 * 8);
     globalSerrPtr   = swe.SweModule._malloc(256);
 
     isReady = true;
-    self.postMessage({ type: 'READY' });
+    self.postMessage({ 
+      type: 'READY',
+      timings: {
+        wasmTime,
+        ephemerisTime
+      }
+    });
+
+    // Flush all calculation requests that arrived while WASM was initializing
+    while (pendingWorkerQueue.length > 0) {
+      const queuedData = pendingWorkerQueue.shift();
+      await processWorkerQuery(queuedData);
+    }
   } catch (error: any) {
-    self.postMessage({ type: 'ERROR', message: error.message || String(error) });
+    const errorDetails = error.stack || error.message || String(error);
+    self.postMessage({ type: 'ERROR', message: `Init Error: ${errorDetails}` });
   }
 }
 
-// ---------------------------------------------------------------------------
-// Worker Message Handler
-// ---------------------------------------------------------------------------
-self.onmessage = async (event: MessageEvent) => {
-  const { type, key, seplBuf, semoBuf, error, lat, lon, date, offsetHours } = event.data;
-
-  if (type === 'INIT') {
-    await initWorker(seplBuf, semoBuf);
-    return;
-  }
-
-  if (type === 'INIT_FAIL') {
-    self.postMessage({ type: 'ERROR', message: `Main thread fetch failed: ${error}` });
-    return;
-  }
-
-  if (!isReady || !swe) {
-    self.postMessage({ type: 'ERROR', message: 'Engine not ready' });
-    return;
-  }
-
+async function processWorkerQuery(queryData: any) {
+  const { type, key, lat, lon, date, offsetHours } = queryData;
   const parsedDate = new Date(date);
   const jdQuery = dateToJulianDay(parsedDate);
   const today0h = new Date(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate(), 0, 0, 0);
@@ -371,8 +429,6 @@ self.onmessage = async (event: MessageEvent) => {
       const monthIdx = (rashiPrev + 1) % 12;
 
       // 6. Calculate Navagraha Positions
-
-
       const planetsResult: any[] = [];
       for (const g of Grahas) {
         const pos = swe.calc_ut(jdQuery, g.id, 2 | 256);
@@ -442,4 +498,29 @@ self.onmessage = async (event: MessageEvent) => {
   } catch (err: any) {
     self.postMessage({ type: 'ERROR', message: err.message || String(err) });
   }
+}
+
+// ---------------------------------------------------------------------------
+// Worker Message Handler
+// ---------------------------------------------------------------------------
+self.onmessage = async (event: MessageEvent) => {
+  const { type, key, seplBuf, semoBuf, appOrigin, error } = event.data;
+
+  if (type === 'INIT') {
+    await initWorker(seplBuf, semoBuf, appOrigin);
+    return;
+  }
+
+  if (type === 'INIT_FAIL') {
+    self.postMessage({ type: 'ERROR', message: `Main thread fetch failed: ${error}` });
+    return;
+  }
+
+  if (!isReady || !swe) {
+    pendingWorkerQueue.push(event.data);
+    self.postMessage({ type: 'PROGRESS', stage: 'QUEUED_CALCULATION', key, message: `Worker initializing, queued request [${key}]` });
+    return;
+  }
+
+  await processWorkerQuery(event.data);
 };
