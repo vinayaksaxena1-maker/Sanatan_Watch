@@ -1885,7 +1885,9 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
     ishtakala: calculateIshtakala(date, solarTimes.sunriseRaw)
   };
 
-  panchangCache.set(cacheKey, result);
+  if (isSwiss) {
+    panchangCache.set(cacheKey, result);
+  }
   return result;
 
 }
