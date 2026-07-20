@@ -14,7 +14,7 @@ Every audit report must contain ONLY the following four sections:
 Do not include any other sections in the audit report.
 
 ## 3. Astronomical Engine Lock (STRICT)
-- The astronomical engine files `src/utils/astronomicalEngine.ts` and `src/utils/astroWorker.ts` are strictly LOCKED.
+- The astronomical engine files `src/utils/astronomicalEngine.ts`, `src/utils/astroWorker.ts`, `src/utils/engineLogger.ts`, and `src/components/DiagnosticLogsModal.tsx` are strictly LOCKED.
 - No modifications, refactoring, or adjustments can be made to these files without explicit, written user approval in the chat.
 
 ## 4. Chaughadiya Ring Component Lock (STRICT)
