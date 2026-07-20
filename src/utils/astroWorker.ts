@@ -280,9 +280,15 @@ async function initWorker(seplBuf: ArrayBuffer, semoBuf: ArrayBuffer) {
 async function processWorkerQuery(queryData: any) {
   const { type, key, lat, lon, date, offsetHours } = queryData;
   const parsedDate = new Date(date);
-  const jdQuery = dateToJulianDay(parsedDate);
-  const today0h = new Date(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate(), 0, 0, 0);
-  const jdMidnight = dateToJulianDay(today0h);
+  const tzOffset = typeof offsetHours === 'number' ? offsetHours : 5.5;
+  const jdQuery = (parsedDate.getTime() / 86400000) + 2440587.5;
+  
+  // Calculate local midnight JD
+  const localMs = parsedDate.getTime() + (tzOffset * 3600000);
+  const localDate = new Date(localMs);
+  const today0hUT = new Date(Date.UTC(localDate.getUTCFullYear(), localDate.getUTCMonth(), localDate.getUTCDate(), 0, 0, 0));
+  const today0hMs = today0hUT.getTime() - (tzOffset * 3600000);
+  const jdMidnight = (today0hMs / 86400000) + 2440587.5;
 
   try {
     if (type === 'CALCULATE_SOLAR') {
