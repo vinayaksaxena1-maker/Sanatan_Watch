@@ -1556,12 +1556,45 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
         <MoonPhaseVisualizer panchang={panchang} />
       </div>
 
+      {/* Anandadi Yoga Card */}
+      {panchang.anandadiYoga && (
+        <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 border border-amber-200/50 dark:border-amber-950/40 rounded-3xl bg-amber-50/20 dark:bg-amber-950/5 mt-4 text-left shadow-md">
+          <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-amber-200/35 dark:border-amber-950/20">
+            <span className="text-sm">🔮</span>
+            <span className="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest font-mono">
+              {language === 'Hindi' ? "आनन्दादि व दैनिक नक्षत्र योग (Anandadi Yoga)" : "Anandadi & Daily Nakshatra Yoga"}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-xs">
+            <div>
+              <span className="text-slate-400 block font-mono text-[9px] uppercase tracking-wider">{language === 'Hindi' ? "योग का नाम" : "Yoga Name"}</span>
+              <span className="font-extrabold text-amber-750 dark:text-amber-300 block text-sm font-serif">
+                {panchang.anandadiYoga.nameHindi} ({panchang.anandadiYoga.name})
+              </span>
+            </div>
+            <div>
+              <span className="text-slate-400 block font-mono text-[9px] uppercase tracking-wider">{language === 'Hindi' ? "प्रकृति व स्थिति" : "Nature & Status"}</span>
+              <span className={`font-black block text-2xs ${panchang.anandadiYoga.isAuspicious ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                {panchang.anandadiYoga.isAuspicious ? (language === 'Hindi' ? '✨ शुभ फलदायी (Auspicious)' : '✨ Auspicious') : (language === 'Hindi' ? '⚠️ इनफॉर्म्ड / ध्यान दें (Inauspicious)' : '⚠️ Inauspicious')}
+              </span>
+              <span className="text-[9.5px] text-slate-500 block mt-0.5">🕒 {panchang.anandadiYoga.endTime} {language === 'Hindi' ? 'तक प्रभावी' : 'till'}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 block font-mono text-[9px] uppercase tracking-wider">{language === 'Hindi' ? "वैदिक फलित" : "Vedic Effect"}</span>
+              <span className="text-[11px] text-slate-600 dark:text-slate-300 leading-tight block font-serif mt-0.5">
+                {panchang.anandadiYoga.description}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Bhadra (Vishti Karana) Engine details card */}
-      {panchang.bhadra && panchang.bhadra.active && (
+      {panchang.bhadra && panchang.bhadra.active ? (
         <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 border border-red-200 dark:border-red-950/40 rounded-3xl bg-red-50/20 dark:bg-red-950/5 mt-4 text-left shadow-md">
           <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-red-200/35 dark:border-red-950/20">
             <span className="text-sm">⚠️</span>
-            <span className="text-[10px] font-black text-red-650 dark:text-red-400 uppercase tracking-widest font-mono">{language === 'Hindi' ? "भद्रा दोष चेतावनी (Bhadra Alert)" : "Bhadra Alert"}</span>
+            <span className="text-[10px] font-black text-red-650 dark:text-red-400 uppercase tracking-widest font-mono">{language === 'Hindi' ? "भद्रा दोष चेतावनी (Bhadra Alert - Active)" : "Bhadra Alert - Active"}</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
             <div>
@@ -1585,6 +1618,23 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
           <p className="text-[9.5px] text-slate-500 dark:text-slate-400 mt-2.5 leading-relaxed font-serif italic border-t border-red-200/10 pt-1.5">
             {language === 'Hindi' ? "* भद्रा के पृथ्वी लोक (मृत्यु लोक) में वास के दौरान विवाह, गृह प्रवेश, मुंडन, और अन्य सभी मांगलिक कार्य सर्वथा वर्जित हैं।" : "* During Bhadra residence in the earthly realm (Prithvi Loka), marriages, housewarming, shaving ceremonies, and all other auspicious events are strictly prohibited."}
           </p>
+        </div>
+      ) : (
+        <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 border border-emerald-200/40 dark:border-emerald-950/20 rounded-2xl bg-emerald-50/10 dark:bg-emerald-950/5 mt-4 text-left shadow-sm flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm">🛡️</span>
+            <div>
+              <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest font-mono block">
+                {language === 'Hindi' ? "भद्रा दोष स्थिति (Bhadra Status)" : "Bhadra Status"}
+              </span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 font-serif block mt-0.5">
+                {language === 'Hindi' ? "आज भद्रा काल का प्रभाव नहीं है। (No Bhadra Today)" : "No Bhadra effect today."}
+              </span>
+            </div>
+          </div>
+          <span className="text-[10px] text-slate-400 font-mono italic">
+            {language === 'Hindi' ? "अगला भद्रा: विष्टि करण पर" : "Next Bhadra: On Vishti Karana"}
+          </span>
         </div>
       )}
 

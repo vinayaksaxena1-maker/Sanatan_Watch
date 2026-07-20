@@ -248,6 +248,13 @@ export interface PanchangInfo {
     mukha?: string;
     puchha?: string;
   };
+  anandadiYoga?: {
+    name: string;
+    nameHindi: string;
+    isAuspicious: boolean;
+    endTime: string;
+    description: string;
+  };
   planets?: PlanetPosition[];
   varjyam?: TimeInterval[];
   durmuhurat?: TimeInterval[];

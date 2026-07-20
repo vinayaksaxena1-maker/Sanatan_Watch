@@ -1854,6 +1854,52 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
     };
   }
 
+  // 28 Anandadi Yogas Engine
+  const ANANDADI_YOGAS = [
+    { name: "Ananda", hindi: "आनन्द", isAuspicious: true, desc: "Auspicious yoga for initiating all positive endeavors." },
+    { name: "Kaladanda", hindi: "कालदण्ड", isAuspicious: false, desc: "Inauspicious yoga. Avoid major decisions and ceremonies." },
+    { name: "Dhumra", hindi: "धूम्र", isAuspicious: false, desc: "Inauspicious yoga. May bring confusion or obstruction." },
+    { name: "Prajapati", hindi: "प्रजापति", isAuspicious: true, desc: "Auspicious yoga for progeny, rituals, and new beginnings." },
+    { name: "Saubhagya", hindi: "सौभाग्य", isAuspicious: true, desc: "Brings immense good fortune, marital harmony, and prosperity." },
+    { name: "Dhwanksha / Aadal", hindi: "ध्वंक्ष / आदल योग", isAuspicious: false, desc: "Special daily astrological combination (Aadal Yoga)." },
+    { name: "Dhwaja", hindi: "ध्वज", isAuspicious: true, desc: "Favorable for victory, status elevation, and competition." },
+    { name: "Shrivatsa", hindi: "श्रीवत्स", isAuspicious: true, desc: "Brings divine blessings of Goddess Lakshmi and wealth." },
+    { name: "Vajra", hindi: "वज्र", isAuspicious: false, desc: "Requires caution. Avoid long travels and heavy investments." },
+    { name: "Mudgara", hindi: "मुद्गर", isAuspicious: false, desc: "Inauspicious yoga. Delays in work are possible." },
+    { name: "Chhatra", hindi: "छत्र", isAuspicious: true, desc: "Provides protection from adversaries and grants success." },
+    { name: "Mitra", hindi: "मित्र", isAuspicious: true, desc: "Ideal for forming partnerships, friendships, and agreements." },
+    { name: "Manasa", hindi: "मानस", isAuspicious: true, desc: "Grants mental peace, clarity, and intellectual fulfillment." },
+    { name: "Padma", hindi: "पद्म", isAuspicious: true, desc: "Brings purity, spiritual growth, and material prosperity." },
+    { name: "Lambaka", hindi: "लम्बक", isAuspicious: false, desc: "Inauspicious yoga. Exercise care during travel." },
+    { name: "Utpata", hindi: "उत्पात", isAuspicious: false, desc: "Brings sudden hurdles. Postpone major celebrations." },
+    { name: "Mrityu", hindi: "मृत्यु", isAuspicious: false, desc: "Highly inauspicious. Avoid all auspicious ceremonies." },
+    { name: "Kaana", hindi: "काण", isAuspicious: false, desc: "Inauspicious yoga. Avoid signing important contracts." },
+    { name: "Siddhi", hindi: "सिद्धि", isAuspicious: true, desc: "Ensures success in undertaken endeavors and goals." },
+    { name: "Shubh", hindi: "शुभ", isAuspicious: true, desc: "Favorable yoga for general daily activities." },
+    { name: "Amrita", hindi: "अमृत", isAuspicious: true, desc: "Nectar yoga. Grants longevity, health, and success." },
+    { name: "Musala", hindi: "मुसल", isAuspicious: false, desc: "Inauspicious yoga. Avoid conflicts and litigation." },
+    { name: "Gada", hindi: "गदा", isAuspicious: false, desc: "Inauspicious yoga. Avoid starting physical construction." },
+    { name: "Matanga", hindi: "मातंग", isAuspicious: true, desc: "Grants royal favor, leadership, and public respect." },
+    { name: "Rakshasa", hindi: "राक्षस", isAuspicious: false, desc: "Inauspicious yoga. Avoid auspicious domestic rites." },
+    { name: "Chara", hindi: "चर", isAuspicious: true, desc: "Favorable for vehicle purchase, travel, and movement." },
+    { name: "Sthira", hindi: "स्थिर", isAuspicious: true, desc: "Favorable for permanent investments, house entry, and foundation." },
+    { name: "Vardhamana", hindi: "वर्धमान", isAuspicious: true, desc: "Brings growth, expansion, and continuous progress." }
+  ];
+
+  const WEEKDAY_START_NAKSHATRAS = [0, 4, 8, 12, 16, 19, 25];
+  const dayOfWeek = normalizedDate.getDay();
+  const startNaks = WEEKDAY_START_NAKSHATRAS[dayOfWeek];
+  const curNaksIdx = positions.naksIdx;
+  const anandadiIdx = (curNaksIdx - startNaks + 28) % 28;
+  const anandadiItem = ANANDADI_YOGAS[anandadiIdx] || ANANDADI_YOGAS[0];
+  const anandadiYoga = {
+    name: anandadiItem.name,
+    nameHindi: anandadiItem.hindi,
+    isAuspicious: anandadiItem.isAuspicious,
+    endTime: naksEndTime,
+    description: anandadiItem.desc
+  };
+
   const result: PanchangInfo = {
     date: date.toISOString().split("T")[0],
     hinduDate,
@@ -1867,6 +1913,7 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
     choghadiya,
     hora: horaList,
     bhadra: bhadraObj,
+    anandadiYoga,
     planets: positions.planets,
     varjyam: varjyamList,
     durmuhurat: durmuhuratList,

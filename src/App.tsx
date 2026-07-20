@@ -1357,7 +1357,7 @@ export default function App() {
                     </h3>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 select-none">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 select-none">
                     {/* Tithi */}
                     <div className="flex flex-col bg-amber-50/20 dark:bg-orange-950/5 border border-orange-100/30 dark:border-orange-950/15 rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
                       <span className="text-[9px] sm:text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">तिथि (Tithi)</span>
@@ -1404,13 +1404,24 @@ export default function App() {
                     </div>
 
                     {/* Karana 2 */}
-                    <div className="flex flex-col bg-amber-50/20 dark:bg-orange-950/5 border border-orange-100/30 dark:border-orange-950/15 rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px] col-span-2 sm:col-span-1">
+                    <div className="flex flex-col bg-amber-50/20 dark:bg-orange-950/5 border border-orange-100/30 dark:border-orange-950/15 rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
                       <span className="text-[9px] sm:text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">द्वितीय करण</span>
                       <span className="text-sm sm:text-base font-black font-serif text-orange-655 leading-tight my-1.5 break-words">
                         {panchangInfo.hinduDate.karana2 ? translateKarana(panchangInfo.hinduDate.karana2.hindiName) : ''}
                       </span>
                       <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-0.5 font-sans leading-none">
                         🕒 {panchangInfo.hinduDate.karana2?.endTime || ''}
+                      </span>
+                    </div>
+
+                    {/* Anandadi Yoga */}
+                    <div className="flex flex-col bg-amber-50/20 dark:bg-orange-950/5 border border-orange-100/30 dark:border-orange-950/15 rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">आनन्दादि योग</span>
+                      <span className="text-sm sm:text-base font-black font-serif text-orange-655 leading-tight my-1.5 break-words">
+                        {panchangInfo.anandadiYoga ? panchangInfo.anandadiYoga.nameHindi : 'आनन्द'}
+                      </span>
+                      <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-0.5 font-sans leading-none">
+                        🕒 {panchangInfo.anandadiYoga?.endTime || ''} तक
                       </span>
                     </div>
                   </div>
@@ -1464,19 +1475,19 @@ export default function App() {
                             <div className="flex justify-between items-center bg-rose-500/5 dark:bg-rose-950/10 border border-rose-500/10 rounded-xl p-2 px-3 text-xs leading-none">
                               <span className="font-serif font-bold text-slate-700 dark:text-slate-300">राहुकाल</span>
                               <span className="font-mono font-black text-rose-600 dark:text-rose-400">
-                                {panchangInfo.rahuKaal.start.replace(' AM','').replace(' PM','')}-{panchangInfo.rahuKaal.end.replace(' AM','').replace(' PM','')}
+                                {panchangInfo.rahuKaal.start} - {panchangInfo.rahuKaal.end}
                               </span>
                             </div>
                             <div className="flex justify-between items-center bg-blue-500/5 dark:bg-zinc-950/20 border border-blue-500/10 rounded-xl p-2 px-3 text-xs leading-none">
                               <span className="font-serif font-bold text-slate-700 dark:text-slate-300">यमगण्ड</span>
                               <span className="font-mono font-black text-blue-600 dark:text-blue-400">
-                                {panchangInfo.yamagandam?.start.replace(' AM','').replace(' PM','') || ''}-{panchangInfo.yamagandam?.end.replace(' AM','').replace(' PM','') || ''}
+                                {panchangInfo.yamagandam?.start || ''} - {panchangInfo.yamagandam?.end || ''}
                               </span>
                             </div>
                             <div className="flex justify-between items-center bg-amber-500/5 dark:bg-zinc-950/20 border border-amber-500/10 rounded-xl p-2 px-3 text-xs leading-none">
                               <span className="font-serif font-bold text-slate-700 dark:text-slate-300">गुलिक काल</span>
                               <span className="font-mono font-black text-amber-600 dark:text-amber-450">
-                                {panchangInfo.gulikKaal?.start.replace(' AM','').replace(' PM','') || ''}-{panchangInfo.gulikKaal?.end.replace(' AM','').replace(' PM','') || ''}
+                                {panchangInfo.gulikKaal?.start || ''} - {panchangInfo.gulikKaal?.end || ''}
                               </span>
                             </div>
                           </div>
