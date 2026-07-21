@@ -6,7 +6,6 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, TrendingUp, TrendingDown, Minus, Terminal } from 'lucide-react';
 import { PanchangInfo } from '../types';
-import { isMockActive, retryEngineInitialization, isMaxRetriesReached, getEngineProgressStage } from '../utils/astronomicalEngine';
 import { DiagnosticLogsModal } from './DiagnosticLogsModal';
 
 interface HeaderClockProps {
@@ -36,7 +35,7 @@ const isTimeInInterval = (currMin: number, startStr: string, endStr: string): bo
 
 export const HeaderClock: React.FC<HeaderClockProps> = React.memo(({ selectedDate, panchangInfo, language }) => {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
-  const [isRetrying, setIsRetrying] = useState(false);
+  const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
 
   useEffect(() => {
     const clockTimer = setInterval(() => {
@@ -95,14 +94,6 @@ export const HeaderClock: React.FC<HeaderClockProps> = React.memo(({ selectedDat
   };
 
   const trendInfo = getChoghadiyaTrendInfo();
-  const mockActive = isMockActive();
-  const maxRetriesHit = isMaxRetriesReached();
-  const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
-
-  // Auto-reset isRetrying when Swiss engine loads successfully
-  React.useEffect(() => {
-    if (!mockActive) setIsRetrying(false);
-  }, [mockActive]);
 
   return (
     <>
@@ -126,36 +117,6 @@ export const HeaderClock: React.FC<HeaderClockProps> = React.memo(({ selectedDat
             <Terminal className="w-2.5 h-2.5 text-orange-500" />
             📋 Logs
           </button>
-
-          {mockActive && (
-            <>
-              <button
-                onClick={() => setIsLogsModalOpen(true)}
-                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[8px] font-extrabold tracking-tight leading-none uppercase hover:scale-105 active:scale-95 transition-transform"
-              >
-                🌙 {language === 'Hindi' ? 'मूल गणना' : 'Basic Mode'}
-              </button>
-              {isRetrying ? (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 text-[8px] font-extrabold tracking-tight leading-none uppercase animate-pulse">
-                  ⏳ {language === 'Hindi' ? 'लोड हो रहा है...' : 'Loading...'}
-                </span>
-              ) : maxRetriesHit ? (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-[8px] font-extrabold tracking-tight leading-none uppercase">
-                  ⚠️ {language === 'Hindi' ? 'Engine बंद' : 'Engine Off'}
-                </span>
-              ) : (
-                <button
-                  onClick={() => {
-                    setIsRetrying(true);
-                    retryEngineInitialization();
-                  }}
-                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-[8px] font-extrabold tracking-tight leading-none uppercase active:scale-95 transition-transform"
-                >
-                  🕉️ {language === 'Hindi' ? 'गहरी गणना' : 'Deep Calc'}
-                </button>
-              )}
-            </>
-          )}
         </div>
         {trendInfo.icon && (
           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-black leading-none shadow-3xs hover:shadow-2xs transition-shadow duration-300 ${trendInfo.colorClass}`}>

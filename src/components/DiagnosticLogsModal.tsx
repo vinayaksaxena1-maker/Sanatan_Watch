@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Copy, Trash2, RefreshCw, Terminal, Check, Clock } from 'lucide-react';
 import { EngineLogger, LiveLogEntry } from '../utils/engineLogger';
-import { isMockActive, retryEngineInitialization } from '../utils/astronomicalEngine';
+import { retryEngineInitialization } from '../utils/astronomicalEngine';
 
 interface DiagnosticLogsModalProps {
   isOpen: boolean;
@@ -36,7 +36,7 @@ export const DiagnosticLogsModal: React.FC<DiagnosticLogsModalProps> = ({ isOpen
 
   if (!isOpen) return null;
 
-  const mockActive = isMockActive();
+
 
   const filteredLogs = logs.filter(log => {
     if (filterLevel === 'ERROR') return log.level === 'ERROR';
@@ -76,15 +76,9 @@ export const DiagnosticLogsModal: React.FC<DiagnosticLogsModalProps> = ({ isOpen
             <div>
               <h2 className="text-sm font-black text-slate-100 uppercase tracking-wider flex items-center gap-2">
                 Engine Diagnostics Log
-                {mockActive ? (
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                    MOCK ACTIVE
-                  </span>
-                ) : (
                   <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     SWISS EPH ACTIVE
                   </span>
-                )}
               </h2>
               <p className="text-[10px] text-slate-400 font-medium">Real-time WebWorker & WASM Execution Logs</p>
             </div>

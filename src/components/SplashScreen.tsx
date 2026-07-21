@@ -62,7 +62,7 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
     onCompleteRef.current = onComplete;
   }, [onComplete]);
 
-  // Manage progress and isLoaded state for custom splash screen (6 seconds duration)
+  // Manage progress and isLoaded state for custom splash screen (12 seconds duration)
   useEffect(() => {
     if (!customSplash) return;
     setProgress(0);
@@ -81,7 +81,7 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
         }
         return next;
       });
-    }, 60);
+    }, 120);
 
     return () => clearInterval(interval);
   }, [customSplash, isDemoMode, key]);
@@ -98,11 +98,11 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
     return () => clearInterval(pTimer);
   }, [progress]);
 
-  // Handle auto-timeout for non-demo mode (6 seconds duration)
+  // Handle auto-timeout for non-demo mode (12 seconds duration)
   useEffect(() => {
     if (isDemoMode) return;
-    if (customSplash) return; // Custom splash progress bar will handle auto-completion at 6s
-    const duration = 6000;
+    if (customSplash) return; // Custom splash progress bar will handle auto-completion at 12s
+    const duration = 12000;
     const timer = setTimeout(() => {
       console.log('[SPLASH_TRACE] 3. onComplete() called at:', new Date().toISOString());
       if (onCompleteRef.current) onCompleteRef.current();

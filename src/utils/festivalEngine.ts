@@ -6,11 +6,12 @@ import { PanchangInfo, Festival } from '../types';
  * Runs 100% offline.
  */
 export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
+  if (!panchang || !panchang.hinduDate || !panchang.hinduDate.tithi) return [];
   const festivals: Festival[] = [];
-  const tithiVal = panchang.hinduDate.tithi.value; // 1 to 30
-  const month = panchang.hinduDate.month; // e.g. "Ashadha"
-  const dateStr = panchang.date; // YYYY-MM-DD
-  const dateObj = new Date(panchang.date);
+  const tithiVal = panchang.hinduDate.tithi?.value || 1; // 1 to 30
+  const month = panchang.hinduDate.month || "Chaitra"; // e.g. "Ashadha"
+  const dateStr = panchang.date || new Date().toISOString().split("T")[0];
+  const dateObj = new Date(dateStr);
 
   // 1. Ekadashi Vrat (Tithi 11 and 26)
   if (tithiVal === 11) {

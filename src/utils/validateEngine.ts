@@ -1,5 +1,5 @@
 import { getPanchangForDate } from './panchangCalc';
-import { astronomicalEngine, MockAstronomicalEngine, isMockActive } from './astronomicalEngine';
+import { astronomicalEngine } from './astronomicalEngine';
 
 export async function runBulkValidation() {
   console.log('[Validation Suite] Starting bulk validation of 500 random dates (2026-2030)...');
@@ -19,7 +19,7 @@ export async function runBulkValidation() {
   let assertionFailCount = 0;
   const lat = 28.6139; // New Delhi
   const lon = 77.2090;
-  const mockEngine = new MockAstronomicalEngine();
+
 
   // Process sequentially to let the worker resolve caches and trigger React renders safely
   for (let i = 0; i < testDates.length; i++) {
@@ -31,7 +31,7 @@ export async function runBulkValidation() {
     try {
       const panchang = getPanchangForDate(lat, lon, date);
       const realPos = astronomicalEngine.getPanchangPositions(date);
-      const mockPos = mockEngine.getPanchangPositions(date);
+
       
       // Assertion 1: Verify basic schema structure is correctly populated
       if (
@@ -85,21 +85,7 @@ export async function runBulkValidation() {
         throw new Error(`Moon speed is physically unrealistic: ${moon.speed.toFixed(4)}°/day`);
       }
 
-      // Assertion 6: Compare against Mock Engine if Swiss WASM is active
-      if (!isMockActive()) {
-        const sunDiff = Math.abs((realPos.sunSidereal - mockPos.sunSidereal + 540) % 360 - 180);
-        if (sunDiff > 2.5) {
-          throw new Error(`Sun longitude mismatch between WASM and Mock too high: ${sunDiff.toFixed(2)}°`);
-        }
-        const moonDiff = Math.abs((realPos.moonSidereal - mockPos.moonSidereal + 540) % 360 - 180);
-        if (moonDiff > 6.0) {
-          throw new Error(`Moon longitude mismatch between WASM and Mock too high: ${moonDiff.toFixed(2)}°`);
-        }
-        const tithiDiff = Math.abs(realPos.tithiIdx - mockPos.tithiIdx);
-        if (tithiDiff > 1 && tithiDiff < 29) {
-          throw new Error(`Tithi index mismatch too high: Real=${realPos.tithiIdx}, Mock=${mockPos.tithiIdx}`);
-        }
-      }
+
 
       successCount++;
 

@@ -51,7 +51,8 @@ const getPanchangForDate = (lat: number, lon: number, date: Date) => {
   return info;
 };
 
-import { registerEngineListener, isReady, getEngineProgressStage, isTimeoutTriggered, enableLimitedMode, retryEngineInitialization, extendInitializationTimeout, isMaxRetriesReached, getRetryCount, getLastDiagnosticInfo } from './utils/astronomicalEngine';
+import { registerEngineListener, isReady, getEngineProgressStage, isTimeoutTriggered, retryEngineInitialization, extendInitializationTimeout, isMaxRetriesReached, getRetryCount, getLastDiagnosticInfo, isEngineCalculating, registerActiveExpectedKeys, astronomicalEngine } from './utils/astronomicalEngine';
+import { EngineLogger } from './utils/engineLogger';
 
 
 
@@ -212,8 +213,18 @@ export default function App() {
   // Splash Screen State
   const [isSplashActive, setIsSplashActive] = useState<boolean>(true);
   console.log('[SPLASH_TRACE] Render - isSplashActive state:', isSplashActive);
+  const [splashTimerFinished, setSplashTimerFinished] = useState<boolean>(false);
+  const [isAppLoading, setIsAppLoading] = useState<boolean>(false);
   const [splashAnimationCompleted, setSplashAnimationCompleted] = useState<boolean>(false);
   const [previewSplashStyle, setPreviewSplashStyle] = useState<SplashStyle | null>(null);
+
+  // Enforce 12-second premium splash screen duration
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSplashTimerFinished(true);
+    }, 12000);
+    return () => clearTimeout(timer);
+  }, []);
   
   // Permanent Notification State
   const [notificationEnabled, setNotificationEnabled] = useState<boolean>(false);
@@ -283,24 +294,39 @@ export default function App() {
     registerEngineListener(() => {
       clearPanchangCache();
       setUpdateTrigger({});
-      if (isReady()) {
-        setIsSplashActive(false);
+      if (isReady() && !isEngineCalculating()) {
+        setIsAppLoading(false);
       }
     });
   }, []);
 
-  // Safety timeout to ensure Splash Screen is dismissed even if engine is slow or fails
+  // Coordinate splash dismissal once BOTH 12s is over and engine has finished first calculations
   useEffect(() => {
-    if (isSplashActive) {
-      const timer = setTimeout(() => {
-        setIsSplashActive(false);
-      }, 3000);
-      return () => clearTimeout(timer);
+    if (splashTimerFinished && isReady() && !isEngineCalculating()) {
+      setIsSplashActive(false);
     }
-  }, [isSplashActive]);
+  }, [splashTimerFinished, updateTrigger]);
 
-  // Load from local Cache on Mount
+  // Date change hone par cache saaf karo — taaki Swiss result ke liye fresh calculation ho
   useEffect(() => {
+    setIsAppLoading(true);
+    clearPanchangCache();
+  }, [selectedDate, panchangSelectedDate, muhuratSelectedDate]);
+
+  // Helper to update city and persist to local storage
+  const handleSelectCity = (newCoords: Coords) => {
+    setIsAppLoading(true);
+    setCoords(newCoords);
+    try {
+      localStorage.setItem('dharmic_samay_coords', JSON.stringify(newCoords));
+    } catch (e) {
+      console.warn('Failed to cache coords', e);
+    }
+  };
+
+  // Load from local Cache on Mount & Auto-Detect GPS for first-time users
+  useEffect(() => {
+    let hasCache = false;
     try {
       const cachedCoords = localStorage.getItem('dharmic_samay_coords');
       const cachedSettings = localStorage.getItem('dharmic_samay_settings');
@@ -337,6 +363,56 @@ export default function App() {
         }, 100);
       });
     }
+  }, []);
+
+  // Active Keys Registration for Worker Concurrency & Race Condition Protection
+  useEffect(() => {
+    const qDate = getQueryDate(selectedDate);
+    const qPanchang = getQueryDate(panchangSelectedDate);
+    const qMuhurat = getQueryDate(muhuratSelectedDate);
+
+    const keyActiveSolar = `SOLAR_${coords.latitude.toFixed(4)}_${coords.longitude.toFixed(4)}_${qDate.toDateString()}`;
+    const keyActiveMoon = `MOON_${coords.latitude.toFixed(4)}_${coords.longitude.toFixed(4)}_${qDate.toDateString()}`;
+    const keyActivePos = `POS_${qDate.toDateString()}_${qDate.getHours()}_${qDate.getMinutes()}`;
+
+    const keyPanchangPos = `POS_${qPanchang.toDateString()}_${qPanchang.getHours()}_${qPanchang.getMinutes()}`;
+    const keyMuhuratPos = `POS_${qMuhurat.toDateString()}_${qMuhurat.getHours()}_${qMuhurat.getMinutes()}`;
+
+    registerActiveExpectedKeys([
+      keyActiveSolar,
+      keyActiveMoon,
+      keyActivePos,
+      keyPanchangPos,
+      keyMuhuratPos
+    ]);
+  }, [coords, selectedDate, panchangSelectedDate, muhuratSelectedDate, activeTab]);
+
+  // Automated Midnight Rollover Scheduler (Exactly once per calendar day change)
+  useEffect(() => {
+    const scheduleNextMidnight = (): ReturnType<typeof setTimeout> => {
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0); // Next 00:00:00 local time
+      const msToMidnight = midnight.getTime() - now.getTime();
+
+      return setTimeout(() => {
+        setIsAppLoading(true);
+        clearPanchangCache();
+        
+        const newToday = new Date();
+        setSelectedDate(newToday);
+        setPanchangSelectedDate(newToday);
+        setMuhuratSelectedDate(newToday);
+        
+        setUpdateTrigger({});
+        
+        // Reschedule for the next day
+        timerId = scheduleNextMidnight();
+      }, msToMidnight);
+    };
+
+    let timerId = scheduleNextMidnight();
+    return () => clearTimeout(timerId);
   }, []);
 
   // Sync to local Cache whenever states mutate
@@ -406,19 +482,26 @@ export default function App() {
   const panchangInfo = useMemo(() => {
     const qDate = getQueryDate(selectedDate);
     return getPanchangForDate(coords.latitude, coords.longitude, qDate);
-  }, [coords.latitude, coords.longitude, selectedDate, currentMinuteTime, updateTrigger]);
+  }, [coords.latitude, coords.longitude, selectedDate, updateTrigger]);
 
   const muhuratPanchangInfo = useMemo(() => {
     const qDate = getQueryDate(muhuratSelectedDate);
     return getPanchangForDate(coords.latitude, coords.longitude, qDate);
-  }, [coords.latitude, coords.longitude, muhuratSelectedDate, currentMinuteTime, updateTrigger]);
+  }, [coords.latitude, coords.longitude, muhuratSelectedDate, updateTrigger]);
 
   const panchangScreenInfo = useMemo(() => {
     const qDate = getQueryDate(panchangSelectedDate);
     return getPanchangForDate(coords.latitude, coords.longitude, qDate);
-  }, [coords.latitude, coords.longitude, panchangSelectedDate, currentMinuteTime, updateTrigger]);
+  }, [coords.latitude, coords.longitude, panchangSelectedDate, updateTrigger]);
 
   const activeMuhurats = useMemo(() => getMuhuratsForPanchang(panchangInfo), [panchangInfo]);
+
+  const isPanchangDataReady = Boolean(
+    panchangInfo &&
+    panchangInfo.planets &&
+    panchangInfo.planets.length === 9 &&
+    !panchangInfo.planets.every(p => p.sign === 'Aries')
+  );
 
   // Synchronize Widget Data on Android
   useEffect(() => {
@@ -1010,15 +1093,6 @@ export default function App() {
                     >
                       Restart App
                     </button>
-                    <button
-                      onClick={() => {
-                        enableLimitedMode();
-                        setIsSplashActive(false);
-                      }}
-                      className="w-full py-2.5 px-3 rounded-xl bg-rose-950/50 hover:bg-rose-900/70 border border-rose-500/40 text-rose-300 text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-98"
-                    >
-                      Start with Limited Features (Mock Data)
-                    </button>
                   </div>
                 </>
               ) : (
@@ -1044,21 +1118,57 @@ export default function App() {
                     >
                       Retry Initialization ({getRetryCount()}/3)
                     </button>
-                    <button
-                      onClick={() => {
-                        enableLimitedMode();
-                        setIsSplashActive(false);
-                      }}
-                      className="w-full py-2.5 px-3 rounded-xl bg-rose-950/50 hover:bg-rose-900/70 border border-rose-500/40 text-rose-300 text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-98"
-                    >
-                      Start with Limited Features (Mock Data)
-                    </button>
                   </div>
                 </>
               )}
             </div>
           </div>
         )}
+      </div>
+    );
+  }
+
+  // If calculations are pending after splash screen or Swiss data is not ready, show spiritual loading state with live diagnostics
+  if (!isSplashActive && (!isReady() || !isPanchangDataReady)) {
+    const logs = EngineLogger.getLiveLogs().slice(-6);
+    const pending = Array.from((astronomicalEngine as any).pendingQueries || []);
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-zinc-950 text-white p-4 select-none animate-fade-in overflow-y-auto">
+        <div className="text-4xl text-amber-500 font-serif animate-pulse mb-3">🕉️</div>
+        <h2 className="text-lg font-serif font-black text-amber-500 tracking-wide text-center mb-1">
+          सटीक पंचांग तैयार किया जा रहा है...
+        </h2>
+        <p className="text-xs text-slate-400 font-medium tracking-tight text-center mb-4">
+          कृपया कुछ क्षण प्रतीक्षा करें...
+        </p>
+
+        {/* ON-SCREEN DIAGNOSTIC LOG BOX */}
+        <div className="w-full max-w-md bg-black/90 border border-amber-500/50 rounded-lg p-3 text-left font-mono text-[11px] text-amber-200 shadow-2xl space-y-1.5 mt-2">
+          <div className="font-bold text-amber-400 border-b border-amber-500/40 pb-1 flex justify-between items-center">
+            <span>🔍 DIAGNOSTIC LOGS</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-sans font-bold animate-pulse">LIVE</span>
+          </div>
+          <div><strong className="text-slate-400">isSplashActive:</strong> <span className={isSplashActive ? 'text-red-400' : 'text-green-400'}>{String(isSplashActive)}</span></div>
+          <div><strong className="text-slate-400">isReady():</strong> <span className={isReady() ? 'text-green-400' : 'text-red-400'}>{String(isReady())}</span></div>
+          <div><strong className="text-slate-400">isPanchangDataReady:</strong> <span className={isPanchangDataReady ? 'text-green-400' : 'text-red-400'}>{String(isPanchangDataReady)}</span></div>
+          <div><strong className="text-slate-400">panchangInfo:</strong> {panchangInfo ? 'Object Loaded' : 'NULL'}</div>
+          <div><strong className="text-slate-400">planetsCount:</strong> {panchangInfo?.planets?.length ?? 0}</div>
+          <div><strong className="text-slate-400">firstPlanetSign:</strong> {panchangInfo?.planets?.[0]?.sign ?? 'NONE'}</div>
+          <div><strong className="text-slate-400">pendingQueries ({pending.length}):</strong> {pending.length > 0 ? (pending as string[]).join(', ') : 'None'}</div>
+          
+          <div className="pt-2 border-t border-amber-500/30 text-[10px] text-slate-300 space-y-1">
+            <div className="font-semibold text-amber-300">Latest Engine Log Traces:</div>
+            {logs.length === 0 ? (
+              <div className="text-slate-500 italic">No logs recorded yet</div>
+            ) : (
+              logs.map((l: any, i: number) => (
+                <div key={i} className="truncate text-slate-300">
+                  <span className="text-amber-400 font-semibold">[{l.level}]</span> <span className="text-slate-400">{l.timestamp}</span> {l.message}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     );
   }
@@ -1279,8 +1389,8 @@ export default function App() {
                     )}
 
                     {/* Moon Sign */}
-                    {panchangInfo.planets?.find(p => p.name === 'Moon') && (() => {
-                      const moonPlanet = panchangInfo.planets.find(p => p.name === 'Moon')!;
+                    {panchangInfo.planets?.find(p => p && p.name === 'Moon') && (() => {
+                      const moonPlanet = panchangInfo.planets.find(p => p && p.name === 'Moon')!;
                       const remTime = getPlanetRemainingTime(moonPlanet);
                       return (
                         <div className="flex justify-between items-center bg-orange-50/30 dark:bg-orange-950/5 border border-orange-100/30 dark:border-orange-950/10 rounded-2xl p-2 px-3 text-left">
@@ -1300,8 +1410,8 @@ export default function App() {
                     })()}
 
                     {/* Sun Sign */}
-                    {panchangInfo.planets?.find(p => p.name === 'Sun') && (() => {
-                      const sunPlanet = panchangInfo.planets.find(p => p.name === 'Sun')!;
+                    {panchangInfo.planets?.find(p => p && p.name === 'Sun') && (() => {
+                      const sunPlanet = panchangInfo.planets.find(p => p && p.name === 'Sun')!;
                       const remTime = getPlanetRemainingTime(sunPlanet);
                       return (
                         <div className="flex justify-between items-center bg-orange-50/30 dark:bg-orange-950/5 border border-orange-100/30 dark:border-orange-950/10 rounded-2xl p-2 px-3 text-left">
@@ -1979,7 +2089,7 @@ export default function App() {
         isOpen={isCityModalOpen}
         onClose={() => setIsCityModalOpen(false)}
         currentCoords={coords}
-        onSelectCity={setCoords}
+        onSelectCity={handleSelectCity}
         gpsActive={gpsActive}
         setGpsActive={setGpsActive}
         theme={settings.theme}

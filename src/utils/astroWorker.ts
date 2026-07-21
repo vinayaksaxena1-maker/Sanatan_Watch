@@ -3,6 +3,7 @@ import WasmSwissEph from '../../node_modules/swisseph-wasm/wasm/swisseph.js';
 import swissephWasmUrl from '../../node_modules/swisseph-wasm/wasm/swisseph.wasm?url';
 
 let swe: any = null;
+self.postMessage({ type: 'PROGRESS', stage: 'WORKER_PARSED', message: 'astroWorker.ts script loaded and parsed successfully. Imports resolved.' });
 let isReady = false;
 const pendingWorkerQueue: any[] = [];
 
@@ -104,12 +105,33 @@ function getRiseTrans(swe: any, jd: number, planet: number, lon: number, lat: nu
   return results[0];
 }
 
+function safeCalcUt(sweInst: any, jd: number, body: number, flags: number = 2 | 4 | 256): number[] {
+  try {
+    let res = sweInst.calc_ut(jd, body, flags);
+    if (res && typeof res[0] === 'number' && !isNaN(res[0])) {
+      return res;
+    }
+    res = sweInst.calc_ut(jd, body, (flags & ~2) | 4);
+    if (res && typeof res[0] === 'number' && !isNaN(res[0])) {
+      return res;
+    }
+  } catch (e: any) {
+    try {
+      const res = sweInst.calc_ut(jd, body, 4 | 256);
+      if (res && typeof res[0] === 'number' && !isNaN(res[0])) {
+        return res;
+      }
+    } catch (e2) {}
+    throw new Error(`Swiss Ephemeris calculation failed for body ${body}: ${e?.message || e}`);
+  }
+  throw new Error(`Swiss Ephemeris returned invalid coordinates for body ${body}`);
+}
+
 function findNewMoonJd(swe: any, guessJd: number): number {
   let jd = guessJd;
-  const ephFlag = 2; // SEFLG_SWIEPH
   for (let iter = 0; iter < 5; iter++) {
-    const sun = swe.calc_ut(jd, 0, ephFlag | 256);
-    const moon = swe.calc_ut(jd, 1, ephFlag | 256);
+    const sun = safeCalcUt(swe, jd, 0, 2 | 4 | 256);
+    const moon = safeCalcUt(swe, jd, 1, 2 | 4 | 256);
     const val = (moon[0] - sun[0] + 360) % 360;
     const currentSpeed = moon[3] - sun[3];
     
@@ -141,8 +163,8 @@ function findBoundaryCrossing(
 
   // Maximum 10 iterations of Newton's method for high precision
   for (let iter = 0; iter < 10; iter++) {
-    const sun = swe.calc_ut(jd, 0, ephFlag | 256); // 256 = SEFLG_SPEED
-    const moon = swe.calc_ut(jd, 1, ephFlag | 256);
+    const sun = safeCalcUt(swe, jd, 0, 2 | 4 | 256);
+    const moon = safeCalcUt(swe, jd, 1, 2 | 4 | 256);
     const ayanamsa = swe.get_ayanamsa(jd);
 
     let val = 0;
@@ -176,15 +198,19 @@ function findBoundaryCrossing(
 // ---------------------------------------------------------------------------
 // Worker initialization
 // ---------------------------------------------------------------------------
-async function initWorker(seplBuf: ArrayBuffer, semoBuf: ArrayBuffer) {
+async function initWorker(seplBuf: ArrayBuffer, semoBuf: ArrayBuffer, appOrigin?: string) {
   try {
     const tWasmStart = performance.now();
-    self.postMessage({ type: 'PROGRESS', stage: 'FETCHING_WASM', message: `Fetching ${swissephWasmUrl}` });
+
+    const cleanPath = swissephWasmUrl.startsWith('/') ? swissephWasmUrl : '/' + swissephWasmUrl;
+    const targetWasmUrl = appOrigin ? `${appOrigin}${cleanPath}` : cleanPath;
+
+    self.postMessage({ type: 'PROGRESS', stage: 'FETCHING_WASM', message: `Fetching ${targetWasmUrl}` });
 
     // 1. Explicitly fetch WASM binary into ArrayBuffer in memory
-    const wasmResponse = await fetch(swissephWasmUrl);
+    const wasmResponse = await fetch(targetWasmUrl);
     if (!wasmResponse.ok) {
-      throw new Error(`Failed to fetch WASM binary from ${swissephWasmUrl}: ${wasmResponse.status} ${wasmResponse.statusText}`);
+      throw new Error(`Failed to fetch WASM binary from ${targetWasmUrl}: ${wasmResponse.status} ${wasmResponse.statusText}`);
     }
     const wasmBinary = await wasmResponse.arrayBuffer();
     self.postMessage({ type: 'PROGRESS', stage: 'WASM_FETCHED', message: `WASM binary downloaded (${(wasmBinary.byteLength / 1024).toFixed(1)} KB)` });
@@ -200,7 +226,7 @@ async function initWorker(seplBuf: ArrayBuffer, semoBuf: ArrayBuffer) {
         const config: any = {
           wasmBinary,
           getPreloadedPackage: () => new ArrayBuffer(0),
-          locateFile: (path: string) => path.endsWith('.wasm') ? swissephWasmUrl : path,
+          locateFile: (path: string) => path.endsWith('.wasm') ? targetWasmUrl : path,
           print: (text: string) => self.postMessage({ type: 'PROGRESS', stage: 'WASM_PRINT', message: text }),
           printErr: (text: string) => self.postMessage({ type: 'PROGRESS', stage: 'WASM_PRINT_ERR', message: text }),
           onAbort: (what: any) => {
@@ -228,7 +254,6 @@ async function initWorker(seplBuf: ArrayBuffer, semoBuf: ArrayBuffer) {
     if (!swe.SweModule.HEAP32) {
       swe.SweModule.HEAP32 = new Int32Array(swe.SweModule.HEAPF64.buffer);
     }
-    swe.set_ephe_path('/sweph');
 
     const tWasmEnd = performance.now();
     const wasmTime = tWasmEnd - tWasmStart;
@@ -247,6 +272,7 @@ async function initWorker(seplBuf: ArrayBuffer, semoBuf: ArrayBuffer) {
 
     swe.SweModule.FS.writeFile('/sweph/sepl_18.se1', new Uint8Array(seplBuf));
     swe.SweModule.FS.writeFile('/sweph/semo_18.se1', new Uint8Array(semoBuf));
+    swe.set_ephe_path('/sweph');
     const tEphEnd = performance.now();
     const ephemerisTime = tEphEnd - tEphStart;
 
@@ -347,22 +373,23 @@ async function processWorkerQuery(queryData: any) {
       return;
     }
 
+
     if (type === 'CALCULATE_COORDINATES') {
       // 0 = SE_SUN, 1 = SE_MOON, 2 = SEFLG_SWIEPH, 256 = SEFLG_SPEED
-      const sunPos = swe.calc_ut(jdQuery, 0, 2 | 256);
-      const moonPos = swe.calc_ut(jdQuery, 1, 2 | 256);
+      const sunPos = safeCalcUt(swe, jdQuery, 0, 2 | 256);
+      const moonPos = safeCalcUt(swe, jdQuery, 1, 2 | 256);
       const ayanamsa = swe.get_ayanamsa(jdQuery);
 
-      const sunLon = sunPos[0];
-      const moonLon = moonPos[0];
+      const sunLon = (sunPos && typeof sunPos[0] === 'number' && !isNaN(sunPos[0])) ? sunPos[0] : 0;
+      const moonLon = (moonPos && typeof moonPos[0] === 'number' && !isNaN(moonPos[0])) ? moonPos[0] : 0;
 
-      const sunSidereal = (sunLon - ayanamsa + 360) % 360;
-      const moonSidereal = (moonLon - ayanamsa + 360) % 360;
+      const sunSidereal = ((sunLon - ayanamsa) % 360 + 360) % 360;
+      const moonSidereal = ((moonLon - ayanamsa) % 360 + 360) % 360;
 
       // 1. Tithi Index & Crossover Solver
       const diffNorm = (moonSidereal - sunSidereal + 360) % 360;
       let tithiIdx = Math.floor(diffNorm / 12);
-      if (tithiIdx < 0) tithiIdx += 30;
+      if (isNaN(tithiIdx) || tithiIdx < 0) tithiIdx = (tithiIdx + 30) % 30 || 0;
       if (tithiIdx >= 30) tithiIdx = 29;
       const tithiPercent = (diffNorm % 12) / 12;
       const nextTithiTarget = (Math.floor(diffNorm / 12) + 1) * 12;
@@ -421,15 +448,15 @@ async function processWorkerQuery(queryData: any) {
       const prevNewMoonJd = findNewMoonJd(swe, jdQuery - approxDaysAgo);
       const nextNewMoonJd = findNewMoonJd(swe, prevNewMoonJd + 29.530589);
 
-      const sunPosPrev = swe.calc_ut(prevNewMoonJd, 0, 2);
+      const sunPosPrev = safeCalcUt(swe, prevNewMoonJd, 0, 2 | 4 | 256);
       const ayanamsaPrev = swe.get_ayanamsa(prevNewMoonJd);
-      const sunLonPrev = (sunPosPrev[0] - ayanamsaPrev + 360) % 360;
-      const rashiPrev = Math.floor(sunLonPrev / 30);
+      const sunLonPrev = ((sunPosPrev[0] - ayanamsaPrev) % 360 + 360) % 360;
+      const rashiPrev = Math.max(0, Math.min(11, Math.floor(sunLonPrev / 30)));
 
-      const sunPosNext = swe.calc_ut(nextNewMoonJd, 0, 2);
+      const sunPosNext = safeCalcUt(swe, nextNewMoonJd, 0, 2 | 4 | 256);
       const ayanamsaNext = swe.get_ayanamsa(nextNewMoonJd);
-      const sunLonNext = (sunPosNext[0] - ayanamsaNext + 360) % 360;
-      const rashiNext = Math.floor(sunLonNext / 30);
+      const sunLonNext = ((sunPosNext[0] - ayanamsaNext) % 360 + 360) % 360;
+      const rashiNext = Math.max(0, Math.min(11, Math.floor(sunLonNext / 30)));
 
       const isAdhik = (rashiPrev === rashiNext);
       const monthIdx = (rashiPrev + 1) % 12;
@@ -437,13 +464,13 @@ async function processWorkerQuery(queryData: any) {
       // 6. Calculate Navagraha Positions
       const planetsResult: any[] = [];
       for (const g of Grahas) {
-        const pos = swe.calc_ut(jdQuery, g.id, 2 | 256);
-        const lon = pos[0];
-        const speed = pos[3];
-        const siderealLon = (lon - ayanamsa + 360) % 360;
+        const pos = safeCalcUt(swe, jdQuery, g.id, 2 | 256);
+        const lon = (pos && typeof pos[0] === 'number' && !isNaN(pos[0])) ? pos[0] : 0;
+        const speed = (pos && typeof pos[3] === 'number' && !isNaN(pos[3])) ? pos[3] : 0;
+        const siderealLon = ((lon - ayanamsa) % 360 + 360) % 360;
         
-        const signIdx = Math.floor(siderealLon / 30);
-        const sign = zodiacSigns[signIdx];
+        const signIdx = Math.max(0, Math.min(11, Math.floor(siderealLon / 30)));
+        const sign = zodiacSigns[signIdx] || zodiacSigns[0];
         
         planetsResult.push({
           name: g.name,
@@ -457,16 +484,16 @@ async function processWorkerQuery(queryData: any) {
       }
 
       // Add Ketu (Ketu is always opposite to Rahu, meaning Rahu + 180 degrees)
-      const rahu = planetsResult.find(p => p.name === 'Rahu')!;
-      const ketuLon = (rahu.longitude + 180) % 360;
-      const ketuSignIdx = Math.floor(ketuLon / 30);
-      const ketuSign = zodiacSigns[ketuSignIdx];
+      const rahu = planetsResult.find(p => p && p.name === 'Rahu') || planetsResult[0];
+      const ketuLon = ((rahu.longitude + 180) % 360 + 360) % 360;
+      const ketuSignIdx = Math.max(0, Math.min(11, Math.floor(ketuLon / 30)));
+      const ketuSign = zodiacSigns[ketuSignIdx] || zodiacSigns[0];
       
       planetsResult.push({
         name: 'Ketu',
         hindiName: 'केतु',
         longitude: ketuLon,
-        speed: rahu.speed,
+        speed: rahu.speed || 0,
         isRetrograde: true,
         sign: ketuSign.eng,
         signHindi: ketuSign.hin
@@ -502,7 +529,9 @@ async function processWorkerQuery(queryData: any) {
       return;
     }
   } catch (err: any) {
-    self.postMessage({ type: 'ERROR', message: err.message || String(err) });
+    console.error('ORIGINAL WORKER EXCEPTION', err);
+    console.error(err?.stack);
+    self.postMessage({ type: 'ERROR', key, message: err.message || String(err) });
   }
 }
 
@@ -513,6 +542,7 @@ self.onmessage = async (event: MessageEvent) => {
   const { type, key, seplBuf, semoBuf, appOrigin, error } = event.data;
 
   if (type === 'INIT') {
+    self.postMessage({ type: 'PROGRESS', stage: 'INIT_RECEIVED', message: 'astroWorker.ts received INIT event from main thread.' });
     await initWorker(seplBuf, semoBuf, appOrigin);
     return;
   }

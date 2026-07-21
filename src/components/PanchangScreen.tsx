@@ -11,6 +11,7 @@ import {
   Landmark,
   Share2,
   Clock,
+  Calendar,
   CalendarRange,
   ChevronRight,
   TrendingUp,
@@ -493,11 +494,16 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
   const [showChoghadiyaModal, setShowChoghadiyaModal] = useState(false);
   const [showAllNakshatrasModal, setShowAllNakshatrasModal] = useState(false);
   const [nakshatraModalSearchQuery, setNakshatraModalSearchQuery] = useState('');
+
+  if (!panchang || !panchang.hinduDate || !panchang.hinduDate.tithi || !panchang.hinduDate.nakshatra) {
+    return null;
+  }
+
   const hDate = panchang.hinduDate;
 
   const getPlanetCombustionState = (planetName: string) => {
-    if (!panchang.combustion) return undefined;
-    const combustInfo = panchang.combustion.find(c => c.name.toLowerCase() === planetName.toLowerCase());
+    if (!panchang.combustion || !planetName) return undefined;
+    const combustInfo = panchang.combustion.find(c => c && c.name && c.name.toLowerCase() === planetName.toLowerCase());
     if (combustInfo) {
       return combustInfo.isCombust ? (language === 'Hindi' ? "अस्त (Combust)" : "Combust") : (language === 'Hindi' ? "उदित (Rising)" : "Rising");
     }
@@ -600,53 +606,53 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
     const mainPanchangElements = [
     {
       title: getTranslation(language, 'tithi'),
-      fullName: language === 'Hindi' ? hDate.tithi.hindiName : hDate.tithi.name,
-      engName: hDate.tithi.name,
-      endTime: hDate.tithi.endTime,
-      lord: language === 'Hindi' ? translateLordHindi(hDate.tithi.lord) : hDate.tithi.lord,
-      deity: language === 'Hindi' ? translateDeityHindi(hDate.tithi.deity) : hDate.tithi.deity,
+      fullName: language === 'Hindi' ? (hDate?.tithi?.hindiName || '') : (hDate?.tithi?.name || ''),
+      engName: hDate?.tithi?.name || '',
+      endTime: hDate?.tithi?.endTime || '',
+      lord: language === 'Hindi' ? translateLordHindi(hDate?.tithi?.lord || '') : (hDate?.tithi?.lord || ''),
+      deity: language === 'Hindi' ? translateDeityHindi(hDate?.tithi?.deity || '') : (hDate?.tithi?.deity || ''),
       description: language === 'Hindi' ? 'चंद्रमा की 12 डिग्री की कोणीय दूरी को दर्शाने वाला चंद्र-सौर दिन।' : 'Lunar day representing a 12-degree angular displacement of the Moon.',
       badgeColor: 'bg-orange-100 border-orange-255 text-orange-850'
     },
     {
       title: getTranslation(language, 'nakshatra'),
       fullName: language === 'Hindi' 
-        ? `${hDate.nakshatra.hindiName}${hDate.nakshatra.pada ? ` (चरण ${hDate.nakshatra.pada})` : ''}`
-        : `${hDate.nakshatra.name}${hDate.nakshatra.pada ? ` (Pada ${hDate.nakshatra.pada})` : ''}`,
-      engName: language === 'Hindi' ? `स्वामी: ${translateLordHindi(hDate.nakshatra.lord)}` : `Lord: ${hDate.nakshatra.lord}`,
-      endTime: hDate.nakshatra.endTime,
-      lord: language === 'Hindi' ? translateLordHindi(hDate.nakshatra.lord) : hDate.nakshatra.lord,
-      deity: language === 'Hindi' ? translateDeityHindi(hDate.nakshatra.deity) : hDate.nakshatra.deity,
+        ? `${hDate?.nakshatra?.hindiName || ''}${hDate?.nakshatra?.pada ? ` (चरण ${hDate.nakshatra.pada})` : ''}`
+        : `${hDate?.nakshatra?.name || ''}${hDate?.nakshatra?.pada ? ` (Pada ${hDate.nakshatra.pada})` : ''}`,
+      engName: language === 'Hindi' ? `स्वामी: ${translateLordHindi(hDate?.nakshatra?.lord || '')}` : `Lord: ${hDate?.nakshatra?.lord || ''}`,
+      endTime: hDate?.nakshatra?.endTime || '',
+      lord: language === 'Hindi' ? translateLordHindi(hDate?.nakshatra?.lord || '') : (hDate?.nakshatra?.lord || ''),
+      deity: language === 'Hindi' ? translateDeityHindi(hDate?.nakshatra?.deity || '') : (hDate?.nakshatra?.deity || ''),
       description: language === 'Hindi'
-        ? `चंद्र राशि का भाग (${translateSymbolHindi(hDate.nakshatra.symbol)})। प्रकृति ${hDate.nakshatra.nature === 'Mridu' ? 'मृदु' : hDate.nakshatra.nature === 'Teekshna' ? 'तीक्ष्ण' : hDate.nakshatra.nature} है।` + 
-          (hDate.nakshatra.gana ? ` गण: ${translateGanaHindi(hDate.nakshatra.gana)} | योनि: ${translateYoniHindi(hDate.nakshatra.yoni)} | नाड़ी: ${translateNadiHindi(hDate.nakshatra.nadi)}` : '')
-        : `Segment of Moon's path (${hDate.nakshatra.symbol}). Nature is ${hDate.nakshatra.nature}.` + 
-          (hDate.nakshatra.gana ? ` Gana: ${hDate.nakshatra.gana} | Yoni: ${hDate.nakshatra.yoni} | Nadi: ${hDate.nakshatra.nadi}` : ''),
+        ? `चंद्र राशि का भाग (${translateSymbolHindi(hDate?.nakshatra?.symbol || '')})। प्रकृति ${hDate?.nakshatra?.nature === 'Mridu' ? 'मृदु' : hDate?.nakshatra?.nature === 'Teekshna' ? 'तीक्ष्ण' : (hDate?.nakshatra?.nature || '')} है।` + 
+          (hDate?.nakshatra?.gana ? ` गण: ${translateGanaHindi(hDate.nakshatra.gana)} | योनि: ${translateYoniHindi(hDate.nakshatra.yoni)} | नाड़ी: ${translateNadiHindi(hDate.nakshatra.nadi)}` : '')
+        : `Segment of Moon's path (${hDate?.nakshatra?.symbol || ''}). Nature is ${hDate?.nakshatra?.nature || ''}.` + 
+          (hDate?.nakshatra?.gana ? ` Gana: ${hDate.nakshatra.gana} | Yoni: ${hDate.nakshatra.yoni} | Nadi: ${hDate.nakshatra.nadi}` : ''),
       badgeColor: 'bg-amber-100 border-amber-200 text-amber-800'
     },
     {
       title: getTranslation(language, 'yoga'),
-      fullName: language === 'Hindi' ? translateYogaNameHindi(hDate.yoga.name) : hDate.yoga.name,
-      engName: hDate.yoga.name,
-      endTime: hDate.yoga.endTime,
-      lord: hDate.yoga.type === 'Shubh' ? (language === 'Hindi' ? 'शुभ' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ' : 'Inauspicious'),
-      deity: language === 'Hindi' ? translateYogaMeaningHindi(hDate.yoga.name) : hDate.yoga.meaning,
+      fullName: language === 'Hindi' ? translateYogaNameHindi(hDate?.yoga?.name || '') : (hDate?.yoga?.name || ''),
+      engName: hDate?.yoga?.name || '',
+      endTime: hDate?.yoga?.endTime || '',
+      lord: hDate?.yoga?.type === 'Shubh' ? (language === 'Hindi' ? 'शुभ' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ' : 'Inauspicious'),
+      deity: language === 'Hindi' ? translateYogaMeaningHindi(hDate?.yoga?.name || '') : (hDate?.yoga?.meaning || ''),
       description: language === 'Hindi'
-        ? translateYogaDescriptionHindi(hDate.yoga.name)
-        : (hDate.yoga.meaning || 'Combined longitude of Sun and Moon divided into 27 equal parts.'),
-      badgeColor: hDate.yoga.type === 'Shubh' 
+        ? translateYogaDescriptionHindi(hDate?.yoga?.name || '')
+        : (hDate?.yoga?.meaning || 'Combined longitude of Sun and Moon divided into 27 equal parts.'),
+      badgeColor: hDate?.yoga?.type === 'Shubh' 
         ? 'bg-emerald-100 border-emerald-255 text-emerald-850 dark:bg-emerald-950/30 dark:text-emerald-400' 
         : 'bg-rose-100 border-rose-255 text-rose-850 dark:bg-rose-950/30 dark:text-rose-455'
     },
     {
       title: getTranslation(language, 'karana'),
-      fullName: language === 'Hindi' ? translateKaranaHindi(hDate.karana.name) : hDate.karana.name,
-      engName: hDate.karana.name,
-      endTime: hDate.karana.endTime,
+      fullName: language === 'Hindi' ? translateKaranaHindi(hDate?.karana?.name || '') : (hDate?.karana?.name || ''),
+      engName: hDate?.karana?.name || '',
+      endTime: hDate?.karana?.endTime || '',
       lord: language === 'Hindi' 
-        ? (hDate.karana.natureHindi || (hDate.karana.type === 'Fixed' ? 'स्थिर' : 'चर'))
-        : (hDate.karana.nature || hDate.karana.type),
-      deity: hDate.karana.classification === 'Shubh' ? (language === 'Hindi' ? 'शुभ' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ' : 'Inauspicious'),
+        ? (hDate?.karana?.natureHindi || (hDate?.karana?.type === 'Fixed' ? 'स्थिर' : 'चर'))
+        : (hDate?.karana?.nature || hDate?.karana?.type || ''),
+      deity: hDate?.karana?.classification === 'Shubh' ? (language === 'Hindi' ? 'शुभ' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ' : 'Inauspicious'),
       description: language === 'Hindi'
         ? (hDate.karana.description || 'एक तिथि का आधा हिस्सा, चंद्र चक्र में एक महत्वपूर्ण घटना का संकेत देता है।')
         : 'Half of a Tithi, indicating a critical phase in the lunar cycle.',
@@ -711,26 +717,43 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
             </p>
           </div>
 
-          {/* Premium Date Input Picker for Isolated Panchang Calculation */}
-          <div className="flex items-center gap-2 bg-slate-500/5 dark:bg-zinc-950/40 border border-slate-200/55 dark:border-zinc-850 rounded-xl p-2 shrink-0 self-start sm:self-center">
+          {/* Premium Date Input Picker for Isolated Panchang Calculation (DD-MM-YYYY Format) */}
+          <div className="relative flex items-center gap-2 bg-slate-500/5 dark:bg-zinc-950/40 border border-slate-200/55 dark:border-zinc-850 rounded-xl p-2 px-3 shrink-0 self-start sm:self-center cursor-pointer">
             <span className="text-[10px] font-bold text-slate-450 dark:text-slate-400 uppercase font-mono tracking-wider">
               {language === 'Hindi' ? 'तिथि चुनें:' : 'Select Date:'}
             </span>
+            <div className="flex items-center gap-1.5 text-xs text-slate-800 dark:text-amber-100 font-mono font-bold">
+              <Calendar className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+              <span>{(() => {
+                const validDate = (selectedDate && !isNaN(selectedDate.getTime())) ? selectedDate : new Date();
+                const day = String(validDate.getDate()).padStart(2, '0');
+                const month = String(validDate.getMonth() + 1).padStart(2, '0');
+                const year = validDate.getFullYear();
+                return `${day}-${month}-${year}`;
+              })()}</span>
+            </div>
             <input
               type="date"
               value={(() => {
-                const year = selectedDate.getFullYear();
-                const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-                const day = String(selectedDate.getDate()).padStart(2, '0');
+                const validDate = (selectedDate && !isNaN(selectedDate.getTime())) ? selectedDate : new Date();
+                const year = validDate.getFullYear();
+                const month = String(validDate.getMonth() + 1).padStart(2, '0');
+                const day = String(validDate.getDate()).padStart(2, '0');
                 return `${year}-${month}-${day}`;
               })()}
               onChange={(e) => {
                 if (e.target.value) {
                   const [y, m, d] = e.target.value.split('-').map(Number);
-                  onDateChange(new Date(y, m - 1, d));
+                  if (!isNaN(y) && !isNaN(m) && !isNaN(d) && y > 1000 && m >= 1 && m <= 12 && d >= 1 && d <= 31) {
+                    const parsed = new Date(y, m - 1, d);
+                    if (!isNaN(parsed.getTime())) {
+                      onDateChange(parsed);
+                    }
+                  }
                 }
               }}
-              className="text-xs text-slate-800 dark:text-slate-100 bg-transparent outline-none font-mono font-bold cursor-pointer"
+              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+              title={language === 'Hindi' ? 'तिथि बदलें' : 'Change Date'}
             />
           </div>
         </div>
@@ -777,8 +800,8 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                 const k1 = hDate.karana1 || hDate.karana;
                 const k2 = hDate.karana2;
 
-                const k1Info = getKaranaLordAndDeity(k1.name, language);
-                const k2Info = k2 ? getKaranaLordAndDeity(k2.name, language) : null;
+                const k1Info = k1 ? getKaranaLordAndDeity(k1.name || '', language) : null;
+                const k2Info = k2 ? getKaranaLordAndDeity(k2.name || '', language) : null;
 
                 return (
                   <div 
@@ -794,14 +817,15 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                       </div>
                       
                       {/* Prathama Karana */}
-                      <div className="mt-3.5 pb-3 border-b border-slate-100/10 dark:border-zinc-800/30">
-                        <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono">
-                          {language === 'Hindi' ? "प्रथम करण (1st)" : "First Karana (1st)"}
-                        </span>
-                        <h3 className="text-sm sm:text-base font-black text-slate-800 dark:text-amber-100 mt-1 flex items-center gap-1.5 leading-tight font-serif">
-                          <Feather className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400 flex-shrink-0" />
-                          {language === 'Hindi' ? translateKaranaHindi(k1.name) : k1.name}
-                        </h3>
+                      {k1 && (
+                        <div className="mt-3.5 pb-3 border-b border-slate-100/10 dark:border-zinc-800/30">
+                          <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono">
+                            {language === 'Hindi' ? "प्रथम करण (1st)" : "First Karana (1st)"}
+                          </span>
+                          <h3 className="text-sm sm:text-base font-black text-slate-800 dark:text-amber-100 mt-1 flex items-center gap-1.5 leading-tight font-serif">
+                            <Feather className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400 flex-shrink-0" />
+                            {language === 'Hindi' ? translateKaranaHindi(k1.name) : k1.name}
+                          </h3>
                         <div className="flex flex-wrap items-center gap-2 mt-2">
                           <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-slate-900/60 px-2 py-0.5 rounded-md text-[9.5px] text-slate-500 dark:text-slate-400 font-mono">
                             <span>{language === 'Hindi' ? "समाप्ति:" : "Ends:"}</span>
@@ -818,6 +842,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                           </span>
                         </div>
                       </div>
+                      )}
 
                       {/* Dwitiya Karana */}
                       {k2 && (
@@ -1016,7 +1041,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
               </div>
 
               {/* Paya Detail */}
-              {panchang.paya && (
+              {panchang.paya && panchang.paya.name && (
                 <div className="mt-4 pt-3 border-t border-slate-100/50 dark:border-slate-800/40">
                   <div className="flex justify-between items-center">
                     <span className="text-slate-400 text-xs font-mono">{language === 'Hindi' ? "नक्षत्र पाया:" : "Nakshatra Paya:"}</span>
@@ -1035,7 +1060,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                 </div>
               )}
               {/* Surya Nakshatra Detail */}
-              {panchang.suryaNakshatra && (
+              {panchang.suryaNakshatra && panchang.suryaNakshatra.name && (
                 <div className="mt-4 pt-3 border-t border-slate-100/50 dark:border-slate-800/40">
                   <div className="flex justify-between items-center">
                     <span className="text-slate-400 text-xs font-mono">{language === 'Hindi' ? "सूर्य नक्षत्र:" : "Surya Nakshatra:"}</span>
@@ -1700,9 +1725,10 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100/50 dark:divide-zinc-800/40 font-mono">
-                {panchang.planets.map((p, idx) => {
-                  const deg = Math.floor(p.longitude);
-                  const minFloat = (p.longitude - deg) * 60;
+                {(panchang.planets || []).map((p, idx) => {
+                  if (!p) return null;
+                  const deg = Math.floor(p.longitude || 0);
+                  const minFloat = ((p.longitude || 0) - deg) * 60;
                   const min = Math.floor(minFloat);
                   const sec = Math.floor((minFloat - min) * 60);
                   const degreeStr = `${deg}° ${min}' ${sec}"`;
@@ -1728,8 +1754,8 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
 
                   return (
                     <tr key={idx} className="hover:bg-slate-50/20 dark:hover:bg-zinc-800/10">
-                      <td className="py-2.5 font-bold font-serif text-slate-800 dark:text-orange-100">{language === 'Hindi' ? p.hindiName : p.name}</td>
-                      <td className="py-2.5 font-serif">{language === 'Hindi' ? p.signHindi : p.sign}</td>
+                      <td className="py-2.5 font-bold font-serif text-slate-800 dark:text-orange-100">{language === 'Hindi' ? (p.hindiName || p.name) : p.name}</td>
+                      <td className="py-2.5 font-serif">{language === 'Hindi' ? (p.signHindi || p.sign) : p.sign}</td>
                       <td className="py-2.5">{degreeStr}</td>
                       <td className={`py-2.5 ${stateClass}`}>{stateText}</td>
                       <td className={`py-2.5 ${combustClass}`}>{combustState || "—"}</td>
@@ -1759,10 +1785,10 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
               {language === 'Hindi' ? "🌌 वर्तमान ग्रह गोचर" : "🌌 Current Planet Transits"}
             </h4>
             <div className="grid grid-cols-2 gap-2 text-2xs">
-              {panchang.planets?.map((p, idx) => (
+              {(panchang.planets || []).map((p, idx) => (
                 <div key={idx} className="p-2 rounded-xl bg-white/5 dark:bg-[#120B08]/20 border border-white/5 flex items-center justify-between gap-2">
-                  <span className="font-bold text-slate-800 dark:text-orange-100">{language === 'Hindi' ? p.hindiName : p.name}</span>
-                  <span className="text-slate-550 dark:text-slate-400">➔ {language === 'Hindi' ? p.signHindi : p.sign}</span>
+                  <span className="font-bold text-slate-800 dark:text-orange-100">{language === 'Hindi' ? (p.hindiName || p.name) : p.name}</span>
+                  <span className="text-slate-550 dark:text-slate-400">➔ {language === 'Hindi' ? (p.signHindi || p.sign) : p.sign}</span>
                 </div>
               ))}
             </div>
@@ -1778,7 +1804,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
               <div className="mt-2.5 p-3 rounded-2xl bg-orange-500/5 dark:bg-orange-500/3 border border-orange-150/15 dark:border-orange-950/20 text-[11px] leading-relaxed text-slate-650 dark:text-zinc-355">
                 {language === 'Hindi' ? (
                   <p>
-                    आज चंद्रमा <strong>{panchang.planets?.find(p => p.name === 'Moon')?.signHindi || 'चन्द्र'}</strong> राशि और <strong>{hDate.nakshatra.hindiName}</strong> नक्षत्र में गोचर कर रहे हैं। 
+                    आज चंद्रमा <strong>{panchang.planets?.find(p => p && p.name === 'Moon')?.signHindi || 'चन्द्र'}</strong> राशि और <strong>{hDate.nakshatra.hindiName}</strong> नक्षत्र में गोचर कर रहे हैं। 
                     {hDate.nakshatra.lord === 'Sun' || hDate.nakshatra.lord === 'Jupiter' || hDate.nakshatra.lord === 'Moon' || hDate.nakshatra.lord === 'Venus' || hDate.nakshatra.lord === 'Mercury' ? (
                       <span> यह एक शुभ और रचनात्मक प्रभाव लेकर आ रहा है। नए कार्यों की शुरुआत, विद्यारंभ, एवं व्यावसायिक लेन-देन के लिए आज का दिन अत्यंत अनुकूल है।</span>
                     ) : (
@@ -1787,7 +1813,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                   </p>
                 ) : (
                   <p>
-                    Today, the Moon transits in <strong>{panchang.planets?.find(p => p.name === 'Moon')?.sign || 'Moon sign'}</strong> and <strong>{hDate.nakshatra.name}</strong> Nakshatra. 
+                    Today, the Moon transits in <strong>{panchang.planets?.find(p => p && p.name === 'Moon')?.sign || 'Moon sign'}</strong> and <strong>{hDate.nakshatra.name}</strong> Nakshatra. 
                     {hDate.nakshatra.lord === 'Sun' || hDate.nakshatra.lord === 'Jupiter' || hDate.nakshatra.lord === 'Moon' || hDate.nakshatra.lord === 'Venus' || hDate.nakshatra.lord === 'Mercury' ? (
                       <span> This transit brings positive and creative energies. It is a highly favorable day for starting new initiatives, learning, and business activities.</span>
                     ) : (

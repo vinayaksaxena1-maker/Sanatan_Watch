@@ -1073,23 +1073,36 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
 
   const positions = astronomicalEngine.getPanchangPositions(normalizedDate);
 
-  const isSwiss = !positions.planets.every(p => p.sign === 'Aries');
+  const EXPECTED_PLANET_COUNT = 9;
+  const isSwiss =
+    positions.planets &&
+    positions.planets.length === EXPECTED_PLANET_COUNT &&
+    !positions.planets.every(p => p.sign === 'Aries') &&
+    !positions.planets.every(p => p.sign === 'Pisces') &&
+    positions.planets.every(
+      planet =>
+        planet &&
+        Number.isFinite(planet.longitude) &&
+        Number.isFinite(planet.speed) &&
+        typeof planet.sign === 'string' &&
+        planet.sign.length > 0
+    );
 
-  const tithiIdx = positions.tithiIdx;
-
+  const rawTithiIdx = positions.tithiIdx;
+  const tithiIdx = (typeof rawTithiIdx === 'number' && !isNaN(rawTithiIdx)) ? Math.max(0, Math.min(29, Math.floor(rawTithiIdx))) : 0;
   const paksha: 'Shukla' | 'Krishna' = tithiIdx < 15 ? "Shukla" : "Krishna";
 
-  const displayTithiIdx = tithiIdx % 15;
+  const displayTithiIdx = (tithiIdx % 15 + 15) % 15;
 
-  const baseTithiObj = TITHI_DETAILS[displayTithiIdx];
+  const baseTithiObj = TITHI_DETAILS[displayTithiIdx] || TITHI_DETAILS[0];
 
   const fullTithiName = `${paksha} ${baseTithiObj.name}`;
 
-  const fullTithiNameHindi = `${paksha === "Shukla" ? "शुक्ल" : "कृष्ण"} ${baseTithiObj.hindiName.split(" ")[0]}`;
+  const fullTithiNameHindi = `${paksha === "Shukla" ? "शुक्ल" : "कृष्ण"} ${(baseTithiObj.hindiName || '').split(" ")[0]}`;
 
-  const tithiEndTime = subHoursToTimeStr(normalizedDate, positions.tithiRemainingHours, isSwiss);
+  const tithiEndTime = subHoursToTimeStr(normalizedDate, positions.tithiRemainingHours || 0, isSwiss);
 
-  const tithiStartTime = subHoursToTimeStr(normalizedDate, -positions.tithiPassedHours, isSwiss);
+  const tithiStartTime = subHoursToTimeStr(normalizedDate, -(positions.tithiPassedHours || 0), isSwiss);
 
   const tithi: Tithi = {
     name: fullTithiName,
@@ -1097,21 +1110,22 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
     value: tithiIdx + 1,
     startTime: tithiStartTime,
     endTime: tithiEndTime,
-    percentPassed: positions.tithiPercent,
+    percentPassed: positions.tithiPercent || 0,
     lord: baseTithiObj.lord,
     deity: baseTithiObj.deity,
     isKshaya: positions.tithiRemainingHours < 1.0 && positions.tithiPassedHours < 1.0,
     isVriddhi: false
   };
 
-  const naksIdx = positions.naksIdx;
-  const baseNaksObj = NAKSHATRA_DETAILS[naksIdx];
-  const naksEndTime = subHoursToTimeStr(normalizedDate, positions.naksRemainingHours, isSwiss);
+  const rawNaksIdx = positions.naksIdx;
+  const naksIdx = (typeof rawNaksIdx === 'number' && !isNaN(rawNaksIdx)) ? Math.max(0, Math.min(26, Math.floor(rawNaksIdx))) : 0;
+  const baseNaksObj = NAKSHATRA_DETAILS[naksIdx] || NAKSHATRA_DETAILS[0];
+  const naksEndTime = subHoursToTimeStr(normalizedDate, positions.naksRemainingHours || 0, isSwiss);
 
   // Compute dynamic Pada/Charan details based on Moon longitude
   const relativeLon = (positions.moonSidereal || 0) % 13.333333333333334;
   const pada = Math.floor(relativeLon / 3.3333333333333335) + 1;
-  const moonSpeed = positions.planets?.find(p => p.name === 'Moon')?.speed || 13.176;
+  const moonSpeed = positions.planets?.find(p => p && p.name === 'Moon')?.speed || 13.176;
   const remainingPadaLon = (pada * 3.3333333333333335) - relativeLon;
   const padaRemainingHours = remainingPadaLon / (moonSpeed / 24);
   const padaEndTime = subHoursToTimeStr(normalizedDate, padaRemainingHours, isSwiss);
@@ -1122,14 +1136,15 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
     value: naksIdx + 1,
     pada,
     padaEndTime,
-    gana: GANA_MAPPING[naksIdx],
-    yoni: YONI_MAPPING[naksIdx],
-    nadi: NADI_MAPPING[naksIdx]
+    gana: GANA_MAPPING[naksIdx] || GANA_MAPPING[0],
+    yoni: YONI_MAPPING[naksIdx] || YONI_MAPPING[0],
+    nadi: NADI_MAPPING[naksIdx] || NADI_MAPPING[0]
   };
 
-  const yogaIdx = positions.yogaIdx;
-  const yogaEndTime = subHoursToTimeStr(normalizedDate, positions.yogaRemainingHours, isSwiss);
-  const yogaString = YOGA_DETAILS[yogaIdx];
+  const rawYogaIdx = positions.yogaIdx;
+  const yogaIdx = (typeof rawYogaIdx === 'number' && !isNaN(rawYogaIdx)) ? Math.max(0, Math.min(26, Math.floor(rawYogaIdx))) : 0;
+  const yogaEndTime = subHoursToTimeStr(normalizedDate, positions.yogaRemainingHours || 0, isSwiss);
+  const yogaString = YOGA_DETAILS[yogaIdx] || YOGA_DETAILS[0];
   const yogaNameEng = yogaString.split(" ")[0];
   const yogaMeaning = yogaString.includes("(") ? yogaString.slice(yogaString.indexOf("(") + 1, -1) : "Peaceful";
 
@@ -1583,10 +1598,12 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   }
 
   // 7. Surya Nakshatra & Charan Calculation
-  const sunNaksIdxVal = Math.floor((positions.sunSidereal || 0) / 13.333333333333334);
-  const sunNaksRelativeLon = (positions.sunSidereal || 0) % 13.333333333333334;
+  const rawSunSidereal = (positions.sunSidereal || 0) % 360;
+  const normalizedSunSidereal = rawSunSidereal < 0 ? rawSunSidereal + 360 : rawSunSidereal;
+  const sunNaksIdxVal = Math.max(0, Math.min(26, Math.floor(normalizedSunSidereal / 13.333333333333334)));
+  const sunNaksRelativeLon = normalizedSunSidereal % 13.333333333333334;
   const sunNaksPada = Math.floor(sunNaksRelativeLon / 3.3333333333333335) + 1;
-  const baseSunNaksObj = NAKSHATRA_DETAILS[sunNaksIdxVal];
+  const baseSunNaksObj = NAKSHATRA_DETAILS[sunNaksIdxVal] || NAKSHATRA_DETAILS[0];
 
   const suryaNakshatraObj: SuryaNakshatraDetail = {
     name: baseSunNaksObj.name,
@@ -1597,7 +1614,7 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   };
 
   // 8. Chandra Nakshatra & Charan Calculation
-  const baseMoonNaksObj = NAKSHATRA_DETAILS[naksIdx];
+  const baseMoonNaksObj = NAKSHATRA_DETAILS[naksIdx] || NAKSHATRA_DETAILS[0];
 
   const chandraNakshatraObj: ChandraNakshatraDetail = {
     name: baseMoonNaksObj.name,
@@ -1609,7 +1626,7 @@ export function getPanchangForDate(lat: number, lon: number, date: Date): Pancha
   };
 
   // 9. Ritu Calculation
-  const sunSignIdx = Math.floor((positions.sunSidereal || 0) / 30);
+  const sunSignIdx = Math.max(0, Math.min(11, Math.floor(normalizedSunSidereal / 30)));
   
   const rituMap: Record<number, { eng: string; hin: string; desc: string }> = {
     11: { eng: "Vasanta", hin: "वसन्त", desc: "Vasanta Ritu represents Spring, characterized by blooming flowers and moderate climate. Ruled by Venus, it is ideal for festivals, marriages, and new beginnings." },
