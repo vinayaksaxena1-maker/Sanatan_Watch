@@ -494,34 +494,6 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
             />
           </div>
 
-          <div className="flex items-center gap-1.5 border-r border-orange-150/20 pr-2">
-            <span className="text-[9px] font-black text-orange-850 dark:text-amber-500 uppercase tracking-wider">इमेज बैकग्राउंड:</span>
-            <button
-              onClick={() => setSelectedTheme('back1')}
-              className={`px-2 py-1 rounded-md bg-zinc-850 hover:bg-zinc-800 text-white text-[9px] font-black border cursor-pointer transition-all ${
-                selectedTheme === 'back1' ? 'border-orange-500 text-orange-400 bg-orange-950/20' : 'border-zinc-800 opacity-80'
-              }`}
-            >
-              पैटर्न १
-            </button>
-            <button
-              onClick={() => setSelectedTheme('back2')}
-              className={`px-2 py-1 rounded-md bg-zinc-850 hover:bg-zinc-800 text-white text-[9px] font-black border cursor-pointer transition-all ${
-                selectedTheme === 'back2' ? 'border-orange-500 text-orange-400 bg-orange-950/20' : 'border-zinc-800 opacity-80'
-              }`}
-            >
-              पैटर्न २
-            </button>
-            <button
-              onClick={() => setSelectedTheme('splash')}
-              className={`px-2 py-1 rounded-md bg-zinc-850 hover:bg-zinc-800 text-white text-[9px] font-black border cursor-pointer transition-all ${
-                selectedTheme === 'splash' ? 'border-orange-500 text-orange-400 bg-orange-950/20' : 'border-zinc-800 opacity-80'
-              }`}
-            >
-              पैटर्न ३
-            </button>
-          </div>
-
           {/* Compact Space-Saving Bhagwat Themes Dropdown */}
           <div className="flex items-center gap-1.5 border-r border-orange-150/20 pr-2">
             <span className="text-[9px] font-black text-amber-500 uppercase tracking-wider">भगवद् थीम्स:</span>
