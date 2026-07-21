@@ -72,19 +72,19 @@ const getDishaShoolInfo = (day: number) => {
 };
 
 const DEITY_THEMES = [
-  { id: 'shiva', name: 'शिव जी 🔱', file: './Shiva_Bg.png' },
-  { id: 'krishna', name: 'कृष्ण जी 🪶', file: './Krishna_Bg.png' },
-  { id: 'rama', name: 'श्री राम 🏹', file: './Rama_Bg.png' },
-  { id: 'ganesha', name: 'गणेश जी 🚩', file: './Ganesha_Bg.png' },
-  { id: 'lakshmi', name: 'लक्ष्मी जी 🪷', file: './Lakshmi_Bg.png' },
-  { id: 'saraswati', name: 'सरस्वती जी 🪕', file: './Saraswati_Bg.png' },
-  { id: 'durga', name: 'दुर्गा मां 🦁', file: './Durga_Bg.png' },
-  { id: 'hanuman', name: 'हनुमान जी 🚩', file: './Hanuman_Bg.png' },
-  { id: 'vishnu', name: 'विष्णु जी 🪷', file: './Vishnu_Bg.png' },
-  { id: 'surya', name: 'सूर्य देव ☀️', file: './Surya_Bg.png' },
-  { id: 'brahma', name: 'ब्रह्मा जी 🪷', file: './Brahma_Bg.png' },
-  { id: 'kali', name: 'काली मां 🌺', file: './Kali_Bg.png' },
-  { id: 'kartikeya', name: 'कार्तिकेय जी 🦚', file: './Kartikeya_Bg.png' },
+  { id: 'shiva', name: 'शिव जी 🔱', file: './Shiva_Bg.webp' },
+  { id: 'krishna', name: 'कृष्ण जी 🪶', file: './Krishna_Bg.webp' },
+  { id: 'rama', name: 'श्री राम 🏹', file: './Rama_Bg.webp' },
+  { id: 'ganesha', name: 'गणेश जी 🚩', file: './Ganesha_Bg.webp' },
+  { id: 'lakshmi', name: 'लक्ष्मी जी 🪷', file: './Lakshmi_Bg.webp' },
+  { id: 'saraswati', name: 'सरस्वती जी 🪕', file: './Saraswati_Bg.webp' },
+  { id: 'durga', name: 'दुर्गा मां 🦁', file: './Durga_Bg.webp' },
+  { id: 'hanuman', name: 'हनुमान जी 🚩', file: './Hanuman_Bg.webp' },
+  { id: 'vishnu', name: 'विष्णु जी 🪷', file: './Vishnu_Bg.webp' },
+  { id: 'surya', name: 'सूर्य देव ☀️', file: './Surya_Bg.webp' },
+  { id: 'brahma', name: 'ब्रह्मा जी 🪷', file: './Brahma_Bg.webp' },
+  { id: 'kali', name: 'काली मां 🌺', file: './Kali_Bg.webp' },
+  { id: 'kartikeya', name: 'कार्तिकेय जी 🦚', file: './Kartikeya_Bg.webp' },
 ];
 
 export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGeneratorProps) {
