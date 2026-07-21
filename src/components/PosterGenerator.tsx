@@ -85,6 +85,9 @@ const DEITY_THEMES = [
   { id: 'brahma', name: 'ब्रह्मा जी 🪷', file: './Brahma_Bg.webp' },
   { id: 'kali', name: 'काली मां 🌺', file: './Kali_Bg.webp' },
   { id: 'kartikeya', name: 'कार्तिकेय जी 🦚', file: './Kartikeya_Bg.webp' },
+  { id: 'pattern1', name: 'पैटर्न 1 🌟', file: './Back1.png' },
+  { id: 'pattern2', name: 'पैटर्न 2 🌟', file: './Back2.png' },
+  { id: 'pattern3', name: 'पैटर्न 3 🌟', file: './Splash2.0.png' },
 ];
 
 export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGeneratorProps) {
