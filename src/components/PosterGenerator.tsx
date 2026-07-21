@@ -8,6 +8,9 @@ import {
   FileText,
   Image as ImageIcon
 } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+import { Share } from '@capacitor/share';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 import { PanchangInfo } from '../types';
 
 interface PosterGeneratorProps {
@@ -381,12 +384,28 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
     if (!canvas) return;
     await renderCanvas(canvas);
 
-    // Trigger Download
     const dataURL = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.download = `Panchang_${city}_${panchang.date}.png`;
-    link.href = dataURL;
-    link.click();
+    const fileName = `Panchang_${city}_${panchang.date}.png`;
+
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const base64Data = dataURL.split(',')[1];
+        await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Documents
+        });
+        alert("पोस्टर आपके डिवाइस (Documents) में सेव हो गया है!");
+      } catch (e) {
+        console.error("Failed to download image natively", e);
+        alert("पोस्टर सेव करने में समस्या आई। कृपया स्टोरेज परमिशन चेक करें।");
+      }
+    } else {
+      const link = document.createElement('a');
+      link.download = fileName;
+      link.href = dataURL;
+      link.click();
+    }
   };
 
   const handleShareImage = async () => {
@@ -396,33 +415,58 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
     setSharing(true);
     await renderCanvas(canvas);
     
+    const fileName = `Panchang_${city}_${panchang.date}.png`;
+    const shareTitle = 'आज का पंचांग पोस्टर';
+    const shareText = `🚩 आज का धर्मिक समय पंचांग 🚩\n📍 स्थान: ${city}\n📅 दिनांक: ${formattedDate}`;
+
     try {
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          setSharing(false);
-          return;
-        }
-        const file = new File([blob], `Panchang_${city}_${panchang.date}.png`, { type: 'image/png' });
+      const dataURL = canvas.toDataURL('image/png');
+
+      if (Capacitor.isNativePlatform()) {
+        const base64Data = dataURL.split(',')[1];
         
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: 'आज का पंचांग पोस्टर',
-            text: `🚩 आज का धर्मिक समय पंचांग 🚩\n📍 स्थान: ${city}\n📅 दिनांक: ${formattedDate}`
-          });
-        } else {
-          // Fallback download if sharing is not supported by browser
-          const dataURL = canvas.toDataURL('image/png');
-          const link = document.createElement('a');
-          link.download = `Panchang_${city}_${panchang.date}.png`;
-          link.href = dataURL;
-          link.click();
-          alert("आपका ब्राउज़र इमेज डायरेक्ट शेयरिंग सपोर्ट नहीं करता है। पंचांग पोस्टर आपकी गैलरी में डाउनलोड कर दिया गया है!");
-        }
-        setSharing(false);
-      }, 'image/png');
+        // Save to cache directory temporarily for sharing
+        const savedFile = await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Cache
+        });
+
+        await Share.share({
+          title: shareTitle,
+          text: shareText,
+          url: savedFile.uri,
+          dialogTitle: 'पंचांग पोस्टर शेयर करें'
+        });
+      } else {
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            setSharing(false);
+            return;
+          }
+          const file = new File([blob], fileName, { type: 'image/png' });
+          
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: shareTitle,
+              text: shareText
+            });
+          } else {
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = dataURL;
+            link.click();
+            alert("आपका ब्राउज़र इमेज डायरेक्ट शेयरिंग सपोर्ट नहीं करता है। पंचांग पोस्टर डाउनलोड कर दिया गया है!");
+          }
+        }, 'image/png');
+      }
     } catch (e) {
       console.error("Failed to share image", e);
+      if (Capacitor.isNativePlatform()) {
+        alert("शेयर करने में समस्या आई। कृपया स्टोरेज/शेयर परमिशन चेक करें।");
+      }
+    } finally {
       setSharing(false);
     }
   };
