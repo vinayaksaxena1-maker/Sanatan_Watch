@@ -89,7 +89,14 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
                .replace(/Amavasya/g, 'अमावस्या')
                .replace(/Ashtami/g, 'अष्टमी')
                .replace(/Chaturthi/g, 'चतुर्थी')
-               .replace(/Navami/g, 'नवमी');
+               .replace(/Navami/g, 'नवमी')
+               .replace(/Pratipada/g, 'प्रतिपदा')
+               .replace(/Dwitiya/g, 'द्वितीया')
+               .replace(/Tritiya/g, 'तृतीया')
+               .replace(/Panchami/g, 'पंचमी')
+               .replace(/Shashthi/g, 'षष्ठी')
+               .replace(/Saptami/g, 'सप्तमी')
+               .replace(/Dashami/g, 'दशमी');
     return name;
   };
 
@@ -97,40 +104,92 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
     if (lang !== 'Hindi') return fest.description;
     
     const idLower = fest.id.toLowerCase();
-    if (idLower.includes('ekadashi_shukla')) {
-      return 'विष्णु पूजन एवं आध्यात्मिक शांति के लिए शुक्ल पक्ष एकादशी का पावन व्रत।';
+    const nameLower = (fest.name || '').toLowerCase();
+    const descLower = (fest.description || '').toLowerCase();
+
+    if (idLower.includes('ekadashi') || nameLower.includes('ekadashi')) {
+      if (idLower.includes('shukla') || descLower.includes('shukla')) {
+        return `भगवान विष्णु की विशेष आराधना, सुख-समृद्धि एवं आध्यात्मिक शांति के लिए ${fest.hindiName || 'एकादशी'} का पावन व्रत।`;
+      }
+      return `भगवान विष्णु की कृपा, पाप-निवारण एवं संकट मुक्ति के लिए ${fest.hindiName || 'एकादशी'} का पावन व्रत।`;
     }
-    if (idLower.includes('ekadashi_krishna')) {
-      return 'विष्णु कृपा और संकट निवारण के लिए कृष्ण पक्ष एकादशी का व्रत।';
+    if (idLower.includes('pradosh') || nameLower.includes('pradosh')) {
+      return `भगवान शिव की आराधना, आरोग्य लाभ और दोष शांति के लिए प्रदोष काल में किया जाने वाला पावन व्रत।`;
     }
-    if (idLower.includes('pradosh_shukla')) {
-      return 'स्वास्थ्य और समृद्धि के लिए शुक्ल पक्ष का प्रदोष काल शिव पूजन।';
+    if (idLower.includes('durgashtami') || nameLower.includes('durgashtami') || nameLower.includes('ashtami')) {
+      return `भगवती दुर्गा एवं माँ पार्वती की विशेष कृपा, शक्ति और संकट नाश के लिए पावन अष्टमी व्रत।`;
     }
-    if (idLower.includes('pradosh_krishna')) {
-      return 'ऋणमुक्ति और दोष शांति के लिए कृष्ण पक्ष का प्रदोष व्रत।';
+    if (idLower.includes('kalashtami') || nameLower.includes('kalashtami')) {
+      return `भगवान कालभैरव की विशेष पूजा-अर्चना, भय मुक्ति और आत्मबल के लिए पावन कालाष्टमी व्रत।`;
     }
-    if (idLower.includes('maha_shivratri')) {
-      return 'शिव-पार्वती मिलन का महापर्व। रात्रि काल में जागरण और रुद्र अभिषेक।';
+    if (idLower.includes('shivaratri') || nameLower.includes('shivaratri')) {
+      return `भगवान भोलेनाथ की विशेष आराधना, रात्रि जागरण और रुद्र अभिषेक के लिए पावन शिवरात्रि व्रत।`;
     }
-    if (idLower.includes('holi')) {
-      return 'रंगों का पारंपरिक वसंत उत्सव और बुराई पर अच्छाई की विजय का पर्व।';
+    if (idLower.includes('karwa_chauth') || nameLower.includes('karwa chauth')) {
+      return `पति की दीर्घायु, उत्तम स्वास्थ्य और अखंड सौभाग्य की प्राप्ति के लिए सुहागिनों का पावन निर्जला व्रत।`;
     }
-    if (idLower.includes('diwali')) {
-      return 'दीपों का महापर्व। भगवान श्री राम के अयोध्या आगमन पर लक्ष्मी पूजन।';
+    if (idLower.includes('sankashti') || nameLower.includes('sankashti')) {
+      return `विघ्नहर्ता श्री गणेश की कृपा से समस्त बाधाओं और कष्टों के निवारण के लिए पावन संकष्टी चतुर्थी व्रत।`;
     }
-    if (idLower.includes('janmashtami')) {
-      return 'भगवान श्री कृष्ण का मध्यरात्रि का भव्य जन्मोत्सव व्रत एवं पूजन।';
+    if (idLower.includes('vinayaka') || nameLower.includes('vinayaka')) {
+      return `श्री गणेश जी के पूजन से ज्ञान, बुद्धि, रिद्धि-सिद्धि और सफलता का पावन विनायक चतुर्थी व्रत।`;
     }
-    if (idLower.includes('ganesh_chaturthi')) {
-      return 'विघ्नहर्ता श्री गणेश के जन्मोत्सव का दस दिवसीय पावन उत्सव।';
+    if (idLower.includes('purnima') || nameLower.includes('purnima')) {
+      return `भगवान श्री सत्यनारायण पूजन, स्नान, दान-पुण्य और चंद्र देव की उपासना के लिए पावन पूर्णिमा तिथि।`;
     }
-    if (idLower.includes('rama_navami')) {
-      return 'मर्यादा पुरुषोत्तम भगवान श्री राम का जन्मोत्सव पूजन।';
+    if (idLower.includes('amavasya') || nameLower.includes('amavasya')) {
+      return `पितृ तर्पण, श्राद्ध कर्म, दीपदान और पवित्र नदियों में स्नान के लिए पावन अमावस्या तिथि।`;
     }
-    if (idLower.includes('makar_sankranti')) {
-      return 'सूर्य का मकर राशि में प्रवेश। पवित्र स्नान और दान का विशेष महत्व।';
+    if (idLower.includes('gudi_padwa') || nameLower.includes('gudi padwa')) {
+      return `वैदिक नव संवत्सर का शुभारंभ, सृष्टि निर्माण दिवस और चैत्र नवरात्र का पावन पर्व।`;
     }
-    
+    if (idLower.includes('rama_navami') || nameLower.includes('rama navami')) {
+      return `मर्यादा पुरुषोत्तम भगवान श्री राम का पावन जन्मोत्सव व्रत एवं भव्य पूजन।`;
+    }
+    if (idLower.includes('navratri') || nameLower.includes('navratri')) {
+      return `नवदुर्गा की विशेष उपासना, कलश स्थापना और शक्ति साधना का पावन नवरात्र पर्व।`;
+    }
+    if (idLower.includes('dussehra') || nameLower.includes('dussehra')) {
+      return `अधर्म पर धर्म और बुराई पर अच्छाई की विजय का प्रतीक पावन विजयादशमी (दशहरा) पर्व।`;
+    }
+    if (idLower.includes('govardhan') || nameLower.includes('govardhan')) {
+      return `भगवान श्री कृष्ण द्वारा गोवर्धन पर्वत धारण करने की स्मृति में अन्नकूट एवं गोवर्धन पूजन।`;
+    }
+    if (idLower.includes('bhai_dooj') || nameLower.includes('bhai dooj')) {
+      return `भाई-बहन के पवित्र प्रेम, सुरक्षा और स्नेह का प्रतीक यमद्वितीया (भैया दूज) पर्व।`;
+    }
+    if (idLower.includes('makar_sankranti') || nameLower.includes('makar sankranti')) {
+      return `सूर्य देव का मकर राशि में प्रवेश। पवित्र नदियों में स्नान, तिल-गुड़ दान और सूर्य देव की उपासना।`;
+    }
+    if (idLower.includes('janmashtami') || nameLower.includes('janmashtami')) {
+      return `भगवान श्री कृष्ण का मध्यरात्रि का भव्य जन्मोत्सव व्रत एवं बाल गोपाल पूजन।`;
+    }
+    if (idLower.includes('ganesh_chaturthi') || nameLower.includes('ganesh chaturthi')) {
+      return `विघ्नहर्ता श्री गणेश के जन्मोत्सव का दस दिवसीय पावन भक्ति उत्सव।`;
+    }
+    if (idLower.includes('holi') || nameLower.includes('holi')) {
+      return `रंगों का पारंपरिक वसंत उत्सव और बुराई पर अच्छाई की विजय का पावन पर्व।`;
+    }
+    if (idLower.includes('diwali') || nameLower.includes('diwali')) {
+      return `दीपों का महापर्व। भगवान श्री राम के अयोध्या आगमन पर महालक्ष्मी एवं कुबेर पूजन।`;
+    }
+
+    if (descLower.includes('lord vishnu')) {
+      return 'भगवान विष्णु की कृपा, भक्ति और आत्मिक शांति के लिए पावन व्रत।';
+    }
+    if (descLower.includes('lord shiva')) {
+      return 'भगवान शिव की विशेष आराधना, आरोग्य और दोष शांति का पावन पर्व।';
+    }
+    if (descLower.includes('lord ganesha')) {
+      return 'श्री गणेश जी की कृपा से बाधा मुक्ति और समृद्धि का पावन व्रत।';
+    }
+    if (descLower.includes('full moon')) {
+      return 'सत्यनारायण व्रत कथा, चंद्र दर्शन एवं दान-पुण्य की पावन पूर्णिमा।';
+    }
+    if (descLower.includes('new moon')) {
+      return 'पितृ शांति, तर्पण एवं पवित्र स्नान की पावन अमावस्या।';
+    }
+
     return fest.description;
   };
 
@@ -518,10 +577,10 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
             return (
               <div 
                 key={fest.id} 
-                className="p-3.5 rounded-2xl bg-white/40 dark:bg-zinc-950/20 border border-orange-100/10 dark:border-zinc-850/50 flex flex-col gap-1.5"
+                className="p-3.5 rounded-2xl bg-white/60 dark:bg-zinc-900/80 border border-orange-100/20 dark:border-orange-500/20 shadow-xs flex flex-col gap-1.5"
               >
                 <div className="flex justify-between items-center text-[10px] font-mono font-bold">
-                  <span className="text-orange-655 dark:text-orange-400">
+                  <span className="text-orange-700 dark:text-orange-300">
                     {formatTableDate(fest.date)}
                   </span>
                   <span className={"px-2 py-0.5 rounded-full border text-[8px] font-extrabold font-mono uppercase " + getBadgeStyles(fest.type)}>
@@ -532,7 +591,7 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
                   <h4 className="text-xs sm:text-sm font-serif font-black text-slate-850 dark:text-amber-100">
                     {language === 'Hindi' ? fest.hindiName : fest.name}
                   </h4>
-                  <p className="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed font-sans mt-0.5">
+                  <p className="text-[10px] sm:text-[11px] text-slate-700 dark:text-slate-200 leading-relaxed font-sans mt-0.5">
                     {translateDescription(fest, language)}
                   </p>
                 </div>
@@ -543,25 +602,25 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
 
         {/* Desktop View: Traditional Table Layout */}
         <div className="hidden md:block overflow-x-auto rounded-2xl border border-orange-100/10 dark:border-zinc-850/50">
-          <table className="w-full text-left border-collapse text-slate-800 dark:text-slate-350">
+          <table className="w-full text-left border-collapse text-slate-800 dark:text-slate-200">
             <thead>
-              <tr className="bg-orange-500/5 dark:bg-[#120B08]/40 border-b border-orange-100/10 dark:border-zinc-850/50 text-[10px] font-bold text-slate-400 dark:text-amber-500 uppercase tracking-wider font-mono">
+              <tr className="bg-orange-500/5 dark:bg-[#120B08]/60 border-b border-orange-100/10 dark:border-zinc-850/50 text-[10px] font-bold text-slate-400 dark:text-amber-400 uppercase tracking-wider font-mono">
                 <th className="p-3 whitespace-nowrap">{language === 'Hindi' ? "तिथि" : "Date"}</th>
                 <th className="p-3">{language === 'Hindi' ? "त्यौहार" : "Festival"}</th>
                 <th className="p-3">{language === 'Hindi' ? "संक्षिप्त विवरण" : "Short Summary"}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-orange-100/5 dark:divide-zinc-850/30 text-2xs sm:text-xs">
+            <tbody className="divide-y divide-orange-100/5 dark:divide-zinc-850/40 text-2xs sm:text-xs">
               {sortedYearFestivals.map((fest) => {
                 return (
-                  <tr key={fest.id} className="hover:bg-slate-500/2 dark:hover:bg-zinc-950/20 transition-all duration-200">
-                    <td className="p-3 font-mono font-bold whitespace-nowrap text-orange-655 dark:text-orange-400">
+                  <tr key={fest.id} className="hover:bg-slate-500/5 dark:hover:bg-zinc-900/40 transition-all duration-200">
+                    <td className="p-3 font-mono font-bold whitespace-nowrap text-orange-700 dark:text-orange-300">
                       {formatTableDate(fest.date)}
                     </td>
                     <td className="p-3 font-serif font-black text-slate-850 dark:text-amber-100 whitespace-nowrap">
                       {language === 'Hindi' ? fest.hindiName : fest.name}
                     </td>
-                    <td className="p-3 text-[11px] leading-relaxed text-slate-600 dark:text-slate-400 min-w-[200px]">
+                    <td className="p-3 text-[11px] leading-relaxed text-slate-700 dark:text-slate-200 min-w-[200px]">
                       {translateDescription(fest, language)}
                     </td>
                   </tr>

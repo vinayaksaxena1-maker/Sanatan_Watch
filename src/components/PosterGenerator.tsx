@@ -22,7 +22,9 @@ interface PosterGeneratorProps {
 const loadImage = (src: string): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+    if (src.startsWith('http://') || src.startsWith('https://')) {
+      img.crossOrigin = 'anonymous';
+    }
     img.src = src;
     img.onload = () => resolve(img);
     img.onerror = (e) => reject(e);
@@ -393,12 +395,19 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
         await Filesystem.writeFile({
           path: fileName,
           data: base64Data,
-          directory: Directory.Documents
+          directory: Directory.Cache,
+          recursive: true
         });
-        alert("पोस्टर आपके डिवाइस (Documents) में सेव हो गया है!");
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = dataURL;
+        link.click();
       } catch (e) {
         console.error("Failed to download image natively", e);
-        alert("पोस्टर सेव करने में समस्या आई। कृपया स्टोरेज परमिशन चेक करें।");
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = dataURL;
+        link.click();
       }
     } else {
       const link = document.createElement('a');
@@ -413,31 +422,43 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
     if (!canvas) return;
     
     setSharing(true);
-    await renderCanvas(canvas);
-    
-    const fileName = `Panchang_${city}_${panchang.date}.png`;
-    const shareTitle = 'आज का पंचांग पोस्टर';
-    const shareText = `🚩 आज का धर्मिक समय पंचांग 🚩\n📍 स्थान: ${city}\n📅 दिनांक: ${formattedDate}`;
-
     try {
+      await renderCanvas(canvas);
+      
+      const fileName = `Panchang_${city}_${panchang.date}.png`;
+      const shareTitle = 'आज का पंचांग पोस्टर';
+      const shareText = `🚩 आज का धर्मिक समय पंचांग 🚩\n📍 स्थान: ${city}\n📅 दिनांक: ${formattedDate}`;
       const dataURL = canvas.toDataURL('image/png');
 
       if (Capacitor.isNativePlatform()) {
         const base64Data = dataURL.split(',')[1];
         
-        // Save to cache directory temporarily for sharing
-        const savedFile = await Filesystem.writeFile({
-          path: fileName,
-          data: base64Data,
-          directory: Directory.Cache
-        });
+        try {
+          const savedFile = await Filesystem.writeFile({
+            path: fileName,
+            data: base64Data,
+            directory: Directory.Cache,
+            recursive: true
+          });
 
-        await Share.share({
-          title: shareTitle,
-          text: shareText,
-          url: savedFile.uri,
-          dialogTitle: 'पंचांग पोस्टर शेयर करें'
-        });
+          await Share.share({
+            title: shareTitle,
+            text: shareText,
+            url: savedFile.uri,
+            dialogTitle: 'पंचांग पोस्टर शेयर करें'
+          });
+        } catch (nativeShareErr) {
+          console.warn("Filesystem/Share native URI error, trying text share fallback", nativeShareErr);
+          try {
+            await Share.share({
+              title: shareTitle,
+              text: shareText,
+              dialogTitle: 'पंचांग पोस्टर शेयर करें'
+            });
+          } catch (fallbackErr) {
+            handleDownload();
+          }
+        }
       } else {
         canvas.toBlob(async (blob) => {
           if (!blob) {
@@ -447,25 +468,30 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
           const file = new File([blob], fileName, { type: 'image/png' });
           
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: shareTitle,
-              text: shareText
-            });
+            try {
+              await navigator.share({
+                files: [file],
+                title: shareTitle,
+                text: shareText
+              });
+            } catch (err) {
+              const link = document.createElement('a');
+              link.download = fileName;
+              link.href = dataURL;
+              link.click();
+            }
           } else {
             const link = document.createElement('a');
             link.download = fileName;
             link.href = dataURL;
             link.click();
-            alert("आपका ब्राउज़र इमेज डायरेक्ट शेयरिंग सपोर्ट नहीं करता है। पंचांग पोस्टर डाउनलोड कर दिया गया है!");
           }
         }, 'image/png');
       }
     } catch (e) {
       console.error("Failed to share image", e);
-      if (Capacitor.isNativePlatform()) {
-        alert("शेयर करने में समस्या आई। कृपया स्टोरेज/शेयर परमिशन चेक करें।");
-      }
+      alert("पंचांग विवरण टेक्स्ट कॉपी कर दिया गया है!");
+      handleCopyText();
     } finally {
       setSharing(false);
     }

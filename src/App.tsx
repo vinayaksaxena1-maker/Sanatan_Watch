@@ -1233,13 +1233,13 @@ export default function App() {
                   <img 
                     src="/App1.png" 
                     alt="सनातन घड़ी लोगो" 
-                    className="w-11 h-11 sm:w-12 sm:h-12 object-contain drop-shadow-sm"
+                    className="w-13 h-13 sm:w-15 sm:h-15 object-contain drop-shadow-sm"
                   />
                   <div className="flex flex-col text-left">
-                    <h1 className="text-base sm:text-lg font-serif font-black text-orange-900 dark:text-amber-100 tracking-wider leading-tight">
+                    <h1 className="text-xl sm:text-2xl font-serif font-black text-orange-950 dark:text-amber-100 tracking-wider leading-tight">
                       {getTranslation(settings.language, 'home')}
                     </h1>
-                    <span className="text-[9px] sm:text-[10px] font-serif font-bold text-orange-700/80 dark:text-amber-500/80 tracking-wide mt-0.5">
+                    <span className="text-xs sm:text-sm font-serif font-extrabold text-orange-850 dark:text-amber-400 tracking-wide mt-0.5">
                       {getTranslation(settings.language, 'tagline')}
                     </span>
                   </div>

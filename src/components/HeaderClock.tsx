@@ -104,22 +104,13 @@ export const HeaderClock: React.FC<HeaderClockProps> = React.memo(({ selectedDat
         <div className="flex items-center gap-2">
           <Clock className="w-4.5 h-4.5 text-orange-500 transition-colors drop-shadow-3xs" />
           <span 
-            className="text-[10px] font-black text-slate-700 dark:text-slate-300 tracking-tight font-mono whitespace-nowrap leading-none [text-shadow:0_1px_1px_rgba(0,0,0,0.12)] dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.45)]"
+            className="text-xs sm:text-sm font-black text-slate-900 dark:text-amber-100 tracking-tight font-mono whitespace-nowrap leading-none [text-shadow:0_1px_1px_rgba(0,0,0,0.12)] dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.45)]"
           >
             {selectedDate.toLocaleDateString(language === 'Hindi' ? 'hi-IN' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })} • {currentTime.toLocaleTimeString(language === 'Hindi' ? 'hi-IN' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
           </span>
-          
-          <button
-            onClick={() => setIsLogsModalOpen(true)}
-            title="Open Diagnostic Engine Logs"
-            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-slate-200/60 dark:bg-slate-800/60 border border-slate-300/60 dark:border-slate-700/60 text-slate-700 dark:text-slate-300 text-[8px] font-extrabold tracking-tight leading-none uppercase hover:scale-105 active:scale-95 transition-transform"
-          >
-            <Terminal className="w-2.5 h-2.5 text-orange-500" />
-            📋 Logs
-          </button>
         </div>
         {trendInfo.icon && (
-          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[10px] font-black leading-none shadow-3xs hover:shadow-2xs transition-shadow duration-300 ${trendInfo.colorClass}`}>
+          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-black leading-none shadow-3xs hover:shadow-2xs transition-shadow duration-300 ${trendInfo.colorClass}`}>
             {trendInfo.icon}
             <span className="font-serif [text-shadow:0_0.5px_1px_rgba(255,255,255,0.45)] dark:[text-shadow:0_0.5px_1px_rgba(0,0,0,0.35)]">{activeChoghadiya?.hindiName}</span>
           </span>

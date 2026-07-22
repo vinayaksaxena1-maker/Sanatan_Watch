@@ -8,12 +8,39 @@ html, body {
   -webkit-tap-highlight-color: transparent;
   overflow-x: hidden;
   width: 100%;
-  color: #1e293b; /* Default text color (slate-800) */
+  color: #0f172a; /* Darker Slate 900 for high contrast default */
   background-color: var(--bg-app-light);
+  font-weight: 500;
+}
+
+/* High-Contrast Light Mode Contrast Overrides for Washed-Out Subtexts */
+body:not(.dark) .text-slate-400 {
+  color: #334155 !important; /* Dark Slate 700 instead of washed-out pale gray */
+  font-weight: 600;
+}
+
+body:not(.dark) .text-slate-500 {
+  color: #1e293b !important; /* Dark Slate 800 */
+  font-weight: 600;
+}
+
+body:not(.dark) .text-slate-600 {
+  color: #0f172a !important; /* Slate 900 */
+  font-weight: 600;
+}
+
+body:not(.dark) .text-slate-450 {
+  color: #1e293b !important;
+  font-weight: 600;
+}
+
+body:not(.dark) .text-slate-550 {
+  color: #0f172a !important;
+  font-weight: 600;
 }
 
 .dark html, .dark body {
-  color: #f4f5f7; /* Default dark mode text color (zinc-100) */
+  color: #f8fafc; /* Slate 50 bright white */
   background-color: #0A0A0A;
 }
 
@@ -140,10 +167,23 @@ input, textarea, select {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.dark .glass-card-light {
+  background: var(--card-bg-dark);
+  backdrop-filter: blur(var(--card-blur-dark));
+  border: 1px solid var(--card-border-dark);
+  box-shadow: var(--card-shadow-dark);
+  color: #f4f5f7;
+}
+
 .glass-card-light:hover {
   transform: translateY(-2px);
   box-shadow: var(--card-shadow-hover-light);
   border-color: var(--card-border-hover-light);
+}
+
+.dark .glass-card-light:hover {
+  box-shadow: var(--card-shadow-hover-dark);
+  border-color: var(--card-border-hover-dark);
 }
 
 .glass-card-dark {

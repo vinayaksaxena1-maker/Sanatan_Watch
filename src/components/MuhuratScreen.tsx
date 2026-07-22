@@ -21,8 +21,61 @@ interface MuhuratScreenProps {
   currentTime?: Date;
   selectedDate: Date;
   onDateChange: (date: Date) => void;
-  language?: 'English' | 'Hindi';
 }
+
+const translateShivaVaasDescHindi = (desc?: string): string => {
+  if (!desc) return '';
+  return desc
+    .replace(/Lord Shiva resides with Goddess Gauri\. Performing Rudrabhishek today is highly auspicious, bringing wealth and domestic happiness\./gi, 'भगवान शिव माता गौरी के साथ विराजमान हैं। आज रुद्राभिषेक करना अत्यंत शुभ फलदायी है, जिससे सुख-समृद्धि की प्राप्ति होती है।')
+    .replace(/Lord Shiva resides on Kailash Parvat\. Performing Rudrabhishek today is auspicious, bringing peace and spiritual growth\./gi, 'भगवान शिव कैलाश पर्वत पर विराजमान हैं। आज रुद्राभिषेक करना शुभ है, जो मानसिक शांति प्रदान करता है।')
+    .replace(/Lord Shiva resides in Nandi Svarupa \/ Sabha \/ Smashan \/ Bhoomi\. Avoid performing Rudrabhishek today\./gi, 'भगवान शिव सभा या श्मशान पर निवास कर रहे हैं। आज रुद्राभिषेक करने से बचें।')
+    .replace(/Lord Shiva resides in Smashan\. Avoid performing Rudrabhishek today\./gi, 'भगवान शिव श्मशान पर निवास कर रहे हैं। आज रुद्राभिषेक टालें।')
+    .replace(/Avoid performing Rudrabhishek today\./gi, 'आज रुद्राभिषेक करने से बचें।');
+};
+
+const translateAgniVaasDescHindi = (desc?: string): string => {
+  if (!desc) return '';
+  return desc
+    .replace(/Agni \(Fire\) resides on Earth \(Prithvi\)\. Performing Yajna\/Havan today is highly auspicious, bringing prosperity and fulfillment\./gi, 'अग्नि देव पृथ्वी लोक पर निवास कर रहे हैं। आज यज्ञ या हवन करना अत्यंत शुभ है, जिससे सुख-समृद्धि की प्राप्ति होती है।')
+    .replace(/Agni resides in Aakash \/ Patala\. Avoid performing Yajna\/Havan today\./gi, 'अग्नि देव आकाश या पाताल लोक में निवास कर रहे हैं। आज यज्ञ या हवन करने से बचें।')
+    .replace(/Avoid performing Yajna\/Havan today\./gi, 'आज यज्ञ अथवा हवन करने से बचें।');
+};
+
+const translateAdviceHindi = (advice: string): string => {
+  if (!advice) return '';
+  return advice
+    .replace(/Shukla Paksha is favorable\./g, 'शुक्ल पक्ष अत्यंत अनुकूल है।')
+    .replace(/Krishna Paksha is generally avoided for entering new homes\./g, 'कृष्ण पक्ष में नए गृह प्रवेश को सामान्यतः वर्जित माना जाता है।')
+    .replace(/Highly auspicious wedding Nakshatra: ([^.]+)\./g, 'विवाह हेतु $1 नक्षत्र अत्यंत शुभ एवं मंगलकारी है।')
+    .replace(/Nakshatra ([^.]+) is excellent for new home entry\./g, 'गृह प्रवेश हेतु $1 नक्षत्र अति उत्तम है।')
+    .replace(/Nakshatra ([^.]+) is favorable for naming ceremonies\./g, 'नामकरण संस्कार के लिए $1 नक्षत्र अनुकूल है।')
+    .replace(/Nakshatra ([^.]+) is auspicious for vehicle purchases\./g, 'वाहन क्रय हेतु $1 नक्षत्र शुभ है।')
+    .replace(/Nakshatra ([^.]+) is not recommended\./g, '$1 नक्षत्र में गृह प्रवेश टालें।')
+    .replace(/Nakshatra ([^.]+) is not preferred\./g, '$1 नक्षत्र विवाह हेतु उत्तम नहीं है।')
+    .replace(/Nakshatra ([^.]+) is neutral\./g, '$1 नक्षत्र सामान्य प्रभाव वाला है।')
+    .replace(/Tithi ([^.]+) is highly auspicious\./g, 'तिथि $1 अत्यंत शुभ है।')
+    .replace(/Tithi ([^.]+) is highly favorable\./g, 'तिथि $1 अत्यंत अनुकूल है।')
+    .replace(/Tithi ([^.]+) should be avoided\./g, 'तिथि $1 में यह कार्य वर्जित है।')
+    .replace(/Tithi ([^.]+) is inauspicious\./g, 'तिथि $1 अशुभ मानी जाती है।')
+    .replace(/Tithi ([^.]+) is supportive\./g, 'तिथि $1 अनुकूल है।')
+    .replace(/Tithi ([^.]+) supports major purchases\./g, 'तिथि $1 खरीदारी हेतु शुभ है।')
+    .replace(/Avoid vehicle purchases on Tithi ([^.]+)\./g, 'तिथि $1 में वाहन खरीदारी से बचें।')
+    .replace(/Avoid naming ceremonies on Tithi ([^.]+)\./g, 'तिथि $1 में नामकरण संस्कार न करें।')
+    .replace(/Weekday is favorable\./g, 'वार (दिन) अनुकूल है।')
+    .replace(/Weekday is not ideal\./g, 'वार (दिन) उत्तम नहीं है।')
+    .replace(/Avoid purchasing vehicles on Tuesday or Saturday\./g, 'मंगलवार या शनिवार को वाहन क्रय करने से बचें।')
+    .replace(/Pratipada/g, 'प्रतिपदा').replace(/Dwitiya/g, 'द्वितीया').replace(/Tritiya/g, 'तृतीया').replace(/Chaturthi/g, 'चतुर्थी')
+    .replace(/Panchami/g, 'पंचमी').replace(/Shashthi/g, 'षष्ठी').replace(/Saptami/g, 'सप्तमी').replace(/Ashtami/g, 'अष्टमी')
+    .replace(/Navami/g, 'नवमी').replace(/Dashami/g, 'दशमी').replace(/Ekadashi/g, 'एकादशी').replace(/Dwadashi/g, 'द्वादशी')
+    .replace(/Trayodashi/g, 'त्रयोदशी').replace(/Chaturdashi/g, 'चतुर्दशी').replace(/Purnima/g, 'पूर्णिमा').replace(/Amavasya/g, 'अमावस्या')
+    .replace(/Ashwini/g, 'अश्विनी').replace(/Bharani/g, 'भरणी').replace(/Krittika/g, 'कृत्तिका').replace(/Rohini/g, 'रोहिणी')
+    .replace(/Mrigashirsha/g, 'मृगशिरा').replace(/Ardra/g, 'आर्द्रा').replace(/Punarvasu/g, 'पुनर्वसु').replace(/Pushya/g, 'पुष्य')
+    .replace(/Ashlesha/g, 'आश्लेषा').replace(/Magha/g, 'मघा').replace(/Purvaphalguni/g, 'पूर्वाफाल्गुनी').replace(/Uttaraphalguni/g, 'उत्तराफाल्गुनी')
+    .replace(/Hasta/g, 'हस्त').replace(/Chitra/g, 'चित्रा').replace(/Swati/g, 'स्वाति').replace(/Vishakha/g, 'विशाखा')
+    .replace(/Anuradha/g, 'अनुराधा').replace(/Jyeshtha/g, 'ज्येष्ठा').replace(/Mula/g, 'मूल').replace(/Purvashadha/g, 'पूर्वाषाढ़ा')
+    .replace(/Uttarashadha/g, 'उत्तराषाढ़ा').replace(/Shravana/g, 'श्रवण').replace(/Dhanishta/g, 'धनिष्ठा').replace(/Shatabhisha/g, 'शतभिषा')
+    .replace(/Purvabhadrapada/g, 'पूर्वाभाद्रपद').replace(/Uttarabhadrapada/g, 'उत्तराभाद्रपद').replace(/Revati/g, 'रेवती');
+};
 
 export function MuhuratScreen({ 
   panchang, 
@@ -337,9 +390,11 @@ export function MuhuratScreen({
               <span className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">✨</span>
               <div>
                 <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">
-                  {language === 'Hindi' ? "शुभ मुहूर्त व योग (Siddhi Yogas)" : "Auspicious Siddhi Yogas"}
+                  {language === 'Hindi' ? "शुभ मुहूर्त व योग" : "Auspicious Siddhi Yogas"}
                 </h3>
-                <span className="text-[9px] text-emerald-600 dark:text-emerald-400 block mt-1 uppercase tracking-widest font-mono">Auspicious Timings</span>
+                <span className="text-[9px] text-emerald-600 dark:text-emerald-400 block mt-1 uppercase tracking-widest font-mono">
+                  {language === 'Hindi' ? "शुभ समयावधि" : "Auspicious Timings"}
+                </span>
               </div>
             </div>
 
@@ -356,7 +411,7 @@ export function MuhuratScreen({
             {((panchang.shubhYogas && panchang.shubhYogas.length > 0) || (panchang.pushkarYog && panchang.pushkarYog.active)) && (
               <div className="mt-4 pt-3 border-t border-slate-100/50 dark:border-slate-800/30 space-y-2">
                 <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest block font-mono">
-                  {language === 'Hindi' ? "आज के विशेष योग (Auspicious Yogas):" : "Today's Special Yogas:"}
+                  {language === 'Hindi' ? "आज के विशेष सिद्ध योग:" : "Today's Special Yogas:"}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {panchang.pushkarYog && panchang.pushkarYog.active && (
@@ -382,9 +437,11 @@ export function MuhuratScreen({
               <span className="p-1.5 rounded-lg bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400">⚠️</span>
               <div>
                 <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">
-                  {language === 'Hindi' ? "वर्जित समय चक्र (Adverse Periods)" : "Adverse Periods (Inauspicious)"}
+                  {language === 'Hindi' ? "वर्जित समय चक्र" : "Adverse Periods (Inauspicious)"}
                 </h3>
-                <span className="text-[9px] text-red-600 dark:text-red-405 block mt-1 uppercase tracking-widest font-mono">Inauspicious Timings</span>
+                <span className="text-[9px] text-red-600 dark:text-red-405 block mt-1 uppercase tracking-widest font-mono">
+                  {language === 'Hindi' ? "अशुभ समयावधि" : "Inauspicious Timings"}
+                </span>
               </div>
             </div>
 
@@ -400,13 +457,13 @@ export function MuhuratScreen({
               {/* Durmuhurat & Varjyam */}
               {panchang.durmuhurat && panchang.durmuhurat.length > 0 && panchang.durmuhurat.map((d, idx) => (
                 <div key={`dur-${idx}`} className="flex justify-between items-center py-1.5 border-b border-slate-100/40 dark:border-slate-800/10">
-                  <span className="text-slate-400 font-medium">{language === 'Hindi' ? "दुर्मुहूर्त (Durmuhurat):" : "Durmuhurat:"}</span>
+                  <span className="text-slate-400 font-medium">{language === 'Hindi' ? "दुर्मुहूर्त:" : "Durmuhurat:"}</span>
                   <span className="font-bold text-red-655 dark:text-rose-400 font-mono">{d.start} - {d.end}</span>
                 </div>
               ))}
               {panchang.varjyam && panchang.varjyam.length > 0 && panchang.varjyam.map((v, idx) => (
                 <div key={`var-${idx}`} className="flex justify-between items-center py-1.5 border-b border-slate-100/40 dark:border-slate-800/10">
-                  <span className="text-slate-400 font-medium">{language === 'Hindi' ? "वर्ज्यम (Varjyam):" : "Varjyam:"}</span>
+                  <span className="text-slate-400 font-medium">{language === 'Hindi' ? "वर्ज्यम:" : "Varjyam:"}</span>
                   <span className="font-bold text-red-655 dark:text-rose-400 font-mono">{v.start} - {v.end}</span>
                 </div>
               ))}
@@ -439,9 +496,11 @@ export function MuhuratScreen({
               <span className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400">🔥</span>
               <div>
                 <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">
-                  {language === 'Hindi' ? "अग्निवास व शिववास (Ritual Muhurats)" : "Ritual Muhurats (Shiva/Agni)"}
+                  {language === 'Hindi' ? "अग्निवास व शिववास" : "Ritual Muhurats (Shiva/Agni)"}
                 </h3>
-                <span className="text-[9px] text-orange-600 dark:text-orange-400 block mt-1 uppercase tracking-widest font-mono">Ritual Auspiciousness</span>
+                <span className="text-[9px] text-orange-600 dark:text-orange-400 block mt-1 uppercase tracking-widest font-mono">
+                  {language === 'Hindi' ? "अनुष्ठान शुभता" : "Ritual Auspiciousness"}
+                </span>
               </div>
             </div>
 
@@ -461,8 +520,8 @@ export function MuhuratScreen({
                       {panchang.shivaVaas.isAuspicious ? (language === 'Hindi' ? 'शुभ' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ' : 'Avoid')}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-500 mt-1 leading-normal font-sans">
-                    <strong>{language === 'Hindi' ? "वास स्थान:" : "Residence:"}</strong> {language === 'Hindi' ? (panchang.shivaVaas.residenceHindi || panchang.shivaVaas.residence) : panchang.shivaVaas.residence} - {panchang.shivaVaas.description}
+                  <p className="text-[10px] text-slate-500 dark:text-slate-300 mt-1 leading-normal font-sans">
+                    <strong>{language === 'Hindi' ? "वास स्थान:" : "Residence:"}</strong> {language === 'Hindi' ? (panchang.shivaVaas.residenceHindi || panchang.shivaVaas.residence) : panchang.shivaVaas.residence} - {language === 'Hindi' ? translateShivaVaasDescHindi(panchang.shivaVaas.description) : panchang.shivaVaas.description}
                   </p>
                 </div>
               )}
@@ -482,8 +541,8 @@ export function MuhuratScreen({
                       {panchang.agniVaas.isAuspicious ? (language === 'Hindi' ? 'शुभ' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ' : 'Avoid')}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-500 mt-1 leading-normal font-sans">
-                    <strong>{language === 'Hindi' ? "वास स्थान:" : "Residence:"}</strong> {language === 'Hindi' ? (panchang.agniVaas.residenceHindi || panchang.agniVaas.residence) : panchang.agniVaas.residence} - {panchang.agniVaas.description}
+                  <p className="text-[10px] text-slate-500 dark:text-slate-300 mt-1 leading-normal font-sans">
+                    <strong>{language === 'Hindi' ? "वास स्थान:" : "Residence:"}</strong> {language === 'Hindi' ? (panchang.agniVaas.residenceHindi || panchang.agniVaas.residence) : panchang.agniVaas.residence} - {language === 'Hindi' ? translateAgniVaasDescHindi(panchang.agniVaas.description) : panchang.agniVaas.description}
                   </p>
                 </div>
               )}
@@ -601,7 +660,7 @@ export function MuhuratScreen({
                     <h3 className="text-xs sm:text-sm font-extrabold text-orange-950 dark:text-amber-100 font-serif leading-none">
                       {language === 'Hindi' ? cat.hindiName : cat.name}
                     </h3>
-                    <span className="text-[9px] sm:text-[10px] text-slate-400 block mt-1">{cat.name}</span>
+                    {language !== 'Hindi' && <span className="text-[9px] sm:text-[10px] text-slate-400 block mt-1">{cat.name}</span>}
                   </div>
                 </div>
 

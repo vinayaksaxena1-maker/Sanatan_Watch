@@ -122,6 +122,24 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
     setCustomEndTime('');
   };
 
+  const isTimePassed = (timeStr: string): boolean => {
+    if (!timeStr) return false;
+    const cleanStr = timeStr.trim().toUpperCase();
+    const match = cleanStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/);
+    if (!match) return false;
+    
+    let hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    const ampm = match[3];
+
+    if (ampm === 'PM' && hours < 12) hours += 12;
+    if (ampm === 'AM' && hours === 12) hours = 0;
+
+    const now = new Date();
+    const periodDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
+    return periodDate.getTime() < now.getTime();
+  };
+
   // Extract Adverse periods list
   const getAdverseTimesList = () => {
     if (!panchangInfo) return [];
@@ -203,7 +221,30 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
       });
     }
 
-    return list;
+    // 7. Bhadra Kaal Warning
+    if (panchangInfo.bhadra && (panchangInfo.bhadra.active || panchangInfo.bhadra.startTime)) {
+      list.push({
+        name: 'भद्रा काल चेतावनी',
+        time: `${panchangInfo.bhadra.startTime || panchangInfo.sunrise} - ${panchangInfo.bhadra.endTime || panchangInfo.sunset}`,
+        start: panchangInfo.bhadra.startTime || panchangInfo.sunrise,
+        end: panchangInfo.bhadra.endTime || panchangInfo.sunset,
+        desc: `भद्रा काल (${panchangInfo.bhadra.vasHindi || 'पाताल'}) के दौरान रक्षासूत्र, विवाह व शुभ कार्य वर्जित हैं।`
+      });
+    }
+
+    // 8. Panchak Warning
+    if (panchangInfo.panchak && panchangInfo.panchak.active) {
+      list.push({
+        name: `${panchangInfo.panchak.hindiName || 'पंचक'} काल`,
+        time: `सूर्योदय से अहोरात्र`,
+        start: panchangInfo.sunrise,
+        end: panchangInfo.sunset,
+        desc: panchangInfo.panchak.description || 'पंचक काल के दौरान दक्षिण दिशा यात्रा, शवदाह व छत ढालना वर्जित है।'
+      });
+    }
+
+    // Filter out periods that have already passed for today
+    return list.filter(item => !isTimePassed(item.end || item.start));
   };
 
   // Extract Auspicious periods list
@@ -211,7 +252,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
     if (!panchangInfo) return [];
     const list: { name: string; time: string; start: string; end: string; desc: string }[] = [];
 
-    // 1. Core Muhurats (Brahma, Abhijit, Godhuli) using getMuhuratsForPanchang
+    // 1. Core Muhurats (Brahma, Abhijit, Godhuli, Vijaya, Nishita) using getMuhuratsForPanchang
     try {
       const muhurats = getMuhuratsForPanchang(panchangInfo);
       muhurats.forEach(muh => {
@@ -229,7 +270,69 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
       console.error("Error fetching muhurats", e);
     }
 
-    // 2. Auspicious Choghadiyas
+    // 2. Solar & Lunar Milestones (सूर्योदय, सूर्यास्त व चन्द्रोदय)
+    if (panchangInfo.sunrise) {
+      list.push({
+        name: 'सूर्योदय (प्रातः संध्या समय)',
+        time: panchangInfo.sunrise,
+        start: panchangInfo.sunrise,
+        end: panchangInfo.sunrise,
+        desc: 'प्रातः सूर्य आराधना, गायत्री जाप एवं सूर्य देव को जल अर्पित करने का पावन समय।'
+      });
+    }
+    if (panchangInfo.sunset) {
+      list.push({
+        name: 'सूर्यास्त (सायं संध्या आरती)',
+        time: panchangInfo.sunset,
+        start: panchangInfo.sunset,
+        end: panchangInfo.sunset,
+        desc: 'सायंकाल मंदिर दर्शन, गृह दीप प्रज्वलन एवं संध्या आरती का पवित्र समय।'
+      });
+    }
+    if (panchangInfo.moonrise && panchangInfo.moonrise !== '---') {
+      list.push({
+        name: 'चन्द्रोदय (चन्द्र अर्घ्य समय)',
+        time: panchangInfo.moonrise,
+        start: panchangInfo.moonrise,
+        end: panchangInfo.moonrise,
+        desc: 'संकष्टी चतुर्थी, करवा चौथ व पूर्णिमा व्रत पारण हेतु चन्द्र दर्शन समय।'
+      });
+    }
+
+    // 3. Special Siddhi & Anandadi Yogas (सर्वार्थ/अमृत सिद्धि व त्रिपुष्कर योग)
+    if (panchangInfo.shubhYogas && panchangInfo.shubhYogas.length > 0) {
+      panchangInfo.shubhYogas.forEach((sy: any) => {
+        list.push({
+          name: sy.hindiName || sy.name,
+          time: `${sy.start} - ${sy.end}`,
+          start: sy.start,
+          end: sy.end,
+          desc: 'सिद्धि योग में किए गए सभी कार्यों में निश्चित सफलता प्राप्त होती है।'
+        });
+      });
+    }
+
+    if (panchangInfo.pushkarYog && panchangInfo.pushkarYog.active && panchangInfo.pushkarYog.name !== 'None') {
+      list.push({
+        name: panchangInfo.pushkarYog.hindiName,
+        time: `सूर्योदय से अहोरात्र`,
+        start: panchangInfo.sunrise,
+        end: panchangInfo.sunset,
+        desc: panchangInfo.pushkarYog.description || 'पुष्कर योग में किए गए शुभ कार्यों का फल कई गुना बढ़ जाता है।'
+      });
+    }
+
+    if (panchangInfo.anandadiYoga && panchangInfo.anandadiYoga.isAuspicious) {
+      list.push({
+        name: `${panchangInfo.anandadiYoga.nameHindi} योग`,
+        time: `समाप्ति: ${panchangInfo.anandadiYoga.endTime || panchangInfo.sunset}`,
+        start: panchangInfo.sunrise,
+        end: panchangInfo.anandadiYoga.endTime || panchangInfo.sunset,
+        desc: panchangInfo.anandadiYoga.description || 'आनन्दादि शुभ योग कल्याणकारी माना जाता है।'
+      });
+    }
+
+    // 4. Auspicious Choghadiyas
     if (panchangInfo.choghadiya) {
       panchangInfo.choghadiya.forEach((chog: any) => {
         if (chog.type === 'Shubh' || chog.type === 'Amrit' || chog.type === 'Labh') {
@@ -246,7 +349,22 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
       });
     }
 
-    // 3. Purnima or Amavasya tithi check
+    // 5. Auspicious Planetary Horas (गुरु, शुक्र, बुध, सूर्य होरा)
+    if (panchangInfo.hora) {
+      panchangInfo.hora.forEach((h: any) => {
+        if (h.quality === 'Auspicious') {
+          list.push({
+            name: `${h.lordHindi} होरा (${h.isDay ? 'दिन' : 'रात्रि'})`,
+            time: `${h.startTime} - ${h.endTime}`,
+            start: h.startTime,
+            end: h.endTime,
+            desc: h.benefits || 'शुभ ग्रह होरा काल कार्य सिद्धि एवं शुभ खरीदारी के लिए उत्तम।'
+          });
+        }
+      });
+    }
+
+    // 6. Purnima or Amavasya tithi check
     if (panchangInfo.hinduDate?.tithi?.hindiName) {
       const tithiHindi = panchangInfo.hinduDate.tithi.hindiName;
       if (tithiHindi.includes("पूर्णिमा") || tithiHindi.includes("अमावस्या")) {
@@ -260,7 +378,8 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
       }
     }
 
-    return list;
+    // Filter out periods that have already passed for today
+    return list.filter(item => !isTimePassed(item.end || item.start));
   };
 
   return (

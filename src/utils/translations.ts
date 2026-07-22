@@ -163,7 +163,7 @@ export const translations = {
     helpIntro: "Read all information here to use the app effectively."
   },
   Hindi: {
-    home: "सनातन घड़ी",
+    home: "सनातन घड़ी",
     tagline: "।। कालचक्र ज्ञान यंत्र ।।",
     panchang: "पंचांग",
     muhurat: "शुभ मुहूर्त",
