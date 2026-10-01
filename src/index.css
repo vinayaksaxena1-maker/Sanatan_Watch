@@ -15,23 +15,23 @@
 }
 
 .dark {
-  --brand-bg: #1A2433;
-  --brand-card: #243244;
-  --brand-control: #2E3D52;
-  --brand-border: #475569;
-  --brand-text-pri: #F9FAFB;
+  --brand-bg: #0A1128;
+  --brand-card: #131C31;
+  --brand-control: #1E2940;
+  --brand-border: #31425D;
+  --brand-text-pri: #F8FAFC;
   --brand-text-sec: #CBD5E1;
-  --brand-text-mut: #94A3B8;
+  --brand-text-mut: #AAB7C7;
   --brand-accent: #F59E0B;
   --brand-sel-bg: #422006;
   --brand-sel-text: #FEF3C7;
 }
 
 .theme-midnight {
-  --brand-bg: #17212F;
-  --brand-card: #222F40;
-  --brand-control: #2D3B4E;
-  --brand-border: #435267;
+  --brand-bg: #0A1128;
+  --brand-card: #131C31;
+  --brand-control: #1E2940;
+  --brand-border: #31425D;
   --brand-text-pri: #F8FAFC;
   --brand-text-sec: #CBD5E1;
   --brand-text-mut: #AAB7C7;
@@ -87,13 +87,13 @@ body:not(.dark) .text-slate-550 {
 /* Map existing color tokens to Dark Mode Palette dynamically */
 .dark {
   /* Text Colors */
-  --color-slate-900: #F9FAFB;
-  --color-slate-800: #F9FAFB;
-  --color-slate-700: #F9FAFB;
+  --color-slate-900: #F8FAFC;
+  --color-slate-800: #F8FAFC;
+  --color-slate-700: #F8FAFC;
   --color-slate-600: #CBD5E1;
   --color-slate-500: #CBD5E1;
-  --color-slate-400: #94A3B8;
-  --color-zinc-400: #94A3B8;
+  --color-slate-400: #AAB7C7;
+  --color-zinc-400: #AAB7C7;
   
   /* Brand/Accent tokens for Dark Mode */
   --color-orange-600: #F59E0B;
@@ -103,7 +103,7 @@ body:not(.dark) .text-slate-550 {
   --color-amber-400: #F59E0B;
   
   /* Borders */
-  --color-orange-100: #475569; /* Used in dividers like border-orange-100/35 */
+  --color-orange-100: #31425D; /* Used in dividers like border-orange-100/35 */
 }
 
 input, textarea, select {
@@ -126,13 +126,13 @@ input, textarea, select {
   --color-orange-350: #ffa726; /* Register custom orange-350 color */
 
   /* Dark Mode Palette Tokens (New) */
-  --color-dark-app: #1A2433;
-  --color-dark-card: #243244;
-  --color-dark-control: #2E3D52;
-  --color-dark-text-pri: #F9FAFB;
+  --color-dark-app: #0A1128;
+  --color-dark-card: #131C31;
+  --color-dark-control: #1E2940;
+  --color-dark-text-pri: #F8FAFC;
   --color-dark-text-sec: #CBD5E1;
-  --color-dark-text-mut: #94A3B8;
-  --color-dark-border: #475569;
+  --color-dark-text-mut: #AAB7C7;
+  --color-dark-border: #31425D;
   --color-dark-accent: #F59E0B;
   --color-dark-sel-bg: #422006;
   --color-dark-sel-text: #FEF3C7;
@@ -180,15 +180,15 @@ input, textarea, select {
 
 /* Upgrade active dark theme context with Specific Dark Palette */
 .dark {
-  --bg-app-dark-start: #1A2433;
-  --bg-app-dark-mid: #1A2433;
-  --bg-app-dark-end: #1A2433;
+  --bg-app-dark-start: #0A1128;
+  --bg-app-dark-mid: #0A1128;
+  --bg-app-dark-end: #0A1128;
   --bg-app-dark-glow: #422006;
-  --bg-envelope-dark: #243244;
+  --bg-envelope-dark: #131C31;
 
   /* Glass Card Upgrades */
-  --card-bg-dark: #243244;
-  --card-border-dark: #475569;
+  --card-bg-dark: #131C31;
+  --card-border-dark: #31425D;
   --card-shadow-dark: 0 10px 30px rgba(0, 0, 0, 0.4);
   --card-border-hover-dark: #F59E0B;
   --card-shadow-hover-dark: 0 12px 36px rgba(245, 158, 11, 0.15);
@@ -417,6 +417,5 @@ input, textarea, select {
     font-size: 114.5%; /* Scales base root font size from 16px to 18.32px */
   }
 }
-@ c u s t o m - v a r i a n t   m i d n i g h t   ( & : w h e r e ( . t h e m e - m i d n i g h t ,   . t h e m e - m i d n i g h t   * ) ) ; 
- 
- 
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant midnight (&:where(.theme-midnight, .theme-midnight *));

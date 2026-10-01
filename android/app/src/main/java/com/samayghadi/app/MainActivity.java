@@ -53,6 +53,13 @@ public class MainActivity extends BridgeActivity {
         // Apply Sticky Immersive Mode initially
         hideSystemBarsInternal();
 
+        // Request Notification Permission on Android 13+ (API 33)
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+
         // Register a JS interface to let React code hide/show system bars if ever needed
         WebView webView = getBridge().getWebView();
         if (webView != null) {

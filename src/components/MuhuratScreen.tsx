@@ -345,17 +345,17 @@ export function MuhuratScreen({
             }
           }
         }}
-        className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-white/5 dark:bg-[#120B08]/30 p-4 rounded-2xl border border-white/10 dark:border-white/5 text-left cursor-pointer"
+        className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-white/5 dark:bg-brand-card p-4 rounded-2xl border border-white/10 dark:border-brand-border text-left cursor-pointer"
       >
         <div>
-          <h3 className="text-xs font-extrabold text-slate-800 dark:text-brand-text-pri font-serif">शुभ मुहूर्त तिथि चयनकर्ता</h3>
-          <p className="text-[10px] text-slate-500 dark:text-brand-text-mut mt-0.5">आगे आने वाले या पिछले दिनों के मुहूर्त जानने के लिए तिथि चुनें।</p>
+          <h3 className="text-xs font-extrabold text-slate-800 dark:text-brand-accent font-serif">शुभ मुहूर्त तिथि चयनकर्ता</h3>
+          <p className="text-[10px] text-slate-500 dark:text-brand-text-sec mt-0.5">आगे आने वाले या पिछले दिनों के मुहूर्त जानने के लिए तिथि चुनें।</p>
         </div>
-        <div className="relative min-w-[220px] flex items-center gap-2 bg-white/75 dark:bg-brand-card p-2 px-3 rounded-xl border border-orange-100 dark:border-brand-border shadow-xs">
-          <Calendar className="w-4 h-4 text-orange-600 shrink-0" />
+        <div className="relative min-w-[220px] flex items-center gap-2 bg-white/75 dark:bg-brand-control p-2 px-3 rounded-xl border border-orange-100 dark:border-brand-border shadow-xs">
+          <Calendar className="w-4 h-4 text-orange-600 dark:text-brand-accent shrink-0" />
           <div className="min-w-0 pr-1 text-left flex-grow">
             <span className="text-[8px] text-slate-400 dark:text-brand-text-mut font-mono uppercase tracking-wider block">मुहूर्त तिथि</span>
-            <span className="text-2xs font-extrabold text-[#9A3412] dark:text-orange-200 font-sans block truncate leading-none mt-0.5">
+            <span className="text-2xs font-extrabold text-[#9A3412] dark:text-brand-text-pri font-sans block truncate leading-none mt-0.5">
               {selectedDate.toLocaleDateString('hi-IN', {
                 weekday: 'long',
                 year: 'numeric',
@@ -385,12 +385,12 @@ export function MuhuratScreen({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         
         {/* Card 1: शुभ मुहूर्त व योग */}
-        <div className="glass-card-light dark:glass-card-dark p-5 text-left rounded-3xl border border-emerald-100/50 dark:border-emerald-950/20 hover:border-emerald-500/30 transition-all duration-300 flex flex-col justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
+        <div className="glass-card-light dark:bg-brand-card p-5 text-left rounded-3xl border border-emerald-100/50 dark:border-brand-border hover:border-emerald-500/30 transition-all duration-300 flex flex-col justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2.5 border-b border-emerald-100/60 dark:border-brand-border">
-              <span className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">✨</span>
+              <span className="p-1.5 rounded-lg bg-emerald-100 dark:bg-brand-control text-emerald-700 dark:text-emerald-400">✨</span>
               <div>
-                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-brand-text-pri font-serif leading-none">
+                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-brand-accent font-serif leading-none">
                   {language === 'Hindi' ? "शुभ मुहूर्त व योग" : "Auspicious Siddhi Yogas"}
                 </h3>
                 <span className="text-[9px] text-emerald-600 dark:text-emerald-400 block mt-1 uppercase tracking-widest font-mono">
@@ -403,8 +403,8 @@ export function MuhuratScreen({
             <div className="space-y-2 text-xs">
               {allMuhurats.filter(m => m.type !== 'Ashubh').map((m, idx) => (
                 <div key={idx} className="flex justify-between items-center py-1.5 border-b border-slate-100/40 dark:border-brand-border">
-                  <span className="text-slate-400 dark:text-brand-text-mut font-medium">{language === 'Hindi' ? (m.hindiName || m.name) : m.name}:</span>
-                  <span className="font-bold text-slate-855 dark:text-emerald-350 font-mono">{m.startTime} - {m.endTime}</span>
+                  <span className="text-slate-400 dark:text-brand-text-sec font-medium">{language === 'Hindi' ? (m.hindiName || m.name) : m.name}:</span>
+                  <span className="font-bold text-slate-855 dark:text-brand-text-pri font-mono">{m.startTime} - {m.endTime}</span>
                 </div>
               ))}
             </div>
@@ -416,12 +416,12 @@ export function MuhuratScreen({
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {panchang.pushkarYog && panchang.pushkarYog.active && (
-                    <span className="text-[9.5px] font-black px-2 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-350 border border-amber-300/40 animate-pulse font-serif">
+                    <span className="text-[9.5px] font-black px-2 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-300/40 animate-pulse font-serif">
                       🌟 {language === 'Hindi' ? panchang.pushkarYog.hindiName : panchang.pushkarYog.name} ({panchang.pushkarYog.type})
                     </span>
                   )}
                   {panchang.shubhYogas && panchang.shubhYogas.map((y, idx) => (
-                    <span key={idx} className="text-[9.5px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-350 border border-emerald-250/30 font-serif">
+                    <span key={idx} className="text-[9.5px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-250/30 font-serif">
                       ✨ {language === 'Hindi' ? y.hindiName : y.name} ({y.start} - {y.end})
                     </span>
                   ))}
@@ -432,15 +432,15 @@ export function MuhuratScreen({
         </div>
 
         {/* Card 2: वर्जित समय चक्र */}
-        <div className="glass-card-light dark:glass-card-dark p-5 text-left rounded-3xl border border-red-150 dark:border-red-950/20 hover:border-red-500/30 transition-all duration-300 flex flex-col justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
+        <div className="glass-card-light dark:bg-brand-card p-5 text-left rounded-3xl border border-red-150 dark:border-brand-border hover:border-red-500/30 transition-all duration-300 flex flex-col justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2.5 border-b border-red-100/60 dark:border-brand-border">
-              <span className="p-1.5 rounded-lg bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400">⚠️</span>
+              <span className="p-1.5 rounded-lg bg-red-100 dark:bg-brand-control text-red-700 dark:text-rose-400">⚠️</span>
               <div>
-                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-brand-text-pri font-serif leading-none">
+                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-brand-accent font-serif leading-none">
                   {language === 'Hindi' ? "वर्जित समय चक्र" : "Adverse Periods (Inauspicious)"}
                 </h3>
-                <span className="text-[9px] text-red-600 dark:text-red-405 block mt-1 uppercase tracking-widest font-mono">
+                <span className="text-[9px] text-red-600 dark:text-rose-400 block mt-1 uppercase tracking-widest font-mono">
                   {language === 'Hindi' ? "अशुभ समयावधि" : "Inauspicious Timings"}
                 </span>
               </div>
@@ -450,7 +450,7 @@ export function MuhuratScreen({
             <div className="space-y-2 text-xs">
               {allMuhurats.filter(m => m.type === 'Ashubh').map((m, idx) => (
                 <div key={idx} className="flex justify-between items-center py-1.5 border-b border-slate-100/40 dark:border-brand-border">
-                  <span className="text-slate-400 dark:text-brand-text-mut font-medium">{language === 'Hindi' ? (m.hindiName || m.name) : m.name}:</span>
+                  <span className="text-slate-400 dark:text-brand-text-sec font-medium">{language === 'Hindi' ? (m.hindiName || m.name) : m.name}:</span>
                   <span className="font-bold text-red-655 dark:text-rose-400 font-mono">{m.startTime} - {m.endTime}</span>
                 </div>
               ))}
@@ -458,13 +458,13 @@ export function MuhuratScreen({
               {/* Durmuhurat & Varjyam */}
               {panchang.durmuhurat && panchang.durmuhurat.length > 0 && panchang.durmuhurat.map((d, idx) => (
                 <div key={`dur-${idx}`} className="flex justify-between items-center py-1.5 border-b border-slate-100/40 dark:border-brand-border">
-                  <span className="text-slate-400 dark:text-brand-text-mut font-medium">{language === 'Hindi' ? "दुर्मुहूर्त:" : "Durmuhurat:"}</span>
+                  <span className="text-slate-400 dark:text-brand-text-sec font-medium">{language === 'Hindi' ? "दुर्मुहूर्त:" : "Durmuhurat:"}</span>
                   <span className="font-bold text-red-655 dark:text-rose-400 font-mono">{d.start} - {d.end}</span>
                 </div>
               ))}
               {panchang.varjyam && panchang.varjyam.length > 0 && panchang.varjyam.map((v, idx) => (
                 <div key={`var-${idx}`} className="flex justify-between items-center py-1.5 border-b border-slate-100/40 dark:border-brand-border">
-                  <span className="text-slate-400 dark:text-brand-text-mut font-medium">{language === 'Hindi' ? "वर्ज्यम:" : "Varjyam:"}</span>
+                  <span className="text-slate-400 dark:text-brand-text-sec font-medium">{language === 'Hindi' ? "वर्ज्यम:" : "Varjyam:"}</span>
                   <span className="font-bold text-red-655 dark:text-rose-400 font-mono">{v.start} - {v.end}</span>
                 </div>
               ))}
@@ -474,12 +474,12 @@ export function MuhuratScreen({
             {((panchang.dagdaTithi && panchang.dagdaTithi.isDagda) || (panchang.bhadra && panchang.bhadra.active)) && (
               <div className="mt-3 pt-2.5 border-t border-slate-100/50 dark:border-brand-border space-y-1 text-[10px]">
                 {panchang.dagdaTithi && panchang.dagdaTithi.isDagda && (
-                  <div className="text-red-700 dark:text-red-400 font-bold bg-red-500/10 px-2 py-1 rounded border border-red-500/15 font-serif">
+                  <div className="text-red-700 dark:text-rose-300 font-bold bg-red-500/10 px-2 py-1 rounded border border-red-500/20 font-serif">
                     {language === 'Hindi' ? "🚨 आज दग्ध तिथि है! महत्वपूर्ण कार्य टालें।" : "🚨 Today is Dagda Tithi! Avoid starting important activities."}
                   </div>
                 )}
                 {panchang.bhadra && panchang.bhadra.active && (
-                  <div className="text-red-700 dark:text-red-400 font-bold bg-red-500/10 px-2 py-1 rounded border border-red-500/15 font-serif">
+                  <div className="text-red-700 dark:text-rose-300 font-bold bg-red-500/10 px-2 py-1 rounded border border-red-500/20 font-serif">
                     {language === 'Hindi'
                       ? `🚨 भद्रा काल सक्रिय है (${panchang.bhadra.startTime} से ${panchang.bhadra.endTime} तक)।`
                       : `🚨 Bhadra period is active (from ${panchang.bhadra.startTime} to ${panchang.bhadra.endTime}).`}
@@ -491,12 +491,12 @@ export function MuhuratScreen({
         </div>
 
         {/* Card 3: शिववास व अग्निवास */}
-        <div className="glass-card-light dark:glass-card-dark p-5 text-left rounded-3xl border border-orange-150 dark:border-brand-border hover:border-orange-500/30 transition-all duration-300 flex flex-col justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
+        <div className="glass-card-light dark:bg-brand-card p-5 text-left rounded-3xl border border-orange-150 dark:border-brand-border hover:border-orange-500/30 transition-all duration-300 flex flex-col justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.1)]">
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2.5 border-b border-orange-100/60 dark:border-brand-border">
-              <span className="p-1.5 rounded-lg bg-orange-100 dark:bg-brand-card text-orange-700 dark:text-brand-accent">🔥</span>
+              <span className="p-1.5 rounded-lg bg-orange-100 dark:bg-brand-control text-orange-700 dark:text-brand-accent">🔥</span>
               <div>
-                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-brand-text-pri font-serif leading-none">
+                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-brand-accent font-serif leading-none">
                   {language === 'Hindi' ? "अग्निवास व शिववास" : "Ritual Muhurats (Shiva/Agni)"}
                 </h3>
                 <span className="text-[9px] text-orange-600 dark:text-brand-accent block mt-1 uppercase tracking-widest font-mono">
@@ -508,42 +508,42 @@ export function MuhuratScreen({
             <div className="space-y-3.5">
               {/* Shiva Vaas */}
               {panchang.shivaVaas && (
-                <div className="p-3 rounded-2xl bg-white/5 dark:bg-white/2 border border-white/10 dark:border-white/5">
+                <div className="p-3 rounded-2xl bg-white/5 dark:bg-brand-control border border-white/10 dark:border-brand-border">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-slate-800 dark:text-brand-text-pri font-serif">
                       {language === 'Hindi' ? "शिववास (रुद्राभिषेक):" : "Shiva Vaas (Rudrabhishek):"}
                     </span>
                     <span className={`text-[10px] font-black px-2 py-0.5 rounded border ${
                       panchang.shivaVaas.isAuspicious
-                        ? 'bg-emerald-100 border-emerald-250 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
-                        : 'bg-rose-100 border-rose-250 text-rose-800 dark:bg-rose-950/30 dark:text-rose-455'
+                        ? 'bg-emerald-100 border-emerald-250 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/30'
+                        : 'bg-rose-100 border-rose-250 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-500/30'
                     }`}>
                       {panchang.shivaVaas.isAuspicious ? (language === 'Hindi' ? 'शुभ' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ' : 'Avoid')}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-500 dark:text-brand-text-pri mt-1 leading-normal font-sans">
-                    <strong>{language === 'Hindi' ? "वास स्थान:" : "Residence:"}</strong> {language === 'Hindi' ? (panchang.shivaVaas.residenceHindi || panchang.shivaVaas.residence) : panchang.shivaVaas.residence} - {language === 'Hindi' ? translateShivaVaasDescHindi(panchang.shivaVaas.description) : panchang.shivaVaas.description}
+                  <p className="text-[10px] text-slate-500 dark:text-brand-text-sec mt-1 leading-normal font-sans">
+                    <strong className="dark:text-brand-text-pri">{language === 'Hindi' ? "वास स्थान:" : "Residence:"}</strong> {language === 'Hindi' ? (panchang.shivaVaas.residenceHindi || panchang.shivaVaas.residence) : panchang.shivaVaas.residence} - {language === 'Hindi' ? translateShivaVaasDescHindi(panchang.shivaVaas.description) : panchang.shivaVaas.description}
                   </p>
                 </div>
               )}
 
               {/* Agni Vaas */}
               {panchang.agniVaas && (
-                <div className="p-3 rounded-2xl bg-white/5 dark:bg-white/2 border border-white/10 dark:border-white/5">
+                <div className="p-3 rounded-2xl bg-white/5 dark:bg-brand-control border border-white/10 dark:border-brand-border">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-bold text-slate-800 dark:text-brand-text-pri font-serif">
                       {language === 'Hindi' ? "अग्निवास (यज्ञ/हवन):" : "Agni Vaas (Yajna/Havan):"}
                     </span>
                     <span className={`text-[10px] font-black px-2 py-0.5 rounded border ${
                       panchang.agniVaas.isAuspicious
-                        ? 'bg-emerald-100 border-emerald-250 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
-                        : 'bg-rose-100 border-rose-250 text-rose-800 dark:bg-rose-950/30 dark:text-rose-455'
+                        ? 'bg-emerald-100 border-emerald-250 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/30'
+                        : 'bg-rose-100 border-rose-250 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-500/30'
                     }`}>
                       {panchang.agniVaas.isAuspicious ? (language === 'Hindi' ? 'शुभ' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ' : 'Avoid')}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-500 dark:text-brand-text-pri mt-1 leading-normal font-sans">
-                    <strong>{language === 'Hindi' ? "वास स्थान:" : "Residence:"}</strong> {language === 'Hindi' ? (panchang.agniVaas.residenceHindi || panchang.agniVaas.residence) : panchang.agniVaas.residence} - {language === 'Hindi' ? translateAgniVaasDescHindi(panchang.agniVaas.description) : panchang.agniVaas.description}
+                  <p className="text-[10px] text-slate-500 dark:text-brand-text-sec mt-1 leading-normal font-sans">
+                    <strong className="dark:text-brand-text-pri">{language === 'Hindi' ? "वास स्थान:" : "Residence:"}</strong> {language === 'Hindi' ? (panchang.agniVaas.residenceHindi || panchang.agniVaas.residence) : panchang.agniVaas.residence} - {language === 'Hindi' ? translateAgniVaasDescHindi(panchang.agniVaas.description) : panchang.agniVaas.description}
                   </p>
                 </div>
               )}
@@ -555,7 +555,7 @@ export function MuhuratScreen({
 
       {/* Active Muhurats Section */}
       {activeSlots.length > 0 && (
-        <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-md text-left relative overflow-hidden border border-emerald-500/20">
+        <div className="glass-card-light dark:bg-brand-card p-4 sm:p-5 shadow-md text-left relative overflow-hidden border border-emerald-500/20 dark:border-brand-border">
           <div className="absolute right-0 top-0 -mt-10 -mr-10 w-36 h-36 bg-emerald-500/8 dark:bg-emerald-600/8 blur-2xl rounded-full pointer-events-none"></div>
 
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 pb-2 border-b border-emerald-100/40 dark:border-brand-border">
@@ -567,7 +567,7 @@ export function MuhuratScreen({
                 </span>
                 {language === 'Hindi' ? "लाइव सक्रिय मुहूर्त संसूचक" : "Live Active Muhurat Detector"}
               </span>
-              <h3 className="text-sm sm:text-base md:text-lg font-extrabold text-slate-800 dark:text-brand-text-pri font-serif leading-none">
+              <h3 className="text-sm sm:text-base md:text-lg font-extrabold text-slate-800 dark:text-brand-accent font-serif leading-none">
                 {getTranslation(language, 'liveMuhurat')}
               </h3>
             </div>
@@ -575,26 +575,26 @@ export function MuhuratScreen({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {activeSlots.map((slot, idx) => (
-              <div key={idx} className="bg-emerald-50/20 dark:bg-emerald-950/10 p-3.5 rounded-2xl border border-emerald-500/20 flex gap-3 items-start">
-                <div className="p-2 rounded-xl bg-emerald-100/40 dark:bg-emerald-950/30 shrink-0">
+              <div key={idx} className="bg-emerald-50/20 dark:bg-brand-control p-3.5 rounded-2xl border border-emerald-500/20 dark:border-brand-border flex gap-3 items-start">
+                <div className="p-2 rounded-xl bg-emerald-100/40 dark:bg-brand-card shrink-0">
                   {slot.icon}
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-serif font-black text-slate-850 dark:text-orange-50">
+                    <span className="text-sm font-serif font-black text-slate-850 dark:text-brand-text-pri">
                       {language === 'Hindi' ? slot.categoryHindiName : slot.categoryName}
                     </span>
                     <span className="text-[8.5px] font-black tracking-widest bg-emerald-500 text-white dark:bg-emerald-600 uppercase px-1.5 py-0.5 rounded shadow-3xs">
                       {slot.suitability}
                     </span>
                   </div>
-                  <div className="text-[10px] font-bold text-slate-500 dark:text-brand-text-mut mt-1 font-mono">
+                  <div className="text-[10px] font-bold text-slate-500 dark:text-brand-text-pri mt-1 font-mono">
                     {language === 'Hindi' ? "समय:" : "Time:"} {slot.time}
                   </div>
-                  <div className="text-[10px] text-slate-655 dark:text-brand-text-mut mt-1">
-                    <span className="font-bold text-orange-950 dark:text-orange-200">{language === 'Hindi' ? "लग्न:" : "Lagna:"} {slot.lagna}</span>
+                  <div className="text-[10px] text-slate-655 dark:text-brand-text-sec mt-1">
+                    <span className="font-bold text-orange-950 dark:text-brand-accent">{language === 'Hindi' ? "लग्न:" : "Lagna:"} {slot.lagna}</span>
                   </div>
-                  <p className="text-[9.5px] text-slate-500 dark:text-brand-text-mut italic mt-1 leading-normal font-sans">
+                  <p className="text-[9.5px] text-slate-500 dark:text-brand-text-sec italic mt-1 leading-normal font-sans">
                     🌿 {slot.advice}
                   </p>
                 </div>
@@ -610,7 +610,7 @@ export function MuhuratScreen({
           onClick={() => setSelectedCategory('all')}
           className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer border ${
             selectedCategory === 'all'
-              ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+              ? 'bg-orange-500 text-white border-orange-500 shadow-sm dark:bg-[#853606] dark:text-white dark:border-[#853606]'
               : 'bg-white/80 dark:bg-brand-card hover:bg-slate-50 dark:hover:bg-brand-control border-orange-100 dark:border-brand-border text-slate-700 dark:text-brand-text-pri'
           }`}
         >
@@ -622,7 +622,7 @@ export function MuhuratScreen({
             onClick={() => setSelectedCategory(cat.id)}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer border ${
               selectedCategory === cat.id
-                ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+                ? 'bg-orange-500 text-white border-orange-500 shadow-sm dark:bg-[#853606] dark:text-white dark:border-[#853606]'
                 : 'bg-white/80 dark:bg-brand-card hover:bg-slate-50 dark:hover:bg-brand-control border-orange-100/50 dark:border-brand-border text-slate-700 dark:text-brand-text-pri'
             }`}
           >
@@ -633,13 +633,13 @@ export function MuhuratScreen({
       </div>
 
       {/* Warning regarding Rahu Kaal or special adverse timing if any */}
-      <div className="bg-amber-500/5 dark:bg-brand-card rounded-2xl border border-amber-500/20 [box-shadow:0_0_15px_rgba(245,158,11,0.1)] p-3.5 sm:p-4 text-left flex gap-3">
+      <div className="bg-amber-500/5 dark:bg-brand-card rounded-2xl border border-amber-500/20 dark:border-brand-border [box-shadow:0_0_15px_rgba(245,158,11,0.1)] p-3.5 sm:p-4 text-left flex gap-3">
         <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-brand-accent flex-shrink-0 mt-0.5" />
         <div>
-          <h4 className="text-xs sm:text-sm font-bold text-amber-950 dark:text-amber-200 font-serif">
+          <h4 className="text-xs sm:text-sm font-bold text-amber-950 dark:text-brand-accent font-serif">
             {language === 'Hindi' ? "ज्योतिषीय दिशानिर्देश (राहुकाल)" : "Astrological Guidelines (Rahu Kaal)"}
           </h4>
-          <p className="text-[10px] sm:text-2xs text-amber-900/90 dark:text-amber-300/80 leading-normal mt-0.5 font-sans">
+          <p className="text-[10px] sm:text-2xs text-amber-900/90 dark:text-brand-text-sec leading-normal mt-0.5 font-sans">
             {language === 'Hindi'
               ? `कृपया सुनिश्चित करें कि चुना गया समय सक्रिय राहुकाल (${panchang.rahuKaal.start} - ${panchang.rahuKaal.end}) से मेल नहीं खाता है, क्योंकि राहुकाल के दौरान कोई नया काम शुरू करना शुभ नहीं माना जाता है।`
               : `Please ensure the selected time does not overlap with active Rahu Kaal (${panchang.rahuKaal.start} - ${panchang.rahuKaal.end}), as starting new work during Rahu Kaal is considered inauspicious.`}
@@ -650,15 +650,15 @@ export function MuhuratScreen({
       {/* Render matching category grids */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         {categoriesFiltered.map((cat) => (
-          <div key={cat.id} className="bg-white/5 dark:bg-[#120B08]/40 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-white/10 dark:border-white/5 hover:border-orange-500/30 hover:scale-[1.01] hover:translate-y-[-2px] shadow-[0_8px_32px_0_rgba(0,0,0,0.15)] transition-all duration-300 flex flex-col justify-between text-left">
+          <div key={cat.id} className="bg-white/5 dark:bg-brand-card backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-white/10 dark:border-brand-border hover:border-orange-500/30 hover:scale-[1.01] hover:translate-y-[-2px] shadow-[0_8px_32px_0_rgba(0,0,0,0.15)] transition-all duration-300 flex flex-col justify-between text-left">
             <div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-orange-50/50 dark:bg-brand-card">
+                  <div className="p-2 rounded-xl bg-orange-50/50 dark:bg-brand-control">
                     {cat.icon}
                   </div>
                   <div>
-                    <h3 className="text-xs sm:text-sm font-extrabold text-orange-950 dark:text-brand-text-pri font-serif leading-none">
+                    <h3 className="text-xs sm:text-sm font-extrabold text-orange-950 dark:text-brand-accent font-serif leading-none">
                       {language === 'Hindi' ? cat.hindiName : cat.name}
                     </h3>
                     {language !== 'Hindi' && <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-brand-text-mut block mt-1">{cat.name}</span>}
@@ -676,27 +676,27 @@ export function MuhuratScreen({
                 </div>
               </div>
 
-              <p className="text-[10px] sm:text-2xs text-slate-600 dark:text-brand-text-mut mt-3 border-b border-white/10 dark:border-white/5 pb-3 leading-relaxed">
+              <p className="text-[10px] sm:text-2xs text-slate-600 dark:text-brand-text-sec mt-3 border-b border-white/10 dark:border-brand-border pb-3 leading-relaxed">
                 {cat.desc}
               </p>
 
               {/* Slots Timelines list */}
               <div className="space-y-2.5 mt-4">
-                <span className="text-[10px] font-bold text-slate-400 dark:text-brand-text-mut uppercase font-mono tracking-wider block font-semibold">
+                <span className="text-[10px] font-bold text-slate-400 dark:text-brand-text-sec uppercase font-mono tracking-wider block font-semibold">
                   {language === 'Hindi' ? "आज के शुभ मुहूर्त" : "Auspicious Timings Today"}
                 </span>
                 {cat.slots.map((sl, idx) => (
-                  <div key={idx} className="p-3 rounded-2xl bg-white/5 dark:bg-white/2 border border-white/10 dark:border-white/5 hover:border-orange-500/20 transition-all duration-300 relative overflow-hidden">
+                  <div key={idx} className="p-3 rounded-2xl bg-white/5 dark:bg-brand-control border border-white/10 dark:border-brand-border hover:border-orange-500/20 transition-all duration-300 relative overflow-hidden">
                     <div className="flex justify-between items-center">
                       <span className="text-2xs sm:text-xs font-black text-slate-850 dark:text-brand-text-pri font-mono tracking-tight">{sl.time}</span>
-                      <span className="text-[9px] font-extrabold bg-[#e8f5e9]/70 dark:bg-green-950/25 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-mono">
+                      <span className="text-[9px] font-extrabold bg-[#e8f5e9]/70 dark:bg-emerald-950/40 text-green-800 dark:text-emerald-300 border dark:border-emerald-500/30 px-2 py-0.5 rounded-full font-mono">
                         {sl.suitability}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 mt-2 text-[10px] sm:text-2xs text-slate-600 dark:text-brand-text-mut font-medium">
+                    <div className="flex items-center gap-1.5 mt-2 text-[10px] sm:text-2xs text-slate-600 dark:text-brand-text-sec font-medium">
                       <span className="text-slate-400 dark:text-brand-text-mut text-3xs uppercase font-mono">{language === 'Hindi' ? "लग्न:" : "Lagna:"}</span>
-                      <span className="text-orange-950 dark:text-orange-200 font-bold bg-orange-50 dark:bg-brand-card px-1.5 py-0.2 rounded font-sans">{sl.lagna}</span>
+                      <span className="text-orange-950 dark:text-brand-text-pri font-bold bg-orange-50 dark:bg-brand-card border dark:border-brand-border px-1.5 py-0.2 rounded font-sans">{sl.lagna}</span>
                     </div>
 
                     <div className="text-[9px] sm:text-3xs text-slate-500 dark:text-brand-text-sec italic mt-1 leading-normal font-sans">
@@ -708,7 +708,7 @@ export function MuhuratScreen({
             </div>
 
             {/* Custom advice footer */}
-            <div className="mt-4 pt-3 border-t border-white/10 dark:border-white/5 flex items-center justify-between text-[10px] text-slate-400 dark:text-brand-text-mut font-mono">
+            <div className="mt-4 pt-3 border-t border-white/10 dark:border-brand-border flex items-center justify-between text-[10px] text-slate-400 dark:text-brand-text-sec font-mono">
               <span>{language === 'Hindi' ? `संवत् ${panchang.hinduDate.samvatVikram} स्थितियां` : `Samvat ${panchang.hinduDate.samvatVikram} Conditions`}</span>
               <span 
                 onClick={onViewAstrologyChart}

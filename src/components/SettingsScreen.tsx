@@ -32,12 +32,15 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
       theme
     }));
     
-    let title = language === 'Hindi' ? '☀️ लाइट मोड सक्रिय' : '☀️ Light Mode Active';
-    let body = language === 'Hindi' ? 'रोशनी के अनुकूल लाइट थीम सक्रिय की गई।' : 'Light theme optimized for daylight active.';
-    if (theme === 'dark') {
-      title = language === 'Hindi' ? '🌙 डार्क मोड सक्रिय' : '🌙 Dark Mode Active';
-      body = language === 'Hindi' ? 'आँखों की थकान कम करने के लिए डार्क थीम सक्रिय की गई।' : 'Dark theme active to reduce eye fatigue.';
-    }
+    let title = language === 'Hindi' ? '? ???? ??? ??????' : '? Light Mode Active';
+      let body = language === 'Hindi' ? '??? ?? ??? ????? ?? ??? ???? ??? ???? ???? ??? ???' : 'Light theme optimized for daylight active.';
+      if (theme === 'dark') {
+        title = language === 'Hindi' ? '?? ????? ??? ??????' : '?? Dark Mode Active';
+        body = language === 'Hindi' ? '????? ?? ???? ?? ??? ????? ??? ???? ???? ??? ???' : 'Dark theme active to reduce eye fatigue.';
+      } else if (theme === 'midnight-saffron') {
+        title = language === 'Hindi' ? '✨ मिडनाइट सैफरन सक्रिय' : '? Midnight Saffron Active';
+        body = language === 'Hindi' ? 'मिडनाइट सैफरन डार्क थीम लागू किया गया है।' : 'Midnight Saffron dark theme active.';
+      }
     
     onPushToast(title, body);
   };
@@ -176,7 +179,7 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
                 >
                   {settings.theme === 'midnight-saffron' && <Check className="w-3 h-3 absolute top-1.5 right-1.5 text-white dark:text-brand-accent" />}
                   <Moon className={`w-3.5 h-3.5 ${settings.theme === 'midnight-saffron' ? 'text-white dark:text-brand-accent' : 'text-slate-400 dark:text-brand-text-mut'}`} />
-                  <span>{language === 'Hindi' ? '???????' : 'Midnight'}</span>
+                  <span>{language === 'Hindi' ? 'मिडनाइट' : 'Midnight'}</span>
                 </button>
               </div>
             </div>

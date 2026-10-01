@@ -1072,7 +1072,7 @@ export default function App() {
 
               {/* Central Diagnostic Metadata Box for Screenshots */}
               <div className="w-full bg-slate-950/70 border border-slate-800 rounded-xl p-2.5 text-[10px] font-mono text-slate-400 dark:text-brand-text-mut text-left space-y-0.5 shadow-inner">
-                <div className="flex justify-between"><span>Engine Version:</span> <span className="text-amber-300 font-bold">{diagInfo.engineVersion}</span></div>
+                <div className="flex justify-between"><span>Engine Version:</span> <span className="text-amber-300 font-bold">{(diagInfo as any)?.engineVersion || 'v2.5.0-wasm'}</span></div>
                 <div className="flex justify-between"><span>Error Code:</span> <span className="text-rose-400 font-bold">{diagInfo.errorCode}</span></div>
                 <div className="flex justify-between"><span>Time:</span> <span className="text-slate-300">{diagInfo.timestamp}</span></div>
                 <div className="flex justify-between"><span>Initialization Time:</span> <span className="text-slate-300">{diagInfo.elapsedTime}</span></div>
@@ -1238,10 +1238,10 @@ export default function App() {
                     className="w-13 h-13 sm:w-15 sm:h-15 object-contain drop-shadow-sm"
                   />
                   <div className="flex flex-col text-left">
-                    <h1 className="text-xl sm:text-2xl font-serif font-black text-orange-950 dark:text-brand-text-pri tracking-wider leading-tight">
+                    <h1 className="text-xl sm:text-2xl font-serif font-black text-orange-950 dark:text-[#F59E0B] tracking-wider leading-tight">
                       {getTranslation(settings.language, 'home')}
                     </h1>
-                    <span className="text-xs sm:text-sm font-serif font-extrabold text-orange-850 dark:text-brand-accent tracking-wide mt-0.5">
+                    <span className="text-xs sm:text-sm font-serif font-extrabold text-orange-850 dark:text-[#F8FAFC] tracking-wide mt-0.5">
                       {getTranslation(settings.language, 'tagline')}
                     </span>
                   </div>
@@ -1969,11 +1969,11 @@ export default function App() {
                 <div className="flex flex-col gap-1 text-left">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">🔔</span>
-                    <h2 className="text-xl font-bold font-serif text-slate-900 dark:text-orange-100 flex items-center gap-2">
+                    <h2 className="text-xl font-bold font-serif text-slate-900 dark:text-brand-accent flex items-center gap-2">
                       धर्मिक एवं साधना अलार्म (Alarms & Alerts)
                     </h2>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-brand-text-mut">
+                  <p className="text-xs text-slate-500 dark:text-brand-text-sec">
                     संध्या वंदन, शुभ लग्न, अभिजित मुहूर्त, राहुकाल और चौघड़िया के लिए अनुकूलित अलार्म सेटिंग्स
                   </p>
                 </div>
@@ -2002,8 +2002,8 @@ export default function App() {
               onClick={() => setActiveTab('home')}
               className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'home'
-                  ? 'text-orange-655 dark:text-brand-accent font-extrabold scale-102 bg-orange-500/10 dark:bg-brand-sel-bg'
-                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F9FAFB]'
+                  ? 'text-orange-655 dark:text-white font-extrabold scale-102 bg-orange-500/10 dark:bg-[#853606]'
+                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F8FAFC]'
               }`}
             >
               <Home className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
@@ -2014,8 +2014,8 @@ export default function App() {
               onClick={() => setActiveTab('panchang')}
               className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'panchang'
-                  ? 'text-orange-655 dark:text-brand-accent font-extrabold scale-102 bg-orange-500/10 dark:bg-brand-sel-bg'
-                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F9FAFB]'
+                  ? 'text-orange-655 dark:text-white font-extrabold scale-102 bg-orange-500/10 dark:bg-[#853606]'
+                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F8FAFC]'
               }`}
             >
               <Landmark className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
@@ -2026,8 +2026,8 @@ export default function App() {
               onClick={() => setActiveTab('muhurat')}
               className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'muhurat'
-                  ? 'text-orange-655 dark:text-brand-accent font-extrabold scale-102 bg-orange-500/10 dark:bg-brand-sel-bg'
-                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F9FAFB]'
+                  ? 'text-orange-655 dark:text-white font-extrabold scale-102 bg-orange-500/10 dark:bg-[#853606]'
+                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F8FAFC]'
               }`}
             >
               <Clock className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
@@ -2038,8 +2038,8 @@ export default function App() {
               onClick={() => setActiveTab('festival')}
               className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'festival'
-                  ? 'text-orange-655 dark:text-brand-accent font-extrabold scale-102 bg-orange-500/10 dark:bg-brand-sel-bg'
-                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F9FAFB]'
+                  ? 'text-orange-655 dark:text-white font-extrabold scale-102 bg-orange-500/10 dark:bg-[#853606]'
+                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F8FAFC]'
               }`}
             >
               <Calendar className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
@@ -2050,8 +2050,8 @@ export default function App() {
               onClick={() => setActiveTab('alerts')}
               className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'alerts'
-                  ? 'text-orange-655 dark:text-brand-accent font-extrabold scale-102 bg-orange-500/10 dark:bg-brand-sel-bg'
-                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F9FAFB]'
+                  ? 'text-orange-655 dark:text-white font-extrabold scale-102 bg-orange-500/10 dark:bg-[#853606]'
+                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F8FAFC]'
               }`}
             >
               <Bell className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
@@ -2062,8 +2062,8 @@ export default function App() {
               onClick={() => setActiveTab('tools')}
               className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'tools'
-                  ? 'text-orange-655 dark:text-brand-accent font-extrabold scale-102 bg-orange-500/10 dark:bg-brand-sel-bg'
-                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F9FAFB]'
+                  ? 'text-orange-655 dark:text-white font-extrabold scale-102 bg-orange-500/10 dark:bg-[#853606]'
+                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F8FAFC]'
               }`}
             >
               <Settings className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
