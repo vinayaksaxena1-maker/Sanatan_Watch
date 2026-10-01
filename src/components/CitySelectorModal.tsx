@@ -44,7 +44,7 @@ export function CitySelectorModal({
           theme === 'light' ? 'bg-orange-50/20 border-orange-100/60' : 'bg-zinc-900/40 border-zinc-800/80'
         }`}>
           <div className="flex items-center gap-2 text-left">
-            <MapPin className="w-5 h-5 text-orange-600 dark:text-amber-500 animate-bounce" />
+            <MapPin className="w-5 h-5 text-orange-600 dark:text-dark-accent animate-bounce" />
             <div>
               <h3 className="text-sm sm:text-base font-bold font-serif leading-none">स्थान चयन (Select Location)</h3>
               <span className="text-[9px] text-slate-400 font-mono tracking-wider uppercase block mt-1">जीपीएस या शहर खोजें</span>

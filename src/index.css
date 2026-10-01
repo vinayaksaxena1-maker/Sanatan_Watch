@@ -40,8 +40,30 @@ body:not(.dark) .text-slate-550 {
 }
 
 .dark html, .dark body {
-  color: #f8fafc; /* Slate 50 bright white */
-  background-color: #0A0A0A;
+  color: #F9FAFB; /* Primary text */
+  background-color: #111827;
+}
+
+/* Map existing color tokens to Dark Mode Palette dynamically */
+.dark {
+  /* Text Colors */
+  --color-slate-900: #F9FAFB;
+  --color-slate-800: #F9FAFB;
+  --color-slate-700: #F9FAFB;
+  --color-slate-600: #CBD5E1;
+  --color-slate-500: #CBD5E1;
+  --color-slate-400: #94A3B8;
+  --color-zinc-400: #94A3B8;
+  
+  /* Brand/Accent tokens for Dark Mode */
+  --color-orange-600: #F59E0B;
+  --color-orange-500: #F59E0B;
+  --color-orange-400: #F59E0B;
+  --color-amber-500: #F59E0B;
+  --color-amber-400: #F59E0B;
+  
+  /* Borders */
+  --color-orange-100: #475569; /* Used in dividers like border-orange-100/35 */
 }
 
 input, textarea, select {
@@ -62,6 +84,18 @@ input, textarea, select {
   --color-glow-gold: var(--glow-gold-col);
   --color-bhagwa: var(--bhagwa-col);
   --color-orange-350: #ffa726; /* Register custom orange-350 color */
+
+  /* Dark Mode Palette Tokens (New) */
+  --color-dark-app: #111827;
+  --color-dark-card: #1F2937;
+  --color-dark-control: #273449;
+  --color-dark-text-pri: #F9FAFB;
+  --color-dark-text-sec: #CBD5E1;
+  --color-dark-text-mut: #94A3B8;
+  --color-dark-border: #475569;
+  --color-dark-accent: #F59E0B;
+  --color-dark-sel-bg: #422006;
+  --color-dark-sel-text: #FEF3C7;
 }
 
 :root {
@@ -104,27 +138,27 @@ input, textarea, select {
   --bhagwa-col: #FF9933;
 }
 
-/* Upgrade active dark theme context with Premium Temple Gold tokens */
+/* Upgrade active dark theme context with Specific Dark Palette */
 .dark {
-  --bg-app-dark-start: #0A0A0A;
-  --bg-app-dark-mid: #141414;
-  --bg-app-dark-end: #1E140A;
-  --bg-app-dark-glow: #5A2D00;
-  --bg-envelope-dark: #141414;
+  --bg-app-dark-start: #111827;
+  --bg-app-dark-mid: #111827;
+  --bg-app-dark-end: #111827;
+  --bg-app-dark-glow: #422006;
+  --bg-envelope-dark: #1F2937;
 
-  /* Glass Card Upgrades (Phase 1 SPECIFICATION) */
-  --card-bg-dark: rgba(20, 20, 20, 0.92);
-  --card-border-dark: rgba(244, 180, 0, 0.20);
-  --card-shadow-dark: 0 10px 30px rgba(244, 180, 0, 0.15);
-  --card-border-hover-dark: rgba(244, 180, 0, 0.40);
-  --card-shadow-hover-dark: 0 12px 36px rgba(244, 180, 0, 0.25);
+  /* Glass Card Upgrades */
+  --card-bg-dark: #1F2937;
+  --card-border-dark: #475569;
+  --card-shadow-dark: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --card-border-hover-dark: #F59E0B;
+  --card-shadow-hover-dark: 0 12px 36px rgba(245, 158, 11, 0.15);
   --card-blur-dark: 20px;
 
-  /* Brand Colors Upgrade (Phase 1 SPECIFICATION) */
-  --temple-gold-col: #D89B00;
-  --divine-gold-col: #F4B400;
-  --glow-gold-col: #FFD54F;
-  --bhagwa-col: #FF6F00;
+  /* Brand Colors Upgrade */
+  --temple-gold-col: #F59E0B;
+  --divine-gold-col: #F59E0B;
+  --glow-gold-col: #FEF3C7;
+  --bhagwa-col: #F59E0B;
 }
 
 /* Temple Gold theme styles removed */

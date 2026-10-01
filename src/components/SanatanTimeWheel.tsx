@@ -296,7 +296,7 @@ export function SanatanTimeWheel({ panchang, currentTime }: SanatanTimeWheelProp
           <span className="text-[10px] font-black uppercase text-amber-400 font-mono">वैदिक गणना विवरण</span>
           <span className="text-[9px] text-slate-400 font-mono">सूर्य उदय: {panchang.sunrise}</span>
         </div>
-        <p className="text-[10.5px] text-slate-400 dark:text-zinc-400 leading-normal italic">
+        <p className="text-[10.5px] text-slate-400 dark:text-dark-text-mut leading-normal italic">
           {activeChoghadiya ? `चक्र पर बाहरी हरा/पीला/लाल वलय वर्तमान चौघड़िया “${activeChoghadiya.hindiName || activeChoghadiya.name}” को दर्शा रहा है।` : 'कालचक्र की बाहरी वृत्त चौघड़िया एवं भीतरी वृत्त होरा काल को प्रदर्शित करती है।'}
         </p>
       </div>

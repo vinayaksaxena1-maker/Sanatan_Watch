@@ -16,7 +16,7 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
 
   if (!panchang || !panchang.hinduDate) {
     return (
-      <div className="flex justify-center p-8 text-slate-400 font-bold bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl">
+      <div className="flex justify-center p-8 text-slate-400 font-bold bg-white dark:bg-dark-card border border-slate-100 dark:border-dark-border rounded-3xl">
         विजेट्स लोड हो रहे हैं...
       </div>
     );
@@ -49,11 +49,11 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
     <div id="widget_simulator_root" className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left font-sans">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
         <div>
-          <h2 className="text-base sm:text-lg font-black text-slate-800 dark:text-amber-100 flex items-center gap-2 font-serif">
+          <h2 className="text-base sm:text-lg font-black text-slate-800 dark:text-dark-text-pri flex items-center gap-2 font-serif">
             <Layout className="w-5 h-5 text-orange-600" />
             होम स्क्रीन विजेट प्रीव्यू
           </h2>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-normal">
+          <p className="text-[11px] text-slate-500 dark:text-dark-text-mut mt-1 leading-normal">
             हमारे प्रीमियम मोबाइल विजेट का लाइव अनुभव करें। देखने के लिए प्रारूप का आकार चुनें।
           </p>
         </div>
@@ -73,8 +73,8 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
               onClick={() => setSelectedSize(size.id as any)}
               className={`cursor-pointer transition-all hover:underline ${
                 selectedSize === size.id
-                  ? 'text-orange-655 font-extrabold dark:text-amber-400'
-                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                  ? 'text-orange-655 font-extrabold dark:text-dark-accent'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-dark-text-mut dark:hover:text-slate-200'
               }`}
             >
               {size.label}

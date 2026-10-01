@@ -229,11 +229,11 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
           theme === 'light' ? 'bg-orange-50/40 border-orange-100' : 'bg-orange-950/20 border-orange-950/20'
         }`}>
           <div className="flex items-center gap-2 text-left">
-            <span className="p-1.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400">
+            <span className="p-1.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-dark-accent">
               <HelpCircle className="w-5 h-5 animate-pulse" />
             </span>
             <div>
-              <h2 className="font-serif text-lg font-black text-orange-900 dark:text-amber-100 leading-tight">
+              <h2 className="font-serif text-lg font-black text-orange-900 dark:text-dark-text-pri leading-tight">
                 {getTranslation(language, 'helpTitle')}
               </h2>
               <p className="text-[10px] text-slate-400 dark:text-slate-450 block mt-0.5 font-semibold font-sans">
@@ -257,7 +257,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
           <button
             onClick={() => setActiveTab('intro')}
             className={`px-4 py-3 text-xs font-black relative flex items-center gap-1.5 cursor-pointer transition-colors ${
-              activeTab === 'intro' ? 'text-orange-600 dark:text-orange-400' : 'text-slate-400 hover:text-slate-600'
+              activeTab === 'intro' ? 'text-orange-600 dark:text-dark-accent' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
@@ -270,7 +270,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
           <button
             onClick={() => setActiveTab('features')}
             className={`px-4 py-3 text-xs font-black relative flex items-center gap-1.5 cursor-pointer transition-colors ${
-              activeTab === 'features' ? 'text-orange-600 dark:text-orange-400' : 'text-slate-400 hover:text-slate-600'
+              activeTab === 'features' ? 'text-orange-600 dark:text-dark-accent' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
             <Home className="w-3.5 h-3.5" />
@@ -283,7 +283,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
           <button
             onClick={() => setActiveTab('faqs')}
             className={`px-4 py-3 text-xs font-black relative flex items-center gap-1.5 cursor-pointer transition-colors ${
-              activeTab === 'faqs' ? 'text-orange-600 dark:text-orange-400' : 'text-slate-400 hover:text-slate-600'
+              activeTab === 'faqs' ? 'text-orange-600 dark:text-dark-accent' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
             <Info className="w-3.5 h-3.5" />
@@ -303,7 +303,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
               <div className="rounded-2xl p-4 bg-orange-500/5 border border-orange-500/10 flex gap-3.5">
                 <span className="text-xl">🕉️</span>
                 <div className="space-y-1">
-                  <h3 className="font-serif text-sm font-bold text-orange-600 dark:text-orange-400">
+                  <h3 className="font-serif text-sm font-bold text-orange-600 dark:text-dark-accent">
                     {currentIntro.title}
                   </h3>
                   <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-350 font-sans">
@@ -320,7 +320,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
                     <TrendingUp className="w-3.5 h-3.5" />
                     {currentIntro.gaugeTitle}
                   </h4>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal font-sans">
+                  <p className="text-[10px] text-slate-500 dark:text-dark-text-mut leading-normal font-sans">
                     {currentIntro.gaugeDesc}
                   </p>
                 </div>
@@ -332,7 +332,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
                     <Sliders className="w-3.5 h-3.5" />
                     {currentIntro.locationTitle}
                   </h4>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal font-sans">
+                  <p className="text-[10px] text-slate-500 dark:text-dark-text-mut leading-normal font-sans">
                     {currentIntro.locationDesc}
                   </p>
                 </div>
@@ -344,7 +344,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
                     <Clock className="w-3.5 h-3.5" />
                     {currentIntro.clockTitle}
                   </h4>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal font-sans">
+                  <p className="text-[10px] text-slate-500 dark:text-dark-text-mut leading-normal font-sans">
                     {currentIntro.clockDesc}
                   </p>
                 </div>
@@ -356,7 +356,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
                     <Tv className="w-3.5 h-3.5" />
                     {currentIntro.customTitle}
                   </h4>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal font-sans">
+                  <p className="text-[10px] text-slate-500 dark:text-dark-text-mut leading-normal font-sans">
                     {currentIntro.customDesc}
                   </p>
                 </div>
@@ -388,7 +388,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
                         <Icon className="w-4 h-4" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-slate-755 dark:text-amber-100 leading-none">{guide.title}</h4>
+                        <h4 className="text-xs font-bold text-slate-755 dark:text-dark-text-pri leading-none">{guide.title}</h4>
                         <p className="text-[10px] text-slate-500 dark:text-slate-455 mt-1 leading-normal">
                           {guide.desc}
                         </p>
@@ -437,7 +437,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
                           onClick={() => setExpandedFaq(isOpen ? null : idx)}
                           className="w-full text-left px-4 py-3.5 font-bold text-xs flex justify-between items-center gap-2 cursor-pointer"
                         >
-                          <span className={`${isOpen ? 'text-orange-600 dark:text-orange-400' : 'text-slate-750 dark:text-slate-300'}`}>{faq.q}</span>
+                          <span className={`${isOpen ? 'text-orange-600 dark:text-dark-accent' : 'text-slate-750 dark:text-dark-text-pri'}`}>{faq.q}</span>
                           {isOpen ? <ChevronUp className="w-4 h-4 text-orange-500 shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />}
                         </button>
                         
@@ -452,7 +452,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
                               {faq.tags.map((tag, tagIdx) => (
                                 <span 
                                   key={tagIdx} 
-                                  className="text-[8px] font-black uppercase font-mono px-1.5 py-0.5 rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                                  className="text-[8px] font-black uppercase font-mono px-1.5 py-0.5 rounded-md bg-orange-500/10 text-orange-600 dark:text-dark-accent"
                                 >
                                   #{tag}
                                 </span>

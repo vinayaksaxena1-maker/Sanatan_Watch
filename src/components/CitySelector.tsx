@@ -52,11 +52,11 @@ export function CitySelector({ currentCoords, onSelectCity, gpsActive, setGpsAct
   return (
     <div id="city_selector_root" className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left">
       <div>
-        <h2 className="text-base sm:text-lg font-black text-slate-800 dark:text-amber-100 flex items-center gap-2 font-serif">
+        <h2 className="text-base sm:text-lg font-black text-slate-800 dark:text-dark-text-pri flex items-center gap-2 font-serif">
           <MapPin className="w-5 h-5 text-orange-600 animate-bounce" />
           स्थान व जीपीएस सेटिंग्स
         </h2>
-        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+        <p className="text-[11px] text-slate-500 dark:text-dark-text-mut mt-1">
           पंचांग गणना आपके भौतिक स्थान और अक्षांश-देशांतर के आधार पर सटीक रूप से निर्धारित की जाती है। निर्देशांक स्वतः-पहचानें या नीचे चुनें।
         </p>
       </div>
@@ -77,12 +77,12 @@ export function CitySelector({ currentCoords, onSelectCity, gpsActive, setGpsAct
           </button>
         </div>
         
-        <div className="md:col-span-6 p-2.5 sm:p-3 rounded-2xl bg-orange-500/5 dark:bg-orange-950/20 border border-orange-100/35 text-left">
-          <span className="text-[9px] sm:text-[10px] uppercase font-bold text-orange-850 dark:text-orange-400 tracking-wider block font-mono">वर्तमान गणना स्थान</span>
-          <span className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-amber-100 block mt-0.5 truncate">
+        <div className="md:col-span-6 p-2.5 sm:p-3 rounded-2xl bg-orange-500/5 dark:bg-dark-card border border-orange-100/35 text-left">
+          <span className="text-[9px] sm:text-[10px] uppercase font-bold text-orange-850 dark:text-dark-accent tracking-wider block font-mono">वर्तमान गणना स्थान</span>
+          <span className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-dark-text-pri block mt-0.5 truncate">
             ⛩️ {currentCoords.city}, {currentCoords.state}
           </span>
-          <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 block font-mono mt-0.5">
+          <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-dark-text-mut block font-mono mt-0.5">
             अक्षांश: {currentCoords.latitude}°N | देशान्तर: {currentCoords.longitude}°E
           </span>
         </div>
@@ -97,8 +97,8 @@ export function CitySelector({ currentCoords, onSelectCity, gpsActive, setGpsAct
       )}
 
       {/* Search selection lists */}
-      <div className="mt-5 border-t border-slate-100 dark:border-zinc-800/60 pt-4">
-        <label className="text-xs font-bold text-slate-500 dark:text-amber-500 uppercase tracking-wider mb-2 font-mono block text-left">भारतीय शहर खोजें</label>
+      <div className="mt-5 border-t border-slate-100 dark:border-dark-border pt-4">
+        <label className="text-xs font-bold text-slate-500 dark:text-dark-accent uppercase tracking-wider mb-2 font-mono block text-left">भारतीय शहर खोजें</label>
         
         <div className="relative flex items-center mb-3">
           <input
@@ -106,7 +106,7 @@ export function CitySelector({ currentCoords, onSelectCity, gpsActive, setGpsAct
             placeholder="शहर खोजें जैसे अयोध्या, वाराणसी..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full text-xs p-3 rounded-2xl bg-slate-500/5 dark:bg-zinc-950/40 border border-slate-200/50 dark:border-zinc-800/60 focus:bg-white dark:focus:bg-zinc-950 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-slate-800 dark:text-slate-100"
+            className="w-full text-xs p-3 rounded-2xl bg-slate-500/5 dark:bg-dark-card border border-slate-200/50 dark:border-dark-border focus:bg-white dark:focus:bg-zinc-950 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-slate-800 dark:text-dark-text-pri"
           />
           <Search className="w-4 h-4 text-slate-400 absolute left-4 pointer-events-none" />
         </div>
@@ -122,7 +122,7 @@ export function CitySelector({ currentCoords, onSelectCity, gpsActive, setGpsAct
                 className={`flex flex-col p-2.5 rounded-xl border text-left cursor-pointer transition-all hover:scale-101 hover:shadow-xs relative ${
                   isSelected
                     ? 'bg-orange-500 text-white border-orange-500 shadow-md'
-                    : 'bg-white/70 dark:bg-zinc-900/40 hover:bg-slate-50 dark:hover:bg-zinc-800/60 border-slate-100 dark:border-zinc-800 text-slate-800 dark:text-slate-200'
+                    : 'bg-white/70 dark:bg-dark-card hover:bg-slate-50 dark:hover:bg-dark-control border-slate-100 dark:border-dark-border text-slate-800 dark:text-dark-text-pri'
                 }`}
               >
                 <div className="flex justify-between items-center gap-1">
@@ -132,7 +132,7 @@ export function CitySelector({ currentCoords, onSelectCity, gpsActive, setGpsAct
                 <span className={`text-[10px] mt-0.5 ${isSelected ? 'text-orange-100' : 'text-slate-500'} truncate font-medium`}>
                   {item.state}
                 </span>
-                <span className={`text-[8.5px] font-mono mt-0.5 ${isSelected ? 'text-orange-200' : 'text-slate-400 dark:text-slate-500'}`}>
+                <span className={`text-[8.5px] font-mono mt-0.5 ${isSelected ? 'text-orange-200' : 'text-slate-400 dark:text-dark-text-mut'}`}>
                   {item.latitude}°N, {item.longitude}°E
                 </span>
               </button>

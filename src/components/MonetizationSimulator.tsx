@@ -28,12 +28,12 @@ export function MonetizationSimulator({ settings, onToggleSubscription, onPushTo
 
   return (
     <div id="monetization_simulator_root" className="text-left font-sans">
-      <div className="flex items-center justify-between p-4 rounded-2xl bg-orange-500/5 dark:bg-orange-950/10 border border-orange-100/20">
+      <div className="flex items-center justify-between p-4 rounded-2xl bg-orange-500/5 dark:bg-dark-card border border-orange-100/20">
         <div className="pr-4">
-          <h4 className="text-xs font-bold text-slate-800 dark:text-amber-100">
+          <h4 className="text-xs font-bold text-slate-800 dark:text-dark-text-pri">
             {isPremium ? 'स्वर्ण प्रीमियम सक्रिय है (Premium Active)' : 'स्वर्ण प्रीमियम निष्क्रिय है (Premium Inactive)'}
           </h4>
-          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-[10px] text-slate-500 dark:text-dark-text-mut mt-1">
             {isPremium 
               ? 'आप सभी स्वर्ण पंचांग एवं विशेष मुहूर्त अलार्म का उपयोग कर सकते हैं।' 
               : 'प्रीमियम सुविधाओं (विज्ञापन मुक्त अनुभव, सभी होम विजेट्स) को सक्रिय करें।'}

@@ -442,9 +442,9 @@ export function LogoSelector({ settings, setSettings, onPushToast }: LogoSelecto
       <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 border-l-4 border-yellow-500">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="w-5 h-5 text-yellow-600 animate-pulse" />
-          <h2 className="text-base sm:text-lg font-black text-slate-800 dark:text-amber-100 font-serif">मुख्य ऐप लोगो और प्रतीक चयन (Sacred Logos)</h2>
+          <h2 className="text-base sm:text-lg font-black text-slate-800 dark:text-dark-text-pri font-serif">मुख्य ऐप लोगो और प्रतीक चयन (Sacred Logos)</h2>
         </div>
-        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+        <p className="text-[11px] text-slate-500 dark:text-dark-text-mut leading-relaxed">
           हरि ओम! "आज का धर्मिक समय" के पंचांग अनुभव को अलंकृत करने के लिए हमने <strong>५ वैदिक शुभ प्रतीक लोगो (App Icon Samples)</strong> बनाए हैं। आप इनमें से किसी भी दिव्य चिह्न को चुनकर उसे अपना अधिकारिक ऐप आइकन घोषित कर सकते हैं। यह चुनिंदा लोगो वास्तविक समय में आपके ऐप हेडर में अपडेट हो जाएगा।
         </p>
       </div>
@@ -481,11 +481,11 @@ export function LogoSelector({ settings, setSettings, onPushToast }: LogoSelecto
                   )}
                 </div>
 
-                <p className="text-[9.5px] text-slate-400 dark:text-slate-500 italic block leading-none">
+                <p className="text-[9.5px] text-slate-400 dark:text-dark-text-mut italic block leading-none">
                   {sample.subtitle}
                 </p>
 
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal line-clamp-3">
+                <p className="text-[10px] text-slate-500 dark:text-dark-text-mut leading-normal line-clamp-3">
                   {sample.description}
                 </p>
 
@@ -513,7 +513,7 @@ export function LogoSelector({ settings, setSettings, onPushToast }: LogoSelecto
       </div>
 
       {/* Startup Launcher Simulation Display Box */}
-      <div className="bg-[#FFFDF9] dark:bg-zinc-950/40 border border-yellow-500/15 rounded-3xl p-5 flex flex-col sm:flex-row items-center gap-6">
+      <div className="bg-[#FFFDF9] dark:bg-dark-card border border-yellow-500/15 rounded-3xl p-5 flex flex-col sm:flex-row items-center gap-6">
         
         {/* Device Icon Launcher Preview */}
         <div className="flex-none flex flex-col items-center gap-2">
@@ -534,11 +534,11 @@ export function LogoSelector({ settings, setSettings, onPushToast }: LogoSelecto
             <span className="text-[9px] font-bold text-slate-400">Live Device Asset</span>
           </div>
           
-          <h3 className="text-xs font-black text-slate-800 dark:text-slate-100 font-serif">
+          <h3 className="text-xs font-black text-slate-800 dark:text-dark-text-pri font-serif">
             सौम्य संपादन एवं वैदिक परिपक्वता (Icon Design Architecture)
           </h3>
           
-          <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
+          <p className="text-[10px] text-slate-500 dark:text-dark-text-mut leading-relaxed">
             जब आपका ऐप Google Play Store या Apple App Store में सूची बद्ध होगा, तो यह चुना गया आइकन दिव्य आभा के साथ स्मार्टफोन लांचर पर प्रदर्शित होगा। आपका वर्तमान चयन <strong>"{logoSamples.find(l => l.id === currentSelected)?.name}"</strong> है। हर सुबह ऐप खोलते समय यह पवित्र ऊर्जा आपका मार्गदर्शन करेगी।
           </p>
         </div>
