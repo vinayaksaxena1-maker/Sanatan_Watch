@@ -34,27 +34,27 @@ export function CitySelectorModal({
       <div 
         className={`relative w-full max-w-md rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh] border transition-colors duration-300 ${
           theme === 'light' 
-            ? 'bg-white border-orange-100/70 text-slate-800' 
+            ? 'bg-white border-orange-100/70 dark:border-brand-border text-slate-800 dark:text-brand-text-pri' 
             : 'bg-zinc-950 border-zinc-800 text-zinc-100'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className={`px-5 py-4 border-b flex justify-between items-center ${
-          theme === 'light' ? 'bg-orange-50/20 border-orange-100/60' : 'bg-zinc-900/40 border-zinc-800/80'
+          theme === 'light' ? 'bg-orange-50/20 dark:bg-brand-card border-orange-100/60 dark:border-brand-border' : 'bg-zinc-900/40 border-zinc-800/80'
         }`}>
           <div className="flex items-center gap-2 text-left">
-            <MapPin className="w-5 h-5 text-orange-600 dark:text-dark-accent animate-bounce" />
+            <MapPin className="w-5 h-5 text-orange-600 dark:text-brand-accent animate-bounce" />
             <div>
               <h3 className="text-sm sm:text-base font-bold font-serif leading-none">स्थान चयन (Select Location)</h3>
-              <span className="text-[9px] text-slate-400 font-mono tracking-wider uppercase block mt-1">जीपीएस या शहर खोजें</span>
+              <span className="text-[9px] text-slate-400 dark:text-brand-text-mut font-mono tracking-wider uppercase block mt-1">जीपीएस या शहर खोजें</span>
             </div>
           </div>
           
           <button 
             onClick={onClose}
             className={`p-1.5 rounded-full hover:scale-105 transition-transform duration-200 cursor-pointer ${
-              theme === 'light' ? 'bg-orange-50 hover:bg-orange-100/80 text-slate-500' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-400'
+              theme === 'light' ? 'bg-orange-50 hover:bg-orange-100 dark:bg-brand-control/80 text-slate-500 dark:text-brand-text-sec' : 'bg-zinc-900 hover:bg-zinc-800 text-zinc-400'
             }`}
             title="बंद करें"
           >
@@ -77,7 +77,7 @@ export function CitySelectorModal({
 
         {/* Footer */}
         <div className={`px-5 py-3.5 border-t text-center text-[9px] font-medium tracking-wide ${
-          theme === 'light' ? 'bg-orange-50/10 border-orange-100/40 text-slate-400' : 'bg-zinc-900/20 border-zinc-800/40 text-zinc-500'
+          theme === 'light' ? 'bg-orange-50/10 border-orange-100/40 dark:border-brand-border text-slate-400 dark:text-brand-text-mut' : 'bg-zinc-900/20 border-zinc-800/40 text-zinc-500'
         }`}>
           सटीक सूर्योदय, सूर्यास्त और ग्रहों की गणना आपके स्थान पर आधारित है।
         </div>

@@ -303,7 +303,7 @@ export type SplashStyle = 'saffron' | 'golden' | 'crimson' | 'sanatan-video';
 export type LogoStyle = 'om' | 'swastika' | 'trishul' | 'kalash' | 'diya';
 
 export interface SettingsState {
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'midnight-saffron';
   language: 'English' | 'Hindi';
   fontSize?: 'small' | 'medium' | 'large';
   locationMode: 'GPS' | 'Manual';

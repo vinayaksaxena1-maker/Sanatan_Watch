@@ -16,7 +16,7 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
 
   if (!panchang || !panchang.hinduDate) {
     return (
-      <div className="flex justify-center p-8 text-slate-400 font-bold bg-white dark:bg-dark-card border border-slate-100 dark:border-dark-border rounded-3xl">
+      <div className="flex justify-center p-8 text-slate-400 dark:text-brand-text-mut font-bold bg-white dark:bg-brand-card border border-slate-100 dark:border-brand-border rounded-3xl">
         विजेट्स लोड हो रहे हैं...
       </div>
     );
@@ -49,11 +49,11 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
     <div id="widget_simulator_root" className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left font-sans">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
         <div>
-          <h2 className="text-base sm:text-lg font-black text-slate-800 dark:text-dark-text-pri flex items-center gap-2 font-serif">
+          <h2 className="text-base sm:text-lg font-black text-slate-800 dark:text-brand-text-pri flex items-center gap-2 font-serif">
             <Layout className="w-5 h-5 text-orange-600" />
             होम स्क्रीन विजेट प्रीव्यू
           </h2>
-          <p className="text-[11px] text-slate-500 dark:text-dark-text-mut mt-1 leading-normal">
+          <p className="text-[11px] text-slate-500 dark:text-brand-text-mut mt-1 leading-normal">
             हमारे प्रीमियम मोबाइल विजेट का लाइव अनुभव करें। देखने के लिए प्रारूप का आकार चुनें।
           </p>
         </div>
@@ -73,8 +73,8 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
               onClick={() => setSelectedSize(size.id as any)}
               className={`cursor-pointer transition-all hover:underline ${
                 selectedSize === size.id
-                  ? 'text-orange-655 font-extrabold dark:text-dark-accent'
-                  : 'text-slate-500 hover:text-slate-800 dark:text-dark-text-mut dark:hover:text-slate-200'
+                  ? 'text-orange-655 font-extrabold dark:text-brand-accent'
+                  : 'text-slate-500 hover:text-slate-800 dark:text-brand-text-mut dark:hover:text-slate-200'
               }`}
             >
               {size.label}
@@ -117,17 +117,17 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
           <div className="my-auto flex items-center justify-center p-3 w-full h-full z-10">
             {/* RENDER SELECTED WIDGET SIZE */}
             {selectedSize === 'small' && (
-              <div className="w-32 h-32 rounded-[22px] bg-gradient-to-b from-[#FFFDF8] to-[#FFF6EB] border border-orange-100 p-3 flex flex-col justify-between shadow-2xl relative overflow-hidden text-slate-800">
+              <div className="w-32 h-32 rounded-[22px] bg-gradient-to-b from-[#FFFDF8] to-[#FFF6EB] border border-orange-100 dark:border-brand-border p-3 flex flex-col justify-between shadow-2xl relative overflow-hidden text-slate-800 dark:text-brand-text-pri">
                 <div className="flex justify-between items-start">
                   <span className="text-[9px] font-extrabold text-orange-600 block uppercase font-serif tracking-normal leading-3">ॐ पंचक</span>
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
                 </div>
                 <div>
-                  <h3 className="text-[9px] font-bold text-slate-400 block leading-3">सक्रिय समय:</h3>
-                  <span className="text-xs font-black text-slate-800 block mt-0.5 truncate leading-tight">{currMuhurat.name.split(' ')[0]}</span>
+                  <h3 className="text-[9px] font-bold text-slate-400 dark:text-brand-text-mut block leading-3">सक्रिय समय:</h3>
+                  <span className="text-xs font-black text-slate-800 dark:text-brand-text-pri block mt-0.5 truncate leading-tight">{currMuhurat.name.split(' ')[0]}</span>
                   <span className="text-[9.5px] text-green-700 font-extrabold block leading-none mt-1">{currMuhurat.startTime} - {currMuhurat.endTime}</span>
                 </div>
-                <div className="border-t border-orange-100/70 pt-1.5 flex justify-between items-center text-[8.5px] text-slate-500 font-medium">
+                <div className="border-t border-orange-100/70 dark:border-brand-border pt-1.5 flex justify-between items-center text-[8.5px] text-slate-500 dark:text-brand-text-sec font-medium">
                   <span>{activeTithi}</span>
                   <span className="text-orange-900 font-extrabold">📍 {city}</span>
                 </div>
@@ -135,33 +135,33 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
             )}
 
             {selectedSize === 'medium' && (
-              <div className="w-full max-w-[280px] h-32 rounded-[22px] bg-gradient-to-b from-[#FFFDF8] to-[#FFF6EB] border border-orange-100 p-3.5 flex flex-col justify-between shadow-2xl relative overflow-hidden text-slate-800">
+              <div className="w-full max-w-[280px] h-32 rounded-[22px] bg-gradient-to-b from-[#FFFDF8] to-[#FFF6EB] border border-orange-100 dark:border-brand-border p-3.5 flex flex-col justify-between shadow-2xl relative overflow-hidden text-slate-800 dark:text-brand-text-pri">
                 {/* Decorative Marigold Background Ring */}
-                <div className="absolute right-[-15px] top-[-15px] w-20 h-20 rounded-full bg-orange-100/30 border-2 border-dashed border-orange-200 pointer-events-none"></div>
+                <div className="absolute right-[-15px] top-[-15px] w-20 h-20 rounded-full bg-orange-100 dark:bg-brand-control/30 border-2 border-dashed border-orange-200 dark:border-brand-border pointer-events-none"></div>
 
-                <div className="flex justify-between items-center border-b border-orange-100/70 pb-1">
+                <div className="flex justify-between items-center border-b border-orange-100/70 dark:border-brand-border pb-1">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] font-bold text-orange-900 font-serif">ॐ आज का धर्मिक समय</span>
                   </div>
-                  <span className="text-[8px] font-black text-orange-600 uppercase bg-orange-100/60 px-1.5 py-0.5 rounded">
+                  <span className="text-[8px] font-black text-orange-600 uppercase bg-orange-100 dark:bg-brand-control/60 px-1.5 py-0.5 rounded">
                     📍 {city}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 my-1">
                   <div>
-                    <span className="text-[9px] font-bold text-slate-400 block">आज की तिथि</span>
+                    <span className="text-[9px] font-bold text-slate-400 dark:text-brand-text-mut block">आज की तिथि</span>
                     <span className="text-xs font-bold text-slate-850 block mt-0.5 leading-tight truncate">{panchang.hinduDate.tithi.hindiName.split(' ')[0]}</span>
-                    <span className="text-[9px] text-slate-500 block">देवता: {panchang.hinduDate.tithi.lord}</span>
+                    <span className="text-[9px] text-slate-500 dark:text-brand-text-sec block">देवता: {panchang.hinduDate.tithi.lord}</span>
                   </div>
-                  <div className="border-l border-orange-100 pl-2">
-                    <span className="text-[9px] font-bold text-slate-400 block">सक्रिय चौघड़िया</span>
+                  <div className="border-l border-orange-100 dark:border-brand-border pl-2">
+                    <span className="text-[9px] font-bold text-slate-400 dark:text-brand-text-mut block">सक्रिय चौघड़िया</span>
                     <span className="text-xs font-bold text-slate-850 block mt-0.5 leading-tight truncate">{currMuhurat.name.replace(' Choghadiya','')}</span>
                     <span className="text-[9px] font-extrabold text-[#27AE60] block">{currMuhurat.startTime} - {currMuhurat.endTime}</span>
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center text-[8.5px] text-slate-500 border-t border-orange-100/40 pt-1">
+                <div className="flex justify-between items-center text-[8.5px] text-slate-500 dark:text-brand-text-sec border-t border-orange-100/40 dark:border-brand-border pt-1">
                   <span>नक्षत्र: {activeNakshatra.split(' ')[0]}</span>
                   <span className="text-orange-700 font-bold">अगला: अभिजीत</span>
                 </div>
@@ -169,33 +169,33 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
             )}
 
             {selectedSize === 'large' && (
-              <div className="w-full max-w-[280px] h-64 rounded-[28px] bg-gradient-to-b from-[#FFFDF8] to-[#FFF6EB] border border-orange-100 p-3.5 flex flex-col justify-between shadow-2xl relative overflow-hidden text-slate-800">
-                <div className="flex justify-between items-center border-b border-orange-100/70 pb-1.5">
+              <div className="w-full max-w-[280px] h-64 rounded-[28px] bg-gradient-to-b from-[#FFFDF8] to-[#FFF6EB] border border-orange-100 dark:border-brand-border p-3.5 flex flex-col justify-between shadow-2xl relative overflow-hidden text-slate-800 dark:text-brand-text-pri">
+                <div className="flex justify-between items-center border-b border-orange-100/70 dark:border-brand-border pb-1.5">
                   <span className="text-[11px] font-black text-orange-900 font-serif flex items-center gap-1">ॐ आज का पंचांग</span>
                   <span className="text-[8px] font-black text-white bg-orange-600 px-1.5 py-0.5 rounded-full">📍 {city}</span>
                 </div>
 
                 {/* Grid stats */}
                 <div className="grid grid-cols-2 gap-x-2.5 gap-y-1.5 mt-1.5 my-auto">
-                  <div className="p-1 rounded-xl bg-orange-500/5 border border-orange-100/50 text-left">
-                    <span className="text-[8.5px] font-bold text-slate-450 block">आज की तिथि</span>
-                    <span className="text-[10px] font-bold text-slate-800 truncate block leading-tight">{activeTithi}</span>
+                  <div className="p-1 rounded-xl bg-orange-500/5 dark:bg-brand-card border border-orange-100/50 dark:border-brand-border text-left">
+                    <span className="text-[8.5px] font-bold text-slate-450 dark:text-brand-text-mut block">आज की तिथि</span>
+                    <span className="text-[10px] font-bold text-slate-800 dark:text-brand-text-pri truncate block leading-tight">{activeTithi}</span>
                   </div>
-                  <div className="p-1 rounded-xl bg-orange-500/5 border border-orange-100/50 text-left">
-                    <span className="text-[8.5px] font-bold text-slate-450 block">आज का नक्षत्र</span>
-                    <span className="text-[10px] font-bold text-slate-800 truncate block leading-tight">{activeNakshatra.split(' ')[0]}</span>
+                  <div className="p-1 rounded-xl bg-orange-500/5 dark:bg-brand-card border border-orange-100/50 dark:border-brand-border text-left">
+                    <span className="text-[8.5px] font-bold text-slate-450 dark:text-brand-text-mut block">आज का नक्षत्र</span>
+                    <span className="text-[10px] font-bold text-slate-800 dark:text-brand-text-pri truncate block leading-tight">{activeNakshatra.split(' ')[0]}</span>
                   </div>
-                  <div className="p-1 rounded-xl bg-orange-500/5 border border-orange-100/50 text-left">
-                    <span className="text-[8.5px] font-bold text-slate-450 block">सक्रिय चौघड़िया</span>
+                  <div className="p-1 rounded-xl bg-orange-500/5 dark:bg-brand-card border border-orange-100/50 dark:border-brand-border text-left">
+                    <span className="text-[8.5px] font-bold text-slate-450 dark:text-brand-text-mut block">सक्रिय चौघड़िया</span>
                     <span className="text-[10px] font-bold text-slate-850 truncate block leading-tight">{currMuhurat?.name?.replace(' Choghadiya','') || 'अभिजीत'}</span>
                   </div>
-                  <div className="p-1 rounded-xl bg-orange-500/5 border border-orange-100/50 text-left">
-                    <span className="text-[8.5px] font-bold text-slate-450 block">राहुकाल</span>
+                  <div className="p-1 rounded-xl bg-orange-500/5 dark:bg-brand-card border border-orange-100/50 dark:border-brand-border text-left">
+                    <span className="text-[8.5px] font-bold text-slate-450 dark:text-brand-text-mut block">राहुकाल</span>
                     <span className="text-[9.5px] font-extrabold text-red-650 block leading-tight">{panchang.rahuKaal?.start || '—'} - {panchang.rahuKaal?.end || '—'}</span>
                   </div>
                 </div>
 
-                <div className="border-t border-orange-100/50 pt-2 flex flex-col gap-0.5">
+                <div className="border-t border-orange-100/50 dark:border-brand-border pt-2 flex flex-col gap-0.5">
                   <div className="flex justify-between items-center text-[9px]">
                     <span className="text-slate-550 font-medium">ब्रह्म मुहूर्त:</span>
                     <span className="text-orange-900 font-extrabold">{muhurats.find(m => m.id === 'brahma')?.startTime || '04:30 AM'}</span>

@@ -29,7 +29,7 @@ export function SacredLogoIcon({ style, size = 'md', customLogo }: { style: Logo
     const roundedClass = size === 'sm' ? 'rounded-xl' : size === 'md' ? 'rounded-2xl' : size === 'lg' ? 'rounded-2xl' : 'rounded-3xl';
     return (
       <div 
-        className={`relative flex items-center justify-center font-bold font-serif select-none border transition-all duration-300 ${sizeClasses[size]} bg-white dark:bg-stone-900 border-orange-200/40`}
+        className={`relative flex items-center justify-center font-bold font-serif select-none border transition-all duration-300 ${sizeClasses[size]} bg-white dark:bg-stone-900 border-orange-200 dark:border-brand-border/40`}
       >
         <img src={customLogo} alt="Custom Logo" className={`w-full h-full object-cover ${roundedClass}`} referrerPolicy="no-referrer" />
         <div className="absolute inset-[-4px] border border-orange-500/10 rounded-full pointer-events-none scale-105" />
@@ -442,9 +442,9 @@ export function LogoSelector({ settings, setSettings, onPushToast }: LogoSelecto
       <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 border-l-4 border-yellow-500">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="w-5 h-5 text-yellow-600 animate-pulse" />
-          <h2 className="text-base sm:text-lg font-black text-slate-800 dark:text-dark-text-pri font-serif">मुख्य ऐप लोगो और प्रतीक चयन (Sacred Logos)</h2>
+          <h2 className="text-base sm:text-lg font-black text-slate-800 dark:text-brand-text-pri font-serif">मुख्य ऐप लोगो और प्रतीक चयन (Sacred Logos)</h2>
         </div>
-        <p className="text-[11px] text-slate-500 dark:text-dark-text-mut leading-relaxed">
+        <p className="text-[11px] text-slate-500 dark:text-brand-text-mut leading-relaxed">
           हरि ओम! "आज का धर्मिक समय" के पंचांग अनुभव को अलंकृत करने के लिए हमने <strong>५ वैदिक शुभ प्रतीक लोगो (App Icon Samples)</strong> बनाए हैं। आप इनमें से किसी भी दिव्य चिह्न को चुनकर उसे अपना अधिकारिक ऐप आइकन घोषित कर सकते हैं। यह चुनिंदा लोगो वास्तविक समय में आपके ऐप हेडर में अपडेट हो जाएगा।
         </p>
       </div>
@@ -459,7 +459,7 @@ export function LogoSelector({ settings, setSettings, onPushToast }: LogoSelecto
               className={`glass-card-light dark:glass-card-dark p-4 rounded-3xl flex flex-row items-center gap-4 transition-all border-2 relative cursor-pointer hover:shadow-md ${
                 isActive 
                   ? 'border-yellow-500 ring-2 ring-yellow-500/10 bg-yellow-500/5' 
-                  : 'border-slate-200/55 dark:border-zinc-805'
+                  : 'border-slate-200/55 dark:border-brand-border'
               }`}
               onClick={() => handleSelectLogo(sample.id)}
             >
@@ -481,11 +481,11 @@ export function LogoSelector({ settings, setSettings, onPushToast }: LogoSelecto
                   )}
                 </div>
 
-                <p className="text-[9.5px] text-slate-400 dark:text-dark-text-mut italic block leading-none">
+                <p className="text-[9.5px] text-slate-400 dark:text-brand-text-mut italic block leading-none">
                   {sample.subtitle}
                 </p>
 
-                <p className="text-[10px] text-slate-500 dark:text-dark-text-mut leading-normal line-clamp-3">
+                <p className="text-[10px] text-slate-500 dark:text-brand-text-mut leading-normal line-clamp-3">
                   {sample.description}
                 </p>
 
@@ -504,7 +504,7 @@ export function LogoSelector({ settings, setSettings, onPushToast }: LogoSelecto
                 {isActive ? (
                   <div className="w-2.5 h-2.5 rounded-full bg-yellow-500 animate-pulse" />
                 ) : (
-                  <div className="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-zinc-800" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-brand-card" />
                 )}
               </div>
             </div>
@@ -513,32 +513,32 @@ export function LogoSelector({ settings, setSettings, onPushToast }: LogoSelecto
       </div>
 
       {/* Startup Launcher Simulation Display Box */}
-      <div className="bg-[#FFFDF9] dark:bg-dark-card border border-yellow-500/15 rounded-3xl p-5 flex flex-col sm:flex-row items-center gap-6">
+      <div className="bg-[#FFFDF9] dark:bg-brand-card border border-yellow-500/15 rounded-3xl p-5 flex flex-col sm:flex-row items-center gap-6">
         
         {/* Device Icon Launcher Preview */}
         <div className="flex-none flex flex-col items-center gap-2">
-          <div className="w-24 h-24 rounded-[26px] bg-linear-to-b from-white to-[#FFF2E0] shadow-xl border border-orange-200/50 flex items-center justify-center relative p-3">
+          <div className="w-24 h-24 rounded-[26px] bg-linear-to-b from-white to-[#FFF2E0] shadow-xl border border-orange-200 dark:border-brand-border/50 flex items-center justify-center relative p-3">
             <SacredLogoIcon style={currentSelected} size="lg" />
             <div className="absolute right-2 bottom-2 bg-orange-600 w-2.5 h-2.5 rounded-full shadow-xs border border-white" />
           </div>
-          <span className="text-[9.5px] font-black tracking-wide text-slate-500 uppercase font-mono">मोवाइल होमस्क्रीन</span>
+          <span className="text-[9.5px] font-black tracking-wide text-slate-500 dark:text-brand-text-sec uppercase font-mono">मोवाइल होमस्क्रीन</span>
         </div>
 
         {/* Branding details */}
         <div className="text-left space-y-1.5">
           <div className="flex items-center gap-1.5">
-            <span className="bg-orange-500/10 text-orange-950 text-[8px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider border border-orange-200">
+            <span className="bg-orange-500/10 text-orange-950 text-[8px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider border border-orange-200 dark:border-brand-border">
               लॉन्चर आइकन सिमुलेटर (App Launcher)
             </span>
             <span className="text-slate-300">|</span>
-            <span className="text-[9px] font-bold text-slate-400">Live Device Asset</span>
+            <span className="text-[9px] font-bold text-slate-400 dark:text-brand-text-mut">Live Device Asset</span>
           </div>
           
-          <h3 className="text-xs font-black text-slate-800 dark:text-dark-text-pri font-serif">
+          <h3 className="text-xs font-black text-slate-800 dark:text-brand-text-pri font-serif">
             सौम्य संपादन एवं वैदिक परिपक्वता (Icon Design Architecture)
           </h3>
           
-          <p className="text-[10px] text-slate-500 dark:text-dark-text-mut leading-relaxed">
+          <p className="text-[10px] text-slate-500 dark:text-brand-text-mut leading-relaxed">
             जब आपका ऐप Google Play Store या Apple App Store में सूची बद्ध होगा, तो यह चुना गया आइकन दिव्य आभा के साथ स्मार्टफोन लांचर पर प्रदर्शित होगा। आपका वर्तमान चयन <strong>"{logoSamples.find(l => l.id === currentSelected)?.name}"</strong> है। हर सुबह ऐप खोलते समय यह पवित्र ऊर्जा आपका मार्गदर्शन करेगी।
           </p>
         </div>

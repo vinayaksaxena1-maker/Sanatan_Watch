@@ -106,7 +106,7 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
 
   if (!panchang || !panchang.hinduDate) {
     return (
-      <div className="flex justify-center p-8 text-slate-400 font-bold bg-white dark:bg-dark-card border border-slate-100 dark:border-dark-border rounded-3xl">
+      <div className="flex justify-center p-8 text-slate-400 dark:text-brand-text-mut font-bold bg-white dark:bg-brand-card border border-slate-100 dark:border-brand-border rounded-3xl">
         पंचांग लोड हो रहा है... कृपया प्रतीक्षा करें।
       </div>
     );
@@ -526,38 +526,38 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
     <div id="poster_generator_root" className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left font-sans">
       
       {/* Header and Selectors */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-5 pb-4 border-b border-orange-100/20 dark:border-dark-border">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-5 pb-4 border-b border-orange-100/20 dark:border-brand-border">
         <div>
-          <h2 className="text-base sm:text-lg font-black text-slate-800 dark:text-dark-text-pri flex items-center gap-2 font-serif">
+          <h2 className="text-base sm:text-lg font-black text-slate-800 dark:text-brand-text-pri flex items-center gap-2 font-serif">
             <Camera className="w-5 h-5 text-orange-600 animate-pulse" />
             दैनिक पंचांग पोस्टर मेकर
           </h2>
-          <p className="text-[11px] text-slate-500 dark:text-dark-text-mut mt-1 leading-normal">
+          <p className="text-[11px] text-slate-500 dark:text-brand-text-mut mt-1 leading-normal">
             अपने मित्रों और परिवार के साथ व्हाट्सएप, फेसबुक और इंस्टाग्राम पर साझा करने के लिए सुंदर दैनिक पंचांग पोस्टर बनाएं।
           </p>
         </div>
 
         {/* Theme Selectors & Upload */}
-        <div className="flex flex-wrap items-center gap-2 bg-orange-500/5 dark:bg-dark-card p-2 rounded-2xl border border-orange-100/30 dark:border-dark-border">
+        <div className="flex flex-wrap items-center gap-2 bg-orange-500/5 dark:bg-brand-card p-2 rounded-2xl border border-orange-100/30 dark:border-brand-border">
           <div className="flex items-center gap-1.5 border-r border-orange-150/20 pr-2">
-            <span className="text-[9px] font-black text-orange-850 dark:text-dark-accent uppercase tracking-wider">रंग थीम्स:</span>
+            <span className="text-[9px] font-black text-orange-850 dark:text-brand-accent uppercase tracking-wider">रंग थीम्स:</span>
             <button
               onClick={() => setSelectedTheme('saffron')}
-              className={`w-5 h-5 rounded-full bg-linear-to-tr from-amber-500 to-orange-600 border border-white dark:border-dark-border cursor-pointer transition-all ${
+              className={`w-5 h-5 rounded-full bg-linear-to-tr from-amber-500 to-orange-600 border border-white dark:border-brand-border cursor-pointer transition-all ${
                 selectedTheme === 'saffron' ? 'scale-115 ring-2 ring-orange-500' : 'opacity-70'
               }`}
               title="Bhagwa Saffron"
             />
             <button
               onClick={() => setSelectedTheme('golden')}
-              className={`w-5 h-5 rounded-full bg-linear-to-tr from-yellow-500 to-red-600 border border-white dark:border-dark-border cursor-pointer transition-all ${
+              className={`w-5 h-5 rounded-full bg-linear-to-tr from-yellow-500 to-red-600 border border-white dark:border-brand-border cursor-pointer transition-all ${
                 selectedTheme === 'golden' ? 'scale-115 ring-2 ring-orange-500' : 'opacity-70'
               }`}
               title="Sindoor Gold"
             />
             <button
               onClick={() => setSelectedTheme('crimson')}
-              className={`w-5 h-5 rounded-full bg-linear-to-tr from-red-800 to-stone-900 border border-white dark:border-dark-border cursor-pointer transition-all ${
+              className={`w-5 h-5 rounded-full bg-linear-to-tr from-red-800 to-stone-900 border border-white dark:border-brand-border cursor-pointer transition-all ${
                 selectedTheme === 'crimson' ? 'scale-115 ring-2 ring-orange-500' : 'opacity-70'
               }`}
               title="Mandir Crimson"
@@ -572,7 +572,7 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
               onChange={(e) => e.target.value && setSelectedTheme(e.target.value)}
               className="bg-zinc-850 hover:bg-zinc-800 text-amber-300 text-[9px] font-bold py-1 px-2 rounded-lg border border-amber-500/40 cursor-pointer outline-none transition-all shadow-xs"
             >
-              <option value="" disabled className="bg-zinc-900 text-slate-400">-- चुनिए (13) --</option>
+              <option value="" disabled className="bg-zinc-900 text-slate-400 dark:text-brand-text-mut">-- चुनिए (13) --</option>
               {DEITY_THEMES.map((theme) => (
                 <option key={theme.id} value={theme.id} className="bg-zinc-900 text-amber-100 py-1">
                   {theme.name}
@@ -629,10 +629,10 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
               
               {/* Basic Info */}
               <div className="space-y-1">
-                <div>📅 <strong className="text-slate-250 dark:text-slate-350">दिनांक:</strong> {formattedDate}</div>
-                <div>📍 <strong className="text-slate-250 dark:text-slate-350">स्थान:</strong> {city}</div>
-                <div>ॐ <strong className="text-slate-250 dark:text-slate-350">संवत्:</strong> {samvatVikram}, {samvatShaka}{samvatGujarati}</div>
-                <div>🌙 <strong className="text-slate-250 dark:text-slate-350">मास व पक्ष:</strong> {hinduMonth}, {currentPaksha}</div>
+                <div>📅 <strong className="text-slate-250 dark:text-brand-text-sec">दिनांक:</strong> {formattedDate}</div>
+                <div>📍 <strong className="text-slate-250 dark:text-brand-text-sec">स्थान:</strong> {city}</div>
+                <div>ॐ <strong className="text-slate-250 dark:text-brand-text-sec">संवत्:</strong> {samvatVikram}, {samvatShaka}{samvatGujarati}</div>
+                <div>🌙 <strong className="text-slate-250 dark:text-brand-text-sec">मास व पक्ष:</strong> {hinduMonth}, {currentPaksha}</div>
               </div>
 
               <div className="border-t border-white/10 my-2" />
@@ -699,7 +699,7 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
         {/* Download & Share Panel (Right) */}
         <div className="lg:col-span-5 flex flex-col justify-between gap-5">
           <div className="space-y-4">
-            <h3 className="text-xs font-bold text-slate-450 dark:text-dark-accent uppercase tracking-wider font-mono">पोस्टर साझा व डाउनलोड विकल्प</h3>
+            <h3 className="text-xs font-bold text-slate-450 dark:text-brand-accent uppercase tracking-wider font-mono">पोस्टर साझा व डाउनलोड विकल्प</h3>
             
             {/* Download Button */}
             <button
@@ -732,7 +732,7 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
             {/* Copy Clipboard Option */}
             <button
               onClick={handleCopyText}
-              className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-slate-500/5 dark:bg-dark-card hover:bg-slate-50 dark:hover:bg-dark-control text-slate-700 dark:text-slate-350 font-bold rounded-2xl border border-slate-200/50 dark:border-dark-border transition-all cursor-pointer text-xs sm:text-sm select-none"
+              className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-slate-500/5 dark:bg-brand-card hover:bg-slate-50 dark:hover:bg-brand-control text-slate-700 dark:text-brand-text-sec font-bold rounded-2xl border border-slate-200/50 dark:border-brand-border transition-all cursor-pointer text-xs sm:text-sm select-none"
             >
               {copied ? (
                 <>
@@ -741,7 +741,7 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
                 </>
               ) : (
                 <>
-                  <FileText className="w-4 h-4 text-slate-400 shrink-0" />
+                  <FileText className="w-4 h-4 text-slate-400 dark:text-brand-text-mut shrink-0" />
                   पंचांग लिखित टेक्स्ट कॉपी करें
                 </>
               )}
@@ -751,7 +751,7 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
           <div className="space-y-3">
             <div className="bg-amber-500/10 rounded-xl border border-amber-500/20 p-3 mt-3">
               <div className="flex gap-2 text-left">
-                <Sparkles className="w-4 h-4 text-amber-600 dark:text-dark-accent flex-shrink-0 mt-0.5 animate-spin-slow" />
+                <Sparkles className="w-4 h-4 text-amber-600 dark:text-brand-accent flex-shrink-0 mt-0.5 animate-spin-slow" />
                 <p className="text-[10px] text-amber-950 dark:text-amber-200 leading-relaxed font-sans">
                   <strong>नया पंचांग लेआउट:</strong> अब आपका पंचांग पोस्टर वास्तविक वैदिक संरचना में मुद्रित होता है। इसमें ब्रह्म, अभिजीत, गोधूलि मुहूर्त, नक्षत्र स्वामी, करण 1 व 2, गुजराती/शक संवत, चन्द्रोदय/चन्द्रास्त, दिशाशूल निवारण, और सक्रीय शुभ योगों का संपूर्ण विवरण शामिल है।
                 </p>

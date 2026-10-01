@@ -80,13 +80,13 @@ export const DiagnosticLogsModal: React.FC<DiagnosticLogsModalProps> = ({ isOpen
                     SWISS EPH ACTIVE
                   </span>
               </h2>
-              <p className="text-[10px] text-slate-400 font-medium">Real-time WebWorker & WASM Execution Logs</p>
+              <p className="text-[10px] text-slate-400 dark:text-brand-text-mut font-medium">Real-time WebWorker & WASM Execution Logs</p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-full text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 transition-colors"
+            className="p-2 rounded-full text-slate-400 dark:text-brand-text-mut hover:text-slate-200 hover:bg-slate-700/50 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -102,7 +102,7 @@ export const DiagnosticLogsModal: React.FC<DiagnosticLogsModalProps> = ({ isOpen
                 className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
                   filterLevel === lvl 
                     ? 'bg-orange-500 text-white shadow-3xs' 
-                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                    : 'bg-slate-800 text-slate-400 dark:text-brand-text-mut hover:bg-slate-700 hover:text-slate-200'
                 }`}
               >
                 {lvl}
@@ -129,7 +129,7 @@ export const DiagnosticLogsModal: React.FC<DiagnosticLogsModalProps> = ({ isOpen
 
             <button
               onClick={handleClearLogs}
-              className="p-1.5 rounded-xl bg-slate-800 hover:bg-rose-900/30 border border-slate-700 hover:border-rose-700/50 text-slate-400 hover:text-rose-300 transition-colors"
+              className="p-1.5 rounded-xl bg-slate-800 hover:bg-rose-900/30 border border-slate-700 hover:border-rose-700/50 text-slate-400 dark:text-brand-text-mut hover:text-rose-300 transition-colors"
               title="Clear Logs"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -143,7 +143,7 @@ export const DiagnosticLogsModal: React.FC<DiagnosticLogsModalProps> = ({ isOpen
           className="flex-1 p-4 overflow-y-auto space-y-2 font-mono text-[11px] bg-slate-950 text-slate-300 select-text"
         >
           {filteredLogs.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-slate-600 space-y-2">
+            <div className="flex flex-col items-center justify-center h-full text-slate-600 dark:text-brand-text-sec space-y-2">
               <Clock className="w-8 h-8 opacity-40" />
               <p className="text-xs">No logs recorded yet...</p>
             </div>
@@ -167,7 +167,7 @@ export const DiagnosticLogsModal: React.FC<DiagnosticLogsModalProps> = ({ isOpen
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="text-[9px] font-bold text-slate-500 font-sans tracking-wider">
+                    <span className="text-[9px] font-bold text-slate-500 dark:text-brand-text-sec font-sans tracking-wider">
                       ⏱ {log.timestamp}
                     </span>
                     <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase ${
@@ -178,7 +178,7 @@ export const DiagnosticLogsModal: React.FC<DiagnosticLogsModalProps> = ({ isOpen
                   </div>
                   <div>{log.message}</div>
                   {log.details && (
-                    <div className="mt-1.5 p-2 rounded-lg bg-black/40 text-[10px] text-slate-400 border border-slate-800/80 font-mono whitespace-pre-wrap">
+                    <div className="mt-1.5 p-2 rounded-lg bg-black/40 text-[10px] text-slate-400 dark:text-brand-text-mut border border-slate-800/80 font-mono whitespace-pre-wrap">
                       {log.details}
                     </div>
                   )}
@@ -189,9 +189,9 @@ export const DiagnosticLogsModal: React.FC<DiagnosticLogsModalProps> = ({ isOpen
         </div>
 
         {/* Footer info */}
-        <div className="px-4 py-2.5 bg-slate-900 border-t border-slate-800 text-[10px] text-slate-400 flex items-center justify-between">
+        <div className="px-4 py-2.5 bg-slate-900 border-t border-slate-800 text-[10px] text-slate-400 dark:text-brand-text-mut flex items-center justify-between">
           <span>Logs count: {filteredLogs.length}</span>
-          <span className="text-slate-500 font-mono">Samay Ghadi Engine v1.0</span>
+          <span className="text-slate-500 dark:text-brand-text-sec font-mono">Samay Ghadi Engine v1.0</span>
         </div>
 
       </div>

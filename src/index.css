@@ -1,6 +1,46 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Martel:wght@400;700;900&family=Noto+Sans+Devanagari:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
+@theme {
+  --color-brand-bg: var(--brand-bg);
+  --color-brand-card: var(--brand-card);
+  --color-brand-control: var(--brand-control);
+  --color-brand-border: var(--brand-border);
+  --color-brand-text-pri: var(--brand-text-pri);
+  --color-brand-text-sec: var(--brand-text-sec);
+  --color-brand-text-mut: var(--brand-text-mut);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-sel-bg: var(--brand-sel-bg);
+  --color-brand-sel-text: var(--brand-sel-text);
+}
+
+.dark {
+  --brand-bg: #1A2433;
+  --brand-card: #243244;
+  --brand-control: #2E3D52;
+  --brand-border: #475569;
+  --brand-text-pri: #F9FAFB;
+  --brand-text-sec: #CBD5E1;
+  --brand-text-mut: #94A3B8;
+  --brand-accent: #F59E0B;
+  --brand-sel-bg: #422006;
+  --brand-sel-text: #FEF3C7;
+}
+
+.theme-midnight {
+  --brand-bg: #17212F;
+  --brand-card: #222F40;
+  --brand-control: #2D3B4E;
+  --brand-border: #435267;
+  --brand-text-pri: #F8FAFC;
+  --brand-text-sec: #CBD5E1;
+  --brand-text-mut: #AAB7C7;
+  --brand-accent: #F59E0B;
+  --brand-sel-bg: #422006;
+  --brand-sel-text: #FEF3C7;
+}
+
+
 html, body {
   touch-action: manipulation;
   user-select: none;
@@ -40,8 +80,8 @@ body:not(.dark) .text-slate-550 {
 }
 
 .dark html, .dark body {
-  color: #F9FAFB; /* Primary text */
-  background-color: #111827;
+  color: var(--brand-text-pri);
+  background-color: var(--brand-bg);
 }
 
 /* Map existing color tokens to Dark Mode Palette dynamically */
@@ -86,9 +126,9 @@ input, textarea, select {
   --color-orange-350: #ffa726; /* Register custom orange-350 color */
 
   /* Dark Mode Palette Tokens (New) */
-  --color-dark-app: #111827;
-  --color-dark-card: #1F2937;
-  --color-dark-control: #273449;
+  --color-dark-app: #1A2433;
+  --color-dark-card: #243244;
+  --color-dark-control: #2E3D52;
   --color-dark-text-pri: #F9FAFB;
   --color-dark-text-sec: #CBD5E1;
   --color-dark-text-mut: #94A3B8;
@@ -140,14 +180,14 @@ input, textarea, select {
 
 /* Upgrade active dark theme context with Specific Dark Palette */
 .dark {
-  --bg-app-dark-start: #111827;
-  --bg-app-dark-mid: #111827;
-  --bg-app-dark-end: #111827;
+  --bg-app-dark-start: #1A2433;
+  --bg-app-dark-mid: #1A2433;
+  --bg-app-dark-end: #1A2433;
   --bg-app-dark-glow: #422006;
-  --bg-envelope-dark: #1F2937;
+  --bg-envelope-dark: #243244;
 
   /* Glass Card Upgrades */
-  --card-bg-dark: #1F2937;
+  --card-bg-dark: #243244;
   --card-border-dark: #475569;
   --card-shadow-dark: 0 10px 30px rgba(0, 0, 0, 0.4);
   --card-border-hover-dark: #F59E0B;
@@ -377,3 +417,6 @@ input, textarea, select {
     font-size: 114.5%; /* Scales base root font size from 16px to 18.32px */
   }
 }
+@ c u s t o m - v a r i a n t   m i d n i g h t   ( & : w h e r e ( . t h e m e - m i d n i g h t ,   . t h e m e - m i d n i g h t   * ) ) ; 
+ 
+ 

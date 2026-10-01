@@ -219,31 +219,31 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
       <div 
         className={`w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh] transition-all duration-300 md:border scale-100 ${
           theme === 'light' 
-            ? 'bg-[#FFFBF7] text-slate-800 border-orange-100' 
+            ? 'bg-[#FFFBF7] text-slate-800 dark:text-brand-text-pri border-orange-100 dark:border-brand-border' 
             : 'bg-[#181411] text-amber-550 border-orange-950/40'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
         <div className={`p-5 flex justify-between items-center border-b ${
-          theme === 'light' ? 'bg-orange-50/40 border-orange-100' : 'bg-orange-950/20 border-orange-950/20'
+          theme === 'light' ? 'bg-orange-50/40 border-orange-100 dark:border-brand-border' : 'bg-orange-950/20 border-orange-950/20'
         }`}>
           <div className="flex items-center gap-2 text-left">
-            <span className="p-1.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-dark-accent">
+            <span className="p-1.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-brand-accent">
               <HelpCircle className="w-5 h-5 animate-pulse" />
             </span>
             <div>
-              <h2 className="font-serif text-lg font-black text-orange-900 dark:text-dark-text-pri leading-tight">
+              <h2 className="font-serif text-lg font-black text-orange-900 dark:text-brand-text-pri leading-tight">
                 {getTranslation(language, 'helpTitle')}
               </h2>
-              <p className="text-[10px] text-slate-400 dark:text-slate-450 block mt-0.5 font-semibold font-sans">
+              <p className="text-[10px] text-slate-400 dark:text-brand-text-mut block mt-0.5 font-semibold font-sans">
                 {getTranslation(language, 'helpIntro')}
               </p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className={`p-1.5 rounded-full hover:bg-orange-500/10 text-slate-400 hover:text-orange-500 cursor-pointer transition-colors`}
+            className={`p-1.5 rounded-full hover:bg-orange-500/10 text-slate-400 dark:text-brand-text-mut hover:text-orange-500 cursor-pointer transition-colors`}
             title={language === 'Hindi' ? "बंद करें" : "Close"}
           >
             <X className="w-5 h-5" />
@@ -252,12 +252,12 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
 
         {/* Modal Tabs Navigation */}
         <div className={`flex border-b px-4 ${
-          theme === 'light' ? 'border-orange-100 bg-[#FFF]' : 'border-orange-950/20 bg-[#16120E]'
+          theme === 'light' ? 'border-orange-100 dark:border-brand-border bg-[#FFF]' : 'border-orange-950/20 bg-[#16120E]'
         }`}>
           <button
             onClick={() => setActiveTab('intro')}
             className={`px-4 py-3 text-xs font-black relative flex items-center gap-1.5 cursor-pointer transition-colors ${
-              activeTab === 'intro' ? 'text-orange-600 dark:text-dark-accent' : 'text-slate-400 hover:text-slate-600'
+              activeTab === 'intro' ? 'text-orange-600 dark:text-brand-accent' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
@@ -270,7 +270,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
           <button
             onClick={() => setActiveTab('features')}
             className={`px-4 py-3 text-xs font-black relative flex items-center gap-1.5 cursor-pointer transition-colors ${
-              activeTab === 'features' ? 'text-orange-600 dark:text-dark-accent' : 'text-slate-400 hover:text-slate-600'
+              activeTab === 'features' ? 'text-orange-600 dark:text-brand-accent' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
             <Home className="w-3.5 h-3.5" />
@@ -283,7 +283,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
           <button
             onClick={() => setActiveTab('faqs')}
             className={`px-4 py-3 text-xs font-black relative flex items-center gap-1.5 cursor-pointer transition-colors ${
-              activeTab === 'faqs' ? 'text-orange-600 dark:text-dark-accent' : 'text-slate-400 hover:text-slate-600'
+              activeTab === 'faqs' ? 'text-orange-600 dark:text-brand-accent' : 'text-slate-400 hover:text-slate-600'
             }`}
           >
             <Info className="w-3.5 h-3.5" />
@@ -300,13 +300,13 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
           {/* TAB 1: INTRO */}
           {activeTab === 'intro' && (
             <div className="space-y-4 animate-fade-in">
-              <div className="rounded-2xl p-4 bg-orange-500/5 border border-orange-500/10 flex gap-3.5">
+              <div className="rounded-2xl p-4 bg-orange-500/5 dark:bg-brand-card border border-orange-500/10 flex gap-3.5">
                 <span className="text-xl">🕉️</span>
                 <div className="space-y-1">
-                  <h3 className="font-serif text-sm font-bold text-orange-600 dark:text-dark-accent">
+                  <h3 className="font-serif text-sm font-bold text-orange-600 dark:text-brand-accent">
                     {currentIntro.title}
                   </h3>
-                  <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-350 font-sans">
+                  <p className="text-[11px] leading-relaxed text-slate-600 dark:text-brand-text-sec font-sans">
                     {currentIntro.desc}
                   </p>
                 </div>
@@ -314,49 +314,49 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
                 <div className={`p-3.5 rounded-xl border ${
-                  theme === 'light' ? 'bg-[#FCFAF2] border-orange-100/50' : 'bg-[#1C1814] border-orange-955/40'
+                  theme === 'light' ? 'bg-[#FCFAF2] border-orange-100/50 dark:border-brand-border' : 'bg-[#1C1814] border-orange-955/40'
                 }`}>
                   <h4 className="text-2xs font-bold text-orange-600 flex items-center gap-1.5 mb-1.5">
                     <TrendingUp className="w-3.5 h-3.5" />
                     {currentIntro.gaugeTitle}
                   </h4>
-                  <p className="text-[10px] text-slate-500 dark:text-dark-text-mut leading-normal font-sans">
+                  <p className="text-[10px] text-slate-500 dark:text-brand-text-mut leading-normal font-sans">
                     {currentIntro.gaugeDesc}
                   </p>
                 </div>
 
                 <div className={`p-3.5 rounded-xl border ${
-                  theme === 'light' ? 'bg-[#FCFAF2] border-orange-100/50' : 'bg-[#1C1814] border-orange-955/40'
+                  theme === 'light' ? 'bg-[#FCFAF2] border-orange-100/50 dark:border-brand-border' : 'bg-[#1C1814] border-orange-955/40'
                 }`}>
                   <h4 className="text-2xs font-bold text-orange-600 flex items-center gap-1.5 mb-1.5">
                     <Sliders className="w-3.5 h-3.5" />
                     {currentIntro.locationTitle}
                   </h4>
-                  <p className="text-[10px] text-slate-500 dark:text-dark-text-mut leading-normal font-sans">
+                  <p className="text-[10px] text-slate-500 dark:text-brand-text-mut leading-normal font-sans">
                     {currentIntro.locationDesc}
                   </p>
                 </div>
 
                 <div className={`p-3.5 rounded-xl border ${
-                  theme === 'light' ? 'bg-[#FCFAF2] border-orange-100/50' : 'bg-[#1C1814] border-orange-955/40'
+                  theme === 'light' ? 'bg-[#FCFAF2] border-orange-100/50 dark:border-brand-border' : 'bg-[#1C1814] border-orange-955/40'
                 }`}>
                   <h4 className="text-2xs font-bold text-orange-600 flex items-center gap-1.5 mb-1.5">
                     <Clock className="w-3.5 h-3.5" />
                     {currentIntro.clockTitle}
                   </h4>
-                  <p className="text-[10px] text-slate-500 dark:text-dark-text-mut leading-normal font-sans">
+                  <p className="text-[10px] text-slate-500 dark:text-brand-text-mut leading-normal font-sans">
                     {currentIntro.clockDesc}
                   </p>
                 </div>
 
                 <div className={`p-3.5 rounded-xl border ${
-                  theme === 'light' ? 'bg-[#FCFAF2] border-orange-100/50' : 'bg-[#1C1814] border-orange-955/40'
+                  theme === 'light' ? 'bg-[#FCFAF2] border-orange-100/50 dark:border-brand-border' : 'bg-[#1C1814] border-orange-955/40'
                 }`}>
                   <h4 className="text-2xs font-bold text-orange-600 flex items-center gap-1.5 mb-1.5">
                     <Tv className="w-3.5 h-3.5" />
                     {currentIntro.customTitle}
                   </h4>
-                  <p className="text-[10px] text-slate-500 dark:text-dark-text-mut leading-normal font-sans">
+                  <p className="text-[10px] text-slate-500 dark:text-brand-text-mut leading-normal font-sans">
                     {currentIntro.customDesc}
                   </p>
                 </div>
@@ -388,7 +388,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
                         <Icon className="w-4 h-4" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-slate-755 dark:text-dark-text-pri leading-none">{guide.title}</h4>
+                        <h4 className="text-xs font-bold text-slate-755 dark:text-brand-text-pri leading-none">{guide.title}</h4>
                         <p className="text-[10px] text-slate-500 dark:text-slate-455 mt-1 leading-normal">
                           {guide.desc}
                         </p>
@@ -412,11 +412,11 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className={`w-full text-xs font-medium px-4 py-3 pl-9 rounded-xl border outline-none transition-all ${
                     theme === 'light' 
-                      ? 'bg-slate-50 border-orange-100 focus:border-orange-400 focus:bg-[#FFF]' 
+                      ? 'bg-slate-50 dark:bg-brand-card border-orange-100 dark:border-brand-border focus:border-orange-400 focus:bg-[#FFF]' 
                       : 'bg-stone-900/40 border-orange-955/30 focus:border-orange-500 focus:bg-stone-955/80 text-amber-50'
                   }`}
                 />
-                <Search className="w-4 h-4 absolute left-3 top-3.5 text-slate-400" />
+                <Search className="w-4 h-4 absolute left-3 top-3.5 text-slate-400 dark:text-brand-text-mut" />
               </div>
 
               {/* FAQs Listing */}
@@ -429,7 +429,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
                         key={idx}
                         className={`rounded-xl border overflow-hidden transition-all duration-250 ${
                           theme === 'light' 
-                            ? 'border-orange-100/40 bg-orange-50/10 hover:bg-orange-50/30' 
+                            ? 'border-orange-100/40 dark:border-brand-border bg-orange-50/10 hover:bg-orange-50/30' 
                             : 'border-orange-950/20 bg-stone-900/20 hover:bg-stone-900/30'
                         }`}
                       >
@@ -437,13 +437,13 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
                           onClick={() => setExpandedFaq(isOpen ? null : idx)}
                           className="w-full text-left px-4 py-3.5 font-bold text-xs flex justify-between items-center gap-2 cursor-pointer"
                         >
-                          <span className={`${isOpen ? 'text-orange-600 dark:text-dark-accent' : 'text-slate-750 dark:text-dark-text-pri'}`}>{faq.q}</span>
-                          {isOpen ? <ChevronUp className="w-4 h-4 text-orange-500 shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />}
+                          <span className={`${isOpen ? 'text-orange-600 dark:text-brand-accent' : 'text-slate-750 dark:text-brand-text-pri'}`}>{faq.q}</span>
+                          {isOpen ? <ChevronUp className="w-4 h-4 text-orange-500 shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate-400 dark:text-brand-text-mut shrink-0" />}
                         </button>
                         
                         {isOpen && (
                           <div className={`px-4 pb-4 pt-1 font-sans text-[10px] sm:text-[11.5px] leading-relaxed border-t border-dashed ${
-                            theme === 'light' ? 'text-slate-650 border-orange-100/30 bg-white/70' : 'text-slate-350 border-orange-950/20 bg-stone-955/40'
+                            theme === 'light' ? 'text-slate-650 border-orange-100/30 dark:border-brand-border bg-white/70 dark:bg-brand-card' : 'text-slate-350 border-orange-950/20 bg-stone-955/40'
                           }`}>
                             <p className="whitespace-pre-line">{faq.a}</p>
                             
@@ -452,7 +452,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
                               {faq.tags.map((tag, tagIdx) => (
                                 <span 
                                   key={tagIdx} 
-                                  className="text-[8px] font-black uppercase font-mono px-1.5 py-0.5 rounded-md bg-orange-500/10 text-orange-600 dark:text-dark-accent"
+                                  className="text-[8px] font-black uppercase font-mono px-1.5 py-0.5 rounded-md bg-orange-500/10 text-orange-600 dark:text-brand-accent"
                                 >
                                   #{tag}
                                 </span>
@@ -465,7 +465,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
                   })}
                 </div>
               ) : (
-                <div className="text-center py-8 text-slate-400 font-sans text-xs">
+                <div className="text-center py-8 text-slate-400 dark:text-brand-text-mut font-sans text-xs">
                   {language === 'Hindi' ? "कोई परिणाम नहीं मिला। कृपया कुछ और शब्द खोजें।" : "No matches found. Please try searching for other terms."}
                 </div>
               )}
@@ -476,7 +476,7 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
 
         {/* Modal Footer branding/acknowledgement */}
         <div className={`px-5 py-3 border-t flex justify-between items-center text-[9px] font-mono font-bold ${
-          theme === 'light' ? 'bg-orange-50/30 border-orange-100 text-slate-500' : 'bg-orange-950/10 border-orange-950/20 text-slate-450'
+          theme === 'light' ? 'bg-orange-50/30 border-orange-100 dark:border-brand-border text-slate-500 dark:text-brand-text-sec' : 'bg-orange-950/10 border-orange-950/20 text-slate-450 dark:text-brand-text-mut'
         }`}>
           <span className="flex items-center gap-1">
             <CheckCircle className="w-3 h-3 text-emerald-500" />

@@ -431,12 +431,14 @@ export default function App() {
   // Sync document class with current settings theme for Tailwind dark mode
   useEffect(() => {
     if (typeof document !== 'undefined') {
+      const root = document.documentElement;
+      root.classList.remove('dark', 'theme-midnight', 'temple');
+      
       if (settings.theme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
+        root.classList.add('dark');
+      } else if (settings.theme === 'midnight-saffron') {
+        root.classList.add('dark', 'theme-midnight');
       }
-      document.documentElement.classList.remove('temple');
     }
   }, [settings.theme]);
 
@@ -1069,7 +1071,7 @@ export default function App() {
               </div>
 
               {/* Central Diagnostic Metadata Box for Screenshots */}
-              <div className="w-full bg-slate-950/70 border border-slate-800 rounded-xl p-2.5 text-[10px] font-mono text-slate-400 text-left space-y-0.5 shadow-inner">
+              <div className="w-full bg-slate-950/70 border border-slate-800 rounded-xl p-2.5 text-[10px] font-mono text-slate-400 dark:text-brand-text-mut text-left space-y-0.5 shadow-inner">
                 <div className="flex justify-between"><span>Engine Version:</span> <span className="text-amber-300 font-bold">{diagInfo.engineVersion}</span></div>
                 <div className="flex justify-between"><span>Error Code:</span> <span className="text-rose-400 font-bold">{diagInfo.errorCode}</span></div>
                 <div className="flex justify-between"><span>Time:</span> <span className="text-slate-300">{diagInfo.timestamp}</span></div>
@@ -1138,7 +1140,7 @@ export default function App() {
         <h2 className="text-lg font-serif font-black text-amber-500 tracking-wide text-center mb-1">
           सटीक पंचांग तैयार किया जा रहा है...
         </h2>
-        <p className="text-xs text-slate-400 font-medium tracking-tight text-center mb-4">
+        <p className="text-xs text-slate-400 dark:text-brand-text-mut font-medium tracking-tight text-center mb-4">
           कृपया कुछ क्षण प्रतीक्षा करें...
         </p>
 
@@ -1148,22 +1150,22 @@ export default function App() {
             <span>🔍 DIAGNOSTIC LOGS</span>
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-sans font-bold animate-pulse">LIVE</span>
           </div>
-          <div><strong className="text-slate-400">isSplashActive:</strong> <span className={isSplashActive ? 'text-red-400' : 'text-green-400'}>{String(isSplashActive)}</span></div>
-          <div><strong className="text-slate-400">isReady():</strong> <span className={isReady() ? 'text-green-400' : 'text-red-400'}>{String(isReady())}</span></div>
-          <div><strong className="text-slate-400">isPanchangDataReady:</strong> <span className={isPanchangDataReady ? 'text-green-400' : 'text-red-400'}>{String(isPanchangDataReady)}</span></div>
-          <div><strong className="text-slate-400">panchangInfo:</strong> {panchangInfo ? 'Object Loaded' : 'NULL'}</div>
-          <div><strong className="text-slate-400">planetsCount:</strong> {panchangInfo?.planets?.length ?? 0}</div>
-          <div><strong className="text-slate-400">firstPlanetSign:</strong> {panchangInfo?.planets?.[0]?.sign ?? 'NONE'}</div>
-          <div><strong className="text-slate-400">pendingQueries ({pending.length}):</strong> {pending.length > 0 ? (pending as string[]).join(', ') : 'None'}</div>
+          <div><strong className="text-slate-400 dark:text-brand-text-mut">isSplashActive:</strong> <span className={isSplashActive ? 'text-red-400' : 'text-green-400'}>{String(isSplashActive)}</span></div>
+          <div><strong className="text-slate-400 dark:text-brand-text-mut">isReady():</strong> <span className={isReady() ? 'text-green-400' : 'text-red-400'}>{String(isReady())}</span></div>
+          <div><strong className="text-slate-400 dark:text-brand-text-mut">isPanchangDataReady:</strong> <span className={isPanchangDataReady ? 'text-green-400' : 'text-red-400'}>{String(isPanchangDataReady)}</span></div>
+          <div><strong className="text-slate-400 dark:text-brand-text-mut">panchangInfo:</strong> {panchangInfo ? 'Object Loaded' : 'NULL'}</div>
+          <div><strong className="text-slate-400 dark:text-brand-text-mut">planetsCount:</strong> {panchangInfo?.planets?.length ?? 0}</div>
+          <div><strong className="text-slate-400 dark:text-brand-text-mut">firstPlanetSign:</strong> {panchangInfo?.planets?.[0]?.sign ?? 'NONE'}</div>
+          <div><strong className="text-slate-400 dark:text-brand-text-mut">pendingQueries ({pending.length}):</strong> {pending.length > 0 ? (pending as string[]).join(', ') : 'None'}</div>
           
           <div className="pt-2 border-t border-amber-500/30 text-[10px] text-slate-300 space-y-1">
             <div className="font-semibold text-amber-300">Latest Engine Log Traces:</div>
             {logs.length === 0 ? (
-              <div className="text-slate-500 italic">No logs recorded yet</div>
+              <div className="text-slate-500 dark:text-brand-text-sec italic">No logs recorded yet</div>
             ) : (
               logs.map((l: any, i: number) => (
                 <div key={i} className="truncate text-slate-300">
-                  <span className="text-amber-400 font-semibold">[{l.level}]</span> <span className="text-slate-400">{l.timestamp}</span> {l.message}
+                  <span className="text-amber-400 font-semibold">[{l.level}]</span> <span className="text-slate-400 dark:text-brand-text-mut">{l.timestamp}</span> {l.message}
                 </div>
               ))
             )}
@@ -1187,7 +1189,7 @@ export default function App() {
     <div className={`min-h-screen transition-all font-sans antialiased ${
       settings.theme === 'light' 
         ? 'bg-[var(--bg-app-light)] text-slate-850' 
-        : 'bg-gradient-to-b from-[var(--bg-app-dark-start)] via-[var(--bg-app-dark-mid)] to-[var(--bg-app-dark-end)] text-slate-200'
+        : 'bg-brand-bg text-slate-200'
     }`}>
       
       {/* NATIVE DEVICE TOAST SIMULATOR */}
@@ -1201,7 +1203,7 @@ export default function App() {
             <p className="text-[10px] text-slate-100 font-sans mt-0.5 leading-normal">{toastMessage.body}</p>
           </div>
           <button 
-            className="text-xs text-slate-400 hover:text-white font-black cursor-pointer font-sans px-1"
+            className="text-xs text-slate-400 dark:text-brand-text-mut hover:text-white font-black cursor-pointer font-sans px-1"
             onClick={() => setShowToast(false)}
           >
             ×
@@ -1216,7 +1218,7 @@ export default function App() {
         <div className={`overflow-hidden transition-all duration-300 relative flex flex-col min-h-screen w-full flex-grow ${
           settings.theme === 'light'
             ? 'bg-[var(--bg-envelope-light)]'
-            : 'bg-[var(--bg-envelope-dark)]'
+            : 'bg-brand-bg'
         }`}>
           
           {/* Subtle Sacred Motif Background Overlay for Spiritual Branding */}
@@ -1224,7 +1226,7 @@ export default function App() {
           
           {/* MAIN BRAND HEADER BANNER */}
           <div className="px-4 pt-4 pb-1 select-none relative z-10">
-            <header className={`p-4 sm:p-5 rounded-[28px] border border-orange-100/50 dark:border-dark-border flex flex-col gap-4 shadow-sm ${
+            <header className={`p-4 sm:p-5 rounded-[28px] border border-orange-100/50 dark:border-brand-border flex flex-col gap-4 shadow-sm ${
               settings.theme === 'light' ? 'bg-orange-50/15' : 'bg-orange-950/5'
             }`}>
               {/* ROW 1: Logo, Title & Tagline + Location */}
@@ -1236,10 +1238,10 @@ export default function App() {
                     className="w-13 h-13 sm:w-15 sm:h-15 object-contain drop-shadow-sm"
                   />
                   <div className="flex flex-col text-left">
-                    <h1 className="text-xl sm:text-2xl font-serif font-black text-orange-950 dark:text-dark-text-pri tracking-wider leading-tight">
+                    <h1 className="text-xl sm:text-2xl font-serif font-black text-orange-950 dark:text-brand-text-pri tracking-wider leading-tight">
                       {getTranslation(settings.language, 'home')}
                     </h1>
-                    <span className="text-xs sm:text-sm font-serif font-extrabold text-orange-850 dark:text-dark-accent tracking-wide mt-0.5">
+                    <span className="text-xs sm:text-sm font-serif font-extrabold text-orange-850 dark:text-brand-accent tracking-wide mt-0.5">
                       {getTranslation(settings.language, 'tagline')}
                     </span>
                   </div>
@@ -1248,11 +1250,11 @@ export default function App() {
                 {/* Location Box (Right aligned in Row 1) */}
                 <div 
                   onClick={() => setIsCityModalOpen(true)}
-                  className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-orange-100/50 dark:bg-dark-card border border-orange-200/30 dark:border-dark-border hover:bg-orange-200/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shrink-0"
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1 bg-orange-100/50 dark:bg-brand-card border border-orange-200/30 dark:border-brand-border hover:bg-orange-200/50 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shrink-0"
                   title={settings.language === 'Hindi' ? "स्थान बदलें" : "Change Location"}
                 >
                   <MapPin className="w-3.5 h-3.5 text-orange-600 animate-pulse" />
-                  <span className="text-[9px] font-extrabold text-orange-900 dark:text-dark-text-pri uppercase font-mono tracking-tight leading-none truncate max-w-[120px]">
+                  <span className="text-[9px] font-extrabold text-orange-900 dark:text-brand-text-pri uppercase font-mono tracking-tight leading-none truncate max-w-[120px]">
                     {coords.city}
                   </span>
                 </div>
@@ -1303,15 +1305,15 @@ export default function App() {
                 {/* 2. WELCOME CARD (Redesigned) */}
                 <motion.div 
                   variants={itemVariants}
-                  className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left flex flex-col gap-3 relative overflow-hidden border border-orange-100/50 dark:border-dark-border rounded-3xl"
+                  className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left flex flex-col gap-3 relative overflow-hidden border border-orange-100/50 dark:border-brand-border rounded-3xl"
                 >
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-dark-accent block">॥ सनातन पंचांग कल्याणम ॥</span>
+                      <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-brand-accent block">॥ सनातन पंचांग कल्याणम ॥</span>
                     </div>
                     {/* Header Row: Date & Day */}
-                    <div className="flex justify-between items-baseline gap-2 border-b border-orange-100/20 dark:border-dark-border pb-2 flex-wrap">
-                      <h2 className="text-base sm:text-lg font-bold font-serif text-slate-800 dark:text-dark-text-pri">
+                    <div className="flex justify-between items-baseline gap-2 border-b border-orange-100/20 dark:border-brand-border pb-2 flex-wrap">
+                      <h2 className="text-base sm:text-lg font-bold font-serif text-slate-800 dark:text-brand-text-pri">
                         {selectedDate.toLocaleDateString('hi-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                       </h2>
                     </div>
@@ -1319,24 +1321,24 @@ export default function App() {
 
                   {/* Details Grid */}
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs leading-tight">
-                    <div className="flex flex-col p-2 bg-orange-500/5 dark:bg-dark-card border border-orange-100/10 dark:border-dark-border rounded-2xl justify-center min-h-[52px]">
-                      <span className="text-[9px] text-slate-400 uppercase font-mono tracking-wider">अमान्त महीना</span>
+                    <div className="flex flex-col p-2 bg-orange-500/5 dark:bg-brand-card border border-orange-100/10 dark:border-brand-border rounded-2xl justify-center min-h-[52px]">
+                      <span className="text-[9px] text-slate-400 dark:text-brand-text-mut uppercase font-mono tracking-wider">अमान्त महीना</span>
                       <span className="font-serif font-bold text-orange-700 dark:text-orange-350 mt-0.5 truncate">
                         {panchangInfo.hinduDate.monthAmantaHindi || panchangInfo.hinduDate.monthHindi}
                         {panchangInfo.hinduDate.isLeapMonth ? ' (अधिमास)' : ''}
                       </span>
                     </div>
 
-                    <div className="flex flex-col p-2 bg-orange-500/5 dark:bg-dark-card border border-orange-100/10 dark:border-dark-border rounded-2xl justify-center min-h-[52px]">
-                      <span className="text-[9px] text-slate-400 uppercase font-mono tracking-wider">पूर्णिमान्त महीना</span>
+                    <div className="flex flex-col p-2 bg-orange-500/5 dark:bg-brand-card border border-orange-100/10 dark:border-brand-border rounded-2xl justify-center min-h-[52px]">
+                      <span className="text-[9px] text-slate-400 dark:text-brand-text-mut uppercase font-mono tracking-wider">पूर्णिमान्त महीना</span>
                       <span className="font-serif font-bold text-orange-700 dark:text-orange-350 mt-0.5 truncate">
                         {panchangInfo.hinduDate.monthPurnimantaHindi || panchangInfo.hinduDate.monthHindi}
                         {panchangInfo.hinduDate.isLeapMonth ? ' (अधिमास)' : ''}
                       </span>
                     </div>
 
-                    <div className="flex flex-col p-2 bg-orange-500/5 dark:bg-dark-card border border-orange-100/10 dark:border-dark-border rounded-2xl justify-center min-h-[52px]">
-                      <span className="text-[9px] text-slate-400 uppercase font-mono tracking-wider">पक्ष व ऋतु</span>
+                    <div className="flex flex-col p-2 bg-orange-500/5 dark:bg-brand-card border border-orange-100/10 dark:border-brand-border rounded-2xl justify-center min-h-[52px]">
+                      <span className="text-[9px] text-slate-400 dark:text-brand-text-mut uppercase font-mono tracking-wider">पक्ष व ऋतु</span>
                       <span className="font-serif font-bold text-orange-700 dark:text-orange-350 mt-0.5 truncate">
                         {panchangInfo.hinduDate.paksha === 'Shukla' ? 'शुक्ल' : 'कृष्ण'} पक्ष • {(() => {
                           const r = panchangInfo.hinduDate.ritu;
@@ -1351,15 +1353,15 @@ export default function App() {
                       </span>
                     </div>
 
-                    <div className="flex flex-col p-2 bg-orange-500/5 dark:bg-dark-card border border-orange-100/10 dark:border-dark-border rounded-2xl justify-center min-h-[52px]">
-                      <span className="text-[9px] text-slate-400 uppercase font-mono tracking-wider">वि. / शक / गु. संवत्</span>
-                      <span className="font-mono font-bold text-slate-700 dark:text-slate-350 mt-0.5 text-[10px] sm:text-xs">
+                    <div className="flex flex-col p-2 bg-orange-500/5 dark:bg-brand-card border border-orange-100/10 dark:border-brand-border rounded-2xl justify-center min-h-[52px]">
+                      <span className="text-[9px] text-slate-400 dark:text-brand-text-mut uppercase font-mono tracking-wider">वि. / शक / गु. संवत्</span>
+                      <span className="font-mono font-bold text-slate-700 dark:text-brand-text-sec mt-0.5 text-[10px] sm:text-xs">
                         {panchangInfo.hinduDate.samvatVikram} / {panchangInfo.hinduDate.samvatShaka} / {panchangInfo.hinduDate.samvatGujarati || panchangInfo.hinduDate.samvatVikram - 1}
                       </span>
                     </div>
 
-                    <div className="flex flex-col p-2 bg-orange-500/5 dark:bg-dark-card border border-orange-100/10 dark:border-dark-border rounded-2xl justify-center min-h-[52px]">
-                      <span className="text-[9px] text-slate-400 uppercase font-mono tracking-wider">सूर्योदय / सूर्यास्त</span>
+                    <div className="flex flex-col p-2 bg-orange-500/5 dark:bg-brand-card border border-orange-100/10 dark:border-brand-border rounded-2xl justify-center min-h-[52px]">
+                      <span className="text-[9px] text-slate-400 dark:text-brand-text-mut uppercase font-mono tracking-wider">सूर्योदय / सूर्यास्त</span>
                       <span className="font-mono font-bold text-orange-700 dark:text-orange-350 mt-0.5">
                         🌅 {panchangInfo.sunrise} • 🌇 {panchangInfo.sunset}
                       </span>
@@ -1370,18 +1372,18 @@ export default function App() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1 select-none">
                     {/* Live Ishtakala */}
                     {panchangInfo.ishtakala && (
-                      <div className="flex justify-between items-center bg-orange-50/30 dark:bg-dark-card border border-orange-100/30 dark:border-dark-border rounded-2xl p-2 px-3 text-left">
-                        <span className="text-[10px] text-slate-500 dark:text-dark-text-mut font-bold font-serif">⏳ सजीव इष्टकाल (Live):</span>
-                        <span className="font-serif font-black text-[#ea580c] dark:text-dark-accent text-xs sm:text-sm">{panchangInfo.ishtakala.formatted}</span>
+                      <div className="flex justify-between items-center bg-orange-50/30 dark:bg-brand-card border border-orange-100/30 dark:border-brand-border rounded-2xl p-2 px-3 text-left">
+                        <span className="text-[10px] text-slate-500 dark:text-brand-text-mut font-bold font-serif">⏳ सजीव इष्टकाल (Live):</span>
+                        <span className="font-serif font-black text-[#ea580c] dark:text-brand-accent text-xs sm:text-sm">{panchangInfo.ishtakala.formatted}</span>
                       </div>
                     )}
 
                     {/* Ayana */}
                     {panchangInfo.hinduDate.ayana && (
-                      <div className="flex justify-between items-center bg-orange-50/30 dark:bg-dark-card border border-orange-100/30 dark:border-dark-border rounded-2xl p-2 px-3 text-left">
-                        <span className="text-[10px] text-slate-500 dark:text-dark-text-mut font-bold font-serif">🌞 अयन (Ayana):</span>
+                      <div className="flex justify-between items-center bg-orange-50/30 dark:bg-brand-card border border-orange-100/30 dark:border-brand-border rounded-2xl p-2 px-3 text-left">
+                        <span className="text-[10px] text-slate-500 dark:text-brand-text-mut font-bold font-serif">🌞 अयन (Ayana):</span>
                         <span className={`text-[10.5px] font-black font-serif ${
-                          panchangInfo.hinduDate.ayana === 'Uttarayana' ? 'text-amber-600 dark:text-dark-accent' : 'text-indigo-600 dark:text-indigo-400'
+                          panchangInfo.hinduDate.ayana === 'Uttarayana' ? 'text-amber-600 dark:text-brand-accent' : 'text-indigo-600 dark:text-indigo-400'
                         }`}>
                           {panchangInfo.hinduDate.ayana === 'Uttarayana' ? 'उत्तरायण' : 'दक्षिणायन'}
                         </span>
@@ -1393,14 +1395,14 @@ export default function App() {
                       const moonPlanet = panchangInfo.planets.find(p => p && p.name === 'Moon')!;
                       const remTime = getPlanetRemainingTime(moonPlanet);
                       return (
-                        <div className="flex justify-between items-center bg-orange-50/30 dark:bg-dark-card border border-orange-100/30 dark:border-dark-border rounded-2xl p-2 px-3 text-left">
-                          <span className="text-[10px] text-slate-500 dark:text-dark-text-mut font-bold font-serif">🌙 चन्द्र राशि:</span>
+                        <div className="flex justify-between items-center bg-orange-50/30 dark:bg-brand-card border border-orange-100/30 dark:border-brand-border rounded-2xl p-2 px-3 text-left">
+                          <span className="text-[10px] text-slate-500 dark:text-brand-text-mut font-bold font-serif">🌙 चन्द्र राशि:</span>
                           <div className="flex flex-col items-end">
                             <span className="font-serif font-black text-orange-655 text-xs sm:text-sm">
                               {moonPlanet.signHindi || ''}
                             </span>
                             {remTime && (
-                              <span className="text-[8px] text-slate-500 dark:text-dark-text-mut font-medium">
+                              <span className="text-[8px] text-slate-500 dark:text-brand-text-mut font-medium">
                                 ⏳ {remTime}
                               </span>
                             )}
@@ -1414,14 +1416,14 @@ export default function App() {
                       const sunPlanet = panchangInfo.planets.find(p => p && p.name === 'Sun')!;
                       const remTime = getPlanetRemainingTime(sunPlanet);
                       return (
-                        <div className="flex justify-between items-center bg-orange-50/30 dark:bg-dark-card border border-orange-100/30 dark:border-dark-border rounded-2xl p-2 px-3 text-left">
-                          <span className="text-[10px] text-slate-500 dark:text-dark-text-mut font-bold font-serif">🔆 सूर्य राशि:</span>
+                        <div className="flex justify-between items-center bg-orange-50/30 dark:bg-brand-card border border-orange-100/30 dark:border-brand-border rounded-2xl p-2 px-3 text-left">
+                          <span className="text-[10px] text-slate-500 dark:text-brand-text-mut font-bold font-serif">🔆 सूर्य राशि:</span>
                           <div className="flex flex-col items-end">
                             <span className="font-serif font-black text-orange-655 text-xs sm:text-sm">
                               {sunPlanet.signHindi || ''}
                             </span>
                             {remTime && (
-                              <span className="text-[8px] text-slate-500 dark:text-dark-text-mut font-medium">
+                              <span className="text-[8px] text-slate-500 dark:text-brand-text-mut font-medium">
                                 ⏳ {remTime}
                               </span>
                             )}
@@ -1432,8 +1434,8 @@ export default function App() {
 
                     {/* Praviste/Gate */}
                     {panchangInfo.hinduDate.praviste !== undefined && (
-                      <div className="flex justify-between items-center bg-orange-50/30 dark:bg-dark-card border border-orange-100/30 dark:border-dark-border rounded-2xl p-2 px-3 text-left">
-                        <span className="text-[10px] text-slate-500 dark:text-dark-text-mut font-bold font-serif">📅 प्रविष्टे / गते:</span>
+                      <div className="flex justify-between items-center bg-orange-50/30 dark:bg-brand-card border border-orange-100/30 dark:border-brand-border rounded-2xl p-2 px-3 text-left">
+                        <span className="text-[10px] text-slate-500 dark:text-brand-text-mut font-bold font-serif">📅 प्रविष्टे / गते:</span>
                         <span className="font-serif font-black text-orange-655 text-xs sm:text-sm">
                           {panchangInfo.hinduDate.praviste} प्रविष्टे (गते)
                         </span>
@@ -1445,8 +1447,8 @@ export default function App() {
                       const dsh = getDishaShoolInfo(selectedDate.getDay());
                       return (
                         <div className="flex items-center bg-rose-50/20 dark:bg-rose-950/5 border border-rose-100/30 dark:border-rose-950/10 rounded-2xl p-2 px-3 text-left gap-2 w-full col-span-1 sm:col-span-2">
-                          <span className="text-[10px] text-slate-555 dark:text-dark-text-mut font-serif leading-relaxed">
-                            <strong className="text-slate-700 dark:text-dark-text-pri">🚫 दिशा शूल ({dsh.directionHindi}):</strong> <span className="font-semibold text-rose-600 dark:text-rose-400">निवारण: {dsh.remedyHindi}</span>
+                          <span className="text-[10px] text-slate-555 dark:text-brand-text-mut font-serif leading-relaxed">
+                            <strong className="text-slate-700 dark:text-brand-text-pri">🚫 दिशा शूल ({dsh.directionHindi}):</strong> <span className="font-semibold text-rose-600 dark:text-rose-400">निवारण: {dsh.remedyHindi}</span>
                           </span>
                         </div>
                       );
@@ -1457,79 +1459,79 @@ export default function App() {
                 {/* 3. TODAY'S PANCHANG CARD */}
                 <motion.div
                   variants={itemVariants}
-                  className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left border border-orange-100/50 dark:border-dark-border rounded-3xl space-y-3.5 shadow-sm"
+                  className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left border border-orange-100/50 dark:border-brand-border rounded-3xl space-y-3.5 shadow-sm"
                 >
-                  <div className="flex items-center gap-1.5 border-b border-orange-100/20 dark:border-dark-border pb-2">
+                  <div className="flex items-center gap-1.5 border-b border-orange-100/20 dark:border-brand-border pb-2">
                     <span className="text-[13px] sm:text-[14px]">📿</span>
-                    <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-dark-text-pri leading-none font-serif">
+                    <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-brand-text-pri leading-none font-serif">
                       आज के मुख्य वैदिक अंग
                     </h3>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 select-none">
                     {/* Tithi */}
-                    <div className="flex flex-col bg-amber-50/20 dark:bg-dark-card border border-orange-100/30 dark:border-dark-border rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
-                      <span className="text-[9px] sm:text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">तिथि (Tithi)</span>
+                    <div className="flex flex-col bg-amber-50/20 dark:bg-brand-card border border-orange-100/30 dark:border-brand-border rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-brand-text-mut font-extrabold uppercase font-mono tracking-wider">तिथि (Tithi)</span>
                       <span className="text-sm sm:text-base font-black font-serif text-orange-655 leading-tight my-1.5 break-words">
                         {panchangInfo.hinduDate.tithi.hindiName}
                       </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-dark-text-mut font-medium flex items-center gap-0.5 font-sans leading-none">
+                      <span className="text-[9.5px] text-slate-500 dark:text-brand-text-mut font-medium flex items-center gap-0.5 font-sans leading-none">
                         🕒 {panchangInfo.hinduDate.tithi.endTime} तक
                       </span>
                     </div>
 
                     {/* Nakshatra */}
-                    <div className="flex flex-col bg-amber-50/20 dark:bg-dark-card border border-orange-100/30 dark:border-dark-border rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
-                      <span className="text-[9px] sm:text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">नक्षत्र (Nakshatra)</span>
+                    <div className="flex flex-col bg-amber-50/20 dark:bg-brand-card border border-orange-100/30 dark:border-brand-border rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-brand-text-mut font-extrabold uppercase font-mono tracking-wider">नक्षत्र (Nakshatra)</span>
                       <span className="text-sm sm:text-base font-black font-serif text-orange-655 leading-tight my-1.5 break-words">
                         {panchangInfo.hinduDate.nakshatra.hindiName}
                         {panchangInfo.hinduDate.nakshatra.pada ? ` (${panchangInfo.hinduDate.nakshatra.pada} चरण)` : ''}
                       </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-dark-text-mut font-medium flex items-center gap-0.5 font-sans leading-none">
+                      <span className="text-[9.5px] text-slate-500 dark:text-brand-text-mut font-medium flex items-center gap-0.5 font-sans leading-none">
                         🕒 {panchangInfo.hinduDate.nakshatra.endTime} तक
                       </span>
                     </div>
 
                     {/* Yoga */}
-                    <div className="flex flex-col bg-amber-50/20 dark:bg-dark-card border border-orange-100/30 dark:border-dark-border rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
-                      <span className="text-[9px] sm:text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">योग (Yoga)</span>
+                    <div className="flex flex-col bg-amber-50/20 dark:bg-brand-card border border-orange-100/30 dark:border-brand-border rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-brand-text-mut font-extrabold uppercase font-mono tracking-wider">योग (Yoga)</span>
                       <span className="text-sm sm:text-base font-black font-serif text-orange-655 leading-tight my-1.5 break-words">
                         {translateYoga(panchangInfo.hinduDate.yoga.hindiName)}
                       </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-dark-text-mut font-medium flex items-center gap-0.5 font-sans leading-none">
+                      <span className="text-[9.5px] text-slate-500 dark:text-brand-text-mut font-medium flex items-center gap-0.5 font-sans leading-none">
                         🕒 {panchangInfo.hinduDate.yoga.endTime} तक
                       </span>
                     </div>
 
                     {/* Karana 1 */}
-                    <div className="flex flex-col bg-amber-50/20 dark:bg-dark-card border border-orange-100/30 dark:border-dark-border rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
-                      <span className="text-[9px] sm:text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">प्रथम करण</span>
+                    <div className="flex flex-col bg-amber-50/20 dark:bg-brand-card border border-orange-100/30 dark:border-brand-border rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-brand-text-mut font-extrabold uppercase font-mono tracking-wider">प्रथम करण</span>
                       <span className="text-sm sm:text-base font-black font-serif text-orange-655 leading-tight my-1.5 break-words">
                         {panchangInfo.hinduDate.karana1 ? translateKarana(panchangInfo.hinduDate.karana1.hindiName) : ''}
                       </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-dark-text-mut font-medium flex items-center gap-0.5 font-sans leading-none">
+                      <span className="text-[9.5px] text-slate-500 dark:text-brand-text-mut font-medium flex items-center gap-0.5 font-sans leading-none">
                         🕒 {panchangInfo.hinduDate.karana1?.endTime || ''}
                       </span>
                     </div>
 
                     {/* Karana 2 */}
-                    <div className="flex flex-col bg-amber-50/20 dark:bg-dark-card border border-orange-100/30 dark:border-dark-border rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
-                      <span className="text-[9px] sm:text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">द्वितीय करण</span>
+                    <div className="flex flex-col bg-amber-50/20 dark:bg-brand-card border border-orange-100/30 dark:border-brand-border rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-brand-text-mut font-extrabold uppercase font-mono tracking-wider">द्वितीय करण</span>
                       <span className="text-sm sm:text-base font-black font-serif text-orange-655 leading-tight my-1.5 break-words">
                         {panchangInfo.hinduDate.karana2 ? translateKarana(panchangInfo.hinduDate.karana2.hindiName) : ''}
                       </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-dark-text-mut font-medium flex items-center gap-0.5 font-sans leading-none">
+                      <span className="text-[9.5px] text-slate-500 dark:text-brand-text-mut font-medium flex items-center gap-0.5 font-sans leading-none">
                         🕒 {panchangInfo.hinduDate.karana2?.endTime || ''}
                       </span>
                     </div>
 
                     {/* Anandadi Yoga */}
-                    <div className="flex flex-col bg-amber-50/20 dark:bg-dark-card border border-orange-100/30 dark:border-dark-border rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
-                      <span className="text-[9px] sm:text-[10px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">आनन्दादि योग</span>
+                    <div className="flex flex-col bg-amber-50/20 dark:bg-brand-card border border-orange-100/30 dark:border-brand-border rounded-2xl p-2.5 sm:p-3 justify-between min-h-[96px]">
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-brand-text-mut font-extrabold uppercase font-mono tracking-wider">आनन्दादि योग</span>
                       <span className="text-sm sm:text-base font-black font-serif text-orange-655 leading-tight my-1.5 break-words">
                         {panchangInfo.anandadiYoga ? panchangInfo.anandadiYoga.nameHindi : 'आनन्द'}
                       </span>
-                      <span className="text-[9.5px] text-slate-500 dark:text-dark-text-mut font-medium flex items-center gap-0.5 font-sans leading-none">
+                      <span className="text-[9.5px] text-slate-500 dark:text-brand-text-mut font-medium flex items-center gap-0.5 font-sans leading-none">
                         🕒 {panchangInfo.anandadiYoga?.endTime || ''} तक
                       </span>
                     </div>
@@ -1544,11 +1546,11 @@ export default function App() {
                   return (
                     <motion.div
                       variants={itemVariants}
-                      className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left border border-orange-100/50 dark:border-dark-border rounded-3xl space-y-4 shadow-sm"
+                      className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left border border-orange-100/50 dark:border-brand-border rounded-3xl space-y-4 shadow-sm"
                     >
-                      <div className="flex items-center gap-1.5 border-b border-orange-100/20 dark:border-dark-border pb-2">
+                      <div className="flex items-center gap-1.5 border-b border-orange-100/20 dark:border-brand-border pb-2">
                         <span className="text-[13px] sm:text-[14px]">⏰</span>
-                        <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-dark-text-pri leading-none font-serif">
+                        <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-brand-text-pri leading-none font-serif">
                           आज के मुहूर्त समय (शुभ व वर्जित)
                         </h3>
                       </div>
@@ -1562,13 +1564,13 @@ export default function App() {
                           <div className="space-y-1.5">
                             {abhijit && (
                               <div className="flex justify-between items-center bg-emerald-500/5 dark:bg-emerald-950/10 border border-emerald-500/10 rounded-xl p-2 px-3 text-xs leading-none">
-                                <span className="font-serif font-bold text-slate-700 dark:text-dark-text-pri">अभिजीत मुहूर्त</span>
+                                <span className="font-serif font-bold text-slate-700 dark:text-brand-text-pri">अभिजीत मुहूर्त</span>
                                 <span className="font-mono font-black text-emerald-600 dark:text-emerald-450">{abhijit.startTime} - {abhijit.endTime}</span>
                               </div>
                             )}
                             {brahma && (
                               <div className="flex justify-between items-center bg-emerald-500/5 dark:bg-emerald-950/10 border border-emerald-500/10 rounded-xl p-2 px-3 text-xs leading-none">
-                                <span className="font-serif font-bold text-slate-700 dark:text-dark-text-pri">ब्रह्म मुहूर्त</span>
+                                <span className="font-serif font-bold text-slate-700 dark:text-brand-text-pri">ब्रह्म मुहूर्त</span>
                                 <span className="font-mono font-black text-emerald-600 dark:text-emerald-450">{brahma.startTime} - {brahma.endTime}</span>
                               </div>
                             )}
@@ -1582,19 +1584,19 @@ export default function App() {
                           </span>
                           <div className="space-y-1.5 select-none">
                             <div className="flex justify-between items-center bg-rose-500/5 dark:bg-rose-950/10 border border-rose-500/10 rounded-xl p-2 px-3 text-xs leading-none">
-                              <span className="font-serif font-bold text-slate-700 dark:text-dark-text-pri">राहुकाल</span>
+                              <span className="font-serif font-bold text-slate-700 dark:text-brand-text-pri">राहुकाल</span>
                               <span className="font-mono font-black text-rose-600 dark:text-rose-400">
                                 {panchangInfo.rahuKaal.start} - {panchangInfo.rahuKaal.end}
                               </span>
                             </div>
-                            <div className="flex justify-between items-center bg-blue-500/5 dark:bg-dark-card border border-blue-500/10 rounded-xl p-2 px-3 text-xs leading-none">
-                              <span className="font-serif font-bold text-slate-700 dark:text-dark-text-pri">यमगण्ड</span>
+                            <div className="flex justify-between items-center bg-blue-500/5 dark:bg-brand-card border border-blue-500/10 rounded-xl p-2 px-3 text-xs leading-none">
+                              <span className="font-serif font-bold text-slate-700 dark:text-brand-text-pri">यमगण्ड</span>
                               <span className="font-mono font-black text-blue-600 dark:text-blue-400">
                                 {panchangInfo.yamagandam?.start || ''} - {panchangInfo.yamagandam?.end || ''}
                               </span>
                             </div>
-                            <div className="flex justify-between items-center bg-amber-500/5 dark:bg-dark-card border border-amber-500/10 rounded-xl p-2 px-3 text-xs leading-none">
-                              <span className="font-serif font-bold text-slate-700 dark:text-dark-text-pri">गुलिक काल</span>
+                            <div className="flex justify-between items-center bg-amber-500/5 dark:bg-brand-card border border-amber-500/10 rounded-xl p-2 px-3 text-xs leading-none">
+                              <span className="font-serif font-bold text-slate-700 dark:text-brand-text-pri">गुलिक काल</span>
                               <span className="font-mono font-black text-amber-600 dark:text-amber-450">
                                 {panchangInfo.gulikKaal?.start || ''} - {panchangInfo.gulikKaal?.end || ''}
                               </span>
@@ -1627,36 +1629,36 @@ export default function App() {
                   return (
                     <motion.div
                       variants={itemVariants}
-                      className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left border border-orange-100/50 dark:border-dark-border rounded-3xl space-y-4 shadow-sm"
+                      className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left border border-orange-100/50 dark:border-brand-border rounded-3xl space-y-4 shadow-sm"
                     >
-                      <div className="flex items-center gap-1.5 border-b border-orange-100/20 dark:border-dark-border pb-2">
+                      <div className="flex items-center gap-1.5 border-b border-orange-100/20 dark:border-brand-border pb-2">
                         <span className="text-[13px] sm:text-[14px]">🎉</span>
-                        <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-dark-text-pri leading-none font-serif">
+                        <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-brand-text-pri leading-none font-serif">
                           आज के व्रत एवं त्योहार
                         </h3>
                       </div>
 
                       {todayFests.length === 0 ? (
-                        <div className="flex items-center gap-3 p-3 bg-orange-500/5 border border-orange-100/10 rounded-2xl">
+                        <div className="flex items-center gap-3 p-3 bg-orange-500/5 dark:bg-brand-card border border-orange-100/10 dark:border-brand-border rounded-2xl">
                           <span className="text-xl">🪔</span>
-                          <span className="text-xs font-semibold text-slate-500 dark:text-dark-text-mut">
+                          <span className="text-xs font-semibold text-slate-500 dark:text-brand-text-mut">
                             आज कोई मुख्य व्रत या त्योहार नहीं है।
                           </span>
                         </div>
                       ) : (
                         <div className="space-y-2">
                           {todayFests.map(fest => (
-                            <div key={fest.id} className="flex flex-col p-3 bg-amber-500/5 dark:bg-dark-card border border-orange-150/25 dark:border-dark-border rounded-2xl gap-1">
+                            <div key={fest.id} className="flex flex-col p-3 bg-amber-500/5 dark:bg-brand-card border border-orange-150/25 dark:border-brand-border rounded-2xl gap-1">
                               <div className="flex justify-between items-center flex-wrap gap-1">
                                 <h4 className="text-xs sm:text-sm font-black font-serif text-orange-700 dark:text-orange-350">
                                   {settings.language === 'Hindi' ? fest.hindiName : fest.name}
                                 </h4>
-                                <span className="text-[8.5px] font-black px-1.5 py-0.5 bg-orange-100 dark:bg-dark-card border border-orange-200 text-orange-850 rounded-md">
+                                <span className="text-[8.5px] font-black px-1.5 py-0.5 bg-orange-100 dark:bg-brand-card border border-orange-200 dark:border-brand-border text-orange-850 rounded-md">
                                   {fest.type}
                                 </span>
                               </div>
                               {fest.description && (
-                                <p className="text-[10.5px] sm:text-[11.5px] leading-normal text-slate-500 dark:text-dark-text-mut font-sans italic mt-0.5">
+                                <p className="text-[10.5px] sm:text-[11.5px] leading-normal text-slate-500 dark:text-brand-text-mut font-sans italic mt-0.5">
                                   {fest.description}
                                 </p>
                               )}
@@ -1667,21 +1669,21 @@ export default function App() {
 
                       {/* Upcoming Festival */}
                       {upcomingFest && (
-                        <div className="border-t border-orange-100/20 dark:border-dark-border pt-3.5 space-y-2">
-                          <span className="text-[10px] font-black text-amber-605 dark:text-dark-accent uppercase tracking-widest font-mono flex items-center gap-1">
+                        <div className="border-t border-orange-100/20 dark:border-brand-border pt-3.5 space-y-2">
+                          <span className="text-[10px] font-black text-amber-605 dark:text-brand-accent uppercase tracking-widest font-mono flex items-center gap-1">
                             📅 अगला आने वाला व्रत/त्योहार (Upcoming)
                           </span>
-                          <div className="flex items-center justify-between p-3 bg-orange-500/5 dark:bg-dark-card border border-orange-100/10 dark:border-dark-border rounded-2xl gap-3 text-left">
+                          <div className="flex items-center justify-between p-3 bg-orange-500/5 dark:bg-brand-card border border-orange-100/10 dark:border-brand-border rounded-2xl gap-3 text-left">
                             <div className="flex flex-col gap-0.5">
                               <h4 className="text-xs sm:text-sm font-black font-serif text-slate-800 dark:text-orange-200">
                                 {settings.language === 'Hindi' ? upcomingFest.hindiName : upcomingFest.name}
                               </h4>
-                              <span className="text-[8.5px] font-semibold text-slate-400 uppercase tracking-tight">
+                              <span className="text-[8.5px] font-semibold text-slate-400 dark:text-brand-text-mut uppercase tracking-tight">
                                 {upcomingFest.type}
                               </span>
                             </div>
                             <div className="text-right">
-                              <span className="text-xs font-serif font-black text-orange-655 dark:text-dark-accent">
+                              <span className="text-xs font-serif font-black text-orange-655 dark:text-brand-accent">
                                 {formatFestivalDate(upcomingFest.date)}
                               </span>
                             </div>
@@ -1703,11 +1705,11 @@ export default function App() {
                   return (
                     <motion.div
                       variants={itemVariants}
-                      className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left border border-orange-100/50 dark:border-dark-border rounded-3xl space-y-3 shadow-sm"
+                      className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left border border-orange-100/50 dark:border-brand-border rounded-3xl space-y-3 shadow-sm"
                     >
-                      <div className="flex items-center gap-1.5 border-b border-orange-100/20 dark:border-dark-border pb-2">
+                      <div className="flex items-center gap-1.5 border-b border-orange-100/20 dark:border-brand-border pb-2">
                         <span className="text-[13px] sm:text-[14px]">⚠️</span>
-                        <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-dark-text-pri leading-none font-serif">
+                        <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-brand-text-pri leading-none font-serif">
                           आज के ज्योतिषीय अलर्ट
                         </h3>
                       </div>
@@ -1720,7 +1722,7 @@ export default function App() {
                               <span className="text-xs font-serif font-black text-emerald-805 dark:text-emerald-300">
                                 कोई प्रतिकूल अलर्ट नहीं
                               </span>
-                              <span className="text-[10px] text-slate-500 dark:text-dark-text-mut font-medium font-sans">
+                              <span className="text-[10px] text-slate-500 dark:text-brand-text-mut font-medium font-sans">
                                 आज कोई भद्रा, पंचक या अशुभ तिथि योग सक्रिय नहीं है। दिन सामान्य कार्यों के लिए शुभ है।
                               </span>
                             </div>
@@ -1734,7 +1736,7 @@ export default function App() {
                             <p className="text-xs font-serif font-black text-slate-800 dark:text-orange-200">
                               भद्रा का निवास: {panchangInfo.bhadra.vasHindi || 'मृत्यु लोक'}
                             </p>
-                            <p className="text-[10.5px] leading-snug text-slate-500 dark:text-dark-text-mut">
+                            <p className="text-[10.5px] leading-snug text-slate-500 dark:text-brand-text-mut">
                               समय सीमा: {panchangInfo.bhadra.startTime} से {panchangInfo.bhadra.endTime} तक। {panchangInfo.bhadra.mukha && `मुख: ${panchangInfo.bhadra.mukha}`} {panchangInfo.bhadra.puchha && `पुच्छ: ${panchangInfo.bhadra.puchha}`}
                             </p>
                           </div>
@@ -1742,12 +1744,12 @@ export default function App() {
 
                         {/* Panchak Alert */}
                         {hasPanchak && panchangInfo.panchak && (
-                          <div className="flex flex-col p-3 bg-orange-500/5 dark:bg-amber-950/10 border border-orange-500/20 rounded-2xl gap-1">
-                            <span className="text-[10px] font-black text-orange-655 dark:text-dark-accent uppercase font-mono tracking-wider">पंचक काल (Panchak Active)</span>
+                          <div className="flex flex-col p-3 bg-orange-500/5 dark:bg-brand-card border border-orange-500/20 rounded-2xl gap-1">
+                            <span className="text-[10px] font-black text-orange-655 dark:text-brand-accent uppercase font-mono tracking-wider">पंचक काल (Panchak Active)</span>
                             <p className="text-xs font-serif font-black text-slate-800 dark:text-orange-200">
                               पंचक का प्रकार: {panchangInfo.panchak.hindiName || 'सामान्य पंचक'}
                             </p>
-                            <p className="text-[10.5px] leading-snug text-slate-500 dark:text-dark-text-mut">
+                            <p className="text-[10.5px] leading-snug text-slate-500 dark:text-brand-text-mut">
                               पंचक काल में शुभ निर्माण कार्य, दक्षिण दिशा यात्रा और कुछ विशिष्ट कार्यों को करने की मनाही होती है।
                             </p>
                           </div>
@@ -1755,12 +1757,12 @@ export default function App() {
 
                         {/* Dagda Tithi */}
                         {hasDagda && panchangInfo.dagdaTithi && (
-                          <div className="flex flex-col p-3 bg-slate-500/5 dark:bg-zinc-850 border border-slate-500/20 rounded-2xl gap-1">
-                            <span className="text-[10px] font-black text-slate-500 dark:text-dark-text-mut uppercase font-mono tracking-wider">दग्ध तिथि योग (Adverse Tithi)</span>
+                          <div className="flex flex-col p-3 bg-slate-500/5 dark:bg-brand-card border border-slate-500/20 rounded-2xl gap-1">
+                            <span className="text-[10px] font-black text-slate-500 dark:text-brand-text-mut uppercase font-mono tracking-wider">दग्ध तिथि योग (Adverse Tithi)</span>
                             <p className="text-xs font-serif font-black text-slate-800 dark:text-orange-200">
                               आज दग्ध तिथि का अशुभ योग है।
                             </p>
-                            <p className="text-[10.5px] leading-snug text-slate-500 dark:text-dark-text-mut">
+                            <p className="text-[10.5px] leading-snug text-slate-500 dark:text-brand-text-mut">
                               महत्वपूर्ण व्यावसायिक सौदों या नए कार्यों के प्रारंभ के लिए इस तिथि को शुभ नहीं माना जाता।
                             </p>
                           </div>
@@ -1773,7 +1775,7 @@ export default function App() {
                             <p className="text-xs font-serif font-black text-slate-800 dark:text-orange-200">
                               योग प्रकार: {panchangInfo.pushkarYog.hindiName || 'पुष्कर योग'}
                             </p>
-                            <p className="text-[10.5px] leading-snug text-slate-500 dark:text-dark-text-mut">
+                            <p className="text-[10.5px] leading-snug text-slate-500 dark:text-brand-text-mut">
                               द्विपुष्कर या त्रिपुष्कर योग में किए गए पुण्य, दान और वित्तीय निवेश का प्रभाव बहुगुणित होता है।
                             </p>
                           </div>
@@ -1831,8 +1833,8 @@ export default function App() {
               <div className="space-y-6">
                 
                 {/* Tools Quick Section Navigation Bar */}
-                <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 text-left shadow-xs border border-orange-100/30 dark:border-dark-border rounded-3xl">
-                  <span className="text-[9px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-dark-accent block mb-2 leading-none">
+                <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 text-left shadow-xs border border-orange-100/30 dark:border-brand-border rounded-3xl">
+                  <span className="text-[9px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-brand-accent block mb-2 leading-none">
                     {settings.language === 'Hindi' ? "॥ त्वरित सुविधा नेविगेशन ॥" : "|| Quick Tools Navigation ||"}
                   </span>
                   <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[11px] font-bold">
@@ -1851,7 +1853,7 @@ export default function App() {
                               element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             }
                           }}
-                          className="cursor-pointer text-slate-750 hover:text-orange-655 dark:text-slate-350 dark:hover:text-amber-400 hover:underline transition-all"
+                          className="cursor-pointer text-slate-750 hover:text-orange-655 dark:text-brand-text-sec dark:hover:text-amber-400 hover:underline transition-all"
                         >
                           {settings.language === 'Hindi' ? item.labelHindi : item.labelEng}
                         </span>
@@ -1867,20 +1869,20 @@ export default function App() {
 
 
 
-                <div id="tools_poster_card" className="p-4 bg-white dark:bg-dark-card border border-slate-100 dark:border-dark-border rounded-3xl shadow-3xs text-left">
-                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-dark-border pb-2">
+                <div id="tools_poster_card" className="p-4 bg-white dark:bg-brand-card border border-slate-100 dark:border-brand-border rounded-3xl shadow-3xs text-left">
+                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-brand-border pb-2">
                     <span className="text-lg">🎨</span>
-                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-dark-text-pri">
+                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-brand-text-pri">
                       {settings.language === 'Hindi' ? 'धार्मिक पोस्टर मेकर' : 'Dharmik Poster Maker'}
                     </h3>
                   </div>
                   <PosterGenerator panchang={panchangInfo} city={coords.city} activeMuhurats={activeMuhurats} />
                 </div>
 
-                <div id="tools_widgets_card" className="p-4 bg-white dark:bg-dark-card border border-slate-100 dark:border-dark-border rounded-3xl shadow-3xs text-left">
-                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-dark-border pb-2">
+                <div id="tools_widgets_card" className="p-4 bg-white dark:bg-brand-card border border-slate-100 dark:border-brand-border rounded-3xl shadow-3xs text-left">
+                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-brand-border pb-2">
                     <span className="text-lg">📱</span>
-                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-dark-text-pri">
+                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-brand-text-pri">
                       {settings.language === 'Hindi' ? 'होम स्क्रीन विजेट्स' : 'Home Screen Widgets'}
                     </h3>
                   </div>
@@ -1888,20 +1890,20 @@ export default function App() {
                 </div>
 
                 {/* Permanent Notification Toggle Card */}
-                <div id="tools_notification_card" className="p-4 bg-white dark:bg-dark-card border border-slate-100 dark:border-dark-border rounded-3xl shadow-3xs text-left">
-                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-dark-border pb-2">
+                <div id="tools_notification_card" className="p-4 bg-white dark:bg-brand-card border border-slate-100 dark:border-brand-border rounded-3xl shadow-3xs text-left">
+                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-brand-border pb-2">
                     <span className="text-lg">🔔</span>
-                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-dark-text-pri">
+                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-brand-text-pri">
                       {settings.language === 'Hindi' ? 'स्थायी पंचांग नोटिफिकेशन' : 'Permanent Panchang Notification'}
                     </h3>
                   </div>
                   
-                  <div className="flex items-center justify-between p-3 rounded-2xl bg-orange-500/5 dark:bg-dark-card border border-orange-100/20">
+                  <div className="flex items-center justify-between p-3 rounded-2xl bg-orange-500/5 dark:bg-brand-card border border-orange-100/20 dark:border-brand-border">
                     <div className="pr-4">
-                      <h4 className="text-xs font-bold text-slate-800 dark:text-dark-text-pri">
+                      <h4 className="text-xs font-bold text-slate-800 dark:text-brand-text-pri">
                         {settings.language === 'Hindi' ? 'स्थायी पंचांग सूचना चालू करें' : 'Enable Permanent Notification'}
                       </h4>
-                      <p className="text-[10px] text-slate-500 dark:text-dark-text-mut mt-1">
+                      <p className="text-[10px] text-slate-500 dark:text-brand-text-mut mt-1">
                         {settings.language === 'Hindi' 
                           ? 'मोबाइल के नोटिफिकेशन बार में आज का पंचांग और वर्तमान शुभ-अशुभ काल हमेशा पिन रहेगा।'
                           : 'Keep today\'s Panchang and current Shubh-Ashubh times pinned in your notification drawer.'}
@@ -1920,15 +1922,15 @@ export default function App() {
                         }}
                         className="sr-only peer" 
                       />
-                      <div className="w-9 h-5 bg-slate-200 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500"></div>
+                      <div className="w-9 h-5 bg-slate-200 dark:bg-brand-card peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500"></div>
                     </label>
                   </div>
                 </div>
 
-                <div id="tools_plans_card" className="p-4 bg-white dark:bg-dark-card border border-slate-100 dark:border-dark-border rounded-3xl shadow-3xs text-left">
-                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-dark-border pb-2">
+                <div id="tools_plans_card" className="p-4 bg-white dark:bg-brand-card border border-slate-100 dark:border-brand-border rounded-3xl shadow-3xs text-left">
+                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-brand-border pb-2">
                     <span className="text-lg">⭐</span>
-                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-dark-text-pri">
+                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-brand-text-pri">
                       {settings.language === 'Hindi' ? 'प्रीमियम योजनाएं' : 'Premium Plans'}
                     </h3>
                   </div>
@@ -1939,10 +1941,10 @@ export default function App() {
                   />
                 </div>
 
-                <div id="tools_settings_card" className="p-4 bg-white dark:bg-dark-card border border-slate-100 dark:border-dark-border rounded-3xl shadow-3xs text-left">
-                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-dark-border pb-2">
+                <div id="tools_settings_card" className="p-4 bg-white dark:bg-brand-card border border-slate-100 dark:border-brand-border rounded-3xl shadow-3xs text-left">
+                  <div className="flex items-center gap-2 mb-3 border-b border-orange-100/35 dark:border-brand-border pb-2">
                     <span className="text-lg">⚙️</span>
-                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-dark-text-pri">
+                    <h3 className="text-base font-bold font-serif text-slate-800 dark:text-brand-text-pri">
                       {settings.language === 'Hindi' ? 'ऐप सेटिंग्स' : 'App Settings'}
                     </h3>
                   </div>
@@ -1971,12 +1973,12 @@ export default function App() {
                       धर्मिक एवं साधना अलार्म (Alarms & Alerts)
                     </h2>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-dark-text-mut">
+                  <p className="text-xs text-slate-500 dark:text-brand-text-mut">
                     संध्या वंदन, शुभ लग्न, अभिजित मुहूर्त, राहुकाल और चौघड़िया के लिए अनुकूलित अलार्म सेटिंग्स
                   </p>
                 </div>
 
-                <div className="p-4 bg-white dark:bg-dark-card border border-slate-100 dark:border-dark-border rounded-3xl shadow-3xs">
+                <div className="p-4 bg-white dark:bg-brand-card border border-slate-100 dark:border-brand-border rounded-3xl shadow-3xs">
                   <NotificationSimulator
                     notificationsList={notificationsList}
                     setNotificationsList={setNotificationsList}
@@ -1992,16 +1994,16 @@ export default function App() {
           {/* BOTTOM PREMIUM TAB BAR NAVIGATION */}
           <footer className={`border-t flex justify-between sm:justify-around items-center py-3 px-2 sm:px-4 fixed bottom-0 left-0 right-0 w-full z-40 select-none shadow-[0_-4px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] overflow-x-auto scrollbar-hide flex-nowrap ${
             settings.theme === 'light' 
-              ? 'bg-[#FFFBF5]/95 backdrop-blur-md border-orange-100/70' 
-              : 'bg-[#1D1713]/95 backdrop-blur-md border-[var(--card-border-dark)]' // using dark card border variables
+              ? 'bg-[#FFFBF5]/95 backdrop-blur-md border-orange-100/70 dark:border-brand-border' 
+              : 'bg-brand-card/95 backdrop-blur-md border-[#475569]' // using dark card border variables
           }`}>
             
             <button
               onClick={() => setActiveTab('home')}
               className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'home'
-                  ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
-                  : 'text-slate-400 hover:text-slate-500'
+                  ? 'text-orange-655 dark:text-brand-accent font-extrabold scale-102 bg-orange-500/10 dark:bg-brand-sel-bg'
+                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F9FAFB]'
               }`}
             >
               <Home className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
@@ -2012,8 +2014,8 @@ export default function App() {
               onClick={() => setActiveTab('panchang')}
               className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'panchang'
-                  ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
-                  : 'text-slate-400 hover:text-slate-500'
+                  ? 'text-orange-655 dark:text-brand-accent font-extrabold scale-102 bg-orange-500/10 dark:bg-brand-sel-bg'
+                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F9FAFB]'
               }`}
             >
               <Landmark className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
@@ -2024,8 +2026,8 @@ export default function App() {
               onClick={() => setActiveTab('muhurat')}
               className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'muhurat'
-                  ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
-                  : 'text-slate-400 hover:text-slate-500'
+                  ? 'text-orange-655 dark:text-brand-accent font-extrabold scale-102 bg-orange-500/10 dark:bg-brand-sel-bg'
+                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F9FAFB]'
               }`}
             >
               <Clock className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
@@ -2036,8 +2038,8 @@ export default function App() {
               onClick={() => setActiveTab('festival')}
               className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'festival'
-                  ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
-                  : 'text-slate-400 hover:text-slate-500'
+                  ? 'text-orange-655 dark:text-brand-accent font-extrabold scale-102 bg-orange-500/10 dark:bg-brand-sel-bg'
+                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F9FAFB]'
               }`}
             >
               <Calendar className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
@@ -2048,8 +2050,8 @@ export default function App() {
               onClick={() => setActiveTab('alerts')}
               className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'alerts'
-                  ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
-                  : 'text-slate-400 hover:text-slate-500'
+                  ? 'text-orange-655 dark:text-brand-accent font-extrabold scale-102 bg-orange-500/10 dark:bg-brand-sel-bg'
+                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F9FAFB]'
               }`}
             >
               <Bell className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
@@ -2060,8 +2062,8 @@ export default function App() {
               onClick={() => setActiveTab('tools')}
               className={`flex flex-col items-center justify-center p-1 sm:p-2 rounded-2xl cursor-pointer w-[52px] sm:w-[68px] transition-all flex-shrink-0 ${
                 activeTab === 'tools'
-                  ? 'text-orange-655 font-extrabold scale-102 bg-orange-500/10'
-                  : 'text-slate-400 hover:text-slate-500'
+                  ? 'text-orange-655 dark:text-brand-accent font-extrabold scale-102 bg-orange-500/10 dark:bg-brand-sel-bg'
+                  : 'text-slate-400 hover:text-slate-500 dark:text-brand-text-mut dark:hover:text-[#F9FAFB]'
               }`}
             >
               <Settings className="w-[23px] h-[23px] sm:w-[28px] sm:h-[28px]" />
@@ -2074,10 +2076,10 @@ export default function App() {
 
         {/* Outer footer branding */}
         <div className="hidden md:block mt-4 text-center select-none mb-6">
-          <p className="text-[10px] text-slate-400 tracking-wider uppercase font-mono font-bold">
+          <p className="text-[10px] text-slate-400 dark:text-brand-text-mut tracking-wider uppercase font-mono font-bold">
             आज का धार्मिक समय - Innovix Solutions v1.0.0
           </p>
-          <span className="text-[9px] text-slate-400 mt-0.5 block italic font-sans font-medium">
+          <span className="text-[9px] text-slate-400 dark:text-brand-text-mut mt-0.5 block italic font-sans font-medium">
             🇮🇳 Proudly Made in India | Make for India • प्राचीन सूर्य सिद्धांत और सटीक सौर गणनाओं द्वारा स्थापित।
           </span>
         </div>

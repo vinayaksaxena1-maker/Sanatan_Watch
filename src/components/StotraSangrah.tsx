@@ -225,17 +225,17 @@ export function StotraSangrah({ language = 'English' }: StotraSangrahProps) {
         {/* Recommended by Day of Week */}
         <div 
           onClick={() => setSelectedStotra(dailyRecommendation)}
-          className="cursor-pointer p-4 rounded-2xl border border-orange-100/35 bg-orange-50/20 dark:bg-dark-card hover:border-orange-500 hover:ring-2 hover:ring-orange-500/10 dark:hover:border-orange-900 transition-all flex justify-between items-center"
+          className="cursor-pointer p-4 rounded-2xl border border-orange-100/35 dark:border-brand-border bg-orange-50/20 dark:bg-brand-card hover:border-orange-500 hover:ring-2 hover:ring-orange-500/10 dark:hover:border-orange-900 transition-all flex justify-between items-center"
         >
           <div className="space-y-1.5 text-left">
-            <span className="text-[9.5px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-dark-accent flex items-center gap-1">
+            <span className="text-[9.5px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-brand-accent flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5" />
               {getTranslation(language, 'stotraDailyRecommend')}
             </span>
             <h4 className="text-sm font-serif font-black text-slate-800 dark:text-orange-50">
               {language === 'Hindi' ? dailyRecommendation.hindiTitle : dailyRecommendation.title}
             </h4>
-            <span className="text-[10px] text-slate-400 dark:text-dark-text-mut font-semibold block leading-none">
+            <span className="text-[10px] text-slate-400 dark:text-brand-text-mut font-semibold block leading-none">
               {language === 'Hindi' ? 'वार' : 'Day'}: {getDayName(dailyRecommendation.recommendedDay)} | {getTranslation(language, 'deityLabel')}: {dailyRecommendation.deity}
             </span>
           </div>
@@ -245,17 +245,17 @@ export function StotraSangrah({ language = 'English' }: StotraSangrahProps) {
         {/* Recommended by Time Prahar */}
         <div 
           onClick={() => setSelectedStotra(praharRecommendation)}
-          className="cursor-pointer p-4 rounded-2xl border border-orange-100/35 bg-orange-50/20 dark:bg-dark-card hover:border-orange-500 hover:ring-2 hover:ring-orange-500/10 dark:hover:border-orange-900 transition-all flex justify-between items-center"
+          className="cursor-pointer p-4 rounded-2xl border border-orange-100/35 dark:border-brand-border bg-orange-50/20 dark:bg-brand-card hover:border-orange-500 hover:ring-2 hover:ring-orange-500/10 dark:hover:border-orange-900 transition-all flex justify-between items-center"
         >
           <div className="space-y-1.5 text-left">
-            <span className="text-[9.5px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-dark-accent flex items-center gap-1">
+            <span className="text-[9.5px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-brand-accent flex items-center gap-1">
               {currentPrahar === 'Pratah' || currentPrahar === 'Madhyahna' ? <Sun className="w-3.5 h-3.5 text-amber-550" /> : <Moon className="w-3.5 h-3.5 text-indigo-400" />}
               {getTranslation(language, 'stotraPraharRecommend')}
             </span>
             <h4 className="text-sm font-serif font-black text-slate-800 dark:text-orange-50">
               {language === 'Hindi' ? praharRecommendation.hindiTitle : praharRecommendation.title}
             </h4>
-            <span className="text-[10px] text-slate-400 dark:text-dark-text-mut font-semibold block leading-none">
+            <span className="text-[10px] text-slate-400 dark:text-brand-text-mut font-semibold block leading-none">
               {language === 'Hindi' ? 'प्रहर' : 'Prahar'}: {praharNameMap[praharRecommendation.recommendedPrahar] || praharRecommendation.recommendedPraharName}
             </span>
           </div>
@@ -269,7 +269,7 @@ export function StotraSangrah({ language = 'English' }: StotraSangrahProps) {
         
         {/* Left Side: Stotras Collection List */}
         <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
-          <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-slate-400 dark:text-dark-text-mut block mb-2">
+          <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-slate-400 dark:text-brand-text-mut block mb-2">
             {getTranslation(language, 'stotraCollection')}
           </span>
 
@@ -282,19 +282,19 @@ export function StotraSangrah({ language = 'English' }: StotraSangrahProps) {
                 className={`p-3 rounded-xl border transition-all cursor-pointer text-left ${
                   isSelected 
                     ? 'bg-orange-500/10 border-orange-500' 
-                    : 'bg-white dark:bg-dark-card border-slate-100 dark:border-dark-border hover:border-orange-100'
+                    : 'bg-white dark:bg-brand-card border-slate-100 dark:border-brand-border hover:border-orange-100'
                 }`}
               >
                 <div className="flex justify-between items-center gap-1.5">
-                  <h4 className="text-xs font-serif font-black text-slate-800 dark:text-dark-text-pri">
+                  <h4 className="text-xs font-serif font-black text-slate-800 dark:text-brand-text-pri">
                     {language === 'Hindi' ? s.hindiTitle : s.title}
                   </h4>
-                  <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-orange-100/55 dark:bg-dark-card text-orange-655 dark:text-dark-accent font-mono flex items-center shrink-0">
+                  <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-md bg-orange-100/55 dark:bg-brand-card text-orange-655 dark:text-brand-accent font-mono flex items-center shrink-0">
                     {categoryNameMap[s.category]}
                   </span>
                 </div>
                 
-                <p className="text-[9.5px] text-slate-400 dark:text-dark-text-mut font-medium font-sans mt-1">
+                <p className="text-[9.5px] text-slate-400 dark:text-brand-text-mut font-medium font-sans mt-1">
                   {getTranslation(language, 'deityLabel')}: {s.deity}
                 </p>
               </div>
@@ -303,11 +303,11 @@ export function StotraSangrah({ language = 'English' }: StotraSangrahProps) {
         </div>
 
         {/* Right Side: Epic sacred text reader */}
-        <div className="md:col-span-2 bg-linear-to-b from-orange-50/15 to-orange-50/5 dark:from-zinc-950/20 dark:to-zinc-950/5 border border-orange-100/50 dark:border-dark-border p-5 rounded-3xl shadow-xs text-center flex flex-col justify-between items-stretch">
+        <div className="md:col-span-2 bg-linear-to-b from-orange-50/15 to-orange-50/5 dark:from-zinc-950/20 dark:to-zinc-950/5 border border-orange-100/50 dark:border-brand-border p-5 rounded-3xl shadow-xs text-center flex flex-col justify-between items-stretch">
           
-          <div className="w-full text-left flex justify-between items-center pb-3 border-b border-orange-100/35">
+          <div className="w-full text-left flex justify-between items-center pb-3 border-b border-orange-100/35 dark:border-brand-border">
             <div>
-              <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-orange-600 dark:text-dark-accent block">
+              <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-orange-600 dark:text-brand-accent block">
                 {getTranslation(language, 'stotraReaderTitle')}
               </span>
               <h3 className="text-base sm:text-lg font-serif font-black text-slate-800 dark:text-orange-50 flex items-center gap-1.5">
@@ -317,18 +317,18 @@ export function StotraSangrah({ language = 'English' }: StotraSangrahProps) {
             </div>
 
             {/* Font Sizing Panel */}
-            <div className="flex items-center gap-1 bg-white dark:bg-dark-card p-1 rounded-xl border border-slate-250/30">
+            <div className="flex items-center gap-1 bg-white dark:bg-brand-card p-1 rounded-xl border border-slate-250/30">
               <button 
                 onClick={() => setFontSize(prev => Math.max(12, prev - 1))}
-                className="w-6 h-6 rounded-md hover:bg-slate-50 dark:hover:bg-dark-control text-slate-500 font-black cursor-pointer text-xs"
+                className="w-6 h-6 rounded-md hover:bg-slate-50 dark:bg-brand-card dark:hover:bg-brand-control text-slate-500 dark:text-brand-text-sec font-black cursor-pointer text-xs"
                 title={language === 'Hindi' ? "अक्षर घटाएं" : "Decrease font"}
               >
                 {getTranslation(language, 'decreaseFont')}
               </button>
-              <span className="text-[9px] font-bold text-slate-505 dark:text-dark-text-mut font-mono w-4 text-center">{fontSize}</span>
+              <span className="text-[9px] font-bold text-slate-505 dark:text-brand-text-mut font-mono w-4 text-center">{fontSize}</span>
               <button 
                 onClick={() => setFontSize(prev => Math.min(24, prev + 1))}
-                className="w-6 h-6 rounded-md hover:bg-slate-50 dark:hover:bg-dark-control text-slate-505 font-black cursor-pointer text-xs"
+                className="w-6 h-6 rounded-md hover:bg-slate-50 dark:bg-brand-card dark:hover:bg-brand-control text-slate-505 font-black cursor-pointer text-xs"
                 title={language === 'Hindi' ? "अक्षर बढ़ाएं" : "Increase font"}
               >
                 {getTranslation(language, 'increaseFont')}
@@ -337,7 +337,7 @@ export function StotraSangrah({ language = 'English' }: StotraSangrahProps) {
           </div>
 
           {/* Verses reader area (Simulates ancient holy scriptures manuscripts scroll design style) */}
-          <div className="relative overflow-hidden bg-orange-50/8 dark:bg-dark-card border border-orange-150/20 dark:border-dark-border rounded-2xl p-4 sm:p-6 my-4 max-h-[380px] overflow-y-auto leading-relaxed select-text shadow-3xs">
+          <div className="relative overflow-hidden bg-orange-50/8 dark:bg-brand-card border border-orange-150/20 dark:border-brand-border rounded-2xl p-4 sm:p-6 my-4 max-h-[380px] overflow-y-auto leading-relaxed select-text shadow-3xs">
             
             {/* Ancient design marks */}
             <div className="absolute left-2 top-0 bottom-0 w-0.5 border-r border-dashed border-orange-500/20"></div>
@@ -367,11 +367,11 @@ export function StotraSangrah({ language = 'English' }: StotraSangrahProps) {
           </div>
 
           {/* Meaning / Translation */}
-          <div className="border-t border-dashed border-orange-100/60 dark:border-dark-border pt-3.5 text-left bg-orange-50/10 dark:bg-dark-card p-3 rounded-xl border border-slate-100 dark:border-dark-border">
+          <div className="border-t border-dashed border-orange-100/60 dark:border-brand-border pt-3.5 text-left bg-orange-50/10 dark:bg-brand-card p-3 rounded-xl border border-slate-100 dark:border-brand-border">
             <span className="text-[10px] font-black text-[#FF9933] uppercase tracking-widest block mb-1 font-mono">
               {getTranslation(language, 'sacredMeaning')}
             </span>
-            <p className="text-[11.5px] text-slate-650 dark:text-dark-text-mut font-medium leading-relaxed font-serif">
+            <p className="text-[11.5px] text-slate-650 dark:text-brand-text-mut font-medium leading-relaxed font-serif">
               {language === 'Hindi' ? selectedStotra.meaning : 'This sacred text brings peace, protection, and spiritual strength. Reciting it daily enhances devotion and divine connection.'}
             </p>
           </div>

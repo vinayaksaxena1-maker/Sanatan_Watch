@@ -87,7 +87,7 @@ export const HeaderClock: React.FC<HeaderClockProps> = React.memo(({ selectedDat
     } else {
       return {
         icon: <Minus className="w-3 h-3 text-blue-500 dark:text-blue-400 shrink-0" />,
-        colorClass: 'border-blue-100/50 dark:border-dark-border bg-blue-50/40 dark:bg-dark-card text-blue-600 dark:text-blue-300',
+        colorClass: 'border-blue-100/50 dark:border-brand-border bg-blue-50/40 dark:bg-brand-card text-blue-600 dark:text-blue-300',
         tooltip: `मध्यम चौघड़िया: ${label} (सामान्य/चल समय) - Click to toggle format`
       };
     }
@@ -99,12 +99,12 @@ export const HeaderClock: React.FC<HeaderClockProps> = React.memo(({ selectedDat
     <>
       <div 
         id="header_clock_wrapper"
-        className="flex items-center justify-between w-full rounded-full px-4 py-2 bg-slate-50/50 dark:bg-stone-900/60 border-2 border-slate-200/60 dark:border-dark-border shadow-3xs"
+        className="flex items-center justify-between w-full rounded-full px-4 py-2 bg-slate-50/50 dark:bg-stone-900/60 border-2 border-slate-200/60 dark:border-brand-border shadow-3xs"
       >
         <div className="flex items-center gap-2">
           <Clock className="w-4.5 h-4.5 text-orange-500 transition-colors drop-shadow-3xs" />
           <span 
-            className="text-xs sm:text-sm font-black text-slate-900 dark:text-dark-text-pri tracking-tight font-mono whitespace-nowrap leading-none [text-shadow:0_1px_1px_rgba(0,0,0,0.12)] dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.45)]"
+            className="text-xs sm:text-sm font-black text-slate-900 dark:text-brand-text-pri tracking-tight font-mono whitespace-nowrap leading-none [text-shadow:0_1px_1px_rgba(0,0,0,0.12)] dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.45)]"
           >
             {selectedDate.toLocaleDateString(language === 'Hindi' ? 'hi-IN' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })} • {currentTime.toLocaleTimeString(language === 'Hindi' ? 'hi-IN' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
           </span>

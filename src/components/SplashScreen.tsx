@@ -144,7 +144,7 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
     crimson: {
       bg: 'bg-linear-to-b from-[#FFFDF9] via-[#FFF8EE] to-[#FFE8CC]',
       cardBg: 'bg-linear-to-b from-[#FFFDF9] to-[#FFE8CC]',
-      titleColor: 'text-slate-900',
+      titleColor: 'text-slate-900 dark:text-brand-text-pri',
       accentColor: 'text-[#D54300]',
       mantra: '॥ शुभम करोति कल्याणम ॥',
       vibeName: 'मंदिर लालित्य सौम्य (Sample 3 - भगवा उदय)',
@@ -275,7 +275,7 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
           <div className="absolute inset-4 sm:inset-6 border border-orange-500/20 rounded-2xl pointer-events-none">
             <div className="absolute inset-1 border-2 border-orange-500/15 rounded-xl"></div>
             {/* Arch template dome at top */}
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-48 h-10 border-b border-orange-200 bg-linear-to-b from-orange-500/5 to-transparent rounded-b-full"></div>
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-48 h-10 border-b border-orange-200 dark:border-brand-border bg-linear-to-b from-orange-500/5 to-transparent rounded-b-full"></div>
           </div>
         )}
       </div>
@@ -430,7 +430,7 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
               className="mt-6 space-y-2"
             >
               <h1 className={`font-serif text-2xl sm:text-3xl font-black tracking-tight ${
-                style === 'saffron' ? 'text-white' : style === 'crimson' ? 'text-slate-800' : 'text-amber-100'
+                style === 'saffron' ? 'text-white' : style === 'crimson' ? 'text-slate-800 dark:text-brand-text-pri' : 'text-amber-100'
               }`}>
                 {style === 'sanatan-video' ? 'सनातनी घड़ी' : 'आज का धर्मिक समय'}
               </h1>
@@ -444,7 +444,7 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
               <div className="flex items-center justify-center gap-1 pt-1">
                 <Sparkles className={`w-3.5 h-3.5 ${style === 'crimson' ? 'text-orange-500' : 'text-amber-400'}`} />
                 <span className={`text-[9.5px] font-black tracking-widest font-mono uppercase ${
-                  style === 'saffron' ? 'text-orange-200' : style === 'crimson' ? 'text-slate-500' : 'text-slate-400'
+                  style === 'saffron' ? 'text-orange-200' : style === 'crimson' ? 'text-slate-500 dark:text-brand-text-sec' : 'text-slate-400 dark:text-brand-text-mut'
                 }`}>
                   Panchang • Choghadiya • Astro-Alarms
                 </span>
@@ -555,7 +555,7 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
           ) : (
             <div className="flex flex-col items-center gap-2 mb-4 pointer-events-none animate-pulse">
               <div className={`flex items-center gap-2 text-2xs font-bold font-mono tracking-widest uppercase ${
-                style === 'crimson' ? 'text-slate-500' : 'text-amber-100/75'
+                style === 'crimson' ? 'text-slate-500 dark:text-brand-text-sec' : 'text-amber-100/75'
               }`}>
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                 <span>{statusMessage || 'Initializing Astronomical Engine...'}</span>
