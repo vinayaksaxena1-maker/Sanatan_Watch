@@ -94,17 +94,17 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
   };
 
   return (
-    <div id="settings_screen_root" className="space-y-6 text-left">
+    <div id="settings_screen_root" className="space-y-6 text-left dark:bg-[#111827] dark:text-[#F9FAFB] pb-8">
       
       {/* Settings Panel Header */}
-      <div className="glass-card-light dark:glass-card-dark p-5">
+      <div className="glass-card-light dark:bg-[#1F2937] dark:border-[#475569] dark:shadow-none p-5 rounded-3xl">
         <div className="flex items-center gap-2 mb-2">
-          <Settings className="w-5 h-5 text-orange-600" />
-          <h2 className="text-sm font-black text-slate-400 dark:text-amber-500 uppercase tracking-widest font-mono">
+          <Settings className="w-5 h-5 text-orange-600 dark:text-[#F59E0B]" />
+          <h2 className="text-sm font-black text-slate-400 dark:text-[#F9FAFB] uppercase tracking-widest font-mono">
             {getTranslation(language, 'appSettings')}
           </h2>
         </div>
-        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal">
+        <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] leading-normal">
           {language === 'Hindi' 
             ? "पंचांग गणना, और यूजर इंटरफेस (UI) को अनुकूलित करें।" 
             : "Customize panchang calculations and user interface (UI)."}
@@ -114,20 +114,20 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
       <div className="max-w-2xl mx-auto space-y-6">
         
         {/* Visual & Localization block */}
-        <div className="glass-card-light dark:glass-card-dark p-5 space-y-5">
-          <h3 className="text-xs font-black text-slate-700 dark:text-amber-100 uppercase tracking-wider border-b border-orange-100/35 pb-2">
+        <div className="glass-card-light dark:bg-[#1F2937] dark:border-[#475569] dark:shadow-none p-5 space-y-5 rounded-3xl">
+          <h3 className="text-xs font-black text-slate-700 dark:text-[#F9FAFB] uppercase tracking-wider border-b border-orange-100/35 dark:border-[#475569] pb-2">
             {language === 'Hindi' ? "दृश्य और भाषा" : "Visuals & Language"}
           </h3>
           
           {/* Theme switcher */}
-          <div className="space-y-3 pb-1 border-b border-dashed border-orange-100/35 pb-4">
+          <div className="space-y-3 pb-1 border-b border-dashed border-orange-100/35 dark:border-[#475569] pb-4">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-500 animate-pulse animate-spin-slow" />
+              <Sparkles className="w-4 h-4 text-amber-500 dark:text-[#F59E0B] animate-pulse animate-spin-slow" />
               <div>
-                <span className="text-2xs font-extrabold text-slate-800 dark:text-slate-200 block">
+                <span className="text-2xs font-extrabold text-slate-800 dark:text-[#CBD5E1] block">
                   {getTranslation(language, 'colorTheme')}
                 </span>
-                <span className="text-[10px] text-slate-400 block mt-0.5">
+                <span className="text-[10px] text-slate-400 dark:text-[#94A3B8] block mt-0.5">
                   {language === 'Hindi' 
                     ? "अपने आध्यात्मिक डिजिटल अनुभव के अनुसार ऐप की थीम चुनें।" 
                     : "Select app theme according to your spiritual experience."}
@@ -140,26 +140,28 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
                 <button
                   type="button"
                   onClick={() => handleChangeTheme('light')}
-                  className={`py-2 px-1 rounded-xl text-[10px] font-black border transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 ${
+                  className={`py-2 px-1 rounded-xl text-[10px] font-black border transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 relative ${
                     settings.theme === 'light'
-                      ? 'bg-orange-100 border-orange-400 text-orange-950 font-black shadow-2xs'
-                      : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 border-orange-100/25 text-slate-600 dark:text-slate-350'
+                      ? 'bg-orange-100 border-orange-400 text-orange-950 font-black shadow-2xs dark:bg-[#422006] dark:border-[#F59E0B] dark:text-[#FEF3C7]'
+                      : 'bg-white hover:bg-slate-50 border-orange-100/25 text-slate-600 dark:bg-[#1F2937] dark:hover:bg-[#273449] dark:border-[#475569] dark:text-[#CBD5E1]'
                   }`}
                 >
-                  <Sun className={`w-3.5 h-3.5 ${settings.theme === 'light' ? 'text-orange-600' : 'text-slate-400'}`} />
+                  {settings.theme === 'light' && <Check className="w-3 h-3 absolute top-1.5 right-1.5 text-orange-600 dark:text-[#F59E0B]" />}
+                  <Sun className={`w-3.5 h-3.5 ${settings.theme === 'light' ? 'text-orange-600 dark:text-[#F59E0B]' : 'text-slate-400 dark:text-[#94A3B8]'}`} />
                   <span>{getTranslation(language, 'themeLight')}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => handleChangeTheme('dark')}
-                  className={`py-2 px-1 rounded-xl text-[10px] font-black border transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 ${
+                  className={`py-2 px-1 rounded-xl text-[10px] font-black border transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 relative ${
                     settings.theme === 'dark'
-                      ? 'bg-orange-500 text-white border-orange-400 font-black shadow-2xs'
-                      : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 border-orange-100/25 text-slate-600 dark:text-slate-350'
+                      ? 'bg-orange-500 text-white border-orange-400 font-black shadow-2xs dark:bg-[#422006] dark:border-[#F59E0B] dark:text-[#FEF3C7]'
+                      : 'bg-white hover:bg-slate-50 border-orange-100/25 text-slate-600 dark:bg-[#1F2937] dark:hover:bg-[#273449] dark:border-[#475569] dark:text-[#CBD5E1]'
                   }`}
                 >
-                  <Moon className={`w-3.5 h-3.5 ${settings.theme === 'dark' ? 'text-white' : 'text-slate-400'}`} />
+                  {settings.theme === 'dark' && <Check className="w-3 h-3 absolute top-1.5 right-1.5 text-white dark:text-[#F59E0B]" />}
+                  <Moon className={`w-3.5 h-3.5 ${settings.theme === 'dark' ? 'text-white dark:text-[#F59E0B]' : 'text-slate-400 dark:text-[#94A3B8]'}`} />
                   <span>{getTranslation(language, 'themeDark')}</span>
                 </button>
               </div>
@@ -167,9 +169,9 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
           </div>
 
           {/* Primary Language */}
-          <div className="space-y-2 pt-1 border-t border-dashed border-orange-100/35 pt-4">
+          <div className="space-y-2 pt-1 border-t border-dashed border-orange-100/35 dark:border-[#475569] pt-4">
             <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 font-mono flex items-center gap-1">
-              <Globe className="w-3.5 h-3.5 text-slate-400" /> {getTranslation(language, 'languagePreference')}
+              <Globe className="w-3.5 h-3.5 text-slate-400 dark:text-[#94A3B8]" /> <span className="dark:text-[#CBD5E1]">{getTranslation(language, 'languagePreference')}</span>
             </label>
             <div className="flex gap-2">
               {(['English', 'Hindi'] as const).map((lang) => (
@@ -178,11 +180,11 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
                   onClick={() => handleChangeLanguage(lang)}
                   className={`flex-1 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer flex items-center justify-center gap-1 ${
                     settings.language === lang
-                      ? 'bg-orange-100 border-orange-400 text-orange-950 font-black'
-                      : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 border-orange-100/35 text-slate-600 dark:text-slate-350'
+                      ? 'bg-orange-100 border-orange-400 text-orange-950 font-black dark:bg-[#422006] dark:border-[#F59E0B] dark:text-[#FEF3C7]'
+                      : 'bg-white hover:bg-slate-50 border-orange-100/35 text-slate-600 dark:bg-[#1F2937] dark:hover:bg-[#273449] dark:border-[#475569] dark:text-[#CBD5E1]'
                   }`}
                 >
-                  {settings.language === lang && <Check className="w-3 h-3 text-orange-600 shrink-0" />}
+                  {settings.language === lang && <Check className="w-3 h-3 text-orange-600 dark:text-[#F59E0B] shrink-0" />}
                   {lang === 'Hindi' ? 'हिन्दी (Hindi)' : lang}
                 </button>
               ))}
@@ -190,9 +192,9 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
           </div>
 
           {/* Font Size Settings */}
-          <div className="space-y-2 pt-1 border-t border-dashed border-orange-100/35 pt-4">
+          <div className="space-y-2 pt-1 border-t border-dashed border-orange-100/35 dark:border-[#475569] pt-4">
             <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 font-mono flex items-center gap-1">
-              <Type className="w-3.5 h-3.5 text-slate-400" /> {language === 'Hindi' ? 'फ़ॉन्ट आकार' : 'Font Size Preference'}
+              <Type className="w-3.5 h-3.5 text-slate-400 dark:text-[#94A3B8]" /> <span className="dark:text-[#CBD5E1]">{language === 'Hindi' ? 'फ़ॉन्ट आकार' : 'Font Size Preference'}</span>
             </label>
             <div className="flex gap-2">
               {[
@@ -205,11 +207,11 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
                   onClick={() => handleChangeFontSize(size.id as 'small' | 'medium' | 'large')}
                   className={`flex-1 py-1.5 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer flex items-center justify-center gap-1 ${
                     (settings.fontSize || 'medium') === size.id
-                      ? 'bg-orange-100 border-orange-400 text-orange-950 font-black'
-                      : 'bg-white dark:bg-zinc-900/40 hover:bg-slate-50 border-orange-100/35 text-slate-600 dark:text-slate-350'
+                      ? 'bg-orange-100 border-orange-400 text-orange-950 font-black dark:bg-[#422006] dark:border-[#F59E0B] dark:text-[#FEF3C7]'
+                      : 'bg-white hover:bg-slate-50 border-orange-100/35 text-slate-600 dark:bg-[#1F2937] dark:hover:bg-[#273449] dark:border-[#475569] dark:text-[#CBD5E1]'
                   }`}
                 >
-                  {(settings.fontSize || 'medium') === size.id && <Check className="w-3 h-3 text-orange-600 shrink-0" />}
+                  {(settings.fontSize || 'medium') === size.id && <Check className="w-3 h-3 text-orange-600 dark:text-[#F59E0B] shrink-0" />}
                   {language === 'Hindi' ? size.labelHindi : size.labelEng}
                 </button>
               ))}
@@ -220,15 +222,15 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
       </div>
 
       {/* Astro computation engine metrics */}
-      <div className="glass-card-light dark:glass-card-dark p-5 flex flex-col gap-4">
+      <div className="glass-card-light dark:bg-[#1F2937] dark:border-[#475569] dark:shadow-none p-5 flex flex-col gap-4 rounded-3xl">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-orange-100 flex items-center justify-center font-bold text-orange-600">
+            <div className="w-10 h-10 rounded-2xl bg-orange-100 dark:bg-[#422006] flex items-center justify-center font-bold text-orange-600 dark:text-[#F59E0B]">
               <Sparkles className="w-5 h-5 animate-spin-slow" />
             </div>
             <div>
-              <h4 className="text-[11px] font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wider font-serif">पंचांग गणना इंजन विवरण</h4>
-              <p className="text-[9px] text-slate-400 dark:text-slate-400 leading-tight mt-0.5">
+              <h4 className="text-[11px] font-extrabold text-slate-800 dark:text-[#F9FAFB] uppercase tracking-wider font-serif">पंचांग गणना इंजन विवरण</h4>
+              <p className="text-[9px] text-slate-400 dark:text-[#94A3B8] leading-tight mt-0.5">
                 अक्षांश और ग्रहों की सटीक गणना के लिए <strong>Swiss Ephemeris WebAssembly (AGPL-v3)</strong> इंजन का उपयोग।
               </p>
             </div>
@@ -236,52 +238,52 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
 
           <div className="flex gap-4 text-right text-[10px] font-mono shrink-0">
             <div>
-              <span className="text-slate-400 block">इंजन:</span>
-              <span className="font-extrabold text-[#A64B00] dark:text-[#FFB366]">Swiss Ephemeris</span>
+              <span className="text-slate-400 dark:text-[#94A3B8] block">इंजन:</span>
+              <span className="font-extrabold text-[#A64B00] dark:text-[#F59E0B]">Swiss Ephemeris</span>
             </div>
             <div>
-              <span className="text-slate-400 block">ऑफसेट:</span>
-              <span className="font-extrabold text-slate-800 dark:text-slate-200">Local WASM Worker</span>
+              <span className="text-slate-400 dark:text-[#94A3B8] block">ऑफसेट:</span>
+              <span className="font-extrabold text-slate-800 dark:text-[#CBD5E1]">Local WASM Worker</span>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-dashed border-orange-100/35 pt-3 text-[9px] text-slate-400 leading-relaxed flex flex-col gap-2">
+        <div className="border-t border-dashed border-orange-100/35 dark:border-[#475569] pt-3 text-[9px] text-slate-400 dark:text-[#94A3B8] leading-relaxed flex flex-col gap-2">
           <p>
             Astronomical calculation engine is powered by open-source Swiss Ephemeris under AGPL v3. Source code for the standalone calculation worker module (Part B) is available on GitHub:{' '}
             <a 
               href="https://github.com/vinayaksaxena1-maker/Sanatan_Watch_AstroEngine" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-orange-650 dark:text-orange-400 underline font-mono font-bold"
+              className="text-orange-650 dark:text-[#F59E0B] underline font-mono font-bold"
             >
               View Worker Source Code on GitHub
             </a>
           </p>
-          <div className="border-t border-dashed border-orange-100/20 pt-2 flex items-center justify-between">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 font-mono">Legal & Privacy</span>
+          <div className="border-t border-dashed border-orange-100/20 dark:border-[#475569] pt-2 flex items-center justify-between">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-[#CBD5E1] font-mono">Legal & Privacy</span>
             <a 
               href="/privacy-policy.html" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-orange-650 dark:text-orange-400 underline font-bold text-[10px]"
+              className="text-orange-650 dark:text-[#F59E0B] underline font-bold text-[10px]"
             >
               Privacy Policy
             </a>
           </div>
 
-          <div className="border-t border-dashed border-orange-100/20 pt-2.5 flex flex-col gap-1.5 text-[10px] text-slate-500 dark:text-zinc-400">
+          <div className="border-t border-dashed border-orange-100/20 dark:border-[#475569] pt-2.5 flex flex-col gap-1.5 text-[10px] text-slate-500 dark:text-[#94A3B8]">
             <div className="flex justify-between items-center">
               <span>{language === 'Hindi' ? 'कंपनी / संगठन:' : 'Company / Organization:'}</span>
-              <span className="font-bold text-slate-700 dark:text-slate-200">Innovix Solutions</span>
+              <span className="font-bold text-slate-700 dark:text-[#CBD5E1]">Innovix Solutions</span>
             </div>
             <div className="flex justify-between items-center">
               <span>{language === 'Hindi' ? 'एप्लीकेशन संस्करण:' : 'App Version:'}</span>
-              <span className="font-mono font-bold text-slate-700 dark:text-slate-200">v1.0.0 (First Edition)</span>
+              <span className="font-mono font-bold text-slate-700 dark:text-[#CBD5E1]">v1.0.0 (First Edition)</span>
             </div>
             <div className="flex justify-between items-center">
               <span>{language === 'Hindi' ? 'पहल / निर्माण:' : 'Initiative:'}</span>
-              <span className="font-bold text-orange-600 dark:text-amber-400 flex items-center gap-1">
+              <span className="font-bold text-orange-600 dark:text-[#F59E0B] flex items-center gap-1">
                 🇮🇳 Proudly Made in India | Make for India
               </span>
             </div>
