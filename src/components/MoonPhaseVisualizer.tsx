@@ -144,44 +144,53 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
   const systemColorAccent = paksha === 'Shukla' ? 'text-amber-500' : 'text-[#818CF8]';
   const systemBgAccent = paksha === 'Shukla' ? 'bg-amber-100/50' : 'bg-indigo-100/30';
   const glowShadow = paksha === 'Shukla' 
-    ? 'shadow-[0_0_25px_rgba(245,158,11,0.25)] border-amber-200' 
-    : 'shadow-[0_0_25px_rgba(129,140,248,0.2)] border-indigo-200';
+    ? 'shadow-[0_0_20px_rgba(245,158,11,0.2)] border-[#ff9933]/40 dark:border-[#ff9933]/30' 
+    : 'shadow-[0_0_20px_rgba(129,140,248,0.2)] border-[#ff9933]/40 dark:border-[#ff9933]/30';
 
   return (
-    <div id="moon_phase_visualizer_root" className="glass-card-light dark:glass-card-dark p-5 sm:p-6 text-left border border-slate-100 dark:border-zinc-800">
+    <div id="moon_phase_visualizer_root" className="glass-card-light dark:glass-card-dark p-3 sm:p-3.5 text-left border border-orange-100/50 dark:border-orange-950/20 rounded-3xl space-y-2 shadow-sm">
       
-      {/* Visual Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+      {/* Visual Header - Centered like Muhurat Card */}
+      <div className="flex items-center justify-center gap-1.5 border-b border-orange-100/20 dark:border-orange-950/10 pb-1 w-full text-center">
+        <span className="text-[13px] sm:text-[14px]">✨</span>
+        <h3 className="text-[14px] font-bold tracking-wider text-[#FF9933] dark:text-amber-500 leading-none font-serif text-center">
+          ॥ खगोलीय चंद्र स्थिति ॥
+        </h3>
+      </div>
+
+      {/* Sub Header: Title & Paksha Details + Reset Button */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-0.5">
         <div>
-          <span className="text-[10px] uppercase font-black tracking-wider text-orange-600 font-mono flex items-center gap-1.5">
-            <Sparkles className="w-3 h-3 text-orange-500 animate-pulse" />
-            ॥ खगोलीय चंद्र स्थिति ॥
-          </span>
-          <h3 className="text-base sm:text-lg font-black text-slate-850 dark:text-amber-100 font-serif mt-0.5 leading-tight">
+          <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-amber-100 font-serif leading-tight">
             पक्ष चंद्र कला एवं तिथि चक्र 
-          </h3>
-          <p className="text-[10.5px] text-slate-450 dark:text-slate-400 mt-1 max-w-lg">
-            चंद्रमा के {paksha === 'Shukla' ? 'शुक्ल पक्ष (वैश्विक उदय)' : 'कृष्ण पक्ष (वैश्विक क्षय)'} की गति। चक्र के बिंदुओं पर स्पर्श/माउस ले जाकर अन्य तिथियों का प्रभाव देखें।
+          </h4>
+          <p className="text-[11.5px] text-slate-500 dark:text-slate-400 mt-0.5 max-w-lg leading-snug">
+            चंद्रमा के {paksha === 'Shukla' ? 'शुक्ल पक्ष (वैश्विक उदय)' : 'कृष्ण पक्ष (वैश्विक क्षय)'} की गति। चक्र के बिंदुओं पर स्पर्श करके अन्य तिथियों का प्रभाव देखें।
           </p>
         </div>
 
-        {selectedDay !== todayPakshaDay && (
+        {selectedDay !== todayPakshaDay ? (
           <button
             id="reset_moon_button"
             onClick={() => setSelectedDay(todayPakshaDay)}
-            className="flex items-center gap-1 px-2.5 py-1 text-[10.5px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-950/25 border border-orange-200/50 hover:bg-orange-100 rounded-full transition-all shrink-0 cursor-pointer shadow-3xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-black text-amber-950 dark:text-black bg-gradient-to-r from-amber-400 via-orange-400 to-amber-400 border border-amber-300 dark:border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.5)] rounded-full transition-all shrink-0 cursor-pointer hover:scale-105 active:scale-95 animate-pulse"
           >
-            <RefreshCw className="w-3 h-3 animate-spin" style={{ animationDuration: '4s' }} />
-            आज की तिथि ({todayPakshaDay})
+            <RefreshCw className="w-3.5 h-3.5 animate-spin text-black" style={{ animationDuration: '3s' }} />
+            🔄 आज की तिथि ({todayPakshaDay})
           </button>
+        ) : (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 text-[10.5px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800/60 rounded-full shrink-0 shadow-xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            आज की तिथि ({todayPakshaDay})
+          </div>
         )}
       </div>
 
       {/* Main Dual Design Board */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-center">
         
         {/* Left Side: Interwoven SVG Orbit Board */}
-        <div className="lg:col-span-6 flex justify-center bg-slate-50/50 dark:bg-[#1E1914]/65 rounded-2xl p-4 border border-slate-100/40 dark:border-zinc-800/50 relative overflow-hidden h-[260px]">
+        <div className="lg:col-span-6 flex justify-center bg-slate-50/50 dark:bg-[#1E1914]/65 rounded-2xl p-3 border border-[#ff9933]/40 dark:border-[#ff9933]/30 relative overflow-hidden h-[260px]">
           
           {/* Subtle starry background dots */}
           <div className="absolute inset-0 pointer-events-none opacity-40">
@@ -357,22 +366,22 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
 
                   {/* Floating Number Label above node */}
                   {isSelected && (
-                    <g transform={`translate(${pt.x}, ${pt.y - 14})`}>
+                    <g transform={`translate(${pt.x}, ${pt.y - 15})`}>
                       <rect 
-                        x="-7.5" 
-                        y="-7.5" 
-                        width="15" 
-                        height="13" 
-                        rx="3" 
+                        x="-9" 
+                        y="-9" 
+                        width="18" 
+                        height="16" 
+                        rx="3.5" 
                         fill={paksha === 'Shukla' ? '#FF9933' : '#4F46E5'} 
                         className="shadow-2xs" 
                       />
                       <text
                         x="0"
-                        y="2"
+                        y="2.5"
                         textAnchor="middle"
-                        fontSize="8.5"
-                        fontWeight="extrabold"
+                        fontSize="10.5"
+                        fontWeight="900"
                         fill="#FFF"
                         fontFamily="monospace"
                       >
@@ -387,10 +396,10 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
         </div>
 
         {/* Right Side: Detailed Spiritual Translation Info Column */}
-        <div className="lg:col-span-6 flex flex-col justify-between h-full space-y-4">
+        <div className="lg:col-span-6 flex flex-col justify-between h-full space-y-3">
           
-          {/* Top Panel: Big Tithi Info Highlight */}
-          <div className={`p-4 rounded-2xl border transition-all ${glowShadow} bg-white dark:bg-[#1E1914]/80`}>
+          {/* Top Panel: Big Tithi Info Highlight (Border #ff9933) */}
+          <div className="p-3.5 sm:p-4 rounded-2xl border border-[#ff9933]/40 dark:border-[#ff9933]/30 bg-white dark:bg-[#1E1914]/80 shadow-sm">
             <div className="flex justify-between items-center">
               <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border tracking-wider font-mono ${systemColorAccent} ${systemBgAccent}`}>
                 तारीख स्थिति: दिन {selectedDay} / १५ ({paksha === 'Shukla' ? 'शुक्ल पक्ष' : 'कृष्ण पक्ष'})
@@ -418,7 +427,7 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
           </div>
 
           {/* Deep traditional lore text block */}
-          <div className="p-4 rounded-xl bg-orange-50/30 dark:bg-[#2A2016]/40 border border-orange-200/20 text-left text-xs text-slate-755 dark:text-slate-305 flex gap-2.5">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-orange-50/30 dark:bg-orange-950/20 border border-orange-200/30 dark:border-orange-900/30 text-left text-xs text-slate-700 dark:text-slate-300 flex gap-2.5">
             <Info className="w-5 h-5 text-[#FF9933] shrink-0 mt-0.5" />
             <div>
               <strong className="text-slate-850 dark:text-amber-100 font-bold block mb-1">वैदिक प्रभाव और साधना निर्देश:</strong>

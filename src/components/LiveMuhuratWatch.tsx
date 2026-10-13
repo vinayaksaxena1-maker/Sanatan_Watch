@@ -506,9 +506,9 @@ export function LiveMuhuratWatch({
       
       {/* HEADER BAR */}
       <div className="flex items-center justify-center w-full mb-3">
-        <div className="flex items-center justify-center gap-2">
-          <Clock className="w-4 h-4 text-orange-600 animate-pulse" />
-          <span className="font-mono text-[15px] font-bold tracking-wider text-orange-950 dark:text-orange-300 uppercase">सनातन घड़ी</span>
+        <div className="flex items-center justify-center gap-1.5">
+          <Clock className="w-4 h-4 text-[#FF9933] dark:text-amber-500 animate-pulse" />
+          <span className="text-[14px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block text-center">॥ सनातन घड़ी ॥</span>
         </div>
       </div>
 
