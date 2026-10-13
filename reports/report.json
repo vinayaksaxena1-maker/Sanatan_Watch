@@ -1,0 +1,82 @@
+{
+  "summary": {
+    "totalCases": 50000,
+    "passedCases": 47812,
+    "failedCases": 2188,
+    "coverage": 100,
+    "planetAccuracy": 99.39866666666666,
+    "panchangAccuracy": 95.624,
+    "riseSetAccuracy": 100,
+    "performance": "FAIL",
+    "overallScore": 95.624
+  },
+  "performance": {
+    "wasmInitTimeMs": 51,
+    "coldStartMs": 6,
+    "warmStartAvgMs": 11.8768,
+    "averageCalculationTimeMs": 19.50422,
+    "slowestCalculationMs": 11708,
+    "peakMemoryMb": 122.92996215820312,
+    "totalRuntimeMs": 1114867
+  },
+  "percentiles": {
+    "moonLongitude": {
+      "avg": 0.0001324201537020872,
+      "max": 0.009784014104980088,
+      "p95": 0,
+      "worstDate": "2026-03-20T13:14:59.555Z",
+      "worstLocation": "28.6139N, 77.2090E"
+    },
+    "crossovers": {
+      "avg": 0.000598521967343986,
+      "max": 23.95326255261898,
+      "p95": 0.00019513070583343506,
+      "worstDate": "2026-09-22T10:58:27.440Z",
+      "worstLocation": "28.6139N, 77.2090E"
+    },
+    "riseSet": {
+      "avg": 0,
+      "max": 0,
+      "p95": 0,
+      "worstDate": "",
+      "worstLocation": "0.0000N, 0.0000E"
+    }
+  },
+  "coverage": {
+    "calculatePlanet": {
+      "name": "calculatePlanet()",
+      "executed": 100000,
+      "assertions": 450000,
+      "passed": 447167,
+      "failed": 2833
+    },
+    "calculatePanchang": {
+      "name": "calculatePanchang()",
+      "executed": 100000,
+      "assertions": 250000,
+      "passed": 239060,
+      "failed": 10940
+    },
+    "calculateSolar": {
+      "name": "calculateSolar()",
+      "executed": 100000,
+      "assertions": 100000,
+      "passed": 100000,
+      "failed": 0
+    },
+    "calculateMoonrise": {
+      "name": "calculateMoonrise()",
+      "executed": 100000,
+      "assertions": 100000,
+      "passed": 100000,
+      "failed": 0
+    },
+    "calculateTransit": {
+      "name": "calculateTransit()",
+      "executed": 0,
+      "assertions": 450000,
+      "passed": 450000,
+      "failed": 0
+    }
+  }
+}

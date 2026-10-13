@@ -1,0 +1,26 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Dial Background -->
+    <path
+        android:fillColor="#1C1714"
+        android:strokeColor="#FF9933"
+        android:strokeWidth="4"
+        android:pathData="M 100 100 m -95 0 a 95 95 0 1 1 190 0 a 95 95 0 1 1 -190 0" />
+    <!-- Inner Gold Ring -->
+    <path
+        android:strokeColor="#33FF9933"
+        android:strokeWidth="1.5"
+        android:pathData="M 100 100 m -80 0 a 80 80 0 1 1 160 0 a 80 80 0 1 1 -160 0" />
+    <!-- Major markers at 12, 3, 6, 9 -->
+    <path android:fillColor="#FF9933" android:pathData="M 98 10 h 4 v 14 h -4 z" />
+    <path android:fillColor="#FF9933" android:pathData="M 176 98 h 14 v 4 h -14 z" />
+    <path android:fillColor="#FF9933" android:pathData="M 98 176 h 4 v 14 h -4 z" />
+    <path android:fillColor="#FF9933" android:pathData="M 10 98 h 14 v 4 h -14 z" />
+    <!-- Center Pin Base -->
+    <path
+        android:fillColor="#FF9933"
+        android:pathData="M 100 100 m -6 0 a 6 6 0 1 1 12 0 a 6 6 0 1 1 -12 0" />
+</vector>

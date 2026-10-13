@@ -1,0 +1,16 @@
+Metric,Value,Threshold/Unit
+Total Cases,50000,-
+Passed Cases,47812,-
+Failed Cases,2188,-
+Overall Accuracy Score,95.6240%,-
+Planet Accuracy,99.3987%,-
+Panchang Accuracy,95.6240%,-
+Rise/Set Accuracy,100.0000%,-
+Coverage,100.0%,-
+WASM Init Time,51ms,-
+Cold Start time,6ms,-
+Warm Start Avg time,11.88ms,-
+Average Calculation time,19.50ms,<= 15ms
+Slowest Calculation time,11708ms,<= 100ms
+Peak Memory,122.93MB,-
+Total Runtime,1114.87s,-
