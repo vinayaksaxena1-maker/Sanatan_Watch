@@ -297,6 +297,11 @@ export interface AppNotification {
   endTime?: string;
   type: 'morning' | 'festival' | 'muhurat' | 'custom';
   isRead: boolean;
+  enabled?: boolean;
+  ringtoneTitle?: string;
+  ringtoneUri?: string;
+  vibrate?: boolean;
+  snoozeMinutes?: number;
 }
 
 export type SplashStyle = 'saffron' | 'golden' | 'crimson' | 'sanatan-video';

@@ -12,6 +12,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.app.NotificationManager;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.Gravity;
@@ -29,6 +30,8 @@ public class AlarmRingerActivity extends Activity {
     private boolean vibrateOption = true;
     private int snoozeMinutes = 2;
     private String ringtoneUriString = "";
+    private TextView titleView;
+    private Button snoozeButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,10 +45,10 @@ public class AlarmRingerActivity extends Activity {
             getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-                | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
             );
         }
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         alarmId = getIntent().getStringExtra("alarmId");
         alarmLabel = getIntent().getStringExtra("alarmLabel");
@@ -75,7 +78,7 @@ public class AlarmRingerActivity extends Activity {
         layout.addView(iconView);
 
         // Alarm Title Label
-        TextView titleView = new TextView(this);
+        titleView = new TextView(this);
         titleView.setText(alarmLabel);
         titleView.setTextSize(26);
         titleView.setTextColor(Color.parseColor("#FFD54F")); // Amber color
@@ -112,6 +115,7 @@ public class AlarmRingerActivity extends Activity {
         dismissButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                cancelStatusBarNotification();
                 stopAlarmMedia();
                 launchMainActivity();
                 finish();
@@ -120,7 +124,7 @@ public class AlarmRingerActivity extends Activity {
         layout.addView(dismissButton);
 
         // Snooze Button
-        Button snoozeButton = new Button(this);
+        snoozeButton = new Button(this);
         snoozeButton.setText("सूनोज़ (" + snoozeMinutes + " मिनट बाद)");
         snoozeButton.setBackgroundColor(Color.TRANSPARENT);
         snoozeButton.setTextColor(Color.parseColor("#FFB74D")); // Light amber
@@ -129,6 +133,7 @@ public class AlarmRingerActivity extends Activity {
         snoozeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                cancelStatusBarNotification();
                 stopAlarmMedia();
                 snoozeAlarm();
                 finish();
@@ -265,9 +270,7 @@ public class AlarmRingerActivity extends Activity {
         intent.putExtra("ringtoneUri", ringtoneUriString);
 
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            flags |= PendingIntent.FLAG_MUTABLE;
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             flags |= PendingIntent.FLAG_IMMUTABLE;
         }
 
@@ -281,11 +284,29 @@ public class AlarmRingerActivity extends Activity {
         long triggerTime = System.currentTimeMillis() + (snoozeMinutes * 60 * 1000); // dynamic snooze duration
 
         if (alarmManager != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
-            } else {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+                } else {
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+                }
+            } catch (SecurityException se) {
+                se.printStackTrace();
+                alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+        }
+    }
+
+    private void cancelStatusBarNotification() {
+        try {
+            NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (nm != null) {
+                nm.cancel(alarmId != null ? alarmId.hashCode() : 1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -296,13 +317,45 @@ public class AlarmRingerActivity extends Activity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+
+        cancelStatusBarNotification();
+        stopAlarmMedia();
+
+        alarmId = intent.getStringExtra("alarmId");
+        alarmLabel = intent.getStringExtra("alarmLabel");
+        vibrateOption = intent.getBooleanExtra("vibrate", true);
+        snoozeMinutes = intent.getIntExtra("snoozeMinutes", 2);
+        ringtoneUriString = intent.getStringExtra("ringtoneUri");
+        if (ringtoneUriString == null) {
+            ringtoneUriString = "";
+        }
+        if (alarmLabel == null) {
+            alarmLabel = "साधना एवं शुभ मुहूर्त";
+        }
+
+        if (titleView != null) {
+            titleView.setText(alarmLabel);
+        }
+        if (snoozeButton != null) {
+            snoozeButton.setText("सूनोज़ (" + snoozeMinutes + " मिनट बाद)");
+        }
+
+        startAlarmMedia();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
+        cancelStatusBarNotification();
         stopAlarmMedia();
     }
 
     @Override
     public void onBackPressed() {
+        cancelStatusBarNotification();
         stopAlarmMedia();
         snoozeAlarm();
         super.onBackPressed();

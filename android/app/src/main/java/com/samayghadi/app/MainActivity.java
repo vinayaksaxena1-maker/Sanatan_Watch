@@ -39,6 +39,13 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Request POST_NOTIFICATIONS on Android 13+ (API 33+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+
         Window window = getWindow();
 
         // Enable edge-to-edge layout so content fills the entire display under system bars
@@ -91,9 +98,7 @@ public class MainActivity extends BridgeActivity {
                     intent.putExtra("ringtoneUri", ringtoneUri);
 
                     int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        flags |= PendingIntent.FLAG_MUTABLE;
-                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         flags |= PendingIntent.FLAG_IMMUTABLE;
                     }
 
@@ -122,6 +127,19 @@ public class MainActivity extends BridgeActivity {
                             alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
                         }
                     }
+
+                    // Persist alarm in SharedPreferences for boot restoration
+                    try {
+                        SharedPreferences alarmPrefs = getSharedPreferences("SanatanAlarmRegistry", Context.MODE_PRIVATE);
+                        String serialized = (label != null ? label : "") + ":::" +
+                                            triggerTimeMs + ":::" +
+                                            vibrate + ":::" +
+                                            snoozeMinutes + ":::" +
+                                            (ringtoneUri != null ? ringtoneUri : "");
+                        alarmPrefs.edit().putString(id, serialized).apply();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 @JavascriptInterface
@@ -130,9 +148,7 @@ public class MainActivity extends BridgeActivity {
                     Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
 
                     int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        flags |= PendingIntent.FLAG_MUTABLE;
-                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         flags |= PendingIntent.FLAG_IMMUTABLE;
                     }
 
@@ -145,6 +161,14 @@ public class MainActivity extends BridgeActivity {
 
                     if (alarmManager != null && pendingIntent != null) {
                         alarmManager.cancel(pendingIntent);
+                    }
+
+                    // Remove alarm from SharedPreferences
+                    try {
+                        SharedPreferences alarmPrefs = getSharedPreferences("SanatanAlarmRegistry", Context.MODE_PRIVATE);
+                        alarmPrefs.edit().remove(id).apply();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
 
