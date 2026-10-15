@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { MuhuratItem, HoraInterval, ChoghadiyaInterval } from '../types';
 import { AnalogClock } from './AnalogClock';
+import { formatHindiTime } from '../utils/translations';
 
 interface LiveMuhuratWatchProps {
   muhurats: MuhuratItem[];
@@ -695,7 +696,7 @@ export function LiveMuhuratWatch({
                   {activeHora ? activeHora.lordHindi : '-'}
                 </span>
                 <span className="text-[6.5px] sm:text-[7.5px] font-mono text-stone-400 leading-none mt-1">
-                  {activeHora ? `${activeHora.startTime}-${activeHora.endTime}` : '-'}
+                  {activeHora ? `${formatHindiTime(activeHora.startTime)}-${formatHindiTime(activeHora.endTime)}` : '-'}
                 </span>
               </div>
 
@@ -720,7 +721,7 @@ export function LiveMuhuratWatch({
                   {currentChoghadiya ? (currentChoghadiya.hindiName || currentChoghadiya.name) : '-'}
                 </span>
                 <span className="text-[6.5px] sm:text-[7.5px] font-mono text-stone-400 leading-none mt-1">
-                  {currentChoghadiya ? `${currentChoghadiya.startTime}-${currentChoghadiya.endTime}` : '-'}
+                  {currentChoghadiya ? `${formatHindiTime(currentChoghadiya.startTime)}-${formatHindiTime(currentChoghadiya.endTime)}` : '-'}
                 </span>
               </div>
             </div>
@@ -785,27 +786,27 @@ export function LiveMuhuratWatch({
           {/* Card 1: Current Hora */}
           <div className="p-3.5 rounded-2xl border border-[#ff9933] dark:border-[#ff9933]/80 bg-orange-50/10 dark:bg-[#1E1713]/80 backdrop-blur-xs flex flex-col justify-between space-y-1.5 text-left shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-[13px] font-black text-rose-600 dark:text-amber-400 uppercase tracking-widest font-mono">सक्रिय होरा</span>
-              <span className="text-[14px] font-black text-slate-850 dark:text-amber-100 font-serif">
+              <span className="text-[14px] font-black text-rose-600 dark:text-amber-400 uppercase tracking-widest font-mono">सक्रिय होरा</span>
+              <span className="text-[15px] font-black text-slate-900 dark:text-amber-100 font-serif">
                 {activeHora ? `${activeHora.lordHindi} की होरा` : '-'}
               </span>
             </div>
             
-            <div className="flex items-center justify-between text-[13px] font-bold text-slate-600 dark:text-amber-200 font-mono">
+            <div className="flex items-center justify-between text-[14px] font-bold text-slate-700 dark:text-amber-200 font-mono">
               <span>समय:</span>
-              <span>{activeHora ? `${activeHora.startTime} से ${activeHora.endTime}` : '-'}</span>
+              <span>{activeHora ? `${formatHindiTime(activeHora.startTime)} से ${formatHindiTime(activeHora.endTime)}` : '-'}</span>
             </div>
             
             <div className="border-t border-orange-100/30 dark:border-zinc-800/40 pt-1">
-              <span className="text-[15px] font-black text-orange-850 dark:text-amber-300 uppercase tracking-widest block font-mono leading-tight">उपयुक्त कार्य:</span>
-              <p className="text-[12px] text-slate-700 dark:text-slate-200 font-medium leading-tight mt-0.5">
+              <span className="text-[15.5px] font-black text-orange-900 dark:text-amber-300 uppercase tracking-widest block font-mono leading-tight">उपयुक्त कार्य:</span>
+              <p className="text-[13px] text-slate-800 dark:text-slate-200 font-medium leading-tight mt-0.5">
                 {activeHora ? activeHora.benefits : '-'}
               </p>
             </div>
             
             <div className="border-t border-orange-100/30 dark:border-zinc-800/40 pt-1">
-              <span className="text-[15px] font-black text-slate-650 dark:text-slate-300 uppercase tracking-widest block font-mono leading-tight">वैदिक परामर्श:</span>
-              <p className="text-[12px] text-slate-700 dark:text-slate-200 font-medium leading-tight mt-0.5">
+              <span className="text-[15.5px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest block font-mono leading-tight">वैदिक परामर्श:</span>
+              <p className="text-[13px] text-slate-800 dark:text-slate-200 font-medium leading-tight mt-0.5">
                 {activeHora ? getHoraAdvice(activeHora.quality) : '-'}
               </p>
             </div>
@@ -814,27 +815,27 @@ export function LiveMuhuratWatch({
           {/* Card 2: Current Choghadiya */}
           <div className="p-3.5 rounded-2xl border border-[#ff9933] dark:border-[#ff9933]/80 bg-orange-50/10 dark:bg-[#1E1713]/80 backdrop-blur-xs flex flex-col justify-between space-y-1.5 text-left shadow-xs">
             <div className="flex items-center justify-between">
-              <span className="text-[13px] font-black text-rose-600 dark:text-amber-400 uppercase tracking-widest font-mono">सक्रिय चौघड़िया</span>
-              <span className="text-[14px] font-black text-slate-850 dark:text-amber-100 font-serif">
+              <span className="text-[14px] font-black text-rose-600 dark:text-amber-400 uppercase tracking-widest font-mono">सक्रिय चौघड़िया</span>
+              <span className="text-[15px] font-black text-slate-900 dark:text-amber-100 font-serif">
                 {currentChoghadiya ? `${currentChoghadiya.hindiName || currentChoghadiya.name} चौघड़िया` : '-'}
               </span>
             </div>
             
-            <div className="flex items-center justify-between text-[13px] font-bold text-slate-600 dark:text-amber-200 font-mono">
+            <div className="flex items-center justify-between text-[14px] font-bold text-slate-700 dark:text-amber-200 font-mono">
               <span>समय:</span>
-              <span>{currentChoghadiya ? `${currentChoghadiya.startTime} से ${currentChoghadiya.endTime}` : '-'}</span>
+              <span>{currentChoghadiya ? `${formatHindiTime(currentChoghadiya.startTime)} से ${formatHindiTime(currentChoghadiya.endTime)}` : '-'}</span>
             </div>
             
             <div className="border-t border-orange-100/30 dark:border-zinc-800/40 pt-1">
-              <span className="text-[15px] font-black text-orange-850 dark:text-amber-300 uppercase tracking-widest block font-mono leading-tight">उपयुक्त कार्य:</span>
-              <p className="text-[12px] text-slate-700 dark:text-slate-200 font-medium leading-tight mt-0.5">
+              <span className="text-[15.5px] font-black text-orange-900 dark:text-amber-300 uppercase tracking-widest block font-mono leading-tight">उपयुक्त कार्य:</span>
+              <p className="text-[13px] text-slate-800 dark:text-slate-200 font-medium leading-tight mt-0.5">
                 {currentChoghadiya ? getChoghadiyaUpyuktKarya(currentChoghadiya.type) : '-'}
               </p>
             </div>
             
             <div className="border-t border-orange-100/30 dark:border-zinc-800/40 pt-1">
-              <span className="text-[15px] font-black text-slate-655 dark:text-slate-300 uppercase tracking-widest block font-mono leading-tight">वैदिक परामर्श:</span>
-              <p className="text-[12px] text-slate-700 dark:text-slate-200 font-medium leading-tight mt-0.5">
+              <span className="text-[15.5px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest block font-mono leading-tight">वैदिक परामर्श:</span>
+              <p className="text-[13px] text-slate-800 dark:text-slate-200 font-medium leading-tight mt-0.5">
                 {currentChoghadiya ? getChoghadiyaAdvice(currentChoghadiya.type) : '-'}
               </p>
             </div>

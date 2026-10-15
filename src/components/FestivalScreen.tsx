@@ -290,20 +290,20 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
   };
 
   return (
-    <div id="festival_screen_root" className="space-y-4 sm:space-y-6 font-sans">
+    <div id="festival_screen_root" className="space-y-3.5 sm:space-y-5 font-sans">
       
       {/* 1. Month & Year Select Dropdowns Header Card */}
-      <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block mb-0.5">
+      <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4.5 shadow-xs text-center flex flex-col sm:flex-row sm:items-center justify-between gap-3 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl">
+        <div className="flex-1 text-center">
+          <span className="text-[12px] sm:text-[13px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block mb-0.5 text-center">
             {language === 'Hindi' ? "॥ मासिक व्रत-त्यौहार कैलेंडर ॥" : "|| Monthly Vedic Calendar ||"}
           </span>
-          <h2 className="text-base sm:text-lg font-bold font-serif text-slate-800 dark:text-amber-100 leading-tight">
+          <h2 className="text-[15px] sm:text-base font-bold font-serif text-slate-800 dark:text-amber-100 leading-tight text-center">
             {language === 'Hindi' ? "कैलेंडर तिथि चुनें" : "Select Calendar Date"}
           </h2>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-center sm:justify-end">
           {/* Month Selector Dropdown */}
           <select
             value={currentMonth}
@@ -311,7 +311,7 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
               setCurrentMonth(Number(e.target.value));
               setSelectedDay(null);
             }}
-            className="text-xs p-2 rounded-xl bg-slate-500/5 dark:bg-zinc-950/40 border border-slate-200/55 dark:border-zinc-850 text-slate-800 dark:text-slate-100 outline-none focus:border-orange-500 font-serif font-extrabold cursor-pointer animate-fade-in"
+            className="text-[13px] p-2 rounded-xl bg-slate-500/5 dark:bg-zinc-950/40 border !border-[#FF9933]/35 dark:!border-[#FF9933]/25 focus:!border-[#FF9933] text-slate-800 dark:text-slate-100 outline-none font-serif font-extrabold cursor-pointer animate-fade-in"
           >
             {MONTH_NAMES[language === 'Hindi' ? 'Hindi' : 'English'].map((mName, idx) => (
               <option key={idx} value={idx} className="bg-[#120B08] text-slate-100">{mName}</option>
@@ -325,7 +325,7 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
               setCurrentYear(Number(e.target.value));
               setSelectedDay(null);
             }}
-            className="text-xs p-2 rounded-xl bg-slate-500/5 dark:bg-zinc-950/40 border border-slate-200/55 dark:border-zinc-850 text-slate-800 dark:text-slate-100 outline-none focus:border-orange-500 font-mono font-extrabold cursor-pointer animate-fade-in"
+            className="text-[13px] p-2 rounded-xl bg-slate-500/5 dark:bg-zinc-950/40 border !border-[#FF9933]/35 dark:!border-[#FF9933]/25 focus:!border-[#FF9933] text-slate-800 dark:text-slate-100 outline-none font-mono font-extrabold cursor-pointer animate-fade-in"
           >
             {Array.from({ length: 11 }, (_, i) => year - 5 + i).map((y) => (
               <option key={y} value={y} className="bg-[#120B08] text-slate-100">{y}</option>
@@ -335,22 +335,22 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
       </div>
 
       {/* 2. 7x5 Calendar Grid with Centered Date and Saffron Borders */}
-      <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left space-y-4">
+      <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 shadow-xs text-left space-y-3.5 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl">
         {/* Weekday Labels (7 Horizontal boxes) */}
-        <div className="grid grid-cols-7 gap-1.5 text-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono">
+        <div className="grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">
           {WEEKDAYS[language === 'Hindi' ? 'Hindi' : 'English'].map((day) => (
             <div key={day} className="py-1">{day}</div>
           ))}
         </div>
 
         {/* 35 Grid Cells (7 columns x 5 rows) */}
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
           {gridCells.map((cell, idx) => {
             if (cell === null) {
               return (
                 <div 
                   key={idx} 
-                  className="rounded-xl border border-dashed border-orange-500/20 dark:border-orange-500/10 bg-slate-500/2 dark:bg-zinc-950/5 min-h-[58px] sm:min-h-[66px]"
+                  className="rounded-2xl border border-dashed !border-[#FF9933]/25 dark:!border-[#FF9933]/15 bg-slate-500/2 dark:bg-zinc-950/5 min-h-[58px] sm:min-h-[66px]"
                 ></div>
               );
             }
@@ -360,7 +360,7 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
               return (
                 <div 
                   key={idx} 
-                  className="p-1 rounded-2xl bg-white/40 dark:bg-zinc-950/20 border border-orange-500/45 dark:border-orange-500/35 shadow-xs min-h-[58px] sm:min-h-[66px] flex flex-col justify-between hover:scale-102 hover:border-orange-500/60 transition-all duration-300"
+                  className="p-1 rounded-2xl bg-white/40 dark:bg-zinc-950/20 border !border-[#FF9933]/40 dark:!border-[#FF9933]/30 shadow-xs min-h-[58px] sm:min-h-[66px] flex flex-col justify-between hover:scale-102 hover:!border-[#FF9933] transition-all duration-300"
                 >
                   {cell.map(d => {
                     const dayFests = getFestivalsForDay(d);
@@ -370,12 +370,12 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
                       <div 
                         key={d} 
                         onClick={() => setSelectedDay(isSelected ? null : d)}
-                        className={"flex justify-center items-center gap-1.5 px-1.5 py-0.5 rounded-lg cursor-pointer text-[9px] font-mono font-black leading-none transition-all " + (
+                        className={"flex justify-center items-center gap-1.5 px-1.5 py-0.5 rounded-lg cursor-pointer text-[10px] font-mono font-black leading-none transition-all " + (
                           isSelected 
                             ? 'bg-orange-500 text-white font-extrabold shadow-sm' 
                             : dIsToday
-                              ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 font-extrabold border border-amber-500/35 shadow-xs'
-                              : 'hover:bg-orange-500/10 text-slate-700 dark:text-slate-355'
+                              ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 font-extrabold border !border-[#FF9933]/40 shadow-xs'
+                              : 'hover:bg-orange-500/10 text-slate-700 dark:text-slate-300'
                         )}
                       >
                         <span>{d}</span>
@@ -398,28 +398,28 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
               <div 
                 key={idx}
                 onClick={() => setSelectedDay(isSelected ? null : cell)}
-                className={"p-1.5 rounded-2xl border transition-all duration-300 cursor-pointer min-h-[58px] sm:min-h-[66px] flex flex-col justify-between items-center text-center shadow-xs hover:scale-102 hover:border-orange-500/65 " + (
+                className={"p-1.5 rounded-2xl border transition-all duration-300 cursor-pointer min-h-[58px] sm:min-h-[66px] flex flex-col justify-between items-center text-center shadow-xs hover:scale-102 hover:!border-[#FF9933] " + (
                   isSelected
-                    ? 'bg-gradient-to-br from-orange-500 to-amber-600 text-white border-orange-500 shadow-md font-bold scale-102'
+                    ? 'bg-gradient-to-br from-orange-500 to-amber-600 text-white !border-[#FF9933] shadow-md font-bold scale-102'
                     : cellIsToday
-                      ? 'bg-amber-500/10 dark:bg-amber-950/30 border-orange-500 dark:border-orange-500 ring-1 ring-orange-500/40 shadow-sm text-slate-900 dark:text-amber-100 font-extrabold'
-                      : 'bg-white/60 dark:bg-zinc-950/30 border-orange-500/45 dark:border-orange-500/35 hover:bg-orange-500/5 dark:hover:bg-zinc-900/30 text-slate-750 dark:text-slate-350'
+                      ? 'bg-amber-500/10 dark:bg-amber-950/30 !border-[#FF9933] ring-1 ring-[#FF9933]/40 shadow-sm text-slate-900 dark:text-amber-100 font-extrabold'
+                      : 'bg-white/60 dark:bg-zinc-950/30 !border-[#FF9933]/40 dark:!border-[#FF9933]/30 hover:bg-orange-500/5 dark:hover:bg-zinc-900/30 text-slate-750 dark:text-slate-350'
                 )}
               >
                 {cellIsToday && (
-                  <span className="text-[7px] bg-amber-500 text-white dark:bg-amber-500/20 dark:text-amber-350 px-1 py-0.5 rounded-md font-bold font-mono">
+                  <span className="text-[8px] bg-[#FF9933] text-white dark:bg-[#FF9933]/25 dark:text-amber-200 px-1.5 py-0.5 rounded-md font-bold font-mono">
                     {language === 'Hindi' ? 'आज' : 'TODAY'}
                   </span>
                 )}
                 
                 {/* Centered Date Number */}
-                <span className="text-[10px] sm:text-xs font-mono font-black leading-none text-center my-auto">{cell}</span>
+                <span className="text-xs sm:text-[13px] font-mono font-black leading-none text-center my-auto">{cell}</span>
                 
                 {/* Festival Indicator underneath the date inside the box */}
                 {dayFests.length > 0 && (
                   <div className="flex items-center justify-center gap-1 w-full mt-1">
                     <span 
-                      className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
+                      className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
                         isSelected 
                           ? 'bg-white/25 text-white' 
                           : 'bg-orange-500/15 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300'
@@ -441,42 +441,42 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
 
       {/* 3. Selected Day Festivals (Visible when cell is clicked) */}
       {selectedDay !== null && (
-        <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 text-left border border-orange-500/20 dark:border-orange-500/10 rounded-3xl bg-orange-500/3 dark:bg-orange-950/5 animate-fade-in space-y-3">
-          <div className="flex justify-between items-center pb-2 border-b border-orange-500/10">
-            <h3 className="text-xs font-black text-orange-655 dark:text-amber-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
+        <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4.5 text-left border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl bg-orange-500/3 dark:bg-orange-950/5 animate-fade-in space-y-2.5 shadow-xs">
+          <div className="flex justify-between items-center pb-2 border-b !border-[#FF9933]/20">
+            <h3 className="text-[13px] sm:text-[14px] font-black text-orange-600 dark:text-amber-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
               {language === 'Hindi' ? selectedDay + ' ' + MONTH_NAMES.Hindi[currentMonth] + ' के त्यौहार' : 'Festivals on ' + selectedDay + ' ' + MONTH_NAMES.English[currentMonth]}
             </h3>
             <button 
               onClick={() => setSelectedDay(null)}
-              className="text-xs text-slate-400 hover:text-slate-655 font-mono cursor-pointer"
+              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-amber-300 font-mono cursor-pointer px-2 py-0.5 rounded-lg border border-slate-200/40 dark:border-zinc-800"
             >
               ✕ {language === 'Hindi' ? "बंद करें" : "Close"}
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {selectedDayFestivals.length === 0 ? (
-              <p className="text-2xs text-slate-500 dark:text-slate-400 italic">
+              <p className="text-xs text-slate-500 dark:text-slate-400 italic">
                 {language === 'Hindi' ? "इस दिन कोई विशेष व्रत या त्यौहार नहीं है।" : "No special fasts or festivals scheduled on this date."}
               </p>
             ) : (
               selectedDayFestivals.map((fest) => {
                 return (
-                  <div key={fest.id} className="p-3.5 rounded-2xl bg-white/10 dark:bg-[#120B08]/40 border border-orange-100/10 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                  <div key={fest.id} className="p-3 rounded-2xl bg-white/40 dark:bg-[#120B08]/40 border !border-[#FF9933]/30 dark:!border-[#FF9933]/20 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
                     <div className="space-y-1.5 flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className={"text-[8px] font-extrabold px-2 py-0.5 rounded-full border " + getBadgeStyles(fest.type) + " font-mono uppercase tracking-wide"}>
+                        <span className={"text-[9px] font-extrabold px-2 py-0.5 rounded-full border " + getBadgeStyles(fest.type) + " font-mono uppercase tracking-wide"}>
                           {getTypeName(fest.type)}
                         </span>
-                        <span className="text-[9px] text-[#A64B00] dark:text-[#FFB366] font-mono font-bold">
+                        <span className="text-[10px] text-[#A64B00] dark:text-[#FFB366] font-mono font-bold">
                           🌙 {language === 'Hindi' ? translateMonthHindi(fest.month) : fest.month} • {language === 'Hindi' ? translateTithiHindi(fest.tithi) : fest.tithi}
                         </span>
                       </div>
-                      <h4 className="text-sm sm:text-base font-black text-slate-850 dark:text-amber-100 font-serif leading-snug">
+                      <h4 className="text-[15px] sm:text-[17px] font-black text-slate-850 dark:text-amber-100 font-serif leading-snug">
                         {language === 'Hindi' ? fest.hindiName : fest.name}
                       </h4>
-                      <p className="text-[10px] text-slate-600 dark:text-slate-455 leading-relaxed">
+                      <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                         {translateDescription(fest, language)}
                       </p>
                     </div>
@@ -489,17 +489,17 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
       )}
 
       {/* 4. Festivals List (Current Month's Festivals) */}
-      <div className="space-y-3.5 sm:space-y-4">
-        <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono text-left pl-1">
+      <div className="space-y-3 sm:space-y-3.5">
+        <h3 className="text-[14px] sm:text-[15px] font-black text-slate-700 dark:text-amber-200 uppercase tracking-widest font-serif text-center pl-1 block">
           {language === 'Hindi' 
             ? MONTH_NAMES.Hindi[currentMonth] + ' माह के मुख्य व्रत एवं त्यौहार' 
             : 'Major Festivals in ' + MONTH_NAMES.English[currentMonth]}
         </h3>
 
         {monthlyFestivals.length === 0 ? (
-          <div className="glass-card-light dark:glass-card-dark p-10 sm:p-12 text-center h-48 flex flex-col justify-center items-center">
+          <div className="glass-card-light dark:glass-card-dark p-8 sm:p-10 text-center h-44 flex flex-col justify-center items-center border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl shadow-xs">
             <Smile className="w-8 h-8 text-orange-400 mb-2 animate-bounce" />
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-350 block">
+            <span className="text-[13px] font-semibold text-slate-700 dark:text-slate-350 block">
               {language === 'Hindi' ? "इस महीने कोई त्यौहार नहीं मिला।" : "No festivals found in this month."}
             </span>
           </div>
@@ -515,35 +515,35 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
             return (
               <div
                 key={fest.id}
-                className="glass-card-light dark:glass-card-dark p-4 sm:p-5 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between text-left shadow-xs rounded-3xl"
+                className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4.5 flex flex-col md:flex-row gap-3.5 items-start md:items-center justify-between text-left shadow-xs rounded-3xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30"
               >
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={"text-[9px] font-extrabold px-2.5 py-0.5 rounded-full border " + getBadgeStyles(fest.type) + " font-mono uppercase tracking-wide"}>
+                    <span className={"text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border " + getBadgeStyles(fest.type) + " font-mono uppercase tracking-wide"}>
                       {getTypeName(fest.type)}
                     </span>
-                    <span className="text-[10px] text-[#A64B00] dark:text-[#FFB366] font-mono font-bold">
+                    <span className="text-[11px] text-[#A64B00] dark:text-[#FFB366] font-mono font-bold">
                       🌙 {language === 'Hindi' ? translateMonthHindi(fest.month) : fest.month} • {language === 'Hindi' ? translateTithiHindi(fest.tithi) : fest.tithi}
                     </span>
                   </div>
 
-                  <h3 className="text-base sm:text-lg font-black text-slate-850 dark:text-amber-100 font-serif leading-snug">
+                  <h3 className="text-[17px] sm:text-[19px] font-black text-slate-850 dark:text-amber-100 font-serif leading-snug">
                     {language === 'Hindi' ? fest.hindiName : fest.name}
                   </h3>
 
-                  <p className="text-[11px] sm:text-2xs text-slate-655 dark:text-slate-400 leading-relaxed font-sans max-w-2xl">
+                  <p className="text-[12px] sm:text-[13px] text-slate-655 dark:text-slate-400 leading-relaxed font-sans max-w-2xl">
                     {translateDescription(fest, language)}
                   </p>
                 </div>
 
                 <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center border-t md:border-t-0 border-slate-100 dark:border-slate-800/50 pt-2.5 md:pt-0 w-full md:w-auto mt-1 md:mt-0 flex-shrink-0">
-                  <div className="bg-orange-50/50 dark:bg-orange-950/15 p-2 sm:p-2.5 rounded-2xl border border-orange-100/30 flex items-center gap-2 text-left md:text-right">
+                  <div className="bg-orange-50/50 dark:bg-orange-950/20 p-2 sm:p-2.5 rounded-2xl border !border-[#FF9933]/30 dark:!border-[#FF9933]/20 flex items-center gap-2 text-left md:text-right">
                     <Calendar className="w-5 h-5 text-orange-600 shrink-0" />
                     <div>
-                      <span className="text-[10px] font-bold text-slate-400 block uppercase font-mono tracking-widest leading-3">
+                      <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 block uppercase font-mono tracking-widest leading-3">
                         {language === 'Hindi' ? "त्यौहार की तिथि" : "Festival Date"}
                       </span>
-                      <span className="text-2xs font-extrabold text-orange-950 dark:text-orange-200 font-sans mt-0.5 block whitespace-nowrap">
+                      <span className="text-[12px] sm:text-[13px] font-extrabold text-orange-950 dark:text-orange-200 font-sans mt-0.5 block whitespace-nowrap">
                         {formattedDateStr}
                       </span>
                     </div>
@@ -557,14 +557,14 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
       </div>
 
       {/* 5. Annual Festivals Table (Entire selected year list) */}
-      <div className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left space-y-4">
+      <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4.5 shadow-xs text-left space-y-3.5 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl">
         <div>
-          <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono">
+          <h3 className="text-[14px] sm:text-[16px] font-black font-serif text-slate-800 dark:text-amber-100 text-center block">
             {language === 'Hindi' 
               ? "वर्ष " + currentYear + " के समस्त व्रत एवं त्यौहार" 
               : "All Festivals of the Year " + currentYear}
           </h3>
-          <p className="text-[10px] text-slate-455 dark:text-slate-555 font-sans mt-0.5">
+          <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-sans mt-0.5 text-center block">
             {language === 'Hindi'
               ? 'वर्षभर के सभी प्रमुख व्रत, एकादशी, पूर्णिमा और राष्ट्रीय त्यौहारों की समय-सारणी।'
               : 'Complete schedule of all major fasts, Ekadashi, Purnima, and national festivals for the year.'}
@@ -572,26 +572,26 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
         </div>
 
         {/* Mobile View: Stacked Card rows (No horizontal scroll, date format DD/MM/YY) */}
-        <div className="md:hidden space-y-3">
+        <div className="md:hidden space-y-2.5">
           {sortedYearFestivals.map((fest) => {
             return (
               <div 
                 key={fest.id} 
-                className="p-3.5 rounded-2xl bg-white/60 dark:bg-zinc-900/80 border border-orange-100/20 dark:border-orange-500/20 shadow-xs flex flex-col gap-1.5"
+                className="p-3 rounded-2xl bg-white/60 dark:bg-zinc-900/80 border !border-[#FF9933]/35 dark:!border-[#FF9933]/25 shadow-xs flex flex-col gap-1"
               >
-                <div className="flex justify-between items-center text-[10px] font-mono font-bold">
+                <div className="flex justify-between items-center text-[11px] font-mono font-bold">
                   <span className="text-orange-700 dark:text-orange-300">
                     {formatTableDate(fest.date)}
                   </span>
-                  <span className={"px-2 py-0.5 rounded-full border text-[8px] font-extrabold font-mono uppercase " + getBadgeStyles(fest.type)}>
+                  <span className={"px-2 py-0.5 rounded-full border text-[9px] font-extrabold font-mono uppercase " + getBadgeStyles(fest.type)}>
                     {getTypeName(fest.type)}
                   </span>
                 </div>
                 <div>
-                  <h4 className="text-xs sm:text-sm font-serif font-black text-slate-850 dark:text-amber-100">
+                  <h4 className="text-[13px] sm:text-[15px] font-serif font-black text-slate-850 dark:text-amber-100">
                     {language === 'Hindi' ? fest.hindiName : fest.name}
                   </h4>
-                  <p className="text-[10px] sm:text-[11px] text-slate-700 dark:text-slate-200 leading-relaxed font-sans mt-0.5">
+                  <p className="text-[11px] sm:text-[12px] text-slate-700 dark:text-slate-200 leading-relaxed font-sans mt-0.5">
                     {translateDescription(fest, language)}
                   </p>
                 </div>
@@ -601,26 +601,26 @@ export function FestivalScreen({ lat, lon, year, language = 'English' }: Festiva
         </div>
 
         {/* Desktop View: Traditional Table Layout */}
-        <div className="hidden md:block overflow-x-auto rounded-2xl border border-orange-100/10 dark:border-zinc-850/50">
+        <div className="hidden md:block overflow-x-auto rounded-2xl border !border-[#FF9933]/30 dark:!border-[#FF9933]/20">
           <table className="w-full text-left border-collapse text-slate-800 dark:text-slate-200">
             <thead>
-              <tr className="bg-orange-500/5 dark:bg-[#120B08]/60 border-b border-orange-100/10 dark:border-zinc-850/50 text-[10px] font-bold text-slate-400 dark:text-amber-400 uppercase tracking-wider font-mono">
-                <th className="p-3 whitespace-nowrap">{language === 'Hindi' ? "तिथि" : "Date"}</th>
-                <th className="p-3">{language === 'Hindi' ? "त्यौहार" : "Festival"}</th>
-                <th className="p-3">{language === 'Hindi' ? "संक्षिप्त विवरण" : "Short Summary"}</th>
+              <tr className="bg-orange-500/5 dark:bg-[#120B08]/60 border-b !border-[#FF9933]/20 text-[11px] font-bold text-slate-500 dark:text-amber-400 uppercase tracking-wider font-mono">
+                <th className="p-2.5 sm:p-3 whitespace-nowrap">{language === 'Hindi' ? "तिथि" : "Date"}</th>
+                <th className="p-2.5 sm:p-3">{language === 'Hindi' ? "त्यौहार" : "Festival"}</th>
+                <th className="p-2.5 sm:p-3">{language === 'Hindi' ? "संक्षिप्त विवरण" : "Short Summary"}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-orange-100/5 dark:divide-zinc-850/40 text-2xs sm:text-xs">
+            <tbody className="divide-y !divide-[#FF9933]/15 dark:!divide-[#FF9933]/10 text-xs sm:text-[13px]">
               {sortedYearFestivals.map((fest) => {
                 return (
                   <tr key={fest.id} className="hover:bg-slate-500/5 dark:hover:bg-zinc-900/40 transition-all duration-200">
-                    <td className="p-3 font-mono font-bold whitespace-nowrap text-orange-700 dark:text-orange-300">
+                    <td className="p-2.5 sm:p-3 font-mono font-bold whitespace-nowrap text-orange-700 dark:text-orange-300 text-[12px] sm:text-[13px]">
                       {formatTableDate(fest.date)}
                     </td>
-                    <td className="p-3 font-serif font-black text-slate-850 dark:text-amber-100 whitespace-nowrap">
+                    <td className="p-2.5 sm:p-3 font-serif font-black text-slate-850 dark:text-amber-100 whitespace-nowrap text-[13px] sm:text-[14px]">
                       {language === 'Hindi' ? fest.hindiName : fest.name}
                     </td>
-                    <td className="p-3 text-[11px] leading-relaxed text-slate-700 dark:text-slate-200 min-w-[200px]">
+                    <td className="p-2.5 sm:p-3 text-[12px] leading-relaxed text-slate-700 dark:text-slate-200 min-w-[200px]">
                       {translateDescription(fest, language)}
                     </td>
                   </tr>

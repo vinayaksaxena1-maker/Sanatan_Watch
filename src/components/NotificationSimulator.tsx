@@ -383,14 +383,14 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
   };
 
   return (
-    <div id="notification_simulator_root" className="glass-card-light dark:glass-card-dark p-4 sm:p-5 shadow-xs text-left font-sans relative">
+    <div id="notification_simulator_root" className="text-left font-sans relative">
       
       {/* Adverse Times Modal */}
       {showAdverseModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-[#1C1714] border border-red-950/40 rounded-3xl w-full max-w-md p-5 shadow-2xl max-h-[80vh] flex flex-col">
-            <div className="flex justify-between items-center border-b border-red-950/20 pb-3 mb-3">
-              <h3 className="text-sm font-bold text-red-500 font-serif flex items-center gap-1.5">
+          <div className="bg-[#1C1714] border !border-[#FF9933]/45 rounded-3xl w-full max-w-md p-4 sm:p-5 shadow-2xl max-h-[80vh] flex flex-col">
+            <div className="flex justify-between items-center border-b !border-[#FF9933]/20 pb-2.5 mb-2.5">
+              <h3 className="text-[15px] sm:text-[16px] font-bold text-red-500 font-serif flex items-center gap-1.5">
                 <span>🔴</span> आज के अशुभ काल (Adverse Periods)
               </h3>
               <button 
@@ -403,18 +403,18 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
             
             <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
               {getAdverseTimesList().length === 0 ? (
-                <div className="text-center py-6 text-xs text-slate-500 italic">
+                <div className="text-center py-6 text-xs text-slate-400 italic">
                   कोई अशुभ काल डेटा उपलब्ध नहीं है।
                 </div>
               ) : (
                 getAdverseTimesList().map((item, idx) => (
-                  <div key={idx} className="p-3 bg-red-950/10 hover:bg-red-950/20 border border-red-900/10 rounded-2xl flex justify-between items-center gap-3">
+                  <div key={idx} className="p-3 bg-red-950/15 hover:bg-red-950/25 border !border-[#FF9933]/25 rounded-2xl flex justify-between items-center gap-3">
                     <div className="text-left flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
-                        <span className="text-xs font-bold text-red-400 truncate">{item.name}</span>
-                        <span className="text-[10px] font-mono text-slate-400 bg-red-950/30 px-2 py-0.5 rounded-full shrink-0">{item.time}</span>
+                        <span className="text-[13px] font-bold text-red-400 truncate">{item.name}</span>
+                        <span className="text-[11px] font-mono text-slate-300 bg-red-950/40 px-2 py-0.5 rounded-full shrink-0">{item.time}</span>
                       </div>
-                      <p className="text-[10px] text-slate-455 mt-1 leading-normal">{item.desc}</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5 leading-normal">{item.desc}</p>
                     </div>
                     <button
                       onClick={() => {
@@ -425,7 +425,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                         setShowAdverseModal(false);
                         onPushToast("✍️ फॉर्म भरा गया", `${item.name} का समय सेट हो गया है!`);
                       }}
-                      className="px-2.5 py-1.5 bg-red-900/40 hover:bg-red-900/60 active:bg-red-900 text-red-200 text-2xs font-bold rounded-xl cursor-pointer transition-all flex-shrink-0"
+                      className="px-3 py-1.5 bg-red-900/60 hover:bg-red-900 active:bg-red-800 text-white text-xs font-bold rounded-xl cursor-pointer transition-all flex-shrink-0 border !border-[#FF9933]/30"
                     >
                       सेट करें
                     </button>
@@ -440,9 +440,9 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
       {/* Auspicious Times Modal */}
       {showAuspiciousModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-[#1C1714] border border-amber-950/40 rounded-3xl w-full max-w-md p-5 shadow-2xl max-h-[80vh] flex flex-col">
-            <div className="flex justify-between items-center border-b border-amber-950/20 pb-3 mb-3">
-              <h3 className="text-sm font-bold text-emerald-400 font-serif flex items-center gap-1.5">
+          <div className="bg-[#1C1714] border !border-[#FF9933]/45 rounded-3xl w-full max-w-md p-4 sm:p-5 shadow-2xl max-h-[80vh] flex flex-col">
+            <div className="flex justify-between items-center border-b !border-[#FF9933]/20 pb-2.5 mb-2.5">
+              <h3 className="text-[15px] sm:text-[16px] font-bold text-emerald-400 font-serif flex items-center gap-1.5">
                 <span>🟢</span> आज के शुभ काल एवं मुहूर्त
               </h3>
               <button 
@@ -455,18 +455,18 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
             
             <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
               {getAuspiciousTimesList().length === 0 ? (
-                <div className="text-center py-6 text-xs text-slate-500 italic">
+                <div className="text-center py-6 text-xs text-slate-400 italic">
                   कोई शुभ काल डेटा उपलब्ध नहीं है।
                 </div>
               ) : (
                 getAuspiciousTimesList().map((item, idx) => (
-                  <div key={idx} className="p-3 bg-emerald-950/10 hover:bg-emerald-950/20 border border-emerald-900/10 rounded-2xl flex justify-between items-center gap-3">
+                  <div key={idx} className="p-3 bg-emerald-950/15 hover:bg-emerald-950/25 border !border-[#FF9933]/25 rounded-2xl flex justify-between items-center gap-3">
                     <div className="text-left flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
-                        <span className="text-xs font-bold text-emerald-455 truncate">{item.name}</span>
-                        <span className="text-[10px] font-mono text-slate-400 bg-emerald-950/30 px-2 py-0.5 rounded-full shrink-0">{item.time}</span>
+                        <span className="text-[13px] font-bold text-emerald-400 truncate">{item.name}</span>
+                        <span className="text-[11px] font-mono text-slate-300 bg-emerald-950/40 px-2 py-0.5 rounded-full shrink-0">{item.time}</span>
                       </div>
-                      <p className="text-[10px] text-slate-455 mt-1 leading-normal">{item.desc}</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5 leading-normal">{item.desc}</p>
                     </div>
                     <button
                       onClick={() => {
@@ -477,7 +477,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                         setShowAuspiciousModal(false);
                         onPushToast("✍️ फॉर्म भरा गया", `${item.name} का समय set हो गया है!`);
                       }}
-                      className="px-2.5 py-1.5 bg-emerald-900/40 hover:bg-emerald-900/60 active:bg-emerald-900 text-emerald-250 text-2xs font-bold rounded-xl cursor-pointer transition-all flex-shrink-0"
+                      className="px-3 py-1.5 bg-emerald-900/60 hover:bg-emerald-900 active:bg-emerald-800 text-white text-xs font-bold rounded-xl cursor-pointer transition-all flex-shrink-0 border !border-[#FF9933]/30"
                     >
                       सेट करें
                     </button>
@@ -489,61 +489,63 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-5">
         
         {/* COLUMN 1: Custom Alarm creator (Left Side on Desktop) */}
-        <div className="md:col-span-6 space-y-4">
-          <div className="bg-slate-500/5 dark:bg-zinc-900/30 p-4 rounded-2xl border border-slate-250/30 dark:border-zinc-800/80">
-            <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
-              <h3 className="text-xs font-bold text-slate-700 dark:text-amber-500 uppercase tracking-wider font-mono">कस्टम रिमाइंडर बनाएं</h3>
+        <div className="md:col-span-6 space-y-3.5">
+          <div className="bg-slate-500/5 dark:bg-zinc-900/30 p-3.5 sm:p-4 rounded-2xl border !border-[#FF9933]/35 dark:!border-[#FF9933]/25 shadow-xs">
+            <div className="flex justify-between items-center mb-2.5 flex-wrap gap-2">
+              <h3 className="text-[13px] sm:text-[14px] font-bold text-slate-800 dark:text-amber-500 uppercase tracking-wider font-mono">
+                कस्टम रिमाइंडर बनाएं
+              </h3>
               
               {/* Shubh/Ashubh quick selectors */}
               <div className="flex gap-1.5">
                 <button
                   type="button"
                   onClick={() => setShowAdverseModal(true)}
-                  className="px-2 py-1 bg-red-950/20 hover:bg-red-950/40 text-red-500 text-3xs font-bold rounded-lg border border-red-900/20 cursor-pointer transition-all"
+                  className="px-2.5 py-1 bg-red-950/20 hover:bg-red-950/40 text-red-500 text-[10px] font-bold rounded-lg border !border-[#FF9933]/30 cursor-pointer transition-all"
                 >
                   🔴 अशुभ काल
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAuspiciousModal(true)}
-                  className="px-2 py-1 bg-emerald-950/20 hover:bg-emerald-950/40 text-emerald-500 text-3xs font-bold rounded-lg border border-emerald-900/20 cursor-pointer transition-all"
+                  className="px-2.5 py-1 bg-emerald-950/20 hover:bg-emerald-950/40 text-emerald-500 text-[10px] font-bold rounded-lg border !border-[#FF9933]/30 cursor-pointer transition-all"
                 >
                   🟢 शुभ काल/मुहूर्त
                 </button>
               </div>
             </div>
             
-            <form onSubmit={handleCreateCustom} className="space-y-3 font-sans">
+            <form onSubmit={handleCreateCustom} className="space-y-2.5 font-sans">
               <div>
-                <label className="text-[9.5px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">रिमाइंडर का शीर्षक</label>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">रिमाइंडर का शीर्षक</label>
                 <input
                   type="text"
                   placeholder="जैसे: संध्या आरती पूजा"
                   value={customTitle}
                   onChange={(e) => setCustomTitle(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl bg-white dark:bg-zinc-950 border border-slate-205/50 dark:border-zinc-800 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                  className="w-full text-xs sm:text-[13px] p-2.5 rounded-xl bg-white dark:bg-zinc-950 border !border-[#FF9933]/30 dark:!border-[#FF9933]/20 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none"
                   required
                 />
               </div>
               
               <div>
-                <label className="text-[9.5px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">विवरण (जानकारी)</label>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">विवरण (जानकारी)</label>
                 <textarea
                   placeholder="जैसे: दीया प्रज्वलित करें एवं हनुमान चालीसा का पाठ करें।"
                   value={customBody}
                   rows={2}
                   onChange={(e) => setCustomBody(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl bg-white dark:bg-zinc-950 border border-slate-205/50 dark:border-zinc-800 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none resize-none"
+                  className="w-full text-xs sm:text-[13px] p-2.5 rounded-xl bg-white dark:bg-zinc-950 border !border-[#FF9933]/30 dark:!border-[#FF9933]/20 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none resize-none"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[9.5px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">समय सेट करें</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">समय सेट करें</label>
                   <input
                     type="text"
                     placeholder="जैसे: 06:45 PM"
@@ -552,17 +554,17 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                       setCustomTime(e.target.value);
                       setCustomEndTime(''); // reset selected end time on manual input
                     }}
-                    className="w-full text-xs p-2.5 rounded-xl bg-white dark:bg-zinc-950 border border-slate-205/50 dark:border-zinc-800 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-550 outline-none font-mono"
+                    className="w-full text-xs sm:text-[13px] p-2.5 rounded-xl bg-white dark:bg-zinc-950 border !border-[#FF9933]/30 dark:!border-[#FF9933]/20 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-550 outline-none font-mono"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-[9.5px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">स्नूज़ अवधि</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">स्नूज़ अवधि</label>
                   <select
                     value={customSnooze}
                     onChange={(e) => setCustomSnooze(parseInt(e.target.value, 10))}
-                    className="w-full text-xs p-2.5 rounded-xl bg-white dark:bg-zinc-950 border border-slate-205/50 dark:border-zinc-800 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-550 outline-none"
+                    className="w-full text-xs sm:text-[13px] p-2.5 rounded-xl bg-white dark:bg-zinc-950 border !border-[#FF9933]/30 dark:!border-[#FF9933]/20 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-550 outline-none"
                   >
                     <option value={1}>1 मिनट</option>
                     <option value={2}>2 मिनट</option>
@@ -573,8 +575,8 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-1 bg-slate-500/5 dark:bg-zinc-900/50 rounded-xl px-2">
-                <span className="text-[10px] font-bold text-slate-600 dark:text-slate-350">अलार्म कंपन (Vibrate)</span>
+              <div className="flex items-center justify-between p-2 bg-slate-500/5 dark:bg-zinc-900/50 rounded-xl px-2.5 border !border-[#FF9933]/20">
+                <span className="text-[11px] font-bold text-slate-650 dark:text-slate-300">अलार्म कंपन (Vibrate)</span>
                 <input
                   type="checkbox"
                   checked={customVibrate}
@@ -584,11 +586,11 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
               </div>
 
               <div>
-                <label className="text-[9.5px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">अलार्म रिंगटोन</label>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">अलार्म रिंगटोन</label>
                 <select
                   value={ringtoneType}
                   onChange={(e) => setRingtoneType(e.target.value as any)}
-                  className="w-full text-xs p-2.5 rounded-xl bg-white dark:bg-zinc-950 border border-slate-205/50 dark:border-zinc-800 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-550 outline-none"
+                  className="w-full text-xs sm:text-[13px] p-2.5 rounded-xl bg-white dark:bg-zinc-950 border !border-[#FF9933]/30 dark:!border-[#FF9933]/20 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-550 outline-none"
                 >
                   <option value="default">ऐप डिफ़ॉल्ट टोन (Flute)</option>
                   <option value="system">सिस्टम अलार्म टोन</option>
@@ -597,15 +599,15 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
               </div>
 
               {ringtoneType === 'custom' && (
-                <div className="p-2 bg-orange-500/5 dark:bg-orange-950/10 rounded-xl border border-orange-200/20 flex flex-col gap-1.5">
-                  <div className="flex justify-between items-center text-[10px]">
-                    <span className="text-slate-555 dark:text-slate-400">चुनी हुई टोन:</span>
+                <div className="p-2.5 bg-orange-500/5 dark:bg-orange-950/10 rounded-xl border !border-[#FF9933]/30 flex flex-col gap-1.5">
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-slate-500 dark:text-slate-400">चुनी हुई टोन:</span>
                     <span className="font-bold text-orange-900 dark:text-orange-400 truncate max-w-[120px]">{ringtoneTitle || 'कोई नहीं'}</span>
                   </div>
                   <button
                     type="button"
                     onClick={handleSelectCustomRingtone}
-                    className="p-1.5 bg-orange-600 text-white font-bold text-2xs rounded-lg cursor-pointer hover:bg-orange-700 transition-all"
+                    className="p-1.5 bg-orange-600 text-white font-bold text-xs rounded-lg cursor-pointer hover:bg-orange-700 transition-all border !border-[#FF9933]/30"
                   >
                     फ़ोन से टोन फ़ाइल चुनें
                   </button>
@@ -614,7 +616,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
 
               <button
                 type="submit"
-                className="w-full h-10 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold rounded-xl shadow-xs text-xs flex items-center justify-center gap-1 cursor-pointer transition-all"
+                className="w-full h-10 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold rounded-xl shadow-xs text-xs sm:text-[13px] flex items-center justify-center gap-1.5 cursor-pointer transition-all border !border-[#FF9933]"
               >
                 <Plus className="w-4 h-4" />
                 रिमाइंडर शेड्यूल करें
@@ -624,55 +626,55 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
         </div>
 
         {/* COLUMN 2: Active Scheduled Alarms Manager (Right Side on Desktop) */}
-        <div className="md:col-span-6 space-y-4">
+        <div className="md:col-span-6 space-y-3.5">
           
-          <div className="bg-slate-500/5 dark:bg-zinc-900/30 rounded-2xl border border-slate-250/30 dark:border-zinc-800/80 p-4 space-y-3">
+          <div className="bg-slate-500/5 dark:bg-zinc-900/30 rounded-2xl border !border-[#FF9933]/35 dark:!border-[#FF9933]/25 p-3.5 sm:p-4 space-y-2.5 shadow-xs">
             <div className="flex justify-between items-center">
-              <h3 className="text-xs font-bold text-slate-700 dark:text-amber-500 uppercase tracking-wider font-mono flex items-center gap-1">
+              <h3 className="text-[13px] sm:text-[14px] font-bold text-slate-800 dark:text-amber-500 uppercase tracking-wider font-mono flex items-center gap-1.5">
                 <Clock className="w-4 h-4 text-orange-550" />
                 सक्रिय अलार्म सूची (Active Scheduled Alarms)
               </h3>
               {notificationsList.length > 0 && (
-                <span className="text-[10px] font-bold bg-orange-500/10 text-orange-600 px-2 py-0.5 rounded-full font-mono">
+                <span className="text-[10.5px] font-bold bg-orange-500/10 text-orange-600 dark:text-amber-400 px-2.5 py-0.5 rounded-full font-mono border !border-[#FF9933]/25">
                   {notificationsList.length} सेट हैं
                 </span>
               )}
             </div>
 
             {/* List of active scheduled alarms */}
-            <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+            <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
               {notificationsList.length === 0 ? (
                 <div className="text-center py-10 flex flex-col items-center justify-center gap-2">
                   <ShieldAlert className="w-8 h-8 text-slate-350 dark:text-zinc-700" />
-                  <span className="text-[11px] text-slate-455 italic">अभी कोई अलार्म सक्रिय नहीं है।</span>
-                  <span className="text-[10px] text-slate-400">ऊपर दिए फॉर्म से या शुभ/अशुभ काल से नया अलार्म सेट करें।</span>
+                  <span className="text-xs text-slate-455 italic">अभी कोई अलार्म सक्रिय नहीं है।</span>
+                  <span className="text-[11px] text-slate-400">ऊपर दिए फॉर्म से या शुभ/अशुभ काल से नया अलार्म सेट करें।</span>
                 </div>
               ) : (
                 notificationsList.map((alert) => (
-                  <div key={alert.id} className="p-3 rounded-2xl bg-white dark:bg-zinc-950 border border-slate-200/50 dark:border-zinc-800/80 text-left flex justify-between items-start gap-2 shadow-3xs relative overflow-hidden group">
+                  <div key={alert.id} className="p-3 rounded-2xl bg-white dark:bg-zinc-950 border !border-[#FF9933]/30 dark:!border-[#FF9933]/20 text-left flex justify-between items-start gap-2 shadow-xs relative overflow-hidden group">
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500" />
                     
                     <div className="flex-1 min-w-0 pl-1.5 space-y-1">
                       <div className="flex justify-between items-start gap-1 flex-wrap">
-                        <span className="text-xs font-black text-slate-800 dark:text-amber-100">{alert.title}</span>
+                        <span className="text-[14px] sm:text-[15px] font-black text-slate-800 dark:text-amber-100">{alert.title}</span>
                         
                         {/* Alarm Time duration details */}
-                        <span className="text-[10px] font-bold text-orange-600 dark:text-amber-500 font-mono bg-orange-500/5 dark:bg-orange-950/20 px-2 py-0.5 rounded-lg shrink-0">
+                        <span className="text-[11px] font-bold text-orange-600 dark:text-amber-400 font-mono bg-orange-500/5 dark:bg-orange-950/30 px-2.5 py-0.5 rounded-lg border !border-[#FF9933]/20 shrink-0">
                           {alert.time}
                           {alert.endTime ? ` से ${alert.endTime}` : ''}
                         </span>
                       </div>
                       
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal">{alert.body}</p>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-350 leading-relaxed">{alert.body}</p>
                       
                       {/* Sub-config display */}
-                      <div className="flex items-center gap-2 text-[9px] text-slate-400 dark:text-zinc-500 font-mono pt-1">
+                      <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-zinc-500 font-mono pt-1">
                         <span className="flex items-center gap-0.5">
                           <Volume2 className="w-3 h-3" />
                           {ringtoneTitle || 'डिफ़ॉल्ट टोन'}
                         </span>
                         <span>•</span>
-                        <span className="text-emerald-600 dark:text-emerald-500 font-bold bg-emerald-500/5 dark:bg-emerald-950/25 px-1.5 py-0.2 rounded">सक्रिय</span>
+                        <span className="text-emerald-600 dark:text-emerald-500 font-bold bg-emerald-500/5 dark:bg-emerald-950/25 px-1.5 py-0.2 rounded border !border-emerald-500/20">सक्रिय</span>
                       </div>
                     </div>
 

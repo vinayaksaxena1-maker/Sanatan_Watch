@@ -332,3 +332,106 @@ export type Language = 'English' | 'Hindi';
 export function getTranslation(lang: Language, key: keyof typeof translations.English): string {
   return translations[lang][key] || translations.English[key];
 }
+
+const CITY_HINDI_MAP: Record<string, string> = {
+  'delhi': 'नई दिल्ली',
+  'new delhi': 'नई दिल्ली',
+  'kanpur': 'कानपुर',
+  'mumbai': 'मुंबई',
+  'bengaluru': 'बेंगलुरु',
+  'bangalore': 'बेंगलुरु',
+  'kolkata': 'कोलकाता',
+  'chennai': 'चेन्नई',
+  'hyderabad': 'हैदराबाद',
+  'ahmedabad': 'अहमदाबाद',
+  'pune': 'पुणे',
+  'jaipur': 'जयपुर',
+  'lucknow': 'लखनऊ',
+  'chandigarh': 'चंडीगढ़',
+  'ludhiana': 'लुधियाना',
+  'amritsar': 'अमृतसर',
+  'agra': 'आगरा',
+  'varanasi': 'वाराणसी',
+  'kashi': 'काशी',
+  'prayagraj': 'प्रयागराज',
+  'allahabad': 'प्रयागराज',
+  'meerut': 'मेरठ',
+  'dehradun': 'देहरादून',
+  'haridwar': 'हरिद्वार',
+  'shimla': 'शिमला',
+  'srinagar': 'श्रीनगर',
+  'jammu': 'जम्मू',
+  'ayodhya': 'अयोध्या',
+  'surat': 'सूरत',
+  'vadodara': 'वडोदरा',
+  'rajkot': 'राजकोट',
+  'indore': 'इंदौर',
+  'bhopal': 'भोपाल',
+  'jabalpur': 'जबलपुर',
+  'gwalior': 'ग्वालियर',
+  'ujjain': 'उज्जैन',
+  'nagpur': 'नागपुर',
+  'nashik': 'नासिक',
+  'aurangabad': 'छत्रपति संभाजीनगर',
+  'raipur': 'रायपुर',
+  'bhilai': 'भिलाई',
+  'patna': 'पटना',
+  'gaya': 'गयाजी',
+  'ranchi': 'रांची',
+  'jamshedpur': 'जमशेदपुर',
+  'bhubaneswar': 'भुवनेश्वर',
+  'cuttack': 'कटक',
+  'guwahati': 'गुवाहाटी',
+  'shillong': 'शिलांग',
+  'siliguri': 'सिलीगुड़ी',
+  'durgapur': 'दुर्गापुर',
+  'asansol': 'आसनसोल',
+  'visakhapatnam': 'विशाखापट्टनम',
+  'vijayawada': 'विजयवाड़ा',
+  'guntur': 'गुंटूर',
+  'coimbatore': 'कोयंबटूर',
+  'madurai': 'मदुरै',
+  'tiruchirappalli': 'तिरुचिरापल्ली',
+  'kochi': 'कोच्चि',
+  'kozhikode': 'कोझिकोड',
+  'thiruvananthapuram': 'तिरुवनंतपुरम',
+  'mysuru': 'मैसूरु',
+  'mysore': 'मैसूरु',
+  'hubballi': 'हुबली',
+  'dharwad': 'धारवाड़',
+  'mangaluru': 'मंगलुरु',
+  'mangalore': 'मंगलुरु',
+  'mathura': 'मथुरा',
+  'vrindavan': 'वृन्दावन',
+  'tirupati': 'तिरुपति',
+  'puri': 'पुरी धाम',
+  'rishikesh': 'ऋषिकेश',
+  'kedarnath': 'केदारनाथ धाम',
+  'badrinath': 'बद्रीनाथ धाम',
+  'dwarka': 'द्वारका धाम',
+  'rameswaram': 'रामेश्वरम धाम'
+};
+
+export function translateCityNameToHindi(cityName: string): string {
+  if (!cityName) return '';
+  const clean = cityName.trim().toLowerCase();
+  return CITY_HINDI_MAP[clean] || cityName;
+}
+
+export function formatHindiTime(timeStr: string): string {
+  if (!timeStr) return '';
+  return timeStr
+    // Night/early dawn (12 AM - 4:59 AM)
+    .replace(/\b(12|0?1|0?2|0?3|0?4)(:\d{2})\s*(?:AM|am)\b/g, '$1$2 रात्रि')
+    // Morning (5 AM - 11:59 AM)
+    .replace(/\b(0?5|0?6|0?7|0?8|0?9|10|11)(:\d{2})\s*(?:AM|am)\b/g, '$1$2 प्रातः')
+    // Noon/Afternoon (12 PM - 3:59 PM)
+    .replace(/\b(12|0?1|0?2|0?3)(:\d{2})\s*(?:PM|pm)\b/g, '$1$2 दोपहर')
+    // Evening (4 PM - 7:59 PM)
+    .replace(/\b(0?4|0?5|0?6|0?7)(:\d{2})\s*(?:PM|pm)\b/g, '$1$2 सायं')
+    // Night (8 PM - 11:59 PM)
+    .replace(/\b(0?8|0?9|10|11)(:\d{2})\s*(?:PM|pm)\b/g, '$1$2 रात्रि')
+    // Generic fallback if no hour match
+    .replace(/\bAM\b/gi, 'प्रातः')
+    .replace(/\bPM\b/gi, 'सायं');
+}

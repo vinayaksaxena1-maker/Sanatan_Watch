@@ -141,19 +141,19 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
   }, [calculatedIllumination, rMoon]);
 
   // Highlight color configurations for UI
-  const systemColorAccent = paksha === 'Shukla' ? 'text-amber-500' : 'text-[#818CF8]';
+  const systemColorAccent = paksha === 'Shukla' ? 'text-amber-600 dark:text-amber-500' : 'text-indigo-600 dark:text-[#818CF8]';
   const systemBgAccent = paksha === 'Shukla' ? 'bg-amber-100/50' : 'bg-indigo-100/30';
   const glowShadow = paksha === 'Shukla' 
     ? 'shadow-[0_0_20px_rgba(245,158,11,0.2)] border-[#ff9933]/40 dark:border-[#ff9933]/30' 
     : 'shadow-[0_0_20px_rgba(129,140,248,0.2)] border-[#ff9933]/40 dark:border-[#ff9933]/30';
 
   return (
-    <div id="moon_phase_visualizer_root" className="glass-card-light dark:glass-card-dark p-3 sm:p-3.5 text-left border border-orange-100/50 dark:border-orange-950/20 rounded-3xl space-y-2 shadow-sm">
+    <div id="moon_phase_visualizer_root" className="glass-card-light dark:glass-card-dark p-3 sm:p-3.5 text-left border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl space-y-2 shadow-sm">
       
       {/* Visual Header - Centered like Muhurat Card */}
       <div className="flex items-center justify-center gap-1.5 border-b border-orange-100/20 dark:border-orange-950/10 pb-1 w-full text-center">
-        <span className="text-[13px] sm:text-[14px]">✨</span>
-        <h3 className="text-[14px] font-bold tracking-wider text-[#FF9933] dark:text-amber-500 leading-none font-serif text-center">
+        <span className="text-[14px] sm:text-[15px]">✨</span>
+        <h3 className="text-[15px] font-bold tracking-wider text-[#FF9933] dark:text-amber-500 leading-none font-serif text-center">
           ॥ खगोलीय चंद्र स्थिति ॥
         </h3>
       </div>
@@ -161,10 +161,10 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
       {/* Sub Header: Title & Paksha Details + Reset Button */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-0.5">
         <div>
-          <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-amber-100 font-serif leading-tight">
+          <h4 className="text-[13px] sm:text-[15px] font-bold text-slate-800 dark:text-amber-100 font-serif leading-tight">
             पक्ष चंद्र कला एवं तिथि चक्र 
           </h4>
-          <p className="text-[11.5px] text-slate-500 dark:text-slate-400 mt-0.5 max-w-lg leading-snug">
+          <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5 max-w-lg leading-snug">
             चंद्रमा के {paksha === 'Shukla' ? 'शुक्ल पक्ष (वैश्विक उदय)' : 'कृष्ण पक्ष (वैश्विक क्षय)'} की गति। चक्र के बिंदुओं पर स्पर्श करके अन्य तिथियों का प्रभाव देखें।
           </p>
         </div>
@@ -396,49 +396,49 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
         </div>
 
         {/* Right Side: Detailed Spiritual Translation Info Column */}
-        <div className="lg:col-span-6 flex flex-col justify-between h-full space-y-3">
+        <div className="lg:col-span-6 flex flex-col justify-between h-full space-y-2">
           
           {/* Top Panel: Big Tithi Info Highlight (Border #ff9933) */}
-          <div className="p-3.5 sm:p-4 rounded-2xl border border-[#ff9933]/40 dark:border-[#ff9933]/30 bg-white dark:bg-[#1E1914]/80 shadow-sm">
+          <div className="p-3 sm:p-3.5 rounded-2xl border border-[#ff9933]/45 dark:border-[#ff9933]/30 bg-white dark:bg-[#1E1914]/80 shadow-sm">
             <div className="flex justify-between items-center">
-              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border tracking-wider font-mono ${systemColorAccent} ${systemBgAccent}`}>
+              <span className={`text-[14px] sm:text-[15px] font-bold tracking-wider font-mono ${systemColorAccent}`}>
                 तारीख स्थिति: दिन {selectedDay} / १५ ({paksha === 'Shukla' ? 'शुक्ल पक्ष' : 'कृष्ण पक्ष'})
               </span>
-              <span className="text-2xs font-extrabold text-slate-400 font-mono">
+              <span className="text-[12px] font-extrabold text-slate-500 dark:text-slate-400 font-mono">
                 चंद्र कला: {Math.round(calculatedIllumination * 100)}%
               </span>
             </div>
 
-            <h4 className="text-lg sm:text-xl font-bold font-serif text-slate-800 dark:text-orange-100 flex items-center gap-1.5 mt-2">
+            <h4 className="text-[20px] sm:text-[22px] font-bold font-serif text-slate-800 dark:text-orange-100 flex items-center gap-1.5 mt-1.5">
               <Moon className={`w-4 h-4 ${systemColorAccent} shrink-0 animate-pulse`} />
               {activeTithiInfo.hindiName}
             </h4>
 
-            <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800/80">
+            <div className="grid grid-cols-2 gap-2.5 mt-2.5 pt-2.5 border-t border-slate-100 dark:border-zinc-800/80">
               <div>
-                <span className="text-[10px] text-slate-400 font-mono block">ऊर्जा तत्त्व</span>
-                <span className="text-[11.5px] font-black text-slate-700 dark:text-slate-300 block">{activeTithiInfo.energy}</span>
+                <span className="text-[12px] text-slate-500 dark:text-slate-400 font-mono block">ऊर्जा तत्त्व</span>
+                <span className="text-[13.5px] font-black text-slate-700 dark:text-slate-300 block">{activeTithiInfo.energy}</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 font-mono block">अधिपति देवता</span>
-                <span className="text-[11.5px] font-black text-slate-700 dark:text-slate-300 block">{activeTithiInfo.deity}</span>
+                <span className="text-[12px] text-slate-500 dark:text-slate-400 font-mono block">अधिपति देवता</span>
+                <span className="text-[13.5px] font-black text-slate-700 dark:text-slate-300 block">{activeTithiInfo.deity}</span>
               </div>
             </div>
           </div>
 
           {/* Deep traditional lore text block */}
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-orange-50/30 dark:bg-orange-950/20 border border-orange-200/30 dark:border-orange-900/30 text-left text-xs text-slate-700 dark:text-slate-300 flex gap-2.5">
+          <div className="p-3 sm:p-3.5 rounded-2xl bg-orange-50/30 dark:bg-orange-950/20 border border-orange-200/30 dark:border-orange-900/30 text-left text-xs text-slate-700 dark:text-slate-300 flex gap-2">
             <Info className="w-5 h-5 text-[#FF9933] shrink-0 mt-0.5" />
             <div>
-              <strong className="text-slate-850 dark:text-amber-100 font-bold block mb-1">वैदिक प्रभाव और साधना निर्देश:</strong>
-              <p className="leading-relaxed font-sans text-[11px] sm:text-xs">
+              <strong className="text-slate-850 dark:text-amber-100 font-bold block mb-0.5 text-[14px]">वैदिक प्रभाव और साधना निर्देश:</strong>
+              <p className="leading-relaxed font-sans text-[13px] sm:text-[14px]">
                 {activeTithiInfo.spirituality} इस दिन चंद्र कलाओं का मानसिक शक्तियों पर गहरा सूक्ष्म प्रभाव पड़ता है।
               </p>
             </div>
           </div>
 
           {/* Prompt action guidelines */}
-          <div className="text-[10px] sm:text-[10.5px] text-slate-400 dark:text-zinc-500 font-sans leading-tight flex items-center gap-1.5 bg-slate-100/30 dark:bg-stone-900/10 p-2 rounded-lg">
+          <div className="text-[12px] sm:text-[12.5px] text-slate-500 dark:text-zinc-400 font-sans leading-tight flex items-center gap-1.5 bg-slate-100/30 dark:bg-stone-900/10 p-2 rounded-lg">
             <ThumbsUp className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
             <span>
               {paksha === 'Shukla' 

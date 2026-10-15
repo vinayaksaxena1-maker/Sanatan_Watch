@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { Clock, TrendingUp, TrendingDown, Minus, Terminal } from 'lucide-react';
 import { PanchangInfo } from '../types';
 import { DiagnosticLogsModal } from './DiagnosticLogsModal';
+import { formatHindiTime } from '../utils/translations';
 
 interface HeaderClockProps {
   selectedDate: Date;
@@ -106,7 +107,7 @@ export const HeaderClock: React.FC<HeaderClockProps> = React.memo(({ selectedDat
           <span 
             className="text-[11px] sm:text-xs font-bold text-slate-900 dark:text-amber-100 tracking-tight font-mono whitespace-nowrap leading-none [text-shadow:0_1px_1px_rgba(0,0,0,0.12)] dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.45)] truncate"
           >
-            {selectedDate.toLocaleDateString(language === 'Hindi' ? 'hi-IN' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })} • {currentTime.toLocaleTimeString(language === 'Hindi' ? 'hi-IN' : 'en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+            {selectedDate.toLocaleDateString(language === 'Hindi' ? 'hi-IN' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })} • {language === 'Hindi' ? formatHindiTime(currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })) : currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
           </span>
         </div>
         {trendInfo.icon && (
