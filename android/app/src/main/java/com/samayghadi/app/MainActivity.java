@@ -110,21 +110,32 @@ public class MainActivity extends BridgeActivity {
                     );
 
                     if (alarmManager != null) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            if (alarmManager.canScheduleExactAlarms()) {
+                        try {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                if (alarmManager.canScheduleExactAlarms()) {
+                                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
+                                } else {
+                                    // Schedule fallback inexact alarm so user never misses reminder
+                                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
+                                    try {
+                                        Intent permissionIntent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                                        startActivity(permissionIntent);
+                                    } catch (Exception ignored) {}
+                                }
+                            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
                             } else {
-                                try {
-                                    Intent permissionIntent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                                    startActivity(permissionIntent);
-                                } catch (Exception e) {
-                                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
-                                }
+                                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
                             }
-                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
-                        } else {
-                            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
+                        } catch (SecurityException se) {
+                            se.printStackTrace();
+                            try {
+                                alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
 

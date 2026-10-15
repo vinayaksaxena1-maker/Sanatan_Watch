@@ -59,7 +59,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
   const parseTimeToMs = (timeStr: string): number | null => {
     if (!timeStr) return null;
     const cleanStr = timeStr.trim().toUpperCase();
-    const match = cleanStr.match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/);
+    const match = cleanStr.match(/^(\d{1,2})\s*:\s*(\d{2})(?:\s*:\s*\d{2})?(?:\s*(AM|PM))?$/);
     if (!match) return null;
 
     let hours = parseInt(match[1], 10);
@@ -85,37 +85,37 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
   };
 
   const handleToggleAlert = (id: string) => {
-    setNotificationsList(prev => prev.map(alert => {
-      if (alert.id === id) {
-        const isCurrentlyEnabled = alert.enabled !== false;
-        const nextEnabled = !isCurrentlyEnabled;
+    const alert = notificationsList.find(a => a.id === id);
+    if (!alert) return;
 
-        if (nextEnabled) {
-          if (window.AndroidAlarm) {
-            const triggerTimeMs = parseTimeToMs(alert.time);
-            if (triggerTimeMs) {
-              window.AndroidAlarm.scheduleAlarm(
-                alert.id,
-                alert.title,
-                triggerTimeMs,
-                alert.vibrate !== false,
-                alert.snoozeMinutes || 2,
-                alert.ringtoneUri || ''
-              );
-            }
-          }
-          onPushToast("🔔 अलार्म सक्रिय", `"${alert.title}" अलार्म चालू कर दिया गया है।`);
-        } else {
-          if (window.AndroidAlarm) {
-            window.AndroidAlarm.cancelAlarm(alert.id);
-          }
-          onPushToast("🔕 अलार्म बंद", `"${alert.title}" अलार्म बंद कर दिया गया है।`);
-        }
+    const isCurrentlyEnabled = alert.enabled !== false;
+    const nextEnabled = !isCurrentlyEnabled;
 
-        return { ...alert, enabled: nextEnabled };
+    if (nextEnabled) {
+      const triggerTimeMs = parseTimeToMs(alert.time);
+      if (!triggerTimeMs) {
+        onPushToast("⚠️ अमान्य समय", `"${alert.title}" का समय अमान्य है, कृपया इसे पुनः सेट करें।`);
+        return;
       }
-      return alert;
-    }));
+      if (window.AndroidAlarm) {
+        window.AndroidAlarm.scheduleAlarm(
+          alert.id,
+          alert.title,
+          triggerTimeMs,
+          alert.vibrate !== false,
+          alert.snoozeMinutes || 2,
+          alert.ringtoneUri || ''
+        );
+      }
+      onPushToast("🔔 अलार्म सक्रिय", `"${alert.title}" अलार्म चालू कर दिया गया है।`);
+    } else {
+      if (window.AndroidAlarm) {
+        window.AndroidAlarm.cancelAlarm(alert.id);
+      }
+      onPushToast("🔕 अलार्म बंद", `"${alert.title}" अलार्म बंद कर दिया गया है।`);
+    }
+
+    setNotificationsList(prev => prev.map(a => a.id === id ? { ...a, enabled: nextEnabled } : a));
   };
 
   const handleCreateCustom = (e: React.FormEvent) => {
@@ -559,14 +559,14 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                 <button
                   type="button"
                   onClick={() => setShowAdverseModal(true)}
-                  className="px-3 min-h-[44px] bg-red-950/20 hover:bg-red-950/40 text-red-500 text-[11px] font-bold rounded-xl border !border-[#FF9933]/30 cursor-pointer transition-all flex items-center justify-center"
+                  className="px-3 min-w-[44px] min-h-[44px] bg-red-950/20 hover:bg-red-950/40 text-red-500 text-[11px] font-bold rounded-xl border !border-[#FF9933]/30 cursor-pointer transition-all flex items-center justify-center"
                 >
                   🔴 अशुभ काल
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAuspiciousModal(true)}
-                  className="px-3 min-h-[44px] bg-emerald-950/20 hover:bg-emerald-950/40 text-emerald-500 text-[11px] font-bold rounded-xl border !border-[#FF9933]/30 cursor-pointer transition-all flex items-center justify-center"
+                  className="px-3 min-w-[44px] min-h-[44px] bg-emerald-950/20 hover:bg-emerald-950/40 text-emerald-500 text-[11px] font-bold rounded-xl border !border-[#FF9933]/30 cursor-pointer transition-all flex items-center justify-center"
                 >
                   🟢 शुभ काल/मुहूर्त
                 </button>

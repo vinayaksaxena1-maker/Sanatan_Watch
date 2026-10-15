@@ -12,6 +12,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.content.SharedPreferences;
 import android.app.NotificationManager;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -116,6 +117,7 @@ public class AlarmRingerActivity extends Activity {
             @Override
             public void onClick(View v) {
                 cancelStatusBarNotification();
+                removeAlarmFromRegistry();
                 stopAlarmMedia();
                 launchMainActivity();
                 finish();
@@ -296,6 +298,33 @@ public class AlarmRingerActivity extends Activity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        updateSnoozeInRegistry(triggerTime);
+    }
+
+    private void removeAlarmFromRegistry() {
+        if (alarmId == null) return;
+        try {
+            SharedPreferences alarmPrefs = getSharedPreferences("SanatanAlarmRegistry", Context.MODE_PRIVATE);
+            alarmPrefs.edit().remove(alarmId).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateSnoozeInRegistry(long triggerTime) {
+        if (alarmId == null) return;
+        try {
+            SharedPreferences alarmPrefs = getSharedPreferences("SanatanAlarmRegistry", Context.MODE_PRIVATE);
+            String serialized = (alarmLabel != null ? alarmLabel : "") + ":::" +
+                                triggerTime + ":::" +
+                                vibrateOption + ":::" +
+                                snoozeMinutes + ":::" +
+                                (ringtoneUriString != null ? ringtoneUriString : "");
+            alarmPrefs.edit().putString(alarmId, serialized).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
