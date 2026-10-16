@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Smartphone, Layout, Minimize2, Sparkles, Watch, Clock } from 'lucide-react';
+import { Layout } from 'lucide-react';
 import { PanchangInfo, MuhuratItem } from '../types';
-import { AnalogClock } from './AnalogClock';
-import { LiveMuhuratWatch } from './LiveMuhuratWatch';
 
 interface WidgetSimulatorProps {
   panchang: PanchangInfo;
@@ -11,7 +9,7 @@ interface WidgetSimulatorProps {
 }
 
 export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorProps) {
-  const [selectedSize, setSelectedSize] = useState<'small' | 'medium' | 'large' | 'lockscreen' | 'analog'>('medium');
+  const [selectedSize, setSelectedSize] = useState<'small' | 'medium' | 'lockscreen'>('medium');
   const [wallpaperBase64, setWallpaperBase64] = useState<string>('');
 
   if (!panchang || !panchang.hinduDate) {
@@ -64,9 +62,7 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
         {[
           { id: 'small', label: 'छोटा (२x२)' },
           { id: 'medium', label: 'मध्यम (४x२)' },
-          { id: 'large', label: 'बड़ा (४x४)' },
-          { id: 'lockscreen', label: 'लॉक स्क्रीन' },
-          { id: 'analog', label: 'एनालॉग घड़ी' }
+          { id: 'lockscreen', label: 'लॉक स्क्रीन' }
         ].map((size, index, arr) => (
           <React.Fragment key={size.id}>
             <span
@@ -168,46 +164,6 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
               </div>
             )}
 
-            {selectedSize === 'large' && (
-              <div className="w-full max-w-[280px] h-64 rounded-[28px] bg-gradient-to-b from-[#FFFDF8] to-[#FFF6EB] border border-orange-100 p-3.5 flex flex-col justify-between shadow-2xl relative overflow-hidden text-slate-800">
-                <div className="flex justify-between items-center border-b border-orange-100/70 pb-1.5">
-                  <span className="text-[11px] font-black text-orange-900 font-serif flex items-center gap-1">ॐ आज का पंचांग</span>
-                  <span className="text-[8px] font-black text-white bg-orange-600 px-1.5 py-0.5 rounded-full">📍 {city}</span>
-                </div>
-
-                {/* Grid stats */}
-                <div className="grid grid-cols-2 gap-x-2.5 gap-y-1.5 mt-1.5 my-auto">
-                  <div className="p-1 rounded-xl bg-orange-500/5 border border-orange-100/50 text-left">
-                    <span className="text-[8.5px] font-bold text-slate-450 block">आज की तिथि</span>
-                    <span className="text-[10px] font-bold text-slate-800 truncate block leading-tight">{activeTithi}</span>
-                  </div>
-                  <div className="p-1 rounded-xl bg-orange-500/5 border border-orange-100/50 text-left">
-                    <span className="text-[8.5px] font-bold text-slate-450 block">आज का नक्षत्र</span>
-                    <span className="text-[10px] font-bold text-slate-800 truncate block leading-tight">{activeNakshatra.split(' ')[0]}</span>
-                  </div>
-                  <div className="p-1 rounded-xl bg-orange-500/5 border border-orange-100/50 text-left">
-                    <span className="text-[8.5px] font-bold text-slate-450 block">सक्रिय चौघड़िया</span>
-                    <span className="text-[10px] font-bold text-slate-850 truncate block leading-tight">{currMuhurat?.name?.replace(' Choghadiya','') || 'अभिजीत'}</span>
-                  </div>
-                  <div className="p-1 rounded-xl bg-orange-500/5 border border-orange-100/50 text-left">
-                    <span className="text-[8.5px] font-bold text-slate-450 block">राहुकाल</span>
-                    <span className="text-[9.5px] font-extrabold text-red-650 block leading-tight">{panchang.rahuKaal?.start || '—'} - {panchang.rahuKaal?.end || '—'}</span>
-                  </div>
-                </div>
-
-                <div className="border-t border-orange-100/50 pt-2 flex flex-col gap-0.5">
-                  <div className="flex justify-between items-center text-[9px]">
-                    <span className="text-slate-550 font-medium">ब्रह्म मुहूर्त:</span>
-                    <span className="text-orange-900 font-extrabold">{muhurats.find(m => m.id === 'brahma')?.startTime || '04:30 AM'}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[9px]">
-                    <span className="text-slate-550 font-medium">अभिजीत मुहूर्त:</span>
-                    <span className="text-[#27AE60] font-extrabold">{muhurats.find(m => m.id === 'abhijit')?.startTime || '11:45 AM'}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {selectedSize === 'lockscreen' && (
               <div className="w-full max-w-[240px] p-3 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md shadow-lg text-white text-center">
                 <span className="text-[10px] font-black tracking-wide block uppercase text-amber-300">ॐ संवत्सर मुहूर्त</span>
@@ -217,22 +173,6 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
                   <span>तिथि: {activeTithi}</span>
                   <span>•</span>
                   <span>नक्षत्र: {activeNakshatra.split(' ')[0]}</span>
-                </div>
-              </div>
-            )}
-
-            {selectedSize === 'analog' && (
-              <div className="w-52 h-52 rounded-[32px] bg-gradient-to-b from-[#1C1714] to-[#120E0C] border border-orange-950/40 p-1 flex justify-center items-center shadow-2xl relative overflow-hidden">
-                <div className="w-[184px] h-[184px] flex items-center justify-center [&_svg]:overflow-visible">
-                  <AnalogClock 
-                    time={new Date()} 
-                    choghadiyaList={panchang.choghadiya || []}
-                    activeChoghadiyaIndex={-1}
-                    activeHora={panchang.hora?.[0]}
-                    horaList={panchang.hora || []}
-                    sunriseTimeStr={panchang.sunrise || '06:00 AM'}
-                    sunsetTimeStr={panchang.sunset || '06:00 PM'}
-                  />
                 </div>
               </div>
             )}
