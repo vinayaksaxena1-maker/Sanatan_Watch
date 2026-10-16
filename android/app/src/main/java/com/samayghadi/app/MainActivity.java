@@ -260,21 +260,7 @@ public class MainActivity extends BridgeActivity {
                         intentSmall.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, idsSmall);
                         sendBroadcast(intentSmall);
 
-                        // 3. Update Large Widget (SanatanLargeWidget)
-                        Intent intentLarge = new Intent(appCtx, SanatanLargeWidget.class);
-                        intentLarge.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-                        int[] idsLarge = widgetManager.getAppWidgetIds(new ComponentName(appCtx, SanatanLargeWidget.class));
-                        intentLarge.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, idsLarge);
-                        sendBroadcast(intentLarge);
-
-                        // 4. Update Analog Widget (SanatanAnalogWidget)
-                        Intent intentAnalog = new Intent(appCtx, SanatanAnalogWidget.class);
-                        intentAnalog.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-                        int[] idsAnalog = widgetManager.getAppWidgetIds(new ComponentName(appCtx, SanatanAnalogWidget.class));
-                        intentAnalog.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, idsAnalog);
-                        sendBroadcast(intentAnalog);
-
-                        // 5. Update Permanent Notification
+                        // 3. Update Permanent Notification
                         updatePermanentNotification();
                     } catch (Exception e) {
                         e.printStackTrace();
