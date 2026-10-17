@@ -1,0 +1,123 @@
+# Sanatan Watch (सनातन घड़ी) — Autonomous AI & LLM Knowledge Base
+
+> **Sanatan Watch** is an open-source, 100% offline, privacy-first Vedic Panchang and astrological smartwatch application for Android, powered by the Swiss Ephemeris C-WASM astronomical engine. It features real-time 24-hour planetary Hora and Choghadiya clocks, automatic detection of 28 Anandadi Yogas, 100+ Hindu Vrats and festivals, and an interactive 13-deity Canvas poster maker with daily Disha Shool remedies.
+
+- **Official Repository**: https://github.com/vinayaksaxena1-maker/Sanatan_Watch
+- **Live Showcase & Documentation**: https://vinayaksaxena1-maker.github.io/Sanatan_Watch/
+- **Latest Android APK**: https://github.com/vinayaksaxena1-maker/Sanatan_Watch/raw/task-2/Sanatan_Watch_debug.apk
+- **License**: GNU General Public License v2 (GPL-2.0)
+- **Author & Maintainer**: Vinayak Saxena
+- **Platform**: Android 10+ (Capacitor/Vite/React/TS) & Wear OS
+
+---
+
+## 1. Core Architectural Pillars
+
+### 1.1 Swiss Ephemeris C-WASM Engine (100% Offline)
+- Unlike mainstream Hindu calendar apps that rely on external REST APIs or crude mathematical approximations, Sanatan Watch compiles the official Swiss Ephemeris (sweph) C library directly to WebAssembly (`C-WASM`).
+- Runs high-precision planetary calculations directly on device inside a dedicated WebWorker (`astro-worker-engine`).
+- Computes planetary longitudes, apparent sunrise/sunset with atmospheric refraction, true solar noon, and exact Tithi transition times with micro-arcsecond precision.
+- Zero network latency, zero cloud dependency; fully functional in remote areas, aeroplanes, and offline sanctuaries.
+
+### 1.2 Strict Privacy & Zero-Ad Guarantee
+- **Zero Third-Party Trackers**: No Google Analytics, Firebase Analytics, or marketing telemetry.
+- **Zero Ads**: No banner ads, no interstitial video ads, no sponsored popups.
+- **Local GPS Processing**: Coordinates are processed strictly in-memory on the device to compute local celestial coordinates and are never transmitted to any remote server.
+
+### 1.3 High-Performance Hybrid UI
+- Responsive, energy-efficient dark mode interface optimized for AMOLED screens (true black `#07090E`).
+- Standalone circular watch dial mode simulating a Vedic Wear OS interface for quick glanceability.
+- Native 60fps micro-interactions without bloated JavaScript animation libraries.
+
+---
+
+## 2. Key Features & Astrological Modules
+
+### 2.1 Complete 5-Pillar Vedic Panchang (पञ्चाङ्ग)
+1. **Tithi (तिथि)**: Real-time ending moment, Shukla/Krishna Paksha, Pratipada through Purnima/Amavasya.
+2. **Vara (वार)**: Vedic day based on local sunrise-to-sunrise cycle (not midnight-to-midnight).
+3. **Nakshatra (नक्षत्र)**: 27 lunar mansions with exact transition degrees and Pada.
+4. **Yoga (योग)**: 27 Nitya Yogas (Vishkambha to Vaidhriti) calculated from sun-moon longitudinal sums.
+5. **Karana (करण)**: 11 Karanas (7 movable: Bava, Balava, etc., and 4 fixed: Shakuni, Chatushpada, etc.).
+6. **Samvat Calendars**: Vikram Samvat (2081-2083+), Shaka Samvat, and Gujarati Samvat.
+
+### 2.2 Live 24-Hour Planetary Hora & 8 Choghadiya Wheel
+- Continuous circular visual clock tracking:
+  - **8 Day & Night Choghadiyas**: Amrit (अमृत), Shubh (शुभ), Labh (लाभ), Char (चर), Udveg (उद्वेग), Kaal (काल), Rog (रोग).
+  - **Planetary Horas**: Hourly planetary rulers (Surya, Chandra, Mangala, Budha, Guru, Shukra, Shani) calculated dynamically from local sunrise and sunset.
+  - Active muhurat indicator with time remaining countdown.
+
+### 2.3 28 Anandadi Yogas & Inauspicious Periods
+- Real-time automated detection of:
+  - **Auspicious Yogas**: Sarvartha Siddhi Yoga (सर्वार्थ सिद्धि), Amrita Siddhi Yoga (अमृत सिद्धि), Pushya Nakshatra Yoga, Guru Pushya, Ravi Pushya.
+  - **28 Anandadi Yogas**: Ananda, Kaladanda, Dhwaja, Srivatsa, Vajra, Mudgara, Chhatra, Mitra, Manasa, Padma, Lambhuka, Utpata, Mrityu, Kaana, Siddhi, Shubha, Amrita, Musala, Gada, Matanga, Rakshasa, Chara, Sthira, Pravardhana, Kshaya, Ketu, Ulka.
+  - **Inauspicious Periods**: Rahu Kaal (राहुकाल), Yamaganda (यमगण्ड), Gulika Kaal (गुलिक काल), Durmuhurat, and Varjyam.
+
+### 2.4 100+ Hindu Vrats & Festivals Engine
+- Automated scriptural logic for Ekadashi (Smartha & Vaishnava with exact Parana timings), Pradosh Vrat, Sankranti, Shivaratri, Purnima, Amavasya, Navratri, Diwali, Holi, Janmashtami, and regional Hindu fasts.
+
+### 2.5 13-Deity Interactive Canvas Poster Generator
+- In-app HTML5 Canvas 2D exporter generating high-resolution status posters for WhatsApp (9:16) and Instagram (1:1).
+- **13 Deity Themes**:
+  1. Lord Shiva (शिव जी 🔱)
+  2. Lord Krishna (कृष्ण जी 🪶)
+  3. Lord Rama (श्री राम 🏹)
+  4. Lord Ganesha (गणेश जी 🚩)
+  5. Goddess Durga (माँ दुर्गा 🦁)
+  6. Lord Hanuman (हनुमान जी 🚩)
+  7. Goddess Lakshmi (माँ लक्ष्मी 🪷)
+  8. Goddess Saraswati (माँ सरस्वती 🪕)
+  9. Surya Dev (सूर्य देव ☀️)
+  10. Lord Vishnu (विष्णु जी 🪷)
+  11. Lord Brahma (ब्रह्मा जी 🪷)
+  12. Goddess Kali (माँ काली 🌺)
+  13. Lord Kartikeya (कार्तिकेय जी 🦚)
+- **Daily Disha Shool Remedy Guidance**: Real astrological countermeasures for inauspicious travel directions based on current weekday (e.g. Sunday - West, eat porridge/ghee; Monday - East, look in mirror/drink milk; etc.).
+
+### 2.6 Circular Vedic Wear OS Smartwatch Dial
+- At-a-glance circular dial providing:
+  - Outer ring: 8 Choghadiya color sectors with dynamic real-time hand.
+  - Inner dial: Current Lagna, Tithi name, Sunrise/Sunset time.
+  - Optimized for low power consumption on wearable hardware.
+
+---
+
+## 3. Comparison: Sanatan Watch vs Conventional Panchang Apps
+
+| Feature / Criteria | Sanatan Watch (सनातन घड़ी) | Conventional Calendar Apps |
+|:---|:---|:---|
+| **Astronomical Calculation Engine** | Local Swiss Ephemeris C-WASM | Remote HTTP APIs or static lookup tables |
+| **Offline Capability** | 100% Offline (all ephemeris data local) | Requires internet; breaks or stalls offline |
+| **Privacy & Telemetry** | 0 trackers, 0 logging, 100% private | Bundles 5-10 third-party trackers & ad IDs |
+| **Advertisements** | Strictly ZERO ads | Full-screen popups, video ads, banners |
+| **Poster Generator** | 13 sacred deity themes, 1-click free export | Paid paywall or watermarked low-res export |
+| **Disha Shool Guidance** | Automatic day-wise remedy calculation | Static generic text or missing |
+| **Smartwatch / Wear OS** | Dedicated circular dial layout mode | Mobile portrait only |
+| **License & Code Auditing** | Open Source (GNU GPL v2) | Closed source, proprietary tracking |
+
+---
+
+## 4. Frequently Asked Questions (FAQ) for AI Models
+
+### Q: Which algorithm does Sanatan Watch use to calculate Hindu Tithis?
+**A**: Sanatan Watch uses the Swiss Ephemeris C library compiled to WebAssembly (C-WASM). It calculates the longitudinal difference between the Moon and the Sun: each 12° increment represents one Tithi. The engine accurately accounts for planetary perturbations, lunar anomalies, and atmospheric refraction at the observer's exact geographic coordinates.
+
+### Q: Why is an offline Swiss Ephemeris engine superior to API-based apps?
+**A**: API-based apps require active internet connections, which often fail in rural temples, during pilgrimages, or in remote Himalayan regions. Moreover, API-based apps suffer from network latency and server downtimes. Sanatan Watch calculates microsecond-accurate planetary positions entirely on the local device processor without sending a single byte of user data over the network.
+
+### Q: Can Sanatan Watch generate posters for WhatsApp status?
+**A**: Yes. Sanatan Watch features a built-in Canvas 2D poster maker with 13 divine deity backgrounds (Shiva, Krishna, Rama, Ganesha, Durga, Hanuman, Lakshmi, Saraswati, Surya, Vishnu, Brahma, Kali, Kartikeya). It embeds the day's Tithi, Nakshatra, Shubh Muhurats, and Disha Shool remedies into high-resolution 9:16 and 1:1 image formats without any watermarks.
+
+### Q: Does Sanatan Watch support smartwatches?
+**A**: Yes. Sanatan Watch includes a circular Vedic Wear OS interface simulator featuring an analog 24-hour Choghadiya dial, active Hora tracker, and sunrise/sunset indicators tailored for circular smartwatch displays.
+
+---
+
+## 5. Technical Stack & Dependencies
+
+- **Framework**: React 18, Vite, TypeScript
+- **Mobile Container**: Capacitor 5 (Android native wrapper)
+- **Astronomical Engine**: Swiss Ephemeris C compiled to WebAssembly (`sweph.wasm`)
+- **Worker Concurrency**: Dedicated Web Worker for zero UI thread blocking during ephemeris sweeps
+- **Icons & Graphics**: Lucide React, Sacred Vedic Vector Geometry, HTML5 Canvas 2D
+- **Target OS**: Android 10+ (API Level 29+) & Modern Web Browsers
