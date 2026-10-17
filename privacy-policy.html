@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Sanatan Watch</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 24px;
+            background-color: #f7fafc;
+        }
+        h1 {
+            color: #d97706; /* Saffron amber */
+            border-bottom: 2px solid #f59e0b;
+            padding-bottom: 12px;
+            font-size: 26px;
+        }
+        h2 {
+            color: #374151;
+            font-size: 18px;
+            margin-top: 24px;
+            border-left: 4px solid #d97706;
+            padding-left: 10px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+        .meta-box {
+            background-color: #fffbeb;
+            border: 1px solid #fef3c7;
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin: 18px 0;
+            color: #92400e;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: monospace;
+            color: #b45309;
+        }
+        a {
+            color: #d97706;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Privacy Policy for Sanatan Watch</h1>
+        
+        <div class="meta-box">
+            <strong>Application:</strong> Sanatan Watch (Package: <code>com.samayghadi.app</code>)<br>
+            <strong>Developer / Publisher:</strong> Innovix (Vinayak Saxena)<br>
+            <strong>Support Contact:</strong> <a href="mailto:vinayaksaxena1@gmail.com">vinayaksaxena1@gmail.com</a><br>
+            <strong>Effective Date:</strong> October 17, 2026<br>
+            <strong>Online Mirror URL:</strong> <a href="https://vinayaksaxena1-maker.github.io/Sanatan_Watch/privacy-policy.html" target="_blank" rel="noopener noreferrer">https://vinayaksaxena1-maker.github.io/Sanatan_Watch/privacy-policy.html</a>
+        </div>
+        
+        <p><strong>Innovix</strong> is dedicated to safeguarding your privacy. This Privacy Policy outlines how <strong>Sanatan Watch</strong> handles user data, permissions, and device information in strict compliance with Google Play Developer Policies and global data privacy standards.</p>
+        
+        <h2>1. 100% Offline-First Architecture & Zero Cloud Data Collection</h2>
+        <p>Sanatan Watch is engineered from the ground up as a <strong>100% offline-first application</strong>. All Vedic Panchang algorithms, astronomical calculations, Choghadiya transitions, Hora cycles, and Muhurat calculations run directly on your device inside isolated WebAssembly and Web Worker background threads. We do not operate external calculation servers, remote databases, or cloud processing pipelines.</p>
+        
+        <h2>2. Information Collection and Local Processing</h2>
+        <ul>
+            <li><strong>Location Data (GPS Coordinates):</strong> The app accesses coarse and fine location coordinates (latitude and longitude) exclusively to determine astronomical horizons for local sunrise, sunset, moonrise, and moonset times. Location coordinates are processed 100% locally on your device and are <strong>never</strong> transmitted over the internet or shared with any third party.</li>
+            <li><strong>System Date & Clock Time:</strong> The app reads local device time to synchronize real-time Panchang indicators and analog dial rings on-device.</li>
+        </ul>
+        
+        <h2>3. Android System Permissions and Purpose</h2>
+        <p>Sanatan Watch requests the minimum set of permissions necessary to function as an accurate Vedic timekeeping and spiritual alarm clock:</p>
+        <ul>
+            <li><code>android.permission.ACCESS_FINE_LOCATION</code> & <code>android.permission.ACCESS_COARSE_LOCATION</code>: Used purely locally to derive high-precision planetary coordinates and sidereal Panchang angles for your city.</li>
+            <li><code>android.permission.POST_NOTIFICATIONS</code>: Required on Android 13+ (API 33+) to deliver optional daily Panchang summaries and active Sadhana alarm alerts to your status bar.</li>
+            <li><code>android.permission.SCHEDULE_EXACT_ALARM</code>: Essential for scheduling time-critical spiritual alarms (such as Brahma Muhurat, Surya Uday, and specific Choghadiya transitions). Inexact scheduling would cause religious prayers and fasts to trigger up to 15 minutes late, undermining the core function of the application.</li>
+            <li><code>android.permission.USE_FULL_SCREEN_INTENT</code>: Allows the alarm ringing screen to display over the lock screen when a user's scheduled Sadhana alarm fires, enabling immediate dismissal or snooze.</li>
+            <li><code>android.permission.RECEIVE_BOOT_COMPLETED</code>: Used solely to restore your scheduled Sadhana alarms in the Android AlarmManager after your device reboots.</li>
+            <li><code>android.permission.WAKE_LOCK</code> & <code>android.permission.VIBRATE</code>: Ensures the screen wakes up and the phone vibrates reliably during an active alarm trigger.</li>
+        </ul>
+
+        <h2>4. Data Retention, Storage, and Account Deletion Policy</h2>
+        <p>Since Sanatan Watch does not create user accounts, does not collect personal identity information, and does not maintain any remote cloud storage or backend databases:
+        <ul>
+            <li><strong>No Remote Retention:</strong> Zero personal data is collected or retained on external servers.</li>
+            <li><strong>Local Storage Only:</strong> User preferences (such as selected language, alarm times, and custom location) are stored exclusively in your device's private local storage (SharedPreferences / LocalStorage).</li>
+            <li><strong>Data Deletion:</strong> You can completely erase all stored preferences and alarms at any time simply by clearing the application's storage in Android Settings or uninstalling the app. No formal server deletion request is needed.</li>
+        </ul>
+        </p>
+
+        <h2>5. Third-Party Services & Advertising</h2>
+        <p>Version 1.0.0 of Sanatan Watch contains <strong>no third-party advertising SDKs, no behavioral trackers, and no third-party analytics libraries</strong>. No third-party network has access to your device, usage patterns, or location data.</p>
+
+        <h2>6. Children's Privacy</h2>
+        <p>Sanatan Watch is suitable for general audiences and spiritual practitioners of all ages. We do not knowingly collect or solicit any personal information from children under the age of 13.</p>
+
+        <h2>7. Contact Us</h2>
+        <p>If you have any questions, suggestions, or concerns regarding this Privacy Policy or the security of your data, please contact the developer directly:</p>
+        <ul>
+            <li><strong>Developer:</strong> Vinayak Saxena (Innovix)</li>
+            <li><strong>Email:</strong> <a href="mailto:vinayaksaxena1@gmail.com">vinayaksaxena1@gmail.com</a></li>
+            <li><strong>Source Code Repository:</strong> <a href="https://github.com/vinayaksaxena1-maker/Sanatan_Watch" target="_blank" rel="noopener noreferrer">https://github.com/vinayaksaxena1-maker/Sanatan_Watch</a></li>
+        </ul>
+    </div>
+</body>
+</html>

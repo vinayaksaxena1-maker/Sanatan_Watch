@@ -375,7 +375,7 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
     ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     ctx.font = 'normal 12px "Inter", sans-serif';
-    ctx.fillText('साझाकर्ता: आज का धार्मिक समय ऐप 🚩', 300, 842);
+    ctx.fillText('साझाकर्ता: Sanatan Watch (सनातन घड़ी) 🚩', 300, 842);
     ctx.fillStyle = '#F6C453';
     ctx.font = 'bold 12.5px "Noto Sans Devanagari", sans-serif';
     ctx.fillText('॥ सनातन धर्मिक समय पंचांग ॥', 300, 862);
@@ -427,7 +427,7 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
       
       const fileName = `Panchang_${city}_${panchang.date}.png`;
       const shareTitle = 'आज का पंचांग पोस्टर';
-      const shareText = `🚩 आज का धर्मिक समय पंचांग 🚩\n📍 स्थान: ${city}\n📅 दिनांक: ${formattedDate}`;
+      const shareText = `🚩 Sanatan Watch पंचांग 🚩\n📍 स्थान: ${city}\n📅 दिनांक: ${formattedDate}`;
       const dataURL = canvas.toDataURL('image/png');
 
       if (Capacitor.isNativePlatform()) {
@@ -498,7 +498,7 @@ export function PosterGenerator({ panchang, city, activeMuhurats }: PosterGenera
   };
 
   const handleCopyText = () => {
-    const textMsg = `🚩 *आज का धर्मिक समय पंचांग* 🚩\n\n📌 *स्थान:* ${city}\n📅 *दिनांक:* ${formattedDate}\n✨ *तिथि:* ${tithiName} (समाप्ति: ${panchang.hinduDate.tithi.endTime})\n🌟 *नक्षत्र:* ${nakshatraHindi} (स्वामी: ${panchang.hinduDate.nakshatra.lord})\n🌙 *मास:* ${hinduMonth}\n🔱 *संवत:* ${samvatVikram}, ${samvatShaka}${samvatGujarati}\n🌅 *सूर्योदय:* ${panchang.sunrise}\n🌇 *सूर्यास्त:* ${panchang.sunset}\n\nसच्चे और सटीक समय की जानकारी के लिए "आज का धर्मिक समय" ऐप का उपयोग करें!`;
+    const textMsg = `🚩 *Sanatan Watch पंचांग* 🚩\n\n📌 *स्थान:* ${city}\n📅 *दिनांक:* ${formattedDate}\n✨ *तिथि:* ${tithiName} (समाप्ति: ${panchang.hinduDate.tithi.endTime})\n🌟 *नक्षत्र:* ${nakshatraHindi} (स्वामी: ${panchang.hinduDate.nakshatra.lord})\n🌙 *मास:* ${hinduMonth}\n🔱 *संवत:* ${samvatVikram}, ${samvatShaka}${samvatGujarati}\n🌅 *सूर्योदय:* ${panchang.sunrise}\n🌇 *सूर्यास्त:* ${panchang.sunset}\n\nउच्च परिशुद्धता खगोलीय गणना और दैनिक पंचांग के लिए "Sanatan Watch" ऐप का उपयोग करें!`;
     navigator.clipboard.writeText(textMsg);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

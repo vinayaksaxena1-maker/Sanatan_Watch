@@ -58,13 +58,12 @@ Swiss Ephemeris C-Library Dual-License Model par karya karti hai:
 1. **GNU General Public License (GPL v2 / v3)**: Open-Source projects ke liye free use.
 2. **Astrodienst Commercial License**: Commercial / Proprietary applications ke liye.
 
-### Legal Isolation Strategy:
-- **Public Engine Repository (Open Source)**:
-  - Swiss Ephemeris C-WASM Engine Wrapper (`astroWorker.ts`) Open-Source Public Repository par hosted hai, jo GPL v2/v3 License Regulations se 100% compliant hai.
-- **Private Main App Repository (Proprietary)**:
-  - Samay Ghadi ki Mukhya Private Repository me Swiss Ephemeris C-Code / Binary shamil nahi hai.
-  - Main App sirf Standard Browser `WebWorker API` ke zariye Public Worker ke sath Asynchronous Text/JSON Messages ka aadan-pradan karti hai.
-  - Process Isolation (Thread Separation) ke karan Private App ki IP (Intellectual Property) fully protected rehti hai.
+### Full Open-Source Compliance:
+- **Public Repository (Open Source under GNU GPL v3)**:
+  - Sanatan Watch ki sampoorna repository (`https://github.com/vinayaksaxena1-maker/Sanatan_Watch`) 100% public aur open-source hai.
+  - Isme Swiss Ephemeris C-WASM Engine Wrapper (`astroWorker.ts`), calculations, aur assets GPL v3 license regulations se 100% compliant hain.
+- **WebWorker Thread Isolation**:
+  - Main UI Thread aur Swiss Ephemeris C-WASM module ke beech Dedicated WebWorker API (`postMessage`) ke zariye asynchronous process separation banaye rakha gaya hai taaki 60 FPS smooth rendering mile aur UI thread lag-free rahe.
 
 ---
 

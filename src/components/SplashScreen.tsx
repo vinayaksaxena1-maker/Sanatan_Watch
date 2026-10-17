@@ -198,22 +198,11 @@ export function SplashScreen({ onComplete, selectedStyle = 'saffron', isDemoMode
           </video>
         )}
 
-        {/* Absolute background video for live spiritual ambiance */}
+        {/* Pure offline ambient overlay for spiritual ambiance (Zero external network requests) */}
         {!isVideoSplash && style === 'sanatan-video' && (
-          <video
-            ref={videoRef}
-            autoPlay
-            loop
-            muted
-            playsInline
-            referrerPolicy="no-referrer"
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-55 z-0 select-none"
-          >
-            <source 
-              src="https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f3c054273b9e4a3c1039c5d011efab3216&profile_id=139&oauth2_token_id=57447761" 
-              type="video/mp4" 
-            />
-          </video>
+          <div 
+            className="absolute inset-0 w-full h-full pointer-events-none opacity-40 z-0 select-none bg-gradient-to-b from-orange-600/20 via-amber-700/15 to-transparent" 
+          />
         )}
 
         {!customSplash && !isVideoSplash && dots.map((dot) => (

@@ -37,7 +37,7 @@ const FAQS: Record<Language, FaqItem[]> = {
   English: [
     {
       q: "How does the Panchang calculation work in this app?",
-      a: "All astronomical calculations in this app are based on the ancient 'Surya Siddhanta' and precise Rishikesh Panchang rules. It computes the actual sunrise and sunset times according to your selected coordinates (latitude/longitude), giving you the most accurate Muhurat timings for your specific city.",
+      a: "All astronomical calculations in this app are based on high-precision Drik Ganita algorithms and Swiss Ephemeris astronomical models. It computes actual sunrise and sunset times according to your selected coordinates (latitude/longitude), giving you high-precision Muhurat timings for your specific city.",
       tags: ["Panchang", "Accuracy"]
     },
     {
@@ -69,7 +69,7 @@ const FAQS: Record<Language, FaqItem[]> = {
   Hindi: [
     {
       q: "इस एप में पंचांग की गणना कैसे होती है?",
-      a: "एप में सभी खगोलीय गणनाएं प्राचीन 'सूर्य सिद्धांत' और सटीक ऋषिकेशीय पंचांग नियमों पर आधारित हैं। इसमें आपके चयनित स्थान (अक्षांश/रेखांश) के अनुसार वास्तविक सूर्योदय और सूर्यास्त का समय निकाला जाता है, जिससे आपके शहर का बिल्कुल सटीक मुहूर्त समय दिखाई देता है।",
+      a: "एप में सभी खगोलीय गणनाएं आधुनिक दृक गणित (Swiss Ephemeris) और उच्च परिशुद्धता खगोलीय नियमों पर आधारित हैं। इसमें आपके चयनित स्थान (अक्षांश/रेखांश) के अनुसार वास्तविक सूर्योदय और सूर्यास्त का समय निकाला जाता है, जिससे आपके शहर के अक्षांश अनुसार सूक्ष्म मुहूर्त समय दिखाई देता है।",
       tags: ["पंचांग", "सटीकता"]
     },
     {
@@ -102,24 +102,24 @@ const FAQS: Record<Language, FaqItem[]> = {
 
 const INTRO_SECTIONS: Record<Language, { title: string; desc: string; gaugeTitle: string; gaugeDesc: string; locationTitle: string; locationDesc: string; clockTitle: string; clockDesc: string; customTitle: string; customDesc: string; }> = {
   English: {
-    title: "|| PURPOSE OF TODAY'S DHARMIC TIME APP ||",
+    title: "|| PURPOSE OF SANATAN WATCH ||",
     desc: "This is a Vedic astronomical tool designed to align daily life with cosmic patterns. By computing precise sunrise, sunset, Panchang, and Choghadiya parameters based on your location, it helps you perform spiritual duties and daily tasks in auspicious times.",
     gaugeTitle: "Detailed Tithi Progress (Gauge)",
     gaugeDesc: "The circular progress indicator shows how much of the current Tithi remains, indicating exactly when it ends.",
     locationTitle: "Location-Based Calculations",
-    locationDesc: "All sunrise and sunset events are calculated using your GPS coordinates, providing exact city-specific Panchang data.",
+    locationDesc: "All sunrise and sunset events are calculated using your GPS coordinates, providing city-specific high-precision Panchang data.",
     clockTitle: "Live Choghadiya Watch",
     clockDesc: "Real-time visual display of daytime and nighttime planetary hours, enabling you to act in favorable periods.",
     customTitle: "Simulations & Customization",
     customDesc: "Modern features including themes, analog/digital clock designs, poster generator, and home widget simulators."
   },
   Hindi: {
-    title: "॥ आज का धर्मिक समय एप का उद्देश्य ॥",
+    title: "॥ सनातन घड़ी (Sanatan Watch) का उद्देश्य ॥",
     desc: "यह एक वैदिक खगोलीय उपकरण है, जो हिंदू धार्मिक जीवन को अनुशासित और संस्कारित बनाने के लिए आपके वर्तमान स्थान के अनुसार सूर्योदय, पंचांग, और शुभ चौघड़िया की सटीक जानकारी प्रस्तुत करता है।",
     gaugeTitle: "विस्तृत तिथि प्रोग्रेस (Gauge)",
     gaugeDesc: "होम स्क्रीन पर तिथि के साथ घूमता हुआ प्रोग्रेस इंडिकेटर है, जो यह दर्शाता है कि वर्तमान तिथि कितनी बची है और कब खत्म होगी।",
     locationTitle: "स्थान आधारित सटीक गणना",
-    locationDesc: "सूर्योदय और सूर्यास्त का सटीक समय सीधे आपके स्थान के अनुसार निकाला जाता है, जिससे आपके शहर का पंचांग सबसे सटीक बनता है।",
+    locationDesc: "सूर्योदय और सूर्यास्त का समय सीधे आपके स्थान के अनुसार निकाला जाता है, जिससे आपके शहर का पंचांग उच्च परिशुद्धता के साथ बनता है।",
     clockTitle: "लाइव चौघड़िया घड़ी",
     clockDesc: "दिन और रात के मुहूर्तों की रीयल-टाइम स्थिति, जिससे आप हर काम सही शुभ काल में प्रारंभ कर सकते हैं।",
     customTitle: "सुविधाएं और अनुकूलन",
@@ -360,6 +360,21 @@ export function HelpModal({ isOpen, onClose, theme, language = 'English' }: Help
                     {currentIntro.customDesc}
                   </p>
                 </div>
+              </div>
+
+              {/* Astronomical Calculation Disclaimer */}
+              <div className={`p-3.5 rounded-xl border mt-3 ${
+                theme === 'light' ? 'bg-amber-50/70 border-amber-200/70 text-amber-950' : 'bg-amber-950/20 border-amber-900/40 text-amber-200/90'
+              }`}>
+                <h4 className="text-[11px] font-bold flex items-center gap-1.5 mb-1 text-amber-600 dark:text-amber-400 font-serif">
+                  <span>⚖️</span>
+                  {language === 'Hindi' ? "खगोलीय एवं पंचांग अस्वीकरण (Disclaimer)" : "Astronomical & Panchang Disclaimer"}
+                </h4>
+                <p className="text-[10px] leading-relaxed opacity-90 font-sans">
+                  {language === 'Hindi' 
+                    ? "इस ऐप में प्रदर्शित पंचांग, सूर्योदय, सूर्यास्त और मुहूर्त समय शुद्ध खगोलीय गणितीय मॉडल (Swiss Ephemeris / आधुनिक दृक गणित) पर आधारित हैं। स्थानीय वायुमंडलीय अपवर्तन (Atmospheric Refraction) और विभिन्न क्षेत्रीय पंचांग पद्धतियों के कारण 1-3 मिनट का सूक्ष्म समय-भेद संभव है। यह जानकारी केवल सांस्कृतिक, धार्मिक और व्यक्तिगत साधना मार्गदर्शन के उद्देश्य से प्रस्तुत की गई है।"
+                    : "Panchang, sunrise, sunset, and Muhurat timings in this app are computed using high-precision astronomical algorithms (Swiss Ephemeris / Drik Ganita). Minor variations (1-3 minutes) may occur due to local atmospheric refraction and varying regional Panchang traditions. This information is intended for personal spiritual, cultural, and sadhana guidance."}
+                </p>
               </div>
             </div>
           )}

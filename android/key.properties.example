@@ -1,0 +1,7 @@
+# Keystore Signing Configuration for Google Play Release
+# Copy this file to `android/key.properties` (never commit key.properties to git)
+#
+# storeFile=../my-release-key.jks
+# storePassword=your_keystore_password
+# keyAlias=your_key_alias
+# keyPassword=your_key_password

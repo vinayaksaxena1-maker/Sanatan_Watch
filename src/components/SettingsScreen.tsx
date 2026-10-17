@@ -229,7 +229,7 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
             <div>
               <h4 className="text-[12px] sm:text-[13px] font-extrabold text-slate-800 dark:text-amber-100 uppercase tracking-wider font-serif">पंचांग गणना इंजन विवरण</h4>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
-                अक्षांश और ग्रहों की सटीक गणना के लिए <strong>Swiss Ephemeris WebAssembly (AGPL-v3)</strong> इंजन का उपयोग।
+                अक्षांश और ग्रहों की सटीक गणना के लिए <strong>Swiss Ephemeris WebAssembly (GNU GPL v2/v3)</strong> इंजन का उपयोग।
               </p>
             </div>
           </div>
@@ -248,14 +248,14 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
 
         <div className="border-t !border-[#FF9933]/20 pt-3 text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed flex flex-col gap-2">
           <p>
-            Astronomical calculation engine is powered by open-source Swiss Ephemeris under AGPL v3. Source code for the standalone calculation worker module (Part B) is available on GitHub:{' '}
+            Astronomical calculation engine is powered by open-source Swiss Ephemeris under GNU General Public License (GPL v2/v3). Full application source code is publicly available on GitHub:{' '}
             <a 
-              href="https://github.com/vinayaksaxena1-maker/Sanatan_Watch_AstroEngine" 
+              href="https://github.com/vinayaksaxena1-maker/Sanatan_Watch" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-orange-650 dark:text-orange-400 underline font-mono font-bold"
             >
-              View Worker Source Code on GitHub
+              View Full Source Code on GitHub
             </a>
           </p>
           <div className="border-t !border-[#FF9933]/15 pt-2 flex items-center justify-between">
@@ -270,10 +270,27 @@ export function SettingsScreen({ settings, setSettings, onPushToast }: SettingsS
             </a>
           </div>
 
+          <div className="border-t !border-[#FF9933]/15 pt-2 text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
+            <span className="font-bold text-slate-700 dark:text-slate-300 block mb-0.5">
+              ⚖️ {language === 'Hindi' ? 'खगोलीय गणना अस्वीकरण (Disclaimer):' : 'Astronomical Calculation Disclaimer:'}
+            </span>
+            <p>
+              {language === 'Hindi'
+                ? 'इस ऐप में प्रदर्शित पंचांग व मुहूर्त समय शुद्ध खगोलीय गणितीय मॉडल (Swiss Ephemeris / दृक गणित) पर आधारित हैं। स्थानीय वायुमंडलीय अपवर्तन और विभिन्न क्षेत्रीय पंचांग पद्धतियों के अनुसार 1-3 मिनट का सूक्ष्म समय-भेद संभव है।'
+                : 'Panchang and Muhurat calculations are derived from high-precision astronomical models (Swiss Ephemeris / Drik Ganita). Minor variations may occur due to atmospheric refraction and regional traditions.'}
+            </p>
+          </div>
+
           <div className="border-t !border-[#FF9933]/15 pt-2.5 flex flex-col gap-1.5 text-[10.5px] text-slate-600 dark:text-zinc-300">
             <div className="flex justify-between items-center">
               <span>{language === 'Hindi' ? 'कंपनी / संगठन:' : 'Company / Organization:'}</span>
-              <span className="font-bold text-slate-800 dark:text-slate-200">Innovix Solutions</span>
+              <span className="font-bold text-slate-800 dark:text-slate-200">Innovix</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>{language === 'Hindi' ? 'संपर्क / सहायता:' : 'Developer Contact:'}</span>
+              <a href="mailto:vinayaksaxena1@gmail.com" className="font-mono font-bold text-orange-650 dark:text-orange-400 underline">
+                vinayaksaxena1@gmail.com
+              </a>
             </div>
             <div className="flex justify-between items-center">
               <span>{language === 'Hindi' ? 'एप्लीकेशन संस्करण:' : 'App Version:'}</span>
