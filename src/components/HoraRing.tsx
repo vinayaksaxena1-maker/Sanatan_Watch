@@ -458,15 +458,15 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
                 shapeRendering="geometricPrecision"
               />
 
-              {/* Active Gold Glow On Top of the Segment */}
+              {/* Active Gold Glow On Top of the Segment (Restricted to Hora Ring Width) */}
               <path
                 d={pathD}
                 fill="none"
                 stroke="#D4AF37"
-                strokeWidth="130"
+                strokeWidth="93"
                 strokeLinecap="butt"
                 className="animate-active-segment-glow-subtle"
-                style={{ filter: "blur(6px)" }}
+                style={{ filter: "blur(4px)" }}
                 shapeRendering="geometricPrecision"
               />
             </g>

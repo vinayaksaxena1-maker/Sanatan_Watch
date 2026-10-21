@@ -160,6 +160,10 @@ export function AnalogClock({
           <clipPath id="main-watch-dial-clip">
             <circle cx="200" cy="200" r="200" />
           </clipPath>
+          {/* Inner Hora Isolation Clip - Prevents any shadow or glow bleed past Radius 211 */}
+          <clipPath id="inner-hora-clip">
+            <circle cx="200" cy="200" r="211" />
+          </clipPath>
           <radialGradient id="textBackShadow" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#000000" stopOpacity="0.75" />
             <stop offset="55%" stopColor="#000000" stopOpacity="0.45" />
@@ -188,12 +192,14 @@ export function AnalogClock({
         {/* Outer Gold Divider Ring separating Hora and Choghadiya rings */}
         <circle cx="200" cy="200" r="211" fill="none" stroke="#D4AF37" strokeWidth="5.0" opacity="0.8" />
 
-        {/* Vedic Hora Inner Complication Ring */}
-        <HoraRing
-          horaList={horaList}
-          activeHora={activeHora}
-          currentTime={currentTime}
-        />
+        {/* Vedic Hora Inner Complication Ring (Strictly clipped to Radius <= 211 to prevent overlay bleeding) */}
+        <g id="hora_ring_isolated_container" clipPath="url(#inner-hora-clip)">
+          <HoraRing
+            horaList={horaList}
+            activeHora={activeHora}
+            currentTime={currentTime}
+          />
+        </g>
 
         {/* Luxury Outer Brass Ring Assembly (Double Ring + 12 Rivets) */}
         {/* Inner thin gold ring */}

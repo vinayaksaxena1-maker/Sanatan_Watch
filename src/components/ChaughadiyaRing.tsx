@@ -72,45 +72,45 @@ export function ChaughadiyaRing({
     }
   };
 
-  // High-contrast, solid Royal Jewel Tones for 360 Choghadiya Ring:
-  // Green = Rich Emerald Green (#166534), Amber = Warm Amber (#92400E), Red = Deep Ruby Crimson (#991B1B)
+  // High-contrast, solid Pure Vibrant Themes for 360 Choghadiya Ring:
+  // Green = Pure Leaf Green (#15803D), Amber = Rich Mustard Gold (#CA8A04), Red = Pure Crimson Red (#B91C1C)
   const getSegmentVisualTheme = (type: string) => {
     switch (type) {
       case "Amrit":
       case "Shubh":
       case "Labh":
         return {
-          fillStroke: "#166534", // Solid Rich Emerald Green (clean, never muddy)
-          accentBorder: "#22C55E", // Vibrant emerald green border
-          statusDot: "#4ADE80", // Bright mint green dot
-          titleColor: "#FFFFFF", // High-contrast crisp white title
-          timingColor: "#FDE68A", // Cream / Light gold
-          activeFill: "#15803D", // Vibrant active green
-          activeGlow: "#22C55E" // Luminous green glow
+          fillStroke: "#15803D", // Pure Leaf Green (solid, vibrant, clean)
+          accentBorder: "#4ADE80", // Bright mint green border
+          statusDot: "#22C55E", // Vibrant status dot
+          titleColor: "#DCFCE7", // Bright Mint White
+          timingColor: "#DCFCE7", // Bright Mint White
+          activeFill: "#22C55E", // Glowing Emerald Green
+          activeGlow: "#4ADE80" // Luminous mint aura
         };
       case "Char":
       case "Chal":
         return {
-          fillStroke: "#92400E", // Solid Warm Amber / Ochre (warm golden-amber, never brown)
-          accentBorder: "#F59E0B", // Luminous golden amber border
-          statusDot: "#FBBF24", // Bright amber gold dot
-          titleColor: "#FFFBEB", // Pure cream-white title
-          timingColor: "#FDE68A", // Cream / Light gold
-          activeFill: "#B45309", // Vibrant active warm amber
-          activeGlow: "#F59E0B" // Luminous amber glow
+          fillStroke: "#CA8A04", // Pure Rich Mustard Gold (Never muddy brown)
+          accentBorder: "#FACC15", // Luminous yellow border
+          statusDot: "#EAB308", // Sun yellow dot
+          titleColor: "#FEF08A", // Bright Lemon Cream
+          timingColor: "#FEF08A", // Bright Lemon Cream
+          activeFill: "#EAB308", // Vibrant Sun Yellow
+          activeGlow: "#FDE047" // Luminous sunburst glow
         };
       case "Rog":
       case "Kaal":
       case "Udveg":
       default:
         return {
-          fillStroke: "#991B1B", // Solid Deep Ruby Crimson (rich ruby red/maroon, never brown)
-          accentBorder: "#EF4444", // Vibrant ruby red border
-          statusDot: "#F87171", // Coral red dot
-          titleColor: "#FFFBEB", // Pure cream-white title
-          timingColor: "#FDE68A", // Cream / Light gold
-          activeFill: "#B91C1C", // Vibrant active ruby
-          activeGlow: "#EF4444" // Luminous ruby glow
+          fillStroke: "#B91C1C", // Pure Crimson Red (pure, distinct)
+          accentBorder: "#F87171", // Vibrant coral red border
+          statusDot: "#EF4444", // Bright alert red dot
+          titleColor: "#FEE2E2", // Soft Rose White
+          timingColor: "#FEE2E2", // Soft Rose White
+          activeFill: "#EF4444", // Bright Alert Red
+          activeGlow: "#F87171" // Luminous ruby alert glow
         };
     }
   };
@@ -417,7 +417,7 @@ export function ChaughadiyaRing({
             dominantBaseline="central"
             fontSize={fontSize}
             fontWeight={isActive ? "700" : "600"}
-            fill={isActive ? "#FFFFFF" : theme.titleColor}
+            fill={theme.titleColor}
             fontFamily="'Noto Sans Devanagari', 'Inter', sans-serif"
             className="select-none"
             letterSpacing="0.05em"
@@ -451,7 +451,7 @@ export function ChaughadiyaRing({
           dominantBaseline="central"
           fontSize={fontSize}
           fontWeight={isActive ? "700" : "600"}
-          fill={isActive ? "#FFFFFF" : theme.titleColor}
+          fill={theme.titleColor}
           fontFamily="'Noto Sans Devanagari', 'Inter', sans-serif"
           className="select-none"
           letterSpacing="0.05em"
@@ -468,7 +468,7 @@ export function ChaughadiyaRing({
           dominantBaseline="central"
           fontSize={isActive ? "14" : "11"}
           fontWeight="600"
-          fill={isActive ? "#FFFBEB" : theme.timingColor}
+          fill={theme.timingColor}
           fontFamily="'Inter', sans-serif"
           className="select-none"
           letterSpacing="0.01em"
