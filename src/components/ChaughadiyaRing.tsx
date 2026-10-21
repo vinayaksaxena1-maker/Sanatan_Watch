@@ -7,6 +7,7 @@ interface ChaughadiyaRingProps {
   displayStartTime: string;
   displayEndTime: string;
   currentTime: Date;
+  onSelectSegment?: (segment: ChoghadiyaInterval) => void;
 }
 
 export function ChaughadiyaRing({
@@ -14,7 +15,8 @@ export function ChaughadiyaRing({
   activeIndex,
   displayStartTime,
   displayEndTime,
-  currentTime
+  currentTime,
+  onSelectSegment
 }: ChaughadiyaRingProps) {
   const [blurEnabled, setBlurEnabled] = useState(false);
 
@@ -293,7 +295,11 @@ export function ChaughadiyaRing({
     const theme = getSegmentVisualTheme(segment.type);
 
     return (
-      <g key={segment.name + originalIndex}>
+      <g 
+        key={segment.name + originalIndex}
+        className="cursor-pointer transition-all hover:brightness-110 active:opacity-90"
+        onClick={() => onSelectSegment?.(segment)}
+      >
         {/* Main Segment Fill with distinct Shubh (Emerald Green), Chal (Warm Amber), Ashubh (Crimson Red) */}
         <path
           id={`chaughadiya_segment_${originalIndex}`}
@@ -395,43 +401,13 @@ export function ChaughadiyaRing({
 
     const timeRange = formatTimeRange(segment.startTime, segment.endTime);
 
-    // Stage 2: If 11 to 30 minutes, only show name (centered vertically with dy="0")
-    if (durationMinutes <= 30) {
-      return (
-        <g key={segment.name + "_label_" + originalIndex}>
-          {/* Luminous Status Dot for 1-second quick glance */}
-          <circle
-            cx={dotX}
-            cy={dotY}
-            r={isActive ? "4" : "3"}
-            fill={theme.statusDot}
-            opacity="0.95"
-            style={{ filter: `drop-shadow(0px 0px 4px ${theme.statusDot})` }}
-          />
-          <text
-            id={`chaughadiya_label_${originalIndex}`}
-            x={x}
-            y={y}
-            dy="0"
-            textAnchor="middle"
-            dominantBaseline="central"
-            fontSize={fontSize}
-            fontWeight={isActive ? "700" : "600"}
-            fill={theme.titleColor}
-            fontFamily="'Noto Sans Devanagari', 'Inter', sans-serif"
-            className="select-none"
-            letterSpacing="0.05em"
-            style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.9))" }}
-          >
-            {segment.hindiName}
-          </text>
-        </g>
-      );
-    }
-
-    // Stage 3: If 31 minutes or more, show both name and timing range
+    // If 11 minutes or more, show name cleanly centered vertically with dy="0"
     return (
-      <g key={segment.name + "_label_" + originalIndex}>
+      <g 
+        key={segment.name + "_label_" + originalIndex}
+        className="cursor-pointer select-none"
+        onClick={() => onSelectSegment?.(segment)}
+      >
         {/* Luminous Status Dot for 1-second quick glance */}
         <circle
           cx={dotX}
@@ -441,40 +417,23 @@ export function ChaughadiyaRing({
           opacity="0.95"
           style={{ filter: `drop-shadow(0px 0px 4px ${theme.statusDot})` }}
         />
-        {/* Choghadiya Hindi Name */}
+        {/* Choghadiya Hindi Name - Centered vertically without small time */}
         <text
           id={`chaughadiya_label_${originalIndex}`}
           x={x}
           y={y}
-          dy={isActive ? "-12" : "-10"}
+          dy="0"
           textAnchor="middle"
           dominantBaseline="central"
           fontSize={fontSize}
           fontWeight={isActive ? "700" : "600"}
           fill={theme.titleColor}
           fontFamily="'Noto Sans Devanagari', 'Inter', sans-serif"
-          className="select-none"
+          className="select-none pointer-events-none"
           letterSpacing="0.05em"
           style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.9))" }}
         >
           {segment.hindiName}
-        </text>
-        {/* Choghadiya Start/End Time Range */}
-        <text
-          x={x}
-          y={y}
-          dy={isActive ? "22" : "18"}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fontSize={isActive ? "14" : "11"}
-          fontWeight="600"
-          fill={theme.timingColor}
-          fontFamily="'Inter', sans-serif"
-          className="select-none"
-          letterSpacing="0.01em"
-          style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.9))" }}
-        >
-          {timeRange}
         </text>
       </g>
     );
@@ -538,7 +497,11 @@ export function ChaughadiyaRing({
           const activeTheme = getSegmentVisualTheme(segment.type);
 
           return (
-            <g key={segment.name + activeIdx}>
+            <g 
+              key={segment.name + activeIdx}
+              className="cursor-pointer transition-all hover:brightness-110 active:opacity-90"
+              onClick={() => onSelectSegment?.(segment)}
+            >
               {/* Active Segment Solid Rich Jewel Base Fill */}
               <path
                 id={`chaughadiya_segment_${activeIdx}`}

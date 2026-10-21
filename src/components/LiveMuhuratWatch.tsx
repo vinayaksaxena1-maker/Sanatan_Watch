@@ -202,6 +202,49 @@ export function LiveMuhuratWatch({
   const [dialTheme, setDialTheme] = useState<'amber' | 'gold' | 'emerald'>('amber');
   const [vibrationActive, setVibrationActive] = useState(false);
   const [viewMode, setViewMode] = useState<'smartwatch' | 'analog'>('analog');
+
+  // Selected slot state for dial tap tooltip & table modals
+  const [selectedSlot, setSelectedSlot] = useState<{
+    type: 'choghadiya' | 'hora';
+    name: string;
+    startTime: string;
+    endTime: string;
+    quality?: string;
+    desc?: string;
+    dot: string;
+  } | null>(null);
+
+  const [showChoghadiyaModal, setShowChoghadiyaModal] = useState(false);
+  const [showHoraModal, setShowHoraModal] = useState(false);
+
+  const handleSelectChoghadiya = (seg: ChoghadiyaInterval) => {
+    const status = getChoghadiyaStatusInfo(seg.type);
+    setSelectedSlot({
+      type: 'choghadiya',
+      name: `${seg.hindiName || seg.name} चौघड़िया`,
+      startTime: formatHindiTime(seg.startTime),
+      endTime: formatHindiTime(seg.endTime),
+      quality: status.label,
+      desc: getChoghadiyaAdvice(seg.type),
+      dot: status.dot
+    });
+  };
+
+  const handleSelectHora = (h: HoraInterval) => {
+    const isShubh = h.quality === 'Auspicious';
+    const isAshubh = h.quality === 'Inauspicious';
+    const dot = isShubh ? '🟢' : isAshubh ? '🔴' : '🟡';
+    const qualityLabel = isShubh ? 'शुभ होरा' : isAshubh ? 'अशुभ होरा' : 'सामान्य होरा';
+    setSelectedSlot({
+      type: 'hora',
+      name: `${h.lordHindi || h.lord} की होरा`,
+      startTime: formatHindiTime(h.startTime),
+      endTime: formatHindiTime(h.endTime),
+      quality: qualityLabel,
+      desc: getHoraPracticalNuance(h.lordHindi, h.lord),
+      dot
+    });
+  };
   
   const effectiveViewMode = viewModeOverride || viewMode;
 
@@ -637,6 +680,8 @@ export function LiveMuhuratWatch({
               horaList={horaList}
               sunriseTimeStr={sunriseTimeStr}
               sunsetTimeStr={sunsetTimeStr}
+              onSelectChoghadiya={handleSelectChoghadiya}
+              onSelectHora={handleSelectHora}
             />
           </div>
         ) : (
@@ -845,6 +890,55 @@ export function LiveMuhuratWatch({
         )}
       </div>
 
+      {/* TAP TOOLTIP FLOATING PILL BADGE */}
+      {selectedSlot && (
+        <div className="w-full max-w-[420px] mx-auto mt-2 p-3 bg-gradient-to-r from-[#2A1810] via-[#1E120B] to-[#2A1810] border border-[#D4AF37]/80 rounded-2xl shadow-xl flex items-center justify-between gap-2.5 animate-fadeIn z-30">
+          <div className="flex items-center gap-2 overflow-hidden text-left">
+            <span className="text-xl select-none shrink-0">{selectedSlot.dot}</span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-xs sm:text-sm font-black font-serif text-amber-200">
+                  {selectedSlot.name}
+                </span>
+                <span className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  {selectedSlot.startTime} – {selectedSlot.endTime}
+                </span>
+              </div>
+              <p className="text-[10.5px] sm:text-[11.5px] text-stone-300 truncate font-serif mt-0.5">
+                {selectedSlot.quality} • {selectedSlot.desc}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                if (selectedSlot.type === 'choghadiya') setShowChoghadiyaModal(true);
+                else setShowHoraModal(true);
+              }}
+              className="text-[10px] sm:text-xs font-bold text-amber-300 hover:text-white bg-amber-600/30 hover:bg-amber-600/50 border border-amber-500/40 px-2.5 py-1 rounded-xl transition-all cursor-pointer whitespace-nowrap"
+            >
+              तालिका 📋
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedSlot(null)}
+              className="text-stone-400 hover:text-white text-base w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center cursor-pointer transition-all"
+              title="बंद करें"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* HINT LINE BELOW DIAL (WHEN NO SLOT SELECTED) */}
+      {effectiveViewMode === 'analog' && !selectedSlot && (
+        <div className="text-[11px] sm:text-xs text-amber-800/80 dark:text-amber-300/80 font-serif flex items-center justify-center gap-1 mt-1.5 animate-pulse select-none">
+          <span>👆 किसी भी चौघड़िया या होरा का समय देखने के लिए उस खाने को छुएं</span>
+        </div>
+      )}
+
       {/* 3-COLOR INTUITIVE LEGEND */}
       <div className="w-full mt-2 flex flex-col items-center gap-1 select-none text-center">
         {/* 3-Color Legend: Green = Shubh, Yellow = Chal, Red = Ashubh */}
@@ -932,6 +1026,163 @@ export function LiveMuhuratWatch({
           </div>
         );
       })()}
+      {/* CHOGHADIYA TABLE MODAL */}
+      {showChoghadiyaModal && choghadiyaList && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-[#120B08] border border-amber-500/30 rounded-3xl p-5 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative text-left">
+            <button 
+              onClick={() => setShowChoghadiyaModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white font-mono font-bold text-lg cursor-pointer bg-white/5 w-8 h-8 rounded-full flex items-center justify-center border border-white/5"
+            >
+              ✕
+            </button>
+            <div className="pb-3 border-b border-orange-100/10 mb-4">
+              <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-amber-500 block">
+                ॥ दैनिक चौघड़िया मुहूर्त ॥
+              </span>
+              <h3 className="text-lg font-bold font-serif text-amber-100">
+                सम्पूर्ण दिन-रात्रि चौघड़िया तालिका
+              </h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+              {/* Day Choghadiya */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-orange-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
+                  ☀️ दिन का चौघड़िया (Daytime)
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {choghadiyaList.filter(ch => ch.isDay).map((ch, i) => {
+                    const status = getChoghadiyaStatusInfo(ch.type);
+                    return (
+                      <div key={i} className="p-2.5 rounded-2xl bg-orange-950/20 border border-orange-500/20 flex flex-col justify-between min-h-[76px]">
+                        <div>
+                          <div className="flex items-center gap-1">
+                            <span>{status.dot}</span>
+                            <span className="text-xs font-black text-slate-200 font-serif leading-tight">{ch.hindiName || ch.name}</span>
+                          </div>
+                          <span className="text-[9px] text-slate-400 font-mono mt-0.5 block leading-none">{formatHindiTime(ch.startTime)} - {formatHindiTime(ch.endTime)}</span>
+                        </div>
+                        <span className={`text-[8.5px] font-black uppercase text-center py-0.5 rounded-md mt-2 tracking-wider ${status.badgeBg}`}>
+                          {status.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Night Choghadiya */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-indigo-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
+                  🌙 रात का चौघड़िया (Nighttime)
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {choghadiyaList.filter(ch => !ch.isDay).map((ch, i) => {
+                    const status = getChoghadiyaStatusInfo(ch.type);
+                    return (
+                      <div key={i} className="p-2.5 rounded-2xl bg-indigo-950/20 border border-indigo-500/20 flex flex-col justify-between min-h-[76px]">
+                        <div>
+                          <div className="flex items-center gap-1">
+                            <span>{status.dot}</span>
+                            <span className="text-xs font-black text-slate-200 font-serif leading-tight">{ch.hindiName || ch.name}</span>
+                          </div>
+                          <span className="text-[9px] text-slate-400 font-mono mt-0.5 block leading-none">{formatHindiTime(ch.startTime)} - {formatHindiTime(ch.endTime)}</span>
+                        </div>
+                        <span className={`text-[8.5px] font-black uppercase text-center py-0.5 rounded-md mt-2 tracking-wider ${status.badgeBg}`}>
+                          {status.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HORA TABLE MODAL */}
+      {showHoraModal && horaList && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-[#120B08] border border-amber-500/30 rounded-3xl p-5 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative text-left">
+            <button 
+              onClick={() => setShowHoraModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white font-mono font-bold text-lg cursor-pointer bg-white/5 w-8 h-8 rounded-full flex items-center justify-center border border-white/5"
+            >
+              ✕
+            </button>
+            <div className="pb-3 border-b border-orange-100/10 mb-4">
+              <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-amber-500 block">
+                ॥ दैनिक होरा चक्र ॥
+              </span>
+              <h3 className="text-lg font-bold font-serif text-amber-100">
+                सम्पूर्ण २४ घंटे की होरा स्थिति तालिका
+              </h3>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+              {/* Day Hora */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-orange-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
+                  ☀️ दिन की होरा (Daytime 12 Horas)
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {horaList.filter(h => h.isDay).map((h, i) => {
+                    const isShubh = h.quality === 'Auspicious';
+                    const isAshubh = h.quality === 'Inauspicious';
+                    const dot = isShubh ? '🟢' : isAshubh ? '🔴' : '🟡';
+                    const badgeClass = isShubh ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : isAshubh ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30';
+                    return (
+                      <div key={i} className="p-2.5 rounded-2xl bg-orange-950/20 border border-orange-500/20 flex flex-col justify-between min-h-[76px]">
+                        <div>
+                          <div className="flex items-center gap-1">
+                            <span>{dot}</span>
+                            <span className="text-xs font-black text-slate-200 font-serif leading-tight">{h.lordHindi || h.lord} की होरा</span>
+                          </div>
+                          <span className="text-[9px] text-slate-400 font-mono mt-0.5 block leading-none">{formatHindiTime(h.startTime)} - {formatHindiTime(h.endTime)}</span>
+                        </div>
+                        <span className={`text-[8.5px] font-black uppercase text-center py-0.5 rounded-md mt-2 tracking-wider ${badgeClass}`}>
+                          {isShubh ? 'शुभ' : isAshubh ? 'अशुभ' : 'सामान्य'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Night Hora */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-indigo-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
+                  🌙 रात की होरा (Nighttime 12 Horas)
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {horaList.filter(h => !h.isDay).map((h, i) => {
+                    const isShubh = h.quality === 'Auspicious';
+                    const isAshubh = h.quality === 'Inauspicious';
+                    const dot = isShubh ? '🟢' : isAshubh ? '🔴' : '🟡';
+                    const badgeClass = isShubh ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : isAshubh ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30';
+                    return (
+                      <div key={i} className="p-2.5 rounded-2xl bg-indigo-950/20 border border-indigo-500/20 flex flex-col justify-between min-h-[76px]">
+                        <div>
+                          <div className="flex items-center gap-1">
+                            <span>{dot}</span>
+                            <span className="text-xs font-black text-slate-200 font-serif leading-tight">{h.lordHindi || h.lord} की होरा</span>
+                          </div>
+                          <span className="text-[9px] text-slate-400 font-mono mt-0.5 block leading-none">{formatHindiTime(h.startTime)} - {formatHindiTime(h.endTime)}</span>
+                        </div>
+                        <span className={`text-[8.5px] font-black uppercase text-center py-0.5 rounded-md mt-2 tracking-wider ${badgeClass}`}>
+                          {isShubh ? 'शुभ' : isAshubh ? 'अशुभ' : 'सामान्य'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

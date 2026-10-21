@@ -13,6 +13,8 @@ interface AnalogClockProps {
   horaList?: HoraInterval[];
   sunriseTimeStr?: string;
   sunsetTimeStr?: string;
+  onSelectChoghadiya?: (segment: ChoghadiyaInterval) => void;
+  onSelectHora?: (hora: HoraInterval) => void;
 }
 
 export function AnalogClock({
@@ -24,7 +26,9 @@ export function AnalogClock({
   activeHora = null,
   horaList = [],
   sunriseTimeStr = '',
-  sunsetTimeStr = ''
+  sunsetTimeStr = '',
+  onSelectChoghadiya,
+  onSelectHora
 }: AnalogClockProps) {
   const currentTime = time;
   const activeIndex = activeChoghadiyaIndex;
@@ -198,6 +202,7 @@ export function AnalogClock({
             horaList={horaList}
             activeHora={activeHora}
             currentTime={currentTime}
+            onSelectHora={onSelectHora}
           />
         </g>
 
@@ -235,6 +240,7 @@ export function AnalogClock({
           displayStartTime=""
           displayEndTime=""
           currentTime={currentTime}
+          onSelectSegment={onSelectChoghadiya}
         />
 
         {/* Simple Outer Information Ring Complication with 16px Gap */}

@@ -5,9 +5,10 @@ interface HoraRingProps {
   horaList: HoraInterval[];
   activeHora: HoraInterval | null | undefined;
   currentTime: Date;
+  onSelectHora?: (hora: HoraInterval) => void;
 }
 
-export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
+export function HoraRing({ horaList, activeHora, currentTime, onSelectHora }: HoraRingProps) {
 
   const getPlanetSolidColor = (lord: string): string => {
     return '#3B2314'; // Solid Dark Walnut Brown
@@ -176,7 +177,7 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
     const pathOuterBorder = `M ${x1_out} ${y1_out} A ${r_out} ${r_out} 0 0 1 ${x2_out} ${y2_out}`;
 
     return (
-      <g key={h.number}>
+      <g key={h.number} className="cursor-pointer transition-all hover:brightness-110 active:opacity-90" onClick={() => onSelectHora?.(h)}>
         {/* Main Segment Fill using solid block colors */}
         <path
           d={pathD}
@@ -268,40 +269,14 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
 
     const timeRange = formatTimeRange(h.startTime, h.endTime);
 
-    // Stage 2 (Duration 11 to 30 Minutes): Render only Hindi Name with dy="0"
-    if (duration >= 11 && duration <= 30) {
-      return (
-        <g key={`hora_label_group_${h.number}`}>
-          <text
-            id={`hora_label_${h.number}`}
-            x={x}
-            y={y}
-            dy="0"
-            textAnchor="middle"
-            dominantBaseline="central"
-            fontSize={isActive ? "24" : "18"}
-            fontWeight="600"
-            fill={isActive ? "#FFFFFF" : "#FF9933"}
-            fontFamily="'Noto Sans Devanagari', 'Inter', sans-serif"
-            className="select-none"
-            letterSpacing="0.05em"
-            style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.75))" }}
-          >
-            {info.label}
-          </text>
-        </g>
-      );
-    }
-
-    // Stage 3 (Duration >= 31 Minutes): Render Name and Time Range
+    // Clean Typography: Render only Hindi Name with dy="0" (Time removed from dial face per design)
     return (
-      <g key={`hora_label_group_${h.number}`}>
-        {/* Planet Lord Name */}
+      <g key={`hora_label_group_${h.number}`} className="cursor-pointer" onClick={() => onSelectHora?.(h)}>
         <text
           id={`hora_label_${h.number}`}
           x={x}
           y={y}
-          dy={isActive ? "-10" : "-8"}
+          dy="0"
           textAnchor="middle"
           dominantBaseline="central"
           fontSize={isActive ? "24" : "18"}
@@ -313,23 +288,6 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
           style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.75))" }}
         >
           {info.label}
-        </text>
-        {/* Hora Time Range */}
-        <text
-          x={x}
-          y={y}
-          dy={isActive ? "18" : "14"}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fontSize={isActive ? "13" : "11"}
-          fontWeight={isActive ? "600" : "normal"}
-          fill={isActive ? "rgba(255, 255, 255, 0.85)" : "rgba(255, 153, 51, 0.45)"}
-          fontFamily="'Inter', sans-serif"
-          className="select-none"
-          letterSpacing="0.01em"
-          style={{ filter: "drop-shadow(0px 0.5px 1px rgba(0, 0, 0, 0.6))" }}
-        >
-          {timeRange}
         </text>
       </g>
     );
@@ -394,7 +352,7 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
           const bezelInnerD = `M ${p1_m1.x} ${p1_m1.y} A ${R_mid1} ${R_mid1} 0 0 1 ${p2_m1.x} ${p2_m1.y} L ${p2_m2.x} ${p2_m2.y} A ${R_mid2} ${R_mid2} 0 0 0 ${p1_m2.x} ${p1_m2.y} Z`;
 
           return (
-            <g key={h.number + activeIndex}>
+            <g key={h.number + activeIndex} className="cursor-pointer transition-all hover:brightness-110 active:opacity-90" onClick={() => onSelectHora?.(h)}>
               {/* Luxury Diamond Cut Gold Bezel */}
               <g id={`hora_bezel_${h.number}`} className="select-none pointer-events-none">
                 <path
