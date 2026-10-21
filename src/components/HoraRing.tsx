@@ -9,51 +9,8 @@ interface HoraRingProps {
 
 export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
 
-  // Option 1: 3-Color Auspiciousness System (Aligned with Choghadiya Ring 3-Color System)
-  // Green = Shubh (Jupiter, Mercury, Venus, Moon)
-  // Yellow/Amber = Samanya (Sun)
-  // Red = Krur/Ashubh (Mars, Saturn)
-  const getHoraVisualTheme = (lord: string) => {
-    const l = (lord || '').toLowerCase();
-    // Auspicious (शुभ): Jupiter (गुरु), Mercury (बुध), Venus (शुक्र), Moon (चन्द्र)
-    if (
-      l.includes('jupiter') || l.includes('guru') || l.includes('बृहस्पति') || l.includes('गुरु') ||
-      l.includes('mercury') || l.includes('budh') || l.includes('बुध') ||
-      l.includes('venus') || l.includes('shukra') || l.includes('शुक्र') ||
-      l.includes('moon') || l.includes('chandra') || l.includes('चन्द्र') || l.includes('चंद्र')
-    ) {
-      return {
-        fillStroke: '#15803D', // Pure Leaf Green (solid, vibrant, clean)
-        accentBorder: '#4ADE80', // Bright mint green border
-        statusDot: '#22C55E', // Vibrant status dot
-        titleColor: '#DCFCE7', // Bright Mint White
-        timingColor: '#DCFCE7', // Bright Mint White
-        activeFill: '#22C55E', // Glowing Emerald Green
-        activeGlow: '#4ADE80' // Luminous mint aura
-      };
-    }
-    // Neutral / Leadership (सामान्य): Sun (सूर्य)
-    if (l.includes('sun') || l.includes('surya') || l.includes('सूर्य')) {
-      return {
-        fillStroke: '#CA8A04', // Pure Rich Mustard Gold
-        accentBorder: '#FACC15', // Luminous yellow border
-        statusDot: '#EAB308', // Sun yellow dot
-        titleColor: '#FEF08A', // Bright Lemon Cream
-        timingColor: '#FEF08A', // Bright Lemon Cream
-        activeFill: '#EAB308', // Vibrant Sun Yellow
-        activeGlow: '#FDE047' // Luminous sunburst glow
-      };
-    }
-    // Krur / Challenging (क्रूर/अशुभ): Mars (मंगल), Saturn (शनि)
-    return {
-      fillStroke: '#B91C1C', // Pure Crimson Red
-      accentBorder: '#F87171', // Vibrant coral red border
-      statusDot: '#EF4444', // Bright alert red dot
-      titleColor: '#FEE2E2', // Soft Rose White
-      timingColor: '#FEE2E2', // Soft Rose White
-      activeFill: '#EF4444', // Bright Alert Red
-      activeGlow: '#F87171' // Luminous ruby alert glow
-    };
+  const getPlanetSolidColor = (lord: string): string => {
+    return '#3B2314'; // Solid Dark Walnut Brown
   };
 
   const parseTimeToMinutes = (timeStr: string): number => {
@@ -218,27 +175,16 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
     const pathInnerBorder = `M ${x1_in} ${y1_in} A ${r_in} ${r_in} 0 0 1 ${x2_in} ${y2_in}`;
     const pathOuterBorder = `M ${x1_out} ${y1_out} A ${r_out} ${r_out} 0 0 1 ${x2_out} ${y2_out}`;
 
-    const theme = getHoraVisualTheme(h.lord);
-
     return (
       <g key={h.number}>
         {/* Main Segment Fill using solid block colors */}
         <path
           d={pathD}
           fill="none"
-          stroke={theme.fillStroke}
+          stroke={getPlanetSolidColor(h.lord)}
           strokeWidth={strokeWidth.toString()}
           strokeLinecap="butt"
           opacity="1.0"
-          shapeRendering="geometricPrecision"
-        />
-        {/* Luminous Inner Accent Tint Border */}
-        <path
-          d={pathInnerBorder}
-          fill="none"
-          stroke={theme.accentBorder}
-          strokeWidth="2.0"
-          opacity="0.45"
           shapeRendering="geometricPrecision"
         />
         {/* 2px Gold borders */}
@@ -321,24 +267,11 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
     };
 
     const timeRange = formatTimeRange(h.startTime, h.endTime);
-    const theme = getHoraVisualTheme(h.lord);
-    const dotRadius = 117 + 10;
-    const dotX = 200 + dotRadius * Math.cos(rad);
-    const dotY = 200 + dotRadius * Math.sin(rad);
 
     // Stage 2 (Duration 11 to 30 Minutes): Render only Hindi Name with dy="0"
     if (duration >= 11 && duration <= 30) {
       return (
         <g key={`hora_label_group_${h.number}`}>
-          {/* Luminous Status Dot for 1-second quick glance */}
-          <circle
-            cx={dotX}
-            cy={dotY}
-            r={isActive ? "3.5" : "2.5"}
-            fill={theme.statusDot}
-            opacity="0.95"
-            style={{ filter: `drop-shadow(0px 0px 3px ${theme.statusDot})` }}
-          />
           <text
             id={`hora_label_${h.number}`}
             x={x}
@@ -347,12 +280,12 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
             textAnchor="middle"
             dominantBaseline="central"
             fontSize={isActive ? "24" : "18"}
-            fontWeight={isActive ? "700" : "600"}
-            fill={theme.titleColor}
+            fontWeight="600"
+            fill={isActive ? "#FFFFFF" : "#FF9933"}
             fontFamily="'Noto Sans Devanagari', 'Inter', sans-serif"
             className="select-none"
             letterSpacing="0.05em"
-            style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.9))" }}
+            style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.75))" }}
           >
             {info.label}
           </text>
@@ -363,15 +296,6 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
     // Stage 3 (Duration >= 31 Minutes): Render Name and Time Range
     return (
       <g key={`hora_label_group_${h.number}`}>
-        {/* Luminous Status Dot for 1-second quick glance */}
-        <circle
-          cx={dotX}
-          cy={dotY}
-          r={isActive ? "3.5" : "2.5"}
-          fill={theme.statusDot}
-          opacity="0.95"
-          style={{ filter: `drop-shadow(0px 0px 3px ${theme.statusDot})` }}
-        />
         {/* Planet Lord Name */}
         <text
           id={`hora_label_${h.number}`}
@@ -381,12 +305,12 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
           textAnchor="middle"
           dominantBaseline="central"
           fontSize={isActive ? "24" : "18"}
-          fontWeight={isActive ? "700" : "600"}
-          fill={theme.titleColor}
+          fontWeight="600"
+          fill={isActive ? "#FFFFFF" : "#FF9933"}
           fontFamily="'Noto Sans Devanagari', 'Inter', sans-serif"
           className="select-none"
           letterSpacing="0.05em"
-          style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.9))" }}
+          style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.75))" }}
         >
           {info.label}
         </text>
@@ -398,12 +322,12 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
           textAnchor="middle"
           dominantBaseline="central"
           fontSize={isActive ? "13" : "11"}
-          fontWeight="600"
-          fill={theme.timingColor}
+          fontWeight={isActive ? "600" : "normal"}
+          fill={isActive ? "rgba(255, 255, 255, 0.85)" : "rgba(255, 153, 51, 0.45)"}
           fontFamily="'Inter', sans-serif"
           className="select-none"
           letterSpacing="0.01em"
-          style={{ filter: "drop-shadow(0px 0.5px 1px rgba(0, 0, 0, 0.9))" }}
+          style={{ filter: "drop-shadow(0px 0.5px 1px rgba(0, 0, 0, 0.6))" }}
         >
           {timeRange}
         </text>
@@ -469,43 +393,22 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
           const bezelOuterD = `M ${p1_in.x} ${p1_in.y} A ${R_in} ${R_in} 0 0 1 ${p2_in.x} ${p2_in.y} L ${p2_out.x} ${p2_out.y} A ${R_out} ${R_out} 0 0 0 ${p1_out.x} ${p1_out.y} Z`;
           const bezelInnerD = `M ${p1_m1.x} ${p1_m1.y} A ${R_mid1} ${R_mid1} 0 0 1 ${p2_m1.x} ${p2_m1.y} L ${p2_m2.x} ${p2_m2.y} A ${R_mid2} ${R_mid2} 0 0 0 ${p1_m2.x} ${p1_m2.y} Z`;
 
-          const activeTheme = getHoraVisualTheme(h.lord);
-
           return (
             <g key={h.number + activeIndex}>
-              {/* Active Segment Solid Base Fill */}
-              <path
-                id={`hora_segment_${activeIndex}`}
-                className="active-hora-segment"
-                d={pathD}
-                fill="none"
-                stroke={activeTheme.activeFill}
-                strokeWidth={strokeWidth.toString()}
-                strokeLinecap="butt"
-                opacity="1.0"
-                shapeRendering="geometricPrecision"
-              />
-              {/* Active Segment Inner Glow Tint */}
-              <path
-                d={bezelOuterD}
-                fill={activeTheme.activeGlow}
-                opacity="0.25"
-                style={{ filter: `drop-shadow(0px 0px 8px ${activeTheme.activeGlow})` }}
-                shapeRendering="geometricPrecision"
-              />
               {/* Luxury Diamond Cut Gold Bezel */}
               <g id={`hora_bezel_${h.number}`} className="select-none pointer-events-none">
                 <path
                   d={bezelOuterD}
                   fill="url(#diamondGoldGrad)"
-                  opacity="0.10"
+                  opacity="0.12"
+                  style={{ filter: "drop-shadow(0px 0px 8px rgba(255, 213, 79, 0.4))" }}
                 />
                 <path
                   d={bezelOuterD}
                   fill="none"
-                  stroke={activeTheme.accentBorder}
-                  strokeWidth="3.0"
-                  opacity="0.5"
+                  stroke="#4A341E"
+                  strokeWidth="13"
+                  opacity="0.45"
                 />
                 <path
                   d={bezelOuterD}
@@ -536,13 +439,24 @@ export function HoraRing({ horaList, activeHora, currentTime }: HoraRingProps) {
                     key={`highlight_${idx}`}
                     cx={pt.x}
                     cy={pt.y}
-                    r="5.5"
+                    r="6.5"
                     fill="#FFFFFF"
                     opacity="0.95"
                     style={{ filter: "drop-shadow(0px 0px 3px #FFFFFF)" }}
                   />
                 ))}
               </g>
+
+              {/* Main Segment Fill */}
+              <path
+                d={pathD}
+                fill="none"
+                stroke={getPlanetSolidColor(h.lord)}
+                strokeWidth={strokeWidth.toString()}
+                strokeLinecap="butt"
+                opacity="1.0"
+                shapeRendering="geometricPrecision"
+              />
 
               {/* Active Gold Glow On Top of the Segment (Restricted to Hora Ring Width) */}
               <path
