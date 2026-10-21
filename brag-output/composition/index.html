@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Sanatan Watch — Launch Video</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #060509;
+        font-family: 'Outfit', sans-serif;
+        color: #ffffff;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        background: radial-gradient(circle at 50% 50%, #1f1105 0%, #0b0710 50%, #040306 100%);
+        overflow: hidden;
+      }
+      /* Sacred Cosmic Background Elements */
+      .cosmic-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        border-radius: 50%;
+        border: 1px dashed rgba(255, 180, 0, 0.2);
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+      }
+      .cosmic-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 900px;
+        height: 900px;
+        background: radial-gradient(circle, rgba(255, 120, 0, 0.15) 0%, rgba(255, 180, 0, 0.05) 50%, transparent 70%);
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+      }
+
+      /* Scene Container */
+      .scene {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1920px;
+        height: 1080px;
+        opacity: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Pill Badge */
+      .badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 24px;
+        background: rgba(255, 120, 0, 0.12);
+        border: 1px solid rgba(255, 160, 0, 0.4);
+        border-radius: 9999px;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #ffaa33;
+        box-shadow: 0 0 25px rgba(255, 120, 0, 0.2);
+      }
+
+      /* Typography */
+      .font-cinzel {
+        font-family: 'Cinzel', serif;
+      }
+      .gold-text {
+        background: linear-gradient(135deg, #fff 0%, #ffd066 40%, #ff8800 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* Phone Frame Mockup */
+      .phone-frame {
+        width: 420px;
+        height: 840px;
+        border-radius: 46px;
+        padding: 12px;
+        background: #181420;
+        box-shadow: 0 35px 80px rgba(0, 0, 0, 0.8), 0 0 50px rgba(255, 140, 0, 0.35);
+        border: 2px solid rgba(255, 180, 0, 0.35);
+        position: relative;
+        overflow: hidden;
+      }
+      .phone-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 36px;
+      }
+
+      /* Highlight card */
+      .feature-card {
+        background: rgba(25, 20, 32, 0.7);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 180, 0, 0.25);
+        border-radius: 20px;
+        padding: 24px 30px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="20"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Audio Track -->
+      <audio
+        id="bgm"
+        src="assets/bgm.mp3"
+        data-start="0"
+        data-duration="20"
+        data-volume="0.8"
+      ></audio>
+
+      <!-- Background Visuals -->
+      <div class="cosmic-glow"></div>
+      <div class="cosmic-ring" style="width: 600px; height: 600px;"></div>
+      <div class="cosmic-ring" style="width: 1000px; height: 1000px;"></div>
+      <div class="cosmic-ring" style="width: 1400px; height: 1400px;"></div>
+
+      <!-- ============================================================== -->
+      <!-- SCENE 1: THE COSMIC HOOK (0.0s – 3.8s) -->
+      <!-- ============================================================== -->
+      <div id="scene1" class="scene">
+        <div style="text-align: center; max-width: 1200px;">
+          <div id="s1-badge" class="badge-pill" style="margin-bottom: 24px;">
+            🕉️ Kalachakra Gyana Yantra
+          </div>
+          <h1
+            id="s1-title"
+            class="font-cinzel gold-text"
+            style="font-size: 78px; line-height: 1.15; font-weight: 900; margin-bottom: 24px; text-shadow: 0 0 50px rgba(255, 140, 0, 0.4);"
+          >
+            WHAT IF TIME WASN'T JUST NUMBERS?
+          </h1>
+          <p
+            id="s1-sub"
+            style="font-size: 34px; color: #cbd5e1; font-weight: 500; letter-spacing: 0.05em;"
+          >
+            Every single second carries ancient sacred cosmic energy.
+          </p>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- SCENE 2: REAL-TIME SACRED CLOCK (3.8s – 8.0s) -->
+      <!-- ============================================================== -->
+      <div id="scene2" class="scene">
+        <div style="display: flex; align-items: center; gap: 90px; width: 1600px;">
+          <!-- Left Info -->
+          <div style="flex: 1.1;">
+            <div id="s2-badge" class="badge-pill" style="margin-bottom: 20px;">
+              ⏱️ Real-Time Vedic Dial
+            </div>
+            <h2
+              id="s2-title"
+              class="font-cinzel gold-text"
+              style="font-size: 64px; line-height: 1.15; font-weight: 900; margin-bottom: 24px;"
+            >
+              16 Chaughadiyas & 24 Horas
+            </h2>
+            <p id="s2-desc" style="font-size: 26px; color: #cbd5e1; margin-bottom: 32px; line-height: 1.4;">
+              Instantly know whether your current moment is <strong style="color: #4ade80;">Amrit</strong> (Best), <strong style="color: #60a5fa;">Shubh</strong> (Auspicious), or <strong style="color: #f87171;">Rahu Kaal</strong> (Adverse).
+            </p>
+            <div id="s2-features" style="display: flex; flex-direction: column; gap: 16px;">
+              <div class="feature-card" style="display: flex; align-items: center; gap: 16px; padding: 18px 24px;">
+                <span style="font-size: 32px;">🌟</span>
+                <div>
+                  <div style="font-weight: 700; font-size: 22px; color: #fff;">Live Muhurat Ring Tracking</div>
+                  <div style="color: #94a3b8; font-size: 18px;">Rotating celestial needle highlights active timings</div>
+                </div>
+              </div>
+              <div class="feature-card" style="display: flex; align-items: center; gap: 16px; padding: 18px 24px;">
+                <span style="font-size: 32px;">⚡</span>
+                <div>
+                  <div style="font-weight: 700; font-size: 22px; color: #fff;">100% Offline Swiss Ephemeris C-WASM</div>
+                  <div style="color: #94a3b8; font-size: 18px;">True planetary coordinates with zero network latency</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Phone Mockup -->
+          <div id="s2-phone" style="flex: 0.9; display: flex; justify-content: center;">
+            <div class="phone-frame">
+              <img src="assets/2_clock.png" alt="Chaughadiya Clock" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- SCENE 3: 35-POINT VEDIC PANCHANG (8.0s – 12.5s) -->
+      <!-- ============================================================== -->
+      <div id="scene3" class="scene">
+        <div style="display: flex; align-items: center; gap: 90px; width: 1600px;">
+          <!-- Left Phone Mockup -->
+          <div id="s3-phone" style="flex: 0.9; display: flex; justify-content: center;">
+            <div class="phone-frame">
+              <img src="assets/5_panchang.png" alt="Panchang Cards" />
+            </div>
+          </div>
+
+          <!-- Right Info -->
+          <div style="flex: 1.1;">
+            <div id="s3-badge" class="badge-pill" style="margin-bottom: 20px;">
+              📜 Ancient Astronomical Science
+            </div>
+            <h2
+              id="s3-title"
+              class="font-cinzel gold-text"
+              style="font-size: 64px; line-height: 1.15; font-weight: 900; margin-bottom: 24px;"
+            >
+              35-Point Vedic Panchang
+            </h2>
+            <p id="s3-desc" style="font-size: 26px; color: #cbd5e1; margin-bottom: 32px; line-height: 1.4;">
+              Micro-precision planetary calculations for every single sunrise and sunset across the globe.
+            </p>
+            <div id="s3-features" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="feature-card">
+                <div style="color: #ffaa33; font-weight: 700; font-size: 20px; margin-bottom: 6px;">28 Anandadi Yogas</div>
+                <div style="color: #cbd5e1; font-size: 16px;">Anand, Siddhi, Amrita, Aadal Yoga determination</div>
+              </div>
+              <div class="feature-card">
+                <div style="color: #ffaa33; font-weight: 700; font-size: 20px; margin-bottom: 6px;">Precision Tithi & End Time</div>
+                <div style="color: #cbd5e1; font-size: 16px;">Exact percentage passed & hours remaining</div>
+              </div>
+              <div class="feature-card">
+                <div style="color: #ffaa33; font-weight: 700; font-size: 20px; margin-bottom: 6px;">Inauspicious Periods</div>
+                <div style="color: #cbd5e1; font-size: 16px;">Rahu Kaal, Yamagandam, Gulik Kaal & Bhadra</div>
+              </div>
+              <div class="feature-card">
+                <div style="color: #ffaa33; font-weight: 700; font-size: 20px; margin-bottom: 6px;">Shiva & Agni Vaas</div>
+                <div style="color: #cbd5e1; font-size: 16px;">Dagda Tithi, Ishtakala & Panchak analysis</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- SCENE 4: MUHURATS & 100+ FESTIVALS (12.5s – 16.5s) -->
+      <!-- ============================================================== -->
+      <div id="scene4" class="scene">
+        <div style="text-align: center; width: 1600px;">
+          <div id="s4-badge" class="badge-pill" style="margin-bottom: 16px;">
+            🪔 Festivals & Milestones
+          </div>
+          <h2
+            id="s4-title"
+            class="font-cinzel gold-text"
+            style="font-size: 58px; font-weight: 900; margin-bottom: 30px;"
+          >
+            Auspicious Muhurats & 100+ Hindu Festivals
+          </h2>
+
+          <div style="display: flex; justify-content: center; gap: 60px; margin-bottom: 30px;">
+            <!-- Left Mockup: Muhurat -->
+            <div id="s4-phone1" style="display: flex; flex-direction: column; align-items: center;">
+              <div class="phone-frame" style="width: 320px; height: 560px;">
+                <img src="assets/3_muhurat.png" alt="Muhurat Suitability" />
+              </div>
+              <div class="badge-pill" style="margin-top: 16px; font-size: 16px; background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.4); color: #4ade80;">
+                ✅ Griha Pravesh & Vivah Scores
+              </div>
+            </div>
+
+            <!-- Right Mockup: Calendar -->
+            <div id="s4-phone2" style="display: flex; flex-direction: column; align-items: center;">
+              <div class="phone-frame" style="width: 320px; height: 560px;">
+                <img src="assets/4_calendar.png" alt="Festival Calendar" />
+              </div>
+              <div class="badge-pill" style="margin-top: 16px; font-size: 16px;">
+                📅 12-Month Vrats & Jayantis
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- SCENE 5: THE OUTRO / PUNCHLINE (16.5s – 20.0s) -->
+      <!-- ============================================================== -->
+      <div id="scene5" class="scene">
+        <div style="text-align: center; max-width: 1200px;">
+          <img
+            id="s5-logo"
+            src="assets/logo.png"
+            alt="Sanatan Watch Logo"
+            style="width: 180px; height: 180px; object-fit: contain; margin-bottom: 24px; filter: drop-shadow(0 0 45px rgba(255, 140, 0, 0.6));"
+          />
+          <h1
+            id="s5-title"
+            class="font-cinzel gold-text"
+            style="font-size: 80px; font-weight: 900; line-height: 1.1; margin-bottom: 12px; letter-spacing: 0.04em;"
+          >
+            SANATAN WATCH
+          </h1>
+          <div
+            id="s5-devanagari"
+            style="font-size: 32px; color: #ffaa33; font-weight: 700; margin-bottom: 24px; letter-spacing: 0.1em;"
+          >
+            || सनातन घड़ी • कालचक्र ज्ञान यन्त्र ||
+          </div>
+          <p
+            id="s5-punchline"
+            style="font-size: 32px; color: #f1f5f9; font-weight: 600; margin-bottom: 36px;"
+          >
+            Stop checking the time. Start living the Muhurat.
+          </p>
+
+          <div id="s5-cta" style="display: flex; justify-content: center; gap: 24px;">
+            <div class="badge-pill" style="font-size: 20px; padding: 12px 32px; background: rgba(255, 140, 0, 0.25); border-color: #ff9900; color: #fff;">
+              📲 Available on Google Play
+            </div>
+            <div class="badge-pill" style="font-size: 20px; padding: 12px 32px; background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.3); color: #fff;">
+              🌐 Live on Web: sanatanwatch.in
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GSAP Master Animation Timeline -->
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // Rotate cosmic background rings gently
+      tl.to('.cosmic-ring', { rotation: 90, duration: 20, ease: 'none' }, 0);
+
+      // ==========================================
+      // SCENE 1 (0.0s to 3.8s)
+      // ==========================================
+      tl.to('#scene1', { opacity: 1, duration: 0.4 }, 0.1)
+        .fromTo('#s1-badge', { opacity: 0, y: -30, scale: 0.8 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'back.out(1.7)' }, 0.3)
+        .fromTo('#s1-title', { opacity: 0, scale: 0.9, y: 40 }, { opacity: 1, scale: 1, y: 0, duration: 0.8, ease: 'power3.out' }, 0.6)
+        .fromTo('#s1-sub', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }, 1.1)
+        .to('#scene1', { opacity: 0, scale: 1.08, filter: 'blur(10px)', duration: 0.5, ease: 'power2.in' }, 3.4);
+
+      // ==========================================
+      // SCENE 2 (3.8s to 8.0s)
+      // ==========================================
+      tl.to('#scene2', { opacity: 1, duration: 0.4 }, 3.8)
+        .fromTo('#s2-phone', { opacity: 0, x: 80, rotationY: -15, scale: 0.9 }, { opacity: 1, x: 0, rotationY: 0, scale: 1, duration: 0.9, ease: 'power3.out' }, 3.9)
+        .fromTo('#s2-badge', { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.5 }, 4.1)
+        .fromTo('#s2-title', { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out' }, 4.3)
+        .fromTo('#s2-desc', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 4.6)
+        .fromTo('#s2-features', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }, 4.9)
+        .to('#scene2', { opacity: 0, x: -80, filter: 'blur(8px)', duration: 0.5, ease: 'power2.in' }, 7.6);
+
+      // ==========================================
+      // SCENE 3 (8.0s to 12.5s)
+      // ==========================================
+      tl.to('#scene3', { opacity: 1, duration: 0.4 }, 8.0)
+        .fromTo('#s3-phone', { opacity: 0, x: -80, rotationY: 15, scale: 0.9 }, { opacity: 1, x: 0, rotationY: 0, scale: 1, duration: 0.9, ease: 'power3.out' }, 8.1)
+        .fromTo('#s3-badge', { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.5 }, 8.3)
+        .fromTo('#s3-title', { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out' }, 8.5)
+        .fromTo('#s3-desc', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 8.8)
+        .fromTo('#s3-features .feature-card', { opacity: 0, scale: 0.85, y: 20 }, { opacity: 1, scale: 1, y: 0, stagger: 0.12, duration: 0.6, ease: 'back.out(1.5)' }, 9.1)
+        .to('#scene3', { opacity: 0, scale: 0.95, filter: 'blur(8px)', duration: 0.5, ease: 'power2.in' }, 12.1);
+
+      // ==========================================
+      // SCENE 4 (12.5s to 16.5s)
+      // ==========================================
+      tl.to('#scene4', { opacity: 1, duration: 0.4 }, 12.5)
+        .fromTo('#s4-badge', { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.5 }, 12.6)
+        .fromTo('#s4-title', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 12.8)
+        .fromTo('#s4-phone1', { opacity: 0, x: -60, rotation: -4 }, { opacity: 1, x: 0, rotation: 0, duration: 0.8, ease: 'power3.out' }, 13.1)
+        .fromTo('#s4-phone2', { opacity: 0, x: 60, rotation: 4 }, { opacity: 1, x: 0, rotation: 0, duration: 0.8, ease: 'power3.out' }, 13.3)
+        .to('#scene4', { opacity: 0, scale: 1.05, filter: 'blur(8px)', duration: 0.5, ease: 'power2.in' }, 16.1);
+
+      // ==========================================
+      // SCENE 5 (16.5s to 20.0s)
+      // ==========================================
+      tl.to('#scene5', { opacity: 1, duration: 0.4 }, 16.5)
+        .fromTo('#s5-logo', { opacity: 0, scale: 0.5, rotation: -20 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.8, ease: 'back.out(2)' }, 16.6)
+        .fromTo('#s5-title', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 17.0)
+        .fromTo('#s5-devanagari', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 17.3)
+        .fromTo('#s5-punchline', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, 17.6)
+        .fromTo('#s5-cta', { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.5)' }, 18.0);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines['main'] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

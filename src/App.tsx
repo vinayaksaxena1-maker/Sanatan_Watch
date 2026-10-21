@@ -1227,7 +1227,7 @@ export default function App() {
       <div className="w-full min-h-screen flex flex-col">
         
         {/* Main interactive application container */}
-        <div className={`overflow-hidden transition-all duration-300 relative flex flex-col min-h-screen w-full flex-grow ${
+        <div className={`overflow-x-hidden relative flex flex-col min-h-screen w-full flex-grow ${
           settings.theme === 'light'
             ? 'bg-[var(--bg-envelope-light)]'
             : 'bg-[var(--bg-envelope-dark)]'
@@ -1237,7 +1237,7 @@ export default function App() {
           <div className="absolute inset-0 sacred-motif-overlay pointer-events-none z-0 opacity-[0.03] dark:opacity-[0.05]"></div>
           
           {/* MAIN BRAND HEADER BANNER */}
-          <div className="px-4 pt-3 pb-1 select-none relative z-10">
+          <div className="px-4 pt-[max(env(safe-area-inset-top),16px)] pb-1 select-none relative z-10">
             <header className={`px-3 pt-2.5 pb-0 sm:px-4 sm:pt-3 sm:pb-0 rounded-[26px] border border-orange-100/50 dark:border-orange-950/20 flex flex-col gap-1.5 shadow-sm ${
               settings.theme === 'light' ? 'bg-orange-50/15' : 'bg-orange-950/5'
             }`}>
@@ -1300,7 +1300,7 @@ export default function App() {
           </div>
 
           {/* MAIN CONTAINER PREVIEW SCREEN */}
-          <main className="pt-3 px-4 pb-24 md:pb-4 flex-grow flex-1 min-h-[460px]">
+          <main className="pt-3 px-4 pb-36 sm:pb-36 md:pb-48 flex-grow flex-1 min-h-[460px]">
             
             {/* 1. HOME SCREEN */}
             {activeTab === 'home' && (
@@ -2014,7 +2014,7 @@ export default function App() {
           </main>
 
           {/* BOTTOM PREMIUM TAB BAR NAVIGATION */}
-          <footer className={`border-t flex justify-between sm:justify-around items-center py-3 px-2 sm:px-4 fixed bottom-0 left-0 right-0 w-full z-40 select-none shadow-[0_-4px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] overflow-x-auto scrollbar-hide flex-nowrap ${
+          <footer className={`border-t flex justify-between sm:justify-around items-center pt-2.5 pb-[max(env(safe-area-inset-bottom),26px)] sm:pb-[max(env(safe-area-inset-bottom),26px)] md:pb-[max(env(safe-area-inset-bottom),56px)] px-2 sm:px-4 fixed bottom-0 left-0 right-0 w-full z-40 select-none shadow-[0_-4px_16px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)] overflow-x-auto scrollbar-hide flex-nowrap ${
             settings.theme === 'light' 
               ? 'bg-[#FFFBF5]/95 backdrop-blur-md border-orange-100/70' 
               : 'bg-[#1D1713]/95 backdrop-blur-md border-[var(--card-border-dark)]' // using dark card border variables

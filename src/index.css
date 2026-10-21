@@ -3,14 +3,27 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-html, body {
-  touch-action: manipulation;
-  overscroll-behavior-y: contain;
+html {
+  touch-action: pan-y;
+  overscroll-behavior-y: auto;
+  -webkit-overflow-scrolling: touch;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 100%;
+}
+
+body {
+  touch-action: pan-y;
+  overscroll-behavior-y: auto;
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
   overflow-x: hidden;
   width: 100%;
+  min-height: 100%;
   color: #0f172a; /* Darker Slate 900 for high contrast default */
   background-color: var(--bg-app-light);
   font-weight: 500;

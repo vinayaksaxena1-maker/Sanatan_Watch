@@ -48,32 +48,30 @@ public class MainActivity extends BridgeActivity {
 
         Window window = getWindow();
 
-        // Enable edge-to-edge layout so content fills the entire display under system bars
+        // Official Google Android Edge-to-Edge: Content extends behind transparent system bars
         WindowCompat.setDecorFitsSystemWindows(window, false);
 
-        // Make the system bars fully transparent to avoid white/black gap overlays
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.setStatusBarColor(Color.TRANSPARENT);
             window.setNavigationBarColor(Color.TRANSPARENT);
         }
 
-        // Apply Sticky Immersive Mode initially
-        hideSystemBarsInternal();
+        // Disable automatic OS contrast scrim on Android 10+ (API 29+) for pure edge-to-edge transparency
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setNavigationBarContrastEnforced(false);
+            window.setStatusBarContrastEnforced(false);
+        }
 
-        // Register a JS interface to let React code hide/show system bars if ever needed
+        // Keep system bars permanently visible (NO IMMERSIVE MODE)
+        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window, window.getDecorView());
+        if (controller != null) {
+            controller.show(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
+            controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
+            controller.setAppearanceLightNavigationBars(false);
+        }
+
         WebView webView = getBridge().getWebView();
         if (webView != null) {
-            webView.addJavascriptInterface(new Object() {
-                @JavascriptInterface
-                public void hideSystemBars() {
-                    runOnUiThread(() -> hideSystemBarsInternal());
-                }
-
-                @JavascriptInterface
-                public void showSystemBars() {
-                    runOnUiThread(() -> showSystemBarsInternal());
-                }
-            }, "AndroidFullScreen");
 
             webView.addJavascriptInterface(new Object() {
                 @JavascriptInterface
@@ -325,50 +323,6 @@ public class MainActivity extends BridgeActivity {
         }
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            hideSystemBarsInternal();
-        }
-    }
-
-    private void hideSystemBarsInternal() {
-        Window window = getWindow();
-        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window, window.getDecorView());
-        if (controller != null) {
-            // Hide both Status Bar and Navigation Bar
-            controller.hide(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
-            // Configure swipe gesture behavior to show transient bars (Sticky Immersive Mode)
-            controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-        } else {
-            // Fallback for older Android versions
-            window.getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            );
-        }
-    }
-
-    private void showSystemBarsInternal() {
-        Window window = getWindow();
-        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window, window.getDecorView());
-        if (controller != null) {
-            // Show Status Bar and Navigation Bar
-            controller.show(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
-        } else {
-            // Fallback for older Android versions
-            window.getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            );
-        }
-    }
     private void updatePermanentNotification() {
         try {
             SharedPreferences sharedPref = getSharedPreferences("SanatanWidgetPrefs", Context.MODE_PRIVATE);
