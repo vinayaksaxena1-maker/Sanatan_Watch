@@ -437,6 +437,14 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
             </div>
           </div>
 
+          {/* Practical mental energy line requested by user */}
+          <div className="text-[12px] sm:text-[13px] font-serif font-bold text-amber-800 dark:text-amber-300 leading-tight flex items-center gap-2 bg-amber-500/10 dark:bg-amber-950/20 border border-amber-500/25 p-2.5 rounded-xl text-left">
+            <span className="text-base shrink-0 select-none">🧠</span>
+            <span>
+              चंद्र बल / मानसिक ऊर्जा: {Math.round(calculatedIllumination * 100)}% ({paksha === 'Shukla' ? 'मानसिक एकाग्रता, ध्यान, सात्विक भोजन और रचनात्मक चिंतन के लिए श्रेष्ठ दिन' : 'मानसिक शांति, आत्मचिंतन, ध्यान और विश्राम के लिए अनुकूल चंद्र बल'})
+            </span>
+          </div>
+
           {/* Prompt action guidelines */}
           <div className="text-[12px] sm:text-[12.5px] text-slate-500 dark:text-zinc-400 font-sans leading-tight flex items-center gap-1.5 bg-slate-100/30 dark:bg-stone-900/10 p-2 rounded-lg">
             <ThumbsUp className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
