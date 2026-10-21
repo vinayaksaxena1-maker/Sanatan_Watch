@@ -890,21 +890,21 @@ export function LiveMuhuratWatch({
         )}
       </div>
 
-      {/* TAP TOOLTIP FLOATING PILL BADGE */}
+      {/* TAP TOOLTIP FLOATING PILL BADGE (THEME-ADAPTIVE LIGHT & DARK) */}
       {selectedSlot && (
-        <div className="w-full max-w-[420px] mx-auto mt-2 p-3 bg-gradient-to-r from-[#2A1810] via-[#1E120B] to-[#2A1810] border border-[#D4AF37]/80 rounded-2xl shadow-xl flex items-center justify-between gap-2.5 animate-fadeIn z-30">
+        <div className="w-full max-w-[420px] mx-auto mt-2 p-3 bg-gradient-to-r from-[#FFFDF9] via-[#FFF9F0] to-[#FFFDF9] dark:from-[#2A1810] dark:via-[#1E120B] dark:to-[#2A1810] border border-[#FF9933]/50 dark:border-[#D4AF37]/80 rounded-2xl shadow-xl flex items-center justify-between gap-2.5 animate-fadeIn z-30 transition-colors">
           <div className="flex items-center gap-2 overflow-hidden text-left">
             <span className="text-xl select-none shrink-0">{selectedSlot.dot}</span>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-xs sm:text-sm font-black font-serif text-amber-200">
+                <span className="text-xs sm:text-sm font-black font-serif text-slate-900 dark:text-amber-200">
                   {selectedSlot.name}
                 </span>
-                <span className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                <span className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full font-mono font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-300/60 dark:border-amber-500/30">
                   {selectedSlot.startTime} – {selectedSlot.endTime}
                 </span>
               </div>
-              <p className="text-[10.5px] sm:text-[11.5px] text-stone-300 truncate font-serif mt-0.5">
+              <p className="text-[10.5px] sm:text-[11.5px] text-slate-600 dark:text-stone-300 truncate font-serif mt-0.5">
                 {selectedSlot.quality} • {selectedSlot.desc}
               </p>
             </div>
@@ -916,14 +916,14 @@ export function LiveMuhuratWatch({
                 if (selectedSlot.type === 'choghadiya') setShowChoghadiyaModal(true);
                 else setShowHoraModal(true);
               }}
-              className="text-[10px] sm:text-xs font-bold text-amber-300 hover:text-white bg-amber-600/30 hover:bg-amber-600/50 border border-amber-500/40 px-2.5 py-1 rounded-xl transition-all cursor-pointer whitespace-nowrap"
+              className="text-[10px] sm:text-xs font-bold text-orange-700 dark:text-amber-300 hover:text-orange-950 dark:hover:text-white bg-orange-500/15 hover:bg-orange-500/25 dark:bg-amber-600/30 dark:hover:bg-amber-600/50 border border-orange-300/60 dark:border-amber-500/40 px-2.5 py-1 rounded-xl transition-all cursor-pointer whitespace-nowrap"
             >
               तालिका 📋
             </button>
             <button
               type="button"
               onClick={() => setSelectedSlot(null)}
-              className="text-stone-400 hover:text-white text-base w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center cursor-pointer transition-all"
+              className="text-slate-500 hover:text-slate-900 dark:text-stone-400 dark:hover:text-white text-base w-7 h-7 rounded-full bg-orange-100/60 hover:bg-orange-200/60 dark:bg-white/5 dark:hover:bg-white/10 flex items-center justify-center cursor-pointer transition-all border border-orange-200/50 dark:border-transparent"
               title="बंद करें"
             >
               ✕
@@ -971,10 +971,10 @@ export function LiveMuhuratWatch({
         const nextStatusInfo = getChoghadiyaStatusInfo(nextChoghadiya?.type);
 
         return (
-          <div className="w-full mt-3 p-3.5 sm:p-4 rounded-3xl border border-[#ff9933]/50 bg-orange-50/15 dark:bg-[#1E1713]/90 backdrop-blur-md shadow-md space-y-2 text-left">
+          <div className="w-full mt-3 p-3.5 sm:p-4 rounded-3xl border border-[#ff9933]/50 bg-orange-50/15 dark:bg-[#1E1713]/90 backdrop-blur-md shadow-md space-y-1.5 text-left">
             
             {/* Header Row: Current Choghadiya & Live Countdown */}
-            <div className="flex items-center justify-between gap-2 pb-2 border-b border-orange-100/40 dark:border-zinc-800/60 flex-wrap">
+            <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-orange-100/40 dark:border-zinc-800/60 flex-wrap">
               <div className="flex items-center gap-2">
                 <span className="text-base select-none">{statusInfo.dot}</span>
                 <div>
@@ -1015,7 +1015,7 @@ export function LiveMuhuratWatch({
 
             {/* Next Upcoming Choghadiya Preview */}
             {nextChoghadiya && (
-              <div className="pt-2 border-t border-orange-100/40 dark:border-zinc-800/60 flex items-center justify-between text-xs flex-wrap gap-1">
+              <div className="pt-1.5 border-t border-orange-100/40 dark:border-zinc-800/60 flex items-center justify-between text-xs flex-wrap gap-1">
                 <span className="font-bold text-slate-500 dark:text-slate-400">⏭️ अगला चौघड़िया:</span>
                 <span className="font-bold font-serif text-slate-800 dark:text-slate-200">
                   {nextStatusInfo.dot} {nextChoghadiya.hindiName || nextChoghadiya.name} चौघड़िया ({formatHindiTime(nextChoghadiya.startTime)} से - {getNextPrecaution(nextChoghadiya.type)})
