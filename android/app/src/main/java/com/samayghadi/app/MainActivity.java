@@ -72,6 +72,7 @@ public class MainActivity extends BridgeActivity {
 
         WebView webView = getBridge().getWebView();
         if (webView != null) {
+            webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
 
             webView.addJavascriptInterface(new Object() {
                 @JavascriptInterface

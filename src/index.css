@@ -5,8 +5,7 @@
 
 html {
   touch-action: pan-y;
-  overscroll-behavior: none;
-  overscroll-behavior-y: none;
+  overscroll-behavior-y: auto;
   -webkit-overflow-scrolling: touch;
   user-select: none;
   -webkit-user-select: none;
@@ -18,8 +17,7 @@ html {
 
 body {
   touch-action: pan-y;
-  overscroll-behavior: none;
-  overscroll-behavior-y: none;
+  overscroll-behavior-y: auto;
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -29,11 +27,6 @@ body {
   color: #0f172a; /* Darker Slate 900 for high contrast default */
   background-color: var(--bg-app-light);
   font-weight: 500;
-}
-
-#root {
-  overscroll-behavior: none;
-  overscroll-behavior-y: none;
 }
 
 /* High-Contrast Light Mode Contrast Overrides for Washed-Out Subtexts */
