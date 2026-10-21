@@ -65,7 +65,20 @@ const getHoraAdvice = (quality: string) => {
   }
 };
 
-const getChoghadiyaUpyuktKarya = (type: string) => {
+const getChoghadiyaUpyuktKarya = (type: string, isNight: boolean = false) => {
+  if (isNight) {
+    const nightMap: Record<string, string> = {
+      Amrit: 'आध्यात्मिक साधना, भगवत्-स्मरण, गंभीर पठन-पाठन, मानसिक शांति व विश्राम।',
+      Labh: 'डिजिटल कार्य, आगामी दिन की व्यावसायिक योजना (Planning), हिसाब-किताब व रचनात्मक चिंतन।',
+      Shubh: 'पारिवारिक सौहार्द, अध्ययन, शुभ संकल्प, शांत निद्रा व विश्राम।',
+      Chal: 'यात्रा या सफ़र, आगामी दिन की कार्ययोजना व सामान पैकिंग, सामान्य कार्य।',
+      Kaal: 'विश्राम व निद्रा। अनावश्यक सोच-विचार व देर रात तक जागने से बचें।',
+      Rog: 'शारीरिक विश्राम व गहरी नींद। स्वास्थ्य लाभ हेतु समय पर शयन करें।',
+      Udveg: 'मानसिक शांति हेतु ध्यान व शयन। देर रात वाद-विवाद या भारी तनाव से बचें।'
+    };
+    return nightMap[type] || 'विश्राम व सामान्य कार्य।';
+  }
+
   const map: Record<string, string> = {
     Amrit: 'धार्मिक, मांगलिक व आध्यात्मिक कार्य, यज्ञ-अनुष्ठान, नया कार्य प्रारंभ।',
     Labh: 'व्यापारिक शुरुआत, नया निवेश, नौकरी प्रारंभ, आर्थिक लेन-देन।',
@@ -76,6 +89,32 @@ const getChoghadiyaUpyuktKarya = (type: string) => {
     Udveg: 'सरकारी या प्रशासनिक कार्य, मुकदमेबाजी, संपत्ति के विवाद।'
   };
   return map[type] || 'दैनिक सामान्य कार्य।';
+};
+
+const getHoraPracticalNuance = (lordHindi?: string, lord?: string) => {
+  const l = (lord || lordHindi || '').toLowerCase();
+  if (l.includes('mangal') || l.includes('mars') || l.includes('मंगल')) {
+    return 'मंगल (तेज/ऊर्जावान • साहसिक व तकनीकी कार्यों हेतु ठीक, वाद-विवाद से बचें)';
+  }
+  if (l.includes('surya') || l.includes('sun') || l.includes('सूर्य')) {
+    return 'सूर्य (प्रभावी/नेतृत्व • प्रशासनिक कार्य, प्रतिष्ठा व स्वास्थ्य चिंतन)';
+  }
+  if (l.includes('chandra') || l.includes('moon') || l.includes('चंद्र')) {
+    return 'चंद्र (शांत/सौम्य • रचनात्मक कार्य, जल संबंधी व पारिवारिक सौहार्द)';
+  }
+  if (l.includes('budh') || l.includes('mercury') || l.includes('बुध')) {
+    return 'बुध (बौद्धिक/शुभ • व्यापार, हिसाब-किताब, संवाद व अध्ययन)';
+  }
+  if (l.includes('guru') || l.includes('jupiter') || l.includes('बृहस्पति') || l.includes('गुरु')) {
+    return 'गुरु (अत्यंत शुभ • ज्ञानार्जन, आध्यात्मिक कार्य, निवेश व शुभ संकल्प)';
+  }
+  if (l.includes('shukra') || l.includes('venus') || l.includes('शुक्र')) {
+    return 'शुक्र (सौंदर्य/आनंद • कला, वस्त्र-आभूषण, सौंदर्य व सुख-सुविधा)';
+  }
+  if (l.includes('shani') || l.includes('saturn') || l.includes('शनि')) {
+    return 'शनि (गंभीर/धीमा • धैर्य, श्रम, भूमि-मशीनरी कार्य, जल्दबाजी से बचें)';
+  }
+  return `${lordHindi || 'ग्रह'} की होरा`;
 };
 
 const getChoghadiyaAdvice = (type: string) => {
@@ -806,27 +845,18 @@ export function LiveMuhuratWatch({
         )}
       </div>
 
-      {/* SUN TIMINGS & 3-COLOR INTUITIVE LEGEND */}
+      {/* 3-COLOR INTUITIVE LEGEND */}
       <div className="w-full mt-2 flex flex-col items-center gap-1 select-none text-center">
-        {/* Sunrise & Sunset */}
-        {(sunriseTimeStr || sunsetTimeStr) && (
-          <div className="flex items-center justify-center gap-3 text-xs sm:text-[13px] font-bold text-slate-700 dark:text-amber-200 font-mono">
-            <span>🌅 सूर्योदय: {formatHindiTime(sunriseTimeStr)}</span>
-            <span className="text-slate-300 dark:text-zinc-700">•</span>
-            <span>🌇 सूर्यास्त: {formatHindiTime(sunsetTimeStr)}</span>
-          </div>
-        )}
-
         {/* 3-Color Legend: Green = Shubh, Yellow = Chal, Red = Ashubh */}
         <div className="flex items-center justify-center gap-3 sm:gap-4 text-[11px] sm:text-xs font-bold font-serif flex-wrap pt-0.5">
           <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm" /> 🟢 शुभ (अमृत/शुभ/लाभ)
+            🟢 शुभ (अमृत/शुभ/लाभ)
           </span>
           <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-            <span className="w-2 h-2 rounded-full bg-amber-500 shadow-sm" /> 🟡 सामान्य (चर)
+            🟡 सामान्य (चर)
           </span>
           <span className="flex items-center gap-1 text-rose-600 dark:text-rose-400">
-            <span className="w-2 h-2 rounded-full bg-rose-500 shadow-sm" /> 🔴 अशुभ (रोग/काल/उद्वेग)
+            🔴 अशुभ (रोग/काल/उद्वेग)
           </span>
         </div>
       </div>
@@ -842,13 +872,9 @@ export function LiveMuhuratWatch({
           choghadiyaRemainingMinutes = Math.max(0, Math.floor(diffMin));
         }
 
+        const isNightTime = currentChoghadiya ? !currentChoghadiya.isDay : (time.getHours() >= 20 || time.getHours() < 6);
         const statusInfo = getChoghadiyaStatusInfo(currentChoghadiya?.type);
         const nextStatusInfo = getChoghadiyaStatusInfo(nextChoghadiya?.type);
-        const horaQualityLabel = activeHora?.quality === 'Auspicious' 
-          ? 'शुभ' 
-          : activeHora?.quality === 'Inauspicious' 
-          ? 'अशुभ' 
-          : 'सामान्य';
 
         return (
           <div className="w-full mt-3 p-3.5 sm:p-4 rounded-3xl border border-[#ff9933]/50 bg-orange-50/15 dark:bg-[#1E1713]/90 backdrop-blur-md shadow-md space-y-2 text-left">
@@ -876,8 +902,8 @@ export function LiveMuhuratWatch({
             {/* Active Hora Status Bar */}
             <div className="flex items-center justify-between text-xs py-1.5 px-3 bg-orange-500/5 dark:bg-zinc-900/40 rounded-xl border border-orange-200/25 dark:border-zinc-800/50">
               <span className="font-bold text-slate-600 dark:text-slate-300">सक्रिय होरा:</span>
-              <span className="font-bold font-serif text-orange-655 dark:text-amber-400">
-                {activeHora ? `${activeHora.lordHindi} की होरा (${horaQualityLabel})` : '—'}
+              <span className="font-bold font-serif text-orange-600 dark:text-amber-400">
+                {activeHora ? getHoraPracticalNuance(activeHora.lordHindi, activeHora.lord) : '—'}
               </span>
             </div>
 
@@ -888,7 +914,7 @@ export function LiveMuhuratWatch({
                   ✅ क्या करें:
                 </span>
                 <p className="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
-                  {getChoghadiyaUpyuktKarya(currentChoghadiya.type)}
+                  {getChoghadiyaUpyuktKarya(currentChoghadiya.type, isNightTime)}
                 </p>
               </div>
             )}

@@ -1355,7 +1355,7 @@ export default function App() {
                   </div>
 
                   {/* Details Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 sm:gap-2 text-xs leading-tight">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 text-xs leading-tight">
                     <div className="flex flex-col p-1.5 px-2 bg-orange-500/5 dark:bg-zinc-950/20 border border-[#ff9933]/40 dark:border-[#ff9933]/30 rounded-2xl justify-center min-h-[48px]">
                       <span className="text-[13px] text-slate-500 dark:text-slate-400 font-extrabold uppercase font-mono tracking-wider">अमान्त महीना</span>
                       <span className="font-serif font-bold text-orange-850 dark:text-orange-350 text-[12px] mt-0.5 truncate">
@@ -1392,13 +1392,6 @@ export default function App() {
                       <span className="text-[13px] text-slate-500 dark:text-slate-400 font-extrabold uppercase font-mono tracking-wider">वि. / शक / गु. संवत्</span>
                       <span className="font-serif font-bold text-orange-850 dark:text-orange-350 mt-0.5 text-[12px] truncate">
                         {panchangInfo.hinduDate.samvatVikram} / {panchangInfo.hinduDate.samvatShaka} / {panchangInfo.hinduDate.samvatGujarati || panchangInfo.hinduDate.samvatVikram - 1}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col p-1.5 px-2 bg-orange-500/5 dark:bg-zinc-950/20 border border-[#ff9933]/40 dark:border-[#ff9933]/30 rounded-2xl justify-center min-h-[48px]">
-                      <span className="text-[13px] text-slate-500 dark:text-slate-400 font-extrabold uppercase font-mono tracking-wider">सूर्योदय / सूर्यास्त</span>
-                      <span className="font-serif font-bold text-orange-850 dark:text-orange-350 mt-0.5 text-[12px] truncate">
-                        🌅 {formatHindiTime(panchangInfo.sunrise)} • 🌇 {formatHindiTime(panchangInfo.sunset)}
                       </span>
                     </div>
                   </div>

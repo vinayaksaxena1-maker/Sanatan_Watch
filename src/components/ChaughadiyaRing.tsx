@@ -72,36 +72,45 @@ export function ChaughadiyaRing({
     }
   };
 
-  // High-contrast, intuitive status color themes for 360 Choghadiya Ring:
-  // Green = Shubh/Labh/Amrit, Amber/Yellow = Chal, Red = Rog/Kaal/Udveg
+  // High-contrast, solid Royal Jewel Tones for 360 Choghadiya Ring:
+  // Green = Rich Emerald Green (#166534), Amber = Warm Amber (#92400E), Red = Deep Ruby Crimson (#991B1B)
   const getSegmentVisualTheme = (type: string) => {
     switch (type) {
       case "Amrit":
       case "Shubh":
       case "Labh":
         return {
-          fillStroke: "#13311E", // Rich emerald green tint
-          accentBorder: "#10B981", // Luminous emerald green
-          statusDot: "#10B981",
-          glowColor: "rgba(16, 185, 129, 0.45)"
+          fillStroke: "#166534", // Solid Rich Emerald Green (clean, never muddy)
+          accentBorder: "#22C55E", // Vibrant emerald green border
+          statusDot: "#4ADE80", // Bright mint green dot
+          titleColor: "#FFFFFF", // High-contrast crisp white title
+          timingColor: "#FDE68A", // Cream / Light gold
+          activeFill: "#15803D", // Vibrant active green
+          activeGlow: "#22C55E" // Luminous green glow
         };
       case "Char":
       case "Chal":
         return {
-          fillStroke: "#3A2E12", // Rich warm golden-amber tint
-          accentBorder: "#F59E0B", // Luminous amber
-          statusDot: "#F59E0B",
-          glowColor: "rgba(245, 158, 11, 0.40)"
+          fillStroke: "#92400E", // Solid Warm Amber / Ochre (warm golden-amber, never brown)
+          accentBorder: "#F59E0B", // Luminous golden amber border
+          statusDot: "#FBBF24", // Bright amber gold dot
+          titleColor: "#FFFBEB", // Pure cream-white title
+          timingColor: "#FDE68A", // Cream / Light gold
+          activeFill: "#B45309", // Vibrant active warm amber
+          activeGlow: "#F59E0B" // Luminous amber glow
         };
       case "Rog":
       case "Kaal":
       case "Udveg":
       default:
         return {
-          fillStroke: "#3A1619", // Rich dark ruby-red tint
-          accentBorder: "#EF4444", // Luminous crimson red
-          statusDot: "#EF4444",
-          glowColor: "rgba(239, 68, 68, 0.45)"
+          fillStroke: "#991B1B", // Solid Deep Ruby Crimson (rich ruby red/maroon, never brown)
+          accentBorder: "#EF4444", // Vibrant ruby red border
+          statusDot: "#F87171", // Coral red dot
+          titleColor: "#FFFBEB", // Pure cream-white title
+          timingColor: "#FDE68A", // Cream / Light gold
+          activeFill: "#B91C1C", // Vibrant active ruby
+          activeGlow: "#EF4444" // Luminous ruby glow
         };
     }
   };
@@ -408,11 +417,11 @@ export function ChaughadiyaRing({
             dominantBaseline="central"
             fontSize={fontSize}
             fontWeight={isActive ? "700" : "600"}
-            fill={isActive ? "#FFFFFF" : "#FF9933"}
+            fill={isActive ? "#FFFFFF" : theme.titleColor}
             fontFamily="'Noto Sans Devanagari', 'Inter', sans-serif"
             className="select-none"
             letterSpacing="0.05em"
-            style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.75))" }}
+            style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.9))" }}
           >
             {segment.hindiName}
           </text>
@@ -442,11 +451,11 @@ export function ChaughadiyaRing({
           dominantBaseline="central"
           fontSize={fontSize}
           fontWeight={isActive ? "700" : "600"}
-          fill={isActive ? "#FFFFFF" : "#FF9933"}
+          fill={isActive ? "#FFFFFF" : theme.titleColor}
           fontFamily="'Noto Sans Devanagari', 'Inter', sans-serif"
           className="select-none"
           letterSpacing="0.05em"
-          style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.75))" }}
+          style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.9))" }}
         >
           {segment.hindiName}
         </text>
@@ -458,12 +467,12 @@ export function ChaughadiyaRing({
           textAnchor="middle"
           dominantBaseline="central"
           fontSize={isActive ? "14" : "11"}
-          fontWeight={isActive ? "650" : "normal"}
-          fill={isActive ? "rgba(255, 255, 255, 0.85)" : "rgba(255, 153, 51, 0.45)"}
+          fontWeight="600"
+          fill={isActive ? "#FFFBEB" : theme.timingColor}
           fontFamily="'Inter', sans-serif"
           className="select-none"
           letterSpacing="0.01em"
-          style={{ filter: "drop-shadow(0px 0.5px 1px rgba(0, 0, 0, 0.6))" }}
+          style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.9))" }}
         >
           {timeRange}
         </text>
@@ -530,22 +539,24 @@ export function ChaughadiyaRing({
 
           return (
             <g key={segment.name + activeIdx}>
-              {/* Active Segment Colored Base Fill */}
+              {/* Active Segment Solid Rich Jewel Base Fill */}
               <path
-                id="active_chaughadiya_base_fill"
+                id={`chaughadiya_segment_${activeIdx}`}
+                className="active-chaughadiya-segment"
                 d={pathD}
                 fill="none"
-                stroke={activeTheme.fillStroke}
+                stroke={activeTheme.activeFill}
                 strokeWidth={strokeWidth.toString()}
                 strokeLinecap="butt"
                 opacity="1.0"
                 shapeRendering="geometricPrecision"
               />
-              {/* Active Segment Subtle Tint Overlay */}
+              {/* Active Segment 25% Inner Glow Tint */}
               <path
                 d={bezelOuterD}
-                fill={activeTheme.statusDot}
-                opacity="0.12"
+                fill={activeTheme.activeGlow}
+                opacity="0.25"
+                style={{ filter: `drop-shadow(0px 0px 10px ${activeTheme.activeGlow})` }}
                 shapeRendering="geometricPrecision"
               />
               {/* Luxury Diamond Cut Gold Frame */}
@@ -553,14 +564,13 @@ export function ChaughadiyaRing({
                 <path
                   d={bezelOuterD}
                   fill="url(#diamondGoldGrad)"
-                  opacity="0.12"
-                  style={{ filter: "drop-shadow(0px 0px 8px rgba(255, 213, 79, 0.4))" }}
+                  opacity="0.08"
                 />
                 <path
                   d={bezelOuterD}
                   fill="none"
-                  stroke="#4A341E"
-                  strokeWidth="13"
+                  stroke={activeTheme.accentBorder}
+                  strokeWidth="3.5"
                   opacity="0.45"
                 />
                 <path
@@ -625,17 +635,6 @@ export function ChaughadiyaRing({
                   />
                 ))}
               </g>
-              <path
-                id={`chaughadiya_segment_${activeIdx}`}
-                className="active-chaughadiya-segment"
-                d={pathD}
-                fill="none"
-                stroke="#3B2314"
-                strokeWidth={strokeWidth.toString()}
-                strokeLinecap="butt"
-                opacity="1.0"
-                shapeRendering="geometricPrecision"
-              />
               {/* Active Gold Glow On Top of the Segment */}
               <path
                 d={pathD}
