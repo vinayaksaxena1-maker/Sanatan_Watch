@@ -287,7 +287,7 @@ export function HoraRing({ horaList, activeHora, currentTime, onSelectHora }: Ho
 
     const isHovered = hoveredIdx === originalIndex;
     // 1px larger base font size per user request: "or hora ring me bhi name 1px bada ho"
-    const baseFontSize = isActive ? 25 : 19;
+    const baseFontSize = isActive ? 28 : 23;
     const fontSize = (baseFontSize + (isHovered ? 2 : 0)).toString();
 
     // Clean Typography: Render only Hindi Name with dy="0" (Time removed from dial face per design)
@@ -312,11 +312,11 @@ export function HoraRing({ horaList, activeHora, currentTime, onSelectHora }: Ho
           textAnchor="middle"
           dominantBaseline="central"
           fontSize={fontSize}
-          fontWeight={isActive || isHovered ? "700" : "600"}
+          fontWeight={isActive || isHovered ? "800" : "700"}
           fill={isActive ? "#FFFFFF" : "#FF9933"}
           fontFamily="'Noto Sans Devanagari', 'Inter', sans-serif"
           className="select-none pointer-events-none"
-          letterSpacing="0.05em"
+          letterSpacing="0"
           style={{ 
             filter: isHovered 
               ? "drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.95)) drop-shadow(0px 0px 5px rgba(255, 153, 51, 0.6))" 

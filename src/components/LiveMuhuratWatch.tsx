@@ -893,18 +893,21 @@ export function LiveMuhuratWatch({
       {/* TAP TOOLTIP FLOATING PILL BADGE (THEME-ADAPTIVE LIGHT & DARK) */}
       {selectedSlot && (
         <div className="w-full max-w-[420px] mx-auto mt-2 p-3 bg-gradient-to-r from-[#FFFDF9] via-[#FFF9F0] to-[#FFFDF9] dark:from-[#2A1810] dark:via-[#1E120B] dark:to-[#2A1810] border border-[#FF9933]/50 dark:border-[#D4AF37]/80 rounded-2xl shadow-xl flex items-center justify-between gap-2.5 animate-fadeIn z-30 transition-colors">
-          <div className="flex items-center gap-2 overflow-hidden text-left">
-            <span className="text-xl select-none shrink-0">{selectedSlot.dot}</span>
+          <div className="flex items-center gap-2.5 overflow-hidden text-left">
+            <span className="text-2xl select-none shrink-0">{selectedSlot.dot}</span>
             <div className="min-w-0">
+              <div className="text-[10.5px] sm:text-[11px] font-mono font-bold text-orange-700 dark:text-amber-400 flex items-center gap-1 mb-0.5">
+                🔍 {selectedSlot.type === 'choghadiya' ? 'चयनित चौघड़िया विवरण' : 'चयनित होरा विवरण'}
+              </div>
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-xs sm:text-sm font-black font-serif text-slate-900 dark:text-amber-200">
+                <span className="text-[14px] sm:text-[15px] font-black font-serif text-slate-900 dark:text-amber-200">
                   {selectedSlot.name}
                 </span>
-                <span className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full font-mono font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-300/60 dark:border-amber-500/30">
+                <span className="text-[11px] sm:text-[12px] px-2 py-0.5 rounded-full font-mono font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-300/60 dark:border-amber-500/30">
                   {selectedSlot.startTime} – {selectedSlot.endTime}
                 </span>
               </div>
-              <p className="text-[10.5px] sm:text-[11.5px] text-slate-600 dark:text-stone-300 truncate font-serif mt-0.5">
+              <p className="text-[13px] sm:text-[13.5px] text-slate-700 dark:text-stone-300 font-serif mt-1 leading-snug line-clamp-2">
                 {selectedSlot.quality} • {selectedSlot.desc}
               </p>
             </div>
@@ -995,8 +998,8 @@ export function LiveMuhuratWatch({
 
             {/* Active Hora Status Bar */}
             <div className="flex items-center justify-between text-xs py-1.5 px-3 bg-orange-500/5 dark:bg-zinc-900/40 rounded-xl border border-orange-200/25 dark:border-zinc-800/50">
-              <span className="font-bold text-slate-600 dark:text-slate-300">सक्रिय होरा:</span>
-              <span className="font-bold font-serif text-orange-600 dark:text-amber-400">
+              <span className="font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">सक्रिय होरा:</span>
+              <span className="font-bold font-serif text-[#78350F] dark:text-amber-300 text-[12.5px] leading-relaxed text-right pl-2">
                 {activeHora ? getHoraPracticalNuance(activeHora.lordHindi, activeHora.lord) : '—'}
               </span>
             </div>
