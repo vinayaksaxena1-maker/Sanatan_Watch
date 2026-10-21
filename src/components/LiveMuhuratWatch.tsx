@@ -1028,40 +1028,45 @@ export function LiveMuhuratWatch({
       })()}
       {/* CHOGHADIYA TABLE MODAL */}
       {showChoghadiyaModal && choghadiyaList && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-[#120B08] border border-amber-500/30 rounded-3xl p-5 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative text-left">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-slate-900/60 dark:bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="bg-[#FFFDF9] dark:bg-[#150F0A] border border-[#FF9933]/50 dark:border-amber-500/35 rounded-3xl p-4 sm:p-5 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative text-left transition-colors">
             <button 
               onClick={() => setShowChoghadiyaModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white font-mono font-bold text-lg cursor-pointer bg-white/5 w-8 h-8 rounded-full flex items-center justify-center border border-white/5"
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-mono font-bold text-base cursor-pointer bg-orange-100/70 hover:bg-orange-200/80 dark:bg-white/10 dark:hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center border border-[#FF9933]/30 dark:border-white/10 transition-all"
             >
               ✕
             </button>
-            <div className="pb-3 border-b border-orange-100/10 mb-4">
-              <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-amber-500 block">
+            <div className="pb-3 border-b border-orange-200/50 dark:border-orange-500/20 mb-4">
+              <span className="text-[10.5px] uppercase font-mono font-bold tracking-widest text-[#EA580C] dark:text-amber-400 block">
                 ॥ दैनिक चौघड़िया मुहूर्त ॥
               </span>
-              <h3 className="text-lg font-bold font-serif text-amber-100">
+              <h3 className="text-lg sm:text-xl font-bold font-serif text-slate-900 dark:text-amber-100">
                 सम्पूर्ण दिन-रात्रि चौघड़िया तालिका
               </h3>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 pt-1">
               {/* Day Choghadiya */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-orange-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
+              <div className="space-y-2.5">
+                <h4 className="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
                   ☀️ दिन का चौघड़िया (Daytime)
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {choghadiyaList.filter(ch => ch.isDay).map((ch, i) => {
                     const status = getChoghadiyaStatusInfo(ch.type);
                     return (
-                      <div key={i} className="p-2.5 rounded-2xl bg-orange-950/20 border border-orange-500/20 flex flex-col justify-between min-h-[76px]">
+                      <div 
+                        key={i} 
+                        className="p-2.5 rounded-2xl bg-orange-50/80 dark:bg-[#251A13] border border-[#FF9933]/45 dark:border-[#FF9933]/40 shadow-xs flex flex-col justify-between min-h-[78px] transition-all hover:scale-[1.02] hover:border-[#FF9933]/70"
+                      >
                         <div>
                           <div className="flex items-center gap-1">
-                            <span>{status.dot}</span>
-                            <span className="text-xs font-black text-slate-200 font-serif leading-tight">{ch.hindiName || ch.name}</span>
+                            <span className="text-xs">{status.dot}</span>
+                            <span className="text-xs font-black text-slate-850 dark:text-amber-100 font-serif leading-tight">{ch.hindiName || ch.name}</span>
                           </div>
-                          <span className="text-[9px] text-slate-400 font-mono mt-0.5 block leading-none">{formatHindiTime(ch.startTime)} - {formatHindiTime(ch.endTime)}</span>
+                          <span className="text-[9.5px] text-slate-500 dark:text-stone-300 font-mono mt-0.5 block leading-none font-semibold">
+                            {formatHindiTime(ch.startTime)} - {formatHindiTime(ch.endTime)}
+                          </span>
                         </div>
                         <span className={`text-[8.5px] font-black uppercase text-center py-0.5 rounded-md mt-2 tracking-wider ${status.badgeBg}`}>
                           {status.label}
@@ -1073,21 +1078,26 @@ export function LiveMuhuratWatch({
               </div>
 
               {/* Night Choghadiya */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-indigo-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
+              <div className="space-y-2.5">
+                <h4 className="text-xs sm:text-sm font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
                   🌙 रात का चौघड़िया (Nighttime)
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {choghadiyaList.filter(ch => !ch.isDay).map((ch, i) => {
                     const status = getChoghadiyaStatusInfo(ch.type);
                     return (
-                      <div key={i} className="p-2.5 rounded-2xl bg-indigo-950/20 border border-indigo-500/20 flex flex-col justify-between min-h-[76px]">
+                      <div 
+                        key={i} 
+                        className="p-2.5 rounded-2xl bg-orange-50/80 dark:bg-[#251A13] border border-[#FF9933]/45 dark:border-[#FF9933]/40 shadow-xs flex flex-col justify-between min-h-[78px] transition-all hover:scale-[1.02] hover:border-[#FF9933]/70"
+                      >
                         <div>
                           <div className="flex items-center gap-1">
-                            <span>{status.dot}</span>
-                            <span className="text-xs font-black text-slate-200 font-serif leading-tight">{ch.hindiName || ch.name}</span>
+                            <span className="text-xs">{status.dot}</span>
+                            <span className="text-xs font-black text-slate-850 dark:text-amber-100 font-serif leading-tight">{ch.hindiName || ch.name}</span>
                           </div>
-                          <span className="text-[9px] text-slate-400 font-mono mt-0.5 block leading-none">{formatHindiTime(ch.startTime)} - {formatHindiTime(ch.endTime)}</span>
+                          <span className="text-[9.5px] text-slate-500 dark:text-stone-300 font-mono mt-0.5 block leading-none font-semibold">
+                            {formatHindiTime(ch.startTime)} - {formatHindiTime(ch.endTime)}
+                          </span>
                         </div>
                         <span className={`text-[8.5px] font-black uppercase text-center py-0.5 rounded-md mt-2 tracking-wider ${status.badgeBg}`}>
                           {status.label}
@@ -1104,27 +1114,27 @@ export function LiveMuhuratWatch({
 
       {/* HORA TABLE MODAL */}
       {showHoraModal && horaList && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-[#120B08] border border-amber-500/30 rounded-3xl p-5 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative text-left">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-slate-900/60 dark:bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="bg-[#FFFDF9] dark:bg-[#150F0A] border border-[#FF9933]/50 dark:border-amber-500/35 rounded-3xl p-4 sm:p-5 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative text-left transition-colors">
             <button 
               onClick={() => setShowHoraModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white font-mono font-bold text-lg cursor-pointer bg-white/5 w-8 h-8 rounded-full flex items-center justify-center border border-white/5"
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-mono font-bold text-base cursor-pointer bg-orange-100/70 hover:bg-orange-200/80 dark:bg-white/10 dark:hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center border border-[#FF9933]/30 dark:border-white/10 transition-all"
             >
               ✕
             </button>
-            <div className="pb-3 border-b border-orange-100/10 mb-4">
-              <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-amber-500 block">
+            <div className="pb-3 border-b border-orange-200/50 dark:border-orange-500/20 mb-4">
+              <span className="text-[10.5px] uppercase font-mono font-bold tracking-widest text-[#EA580C] dark:text-amber-400 block">
                 ॥ दैनिक होरा चक्र ॥
               </span>
-              <h3 className="text-lg font-bold font-serif text-amber-100">
+              <h3 className="text-lg sm:text-xl font-bold font-serif text-slate-900 dark:text-amber-100">
                 सम्पूर्ण २४ घंटे की होरा स्थिति तालिका
               </h3>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 pt-1">
               {/* Day Hora */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-orange-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
+              <div className="space-y-2.5">
+                <h4 className="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
                   ☀️ दिन की होरा (Daytime 12 Horas)
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -1132,15 +1142,24 @@ export function LiveMuhuratWatch({
                     const isShubh = h.quality === 'Auspicious';
                     const isAshubh = h.quality === 'Inauspicious';
                     const dot = isShubh ? '🟢' : isAshubh ? '🔴' : '🟡';
-                    const badgeClass = isShubh ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : isAshubh ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30';
+                    const badgeClass = isShubh 
+                      ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30' 
+                      : isAshubh 
+                      ? 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30' 
+                      : 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30';
                     return (
-                      <div key={i} className="p-2.5 rounded-2xl bg-orange-950/20 border border-orange-500/20 flex flex-col justify-between min-h-[76px]">
+                      <div 
+                        key={i} 
+                        className="p-2.5 rounded-2xl bg-orange-50/80 dark:bg-[#251A13] border border-[#FF9933]/45 dark:border-[#FF9933]/40 shadow-xs flex flex-col justify-between min-h-[78px] transition-all hover:scale-[1.02] hover:border-[#FF9933]/70"
+                      >
                         <div>
                           <div className="flex items-center gap-1">
-                            <span>{dot}</span>
-                            <span className="text-xs font-black text-slate-200 font-serif leading-tight">{h.lordHindi || h.lord} की होरा</span>
+                            <span className="text-xs">{dot}</span>
+                            <span className="text-xs font-black text-slate-850 dark:text-amber-100 font-serif leading-tight">{h.lordHindi || h.lord} की होरा</span>
                           </div>
-                          <span className="text-[9px] text-slate-400 font-mono mt-0.5 block leading-none">{formatHindiTime(h.startTime)} - {formatHindiTime(h.endTime)}</span>
+                          <span className="text-[9.5px] text-slate-500 dark:text-stone-300 font-mono mt-0.5 block leading-none font-semibold">
+                            {formatHindiTime(h.startTime)} - {formatHindiTime(h.endTime)}
+                          </span>
                         </div>
                         <span className={`text-[8.5px] font-black uppercase text-center py-0.5 rounded-md mt-2 tracking-wider ${badgeClass}`}>
                           {isShubh ? 'शुभ' : isAshubh ? 'अशुभ' : 'सामान्य'}
@@ -1152,8 +1171,8 @@ export function LiveMuhuratWatch({
               </div>
 
               {/* Night Hora */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-indigo-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
+              <div className="space-y-2.5">
+                <h4 className="text-xs sm:text-sm font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
                   🌙 रात की होरा (Nighttime 12 Horas)
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -1161,15 +1180,24 @@ export function LiveMuhuratWatch({
                     const isShubh = h.quality === 'Auspicious';
                     const isAshubh = h.quality === 'Inauspicious';
                     const dot = isShubh ? '🟢' : isAshubh ? '🔴' : '🟡';
-                    const badgeClass = isShubh ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : isAshubh ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30';
+                    const badgeClass = isShubh 
+                      ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30' 
+                      : isAshubh 
+                      ? 'bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30' 
+                      : 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30';
                     return (
-                      <div key={i} className="p-2.5 rounded-2xl bg-indigo-950/20 border border-indigo-500/20 flex flex-col justify-between min-h-[76px]">
+                      <div 
+                        key={i} 
+                        className="p-2.5 rounded-2xl bg-orange-50/80 dark:bg-[#251A13] border border-[#FF9933]/45 dark:border-[#FF9933]/40 shadow-xs flex flex-col justify-between min-h-[78px] transition-all hover:scale-[1.02] hover:border-[#FF9933]/70"
+                      >
                         <div>
                           <div className="flex items-center gap-1">
-                            <span>{dot}</span>
-                            <span className="text-xs font-black text-slate-200 font-serif leading-tight">{h.lordHindi || h.lord} की होरा</span>
+                            <span className="text-xs">{dot}</span>
+                            <span className="text-xs font-black text-slate-850 dark:text-amber-100 font-serif leading-tight">{h.lordHindi || h.lord} की होरा</span>
                           </div>
-                          <span className="text-[9px] text-slate-400 font-mono mt-0.5 block leading-none">{formatHindiTime(h.startTime)} - {formatHindiTime(h.endTime)}</span>
+                          <span className="text-[9.5px] text-slate-500 dark:text-stone-300 font-mono mt-0.5 block leading-none font-semibold">
+                            {formatHindiTime(h.startTime)} - {formatHindiTime(h.endTime)}
+                          </span>
                         </div>
                         <span className={`text-[8.5px] font-black uppercase text-center py-0.5 rounded-md mt-2 tracking-wider ${badgeClass}`}>
                           {isShubh ? 'शुभ' : isAshubh ? 'अशुभ' : 'सामान्य'}

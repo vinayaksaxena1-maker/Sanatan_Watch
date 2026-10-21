@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { HoraInterval } from '../types';
 
 interface HoraRingProps {
@@ -9,6 +9,7 @@ interface HoraRingProps {
 }
 
 export function HoraRing({ horaList, activeHora, currentTime, onSelectHora }: HoraRingProps) {
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   const getPlanetSolidColor = (lord: string): string => {
     return '#3B2314'; // Solid Dark Walnut Brown
@@ -176,14 +177,29 @@ export function HoraRing({ horaList, activeHora, currentTime, onSelectHora }: Ho
     const pathInnerBorder = `M ${x1_in} ${y1_in} A ${r_in} ${r_in} 0 0 1 ${x2_in} ${y2_in}`;
     const pathOuterBorder = `M ${x1_out} ${y1_out} A ${r_out} ${r_out} 0 0 1 ${x2_out} ${y2_out}`;
 
+    const isHovered = hoveredIdx === originalIndex;
+    const currentStroke = isHovered ? 97 : 93;
+
     return (
-      <g key={h.number} className="cursor-pointer transition-all hover:brightness-110 active:opacity-90" onClick={() => onSelectHora?.(h)}>
+      <g 
+        key={h.number} 
+        className="cursor-pointer transition-all duration-200" 
+        onClick={() => onSelectHora?.(h)}
+        onMouseEnter={() => setHoveredIdx(originalIndex)}
+        onMouseLeave={() => setHoveredIdx(null)}
+        style={{
+          transformOrigin: '200px 200px',
+          transform: isHovered ? 'scale(1.025)' : 'scale(1)',
+          filter: isHovered ? 'drop-shadow(0px 0px 6px rgba(255, 215, 0, 0.65)) brightness(1.2)' : undefined,
+          transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.18s ease'
+        }}
+      >
         {/* Main Segment Fill using solid block colors */}
         <path
           d={pathD}
           fill="none"
           stroke={getPlanetSolidColor(h.lord)}
-          strokeWidth={strokeWidth.toString()}
+          strokeWidth={currentStroke.toString()}
           strokeLinecap="butt"
           opacity="1.0"
           shapeRendering="geometricPrecision"
@@ -269,9 +285,25 @@ export function HoraRing({ horaList, activeHora, currentTime, onSelectHora }: Ho
 
     const timeRange = formatTimeRange(h.startTime, h.endTime);
 
+    const isHovered = hoveredIdx === originalIndex;
+    // 1px larger base font size per user request: "or hora ring me bhi name 1px bada ho"
+    const baseFontSize = isActive ? 25 : 19;
+    const fontSize = (baseFontSize + (isHovered ? 2 : 0)).toString();
+
     // Clean Typography: Render only Hindi Name with dy="0" (Time removed from dial face per design)
     return (
-      <g key={`hora_label_group_${h.number}`} className="cursor-pointer" onClick={() => onSelectHora?.(h)}>
+      <g 
+        key={`hora_label_group_${h.number}`} 
+        className="cursor-pointer select-none" 
+        onClick={() => onSelectHora?.(h)}
+        onMouseEnter={() => setHoveredIdx(originalIndex)}
+        onMouseLeave={() => setHoveredIdx(null)}
+        style={{
+          transformOrigin: `${x}px ${y}px`,
+          transform: isHovered ? 'scale(1.12)' : 'scale(1)',
+          transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}
+      >
         <text
           id={`hora_label_${h.number}`}
           x={x}
@@ -279,13 +311,17 @@ export function HoraRing({ horaList, activeHora, currentTime, onSelectHora }: Ho
           dy="0"
           textAnchor="middle"
           dominantBaseline="central"
-          fontSize={isActive ? "24" : "18"}
-          fontWeight="600"
+          fontSize={fontSize}
+          fontWeight={isActive || isHovered ? "700" : "600"}
           fill={isActive ? "#FFFFFF" : "#FF9933"}
           fontFamily="'Noto Sans Devanagari', 'Inter', sans-serif"
-          className="select-none"
+          className="select-none pointer-events-none"
           letterSpacing="0.05em"
-          style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.75))" }}
+          style={{ 
+            filter: isHovered 
+              ? "drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.95)) drop-shadow(0px 0px 5px rgba(255, 153, 51, 0.6))" 
+              : "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.75))" 
+          }}
         >
           {info.label}
         </text>
@@ -351,8 +387,23 @@ export function HoraRing({ horaList, activeHora, currentTime, onSelectHora }: Ho
           const bezelOuterD = `M ${p1_in.x} ${p1_in.y} A ${R_in} ${R_in} 0 0 1 ${p2_in.x} ${p2_in.y} L ${p2_out.x} ${p2_out.y} A ${R_out} ${R_out} 0 0 0 ${p1_out.x} ${p1_out.y} Z`;
           const bezelInnerD = `M ${p1_m1.x} ${p1_m1.y} A ${R_mid1} ${R_mid1} 0 0 1 ${p2_m1.x} ${p2_m1.y} L ${p2_m2.x} ${p2_m2.y} A ${R_mid2} ${R_mid2} 0 0 0 ${p1_m2.x} ${p1_m2.y} Z`;
 
+          const isActiveHovered = hoveredIdx === activeIndex;
+          const currentActiveStroke = isActiveHovered ? 97 : 93;
+
           return (
-            <g key={h.number + activeIndex} className="cursor-pointer transition-all hover:brightness-110 active:opacity-90" onClick={() => onSelectHora?.(h)}>
+            <g 
+              key={h.number + activeIndex} 
+              className="cursor-pointer transition-all duration-200" 
+              onClick={() => onSelectHora?.(h)}
+              onMouseEnter={() => setHoveredIdx(activeIndex)}
+              onMouseLeave={() => setHoveredIdx(null)}
+              style={{
+                transformOrigin: '200px 200px',
+                transform: isActiveHovered ? 'scale(1.025)' : 'scale(1)',
+                filter: isActiveHovered ? 'drop-shadow(0px 0px 10px rgba(255, 215, 0, 0.8)) brightness(1.25)' : undefined,
+                transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.18s ease'
+              }}
+            >
               {/* Luxury Diamond Cut Gold Bezel */}
               <g id={`hora_bezel_${h.number}`} className="select-none pointer-events-none">
                 <path
@@ -410,7 +461,7 @@ export function HoraRing({ horaList, activeHora, currentTime, onSelectHora }: Ho
                 d={pathD}
                 fill="none"
                 stroke={getPlanetSolidColor(h.lord)}
-                strokeWidth={strokeWidth.toString()}
+                strokeWidth={currentActiveStroke.toString()}
                 strokeLinecap="butt"
                 opacity="1.0"
                 shapeRendering="geometricPrecision"

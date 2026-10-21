@@ -19,6 +19,7 @@ export function ChaughadiyaRing({
   onSelectSegment
 }: ChaughadiyaRingProps) {
   const [blurEnabled, setBlurEnabled] = useState(false);
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   useEffect(() => {
     let timerId: ReturnType<typeof setTimeout>;
@@ -293,12 +294,22 @@ export function ChaughadiyaRing({
     const pathOuterBorder = `M ${x1_out} ${y1_out} A ${r_out} ${r_out} 0 0 1 ${x2_out} ${y2_out}`;
 
     const theme = getSegmentVisualTheme(segment.type);
+    const isHovered = hoveredIdx === originalIndex;
+    const currentStroke = isHovered ? 114 : 107;
 
     return (
       <g 
         key={segment.name + originalIndex}
-        className="cursor-pointer transition-all hover:brightness-110 active:opacity-90"
+        className="cursor-pointer transition-all duration-200"
         onClick={() => onSelectSegment?.(segment)}
+        onMouseEnter={() => setHoveredIdx(originalIndex)}
+        onMouseLeave={() => setHoveredIdx(null)}
+        style={{
+          transformOrigin: '200px 200px',
+          transform: isHovered ? 'scale(1.025)' : 'scale(1)',
+          filter: isHovered ? 'drop-shadow(0px 0px 8px rgba(255, 215, 0, 0.7)) brightness(1.18)' : undefined,
+          transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.18s ease'
+        }}
       >
         {/* Main Segment Fill with distinct Shubh (Emerald Green), Chal (Warm Amber), Ashubh (Crimson Red) */}
         <path
@@ -307,7 +318,7 @@ export function ChaughadiyaRing({
           d={pathD}
           fill="none"
           stroke={theme.fillStroke}
-          strokeWidth={strokeWidth.toString()}
+          strokeWidth={currentStroke.toString()}
           strokeLinecap="butt"
           opacity="1.0"
           shapeRendering="geometricPrecision"
@@ -381,38 +392,39 @@ export function ChaughadiyaRing({
     const labelRadius = innerRadius + (outerRadius - innerRadius) / 2;
     const x = 200 + labelRadius * Math.cos(rad);
     const y = 200 + labelRadius * Math.sin(rad);
+    const isHovered = hoveredIdx === originalIndex;
     const isLongLabel = segment.hindiName && segment.hindiName.length > 4;
     const isActive = originalIndex === activeIdx;
-    const fontSize = isActive 
-      ? (isLongLabel ? "24" : "32")
-      : (isLongLabel ? "18" : "24");
+
+    // Noticeably larger font size per user request: "Chaiiyghadiya ring ke ander box ke name thoda or bade ho"
+    const baseFontSize = isActive 
+      ? (isLongLabel ? 26 : 34)
+      : (isLongLabel ? 21 : 27);
+    const fontSize = (baseFontSize + (isHovered ? 3 : 0)).toString();
 
     const theme = getSegmentVisualTheme(segment.type);
     const dotRadius = innerRadius + 14;
     const dotX = 200 + dotRadius * Math.cos(rad);
     const dotY = 200 + dotRadius * Math.sin(rad);
 
-    const formatTimeRange = (startStr: string, endStr: string): string => {
-      if (!startStr || !endStr) return "";
-      const [startTime, startAmpm] = startStr.split(' ');
-      const [endTime, endAmpm] = endStr.split(' ');
-      return `${startTime.substring(0, 5)}${startAmpm ? startAmpm.toLowerCase() : ''}-${endTime.substring(0, 5)}${endAmpm ? endAmpm.toLowerCase() : ''}`;
-    };
-
-    const timeRange = formatTimeRange(segment.startTime, segment.endTime);
-
-    // If 11 minutes or more, show name cleanly centered vertically with dy="0"
     return (
       <g 
         key={segment.name + "_label_" + originalIndex}
         className="cursor-pointer select-none"
         onClick={() => onSelectSegment?.(segment)}
+        onMouseEnter={() => setHoveredIdx(originalIndex)}
+        onMouseLeave={() => setHoveredIdx(null)}
+        style={{
+          transformOrigin: `${x}px ${y}px`,
+          transform: isHovered ? 'scale(1.12)' : 'scale(1)',
+          transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)'
+        }}
       >
         {/* Luminous Status Dot for 1-second quick glance */}
         <circle
           cx={dotX}
           cy={dotY}
-          r={isActive ? "4" : "3"}
+          r={isActive || isHovered ? "4.5" : "3.5"}
           fill={theme.statusDot}
           opacity="0.95"
           style={{ filter: `drop-shadow(0px 0px 4px ${theme.statusDot})` }}
@@ -426,12 +438,16 @@ export function ChaughadiyaRing({
           textAnchor="middle"
           dominantBaseline="central"
           fontSize={fontSize}
-          fontWeight={isActive ? "700" : "600"}
+          fontWeight={isActive || isHovered ? "700" : "600"}
           fill={theme.titleColor}
           fontFamily="'Noto Sans Devanagari', 'Inter', sans-serif"
           className="select-none pointer-events-none"
           letterSpacing="0.05em"
-          style={{ filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.9))" }}
+          style={{ 
+            filter: isHovered 
+              ? "drop-shadow(0px 2px 4px rgba(0, 0, 0, 1)) drop-shadow(0px 0px 6px rgba(255, 215, 0, 0.5))" 
+              : "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.9))" 
+          }}
         >
           {segment.hindiName}
         </text>
@@ -496,11 +512,22 @@ export function ChaughadiyaRing({
 
           const activeTheme = getSegmentVisualTheme(segment.type);
 
+          const isActiveHovered = hoveredIdx === activeIdx;
+          const currentActiveStroke = isActiveHovered ? 114 : 107;
+
           return (
             <g 
               key={segment.name + activeIdx}
-              className="cursor-pointer transition-all hover:brightness-110 active:opacity-90"
+              className="cursor-pointer transition-all duration-200"
               onClick={() => onSelectSegment?.(segment)}
+              onMouseEnter={() => setHoveredIdx(activeIdx)}
+              onMouseLeave={() => setHoveredIdx(null)}
+              style={{
+                transformOrigin: '200px 200px',
+                transform: isActiveHovered ? 'scale(1.025)' : 'scale(1)',
+                filter: isActiveHovered ? 'drop-shadow(0px 0px 12px rgba(255, 215, 0, 0.85)) brightness(1.2)' : undefined,
+                transition: 'transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.18s ease'
+              }}
             >
               {/* Active Segment Solid Rich Jewel Base Fill */}
               <path
@@ -509,7 +536,7 @@ export function ChaughadiyaRing({
                 d={pathD}
                 fill="none"
                 stroke={activeTheme.activeFill}
-                strokeWidth={strokeWidth.toString()}
+                strokeWidth={currentActiveStroke.toString()}
                 strokeLinecap="butt"
                 opacity="1.0"
                 shapeRendering="geometricPrecision"

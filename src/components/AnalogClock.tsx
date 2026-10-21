@@ -166,7 +166,7 @@ export function AnalogClock({
           </clipPath>
           {/* Inner Hora Isolation Clip - Prevents any shadow or glow bleed past Radius 211 */}
           <clipPath id="inner-hora-clip">
-            <circle cx="200" cy="200" r="211" />
+            <circle cx="200" cy="200" r="212" />
           </clipPath>
           <radialGradient id="textBackShadow" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#000000" stopOpacity="0.75" />
