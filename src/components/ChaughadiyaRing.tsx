@@ -72,6 +72,40 @@ export function ChaughadiyaRing({
     }
   };
 
+  // High-contrast, intuitive status color themes for 360 Choghadiya Ring:
+  // Green = Shubh/Labh/Amrit, Amber/Yellow = Chal, Red = Rog/Kaal/Udveg
+  const getSegmentVisualTheme = (type: string) => {
+    switch (type) {
+      case "Amrit":
+      case "Shubh":
+      case "Labh":
+        return {
+          fillStroke: "#13311E", // Rich emerald green tint
+          accentBorder: "#10B981", // Luminous emerald green
+          statusDot: "#10B981",
+          glowColor: "rgba(16, 185, 129, 0.45)"
+        };
+      case "Char":
+      case "Chal":
+        return {
+          fillStroke: "#3A2E12", // Rich warm golden-amber tint
+          accentBorder: "#F59E0B", // Luminous amber
+          statusDot: "#F59E0B",
+          glowColor: "rgba(245, 158, 11, 0.40)"
+        };
+      case "Rog":
+      case "Kaal":
+      case "Udveg":
+      default:
+        return {
+          fillStroke: "#3A1619", // Rich dark ruby-red tint
+          accentBorder: "#EF4444", // Luminous crimson red
+          statusDot: "#EF4444",
+          glowColor: "rgba(239, 68, 68, 0.45)"
+        };
+    }
+  };
+
   // Build extended list containing Tomorrow's first segment to fill the gap at day boundaries
   const extendedList = [...choghadiyaList];
   if (choghadiyaList.length === 16) {
@@ -247,18 +281,29 @@ export function ChaughadiyaRing({
     const pathInnerBorder = `M ${x1_in} ${y1_in} A ${r_in} ${r_in} 0 0 1 ${x2_in} ${y2_in}`;
     const pathOuterBorder = `M ${x1_out} ${y1_out} A ${r_out} ${r_out} 0 0 1 ${x2_out} ${y2_out}`;
 
+    const theme = getSegmentVisualTheme(segment.type);
+
     return (
       <g key={segment.name + originalIndex}>
-        {/* Main Segment Fill */}
+        {/* Main Segment Fill with distinct Shubh (Emerald Green), Chal (Warm Amber), Ashubh (Crimson Red) */}
         <path
           id={`chaughadiya_segment_${originalIndex}`}
           className="inactive-chaughadiya-segment"
           d={pathD}
           fill="none"
-          stroke="#3B2314"
+          stroke={theme.fillStroke}
           strokeWidth={strokeWidth.toString()}
           strokeLinecap="butt"
           opacity="1.0"
+          shapeRendering="geometricPrecision"
+        />
+        {/* Luminous Inner Accent Tint Border */}
+        <path
+          d={pathInnerBorder}
+          fill="none"
+          stroke={theme.accentBorder}
+          strokeWidth="2.5"
+          opacity="0.45"
           shapeRendering="geometricPrecision"
         />
         {/* 2px Gold borders */}
@@ -266,8 +311,8 @@ export function ChaughadiyaRing({
           d={pathInnerBorder}
           fill="none"
           stroke="#D4AF37"
-          strokeWidth="1.75"
-          opacity="0.85"
+          strokeWidth="1.2"
+          opacity="0.80"
           shapeRendering="geometricPrecision"
         />
         <path
@@ -327,6 +372,11 @@ export function ChaughadiyaRing({
       ? (isLongLabel ? "24" : "32")
       : (isLongLabel ? "18" : "24");
 
+    const theme = getSegmentVisualTheme(segment.type);
+    const dotRadius = innerRadius + 14;
+    const dotX = 200 + dotRadius * Math.cos(rad);
+    const dotY = 200 + dotRadius * Math.sin(rad);
+
     const formatTimeRange = (startStr: string, endStr: string): string => {
       if (!startStr || !endStr) return "";
       const [startTime, startAmpm] = startStr.split(' ');
@@ -340,6 +390,15 @@ export function ChaughadiyaRing({
     if (durationMinutes <= 30) {
       return (
         <g key={segment.name + "_label_" + originalIndex}>
+          {/* Luminous Status Dot for 1-second quick glance */}
+          <circle
+            cx={dotX}
+            cy={dotY}
+            r={isActive ? "4" : "3"}
+            fill={theme.statusDot}
+            opacity="0.95"
+            style={{ filter: `drop-shadow(0px 0px 4px ${theme.statusDot})` }}
+          />
           <text
             id={`chaughadiya_label_${originalIndex}`}
             x={x}
@@ -364,6 +423,15 @@ export function ChaughadiyaRing({
     // Stage 3: If 31 minutes or more, show both name and timing range
     return (
       <g key={segment.name + "_label_" + originalIndex}>
+        {/* Luminous Status Dot for 1-second quick glance */}
+        <circle
+          cx={dotX}
+          cy={dotY}
+          r={isActive ? "4" : "3"}
+          fill={theme.statusDot}
+          opacity="0.95"
+          style={{ filter: `drop-shadow(0px 0px 4px ${theme.statusDot})` }}
+        />
         {/* Choghadiya Hindi Name */}
         <text
           id={`chaughadiya_label_${originalIndex}`}
@@ -458,8 +526,28 @@ export function ChaughadiyaRing({
           const bezelOuterD = `M ${p1_in.x} ${p1_in.y} A ${R_in} ${R_in} 0 0 1 ${p2_in.x} ${p2_in.y} L ${p2_out.x} ${p2_out.y} A ${R_out} ${R_out} 0 0 0 ${p1_out.x} ${p1_out.y} Z`;
           const bezelInnerD = `M ${p1_m1.x} ${p1_m1.y} A ${R_mid1} ${R_mid1} 0 0 1 ${p2_m1.x} ${p2_m1.y} L ${p2_m2.x} ${p2_m2.y} A ${R_mid2} ${R_mid2} 0 0 0 ${p1_m2.x} ${p1_m2.y} Z`;
 
+          const activeTheme = getSegmentVisualTheme(segment.type);
+
           return (
             <g key={segment.name + activeIdx}>
+              {/* Active Segment Colored Base Fill */}
+              <path
+                id="active_chaughadiya_base_fill"
+                d={pathD}
+                fill="none"
+                stroke={activeTheme.fillStroke}
+                strokeWidth={strokeWidth.toString()}
+                strokeLinecap="butt"
+                opacity="1.0"
+                shapeRendering="geometricPrecision"
+              />
+              {/* Active Segment Subtle Tint Overlay */}
+              <path
+                d={bezelOuterD}
+                fill={activeTheme.statusDot}
+                opacity="0.12"
+                shapeRendering="geometricPrecision"
+              />
               {/* Luxury Diamond Cut Gold Frame */}
               <g id="diamond_cut_bezel" className="select-none pointer-events-none">
                 <path
