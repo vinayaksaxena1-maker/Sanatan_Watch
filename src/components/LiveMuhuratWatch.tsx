@@ -182,20 +182,20 @@ export function LiveMuhuratWatch({
   const getChoghadiyaStatusInfo = (type?: string) => {
     switch (type) {
       case 'Amrit':
-        return { dot: '🟢', label: 'शुभ (अमृत)', badgeBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' };
+        return { dot: '🟢', label: 'सर्वोत्तम समय', badgeBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' };
       case 'Shubh':
-        return { dot: '🟢', label: 'शुभ (शुभ)', badgeBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' };
+        return { dot: '🟢', label: 'शुभ समय', badgeBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' };
       case 'Labh':
-        return { dot: '🟢', label: 'शुभ (लाभ)', badgeBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' };
+        return { dot: '🟢', label: 'शुभ समय', badgeBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' };
       case 'Chal':
       case 'Char':
-        return { dot: '🟡', label: 'सामान्य समय (चल)', badgeBg: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30' };
+        return { dot: '🟡', label: 'सामान्य समय', badgeBg: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30' };
       case 'Rog':
-        return { dot: '🔴', label: 'अशुभ समय (रोग)', badgeBg: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30' };
+        return { dot: '🔴', label: 'अशुभ समय', badgeBg: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30' };
       case 'Kaal':
-        return { dot: '🔴', label: 'अशुभ समय (काल)', badgeBg: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30' };
+        return { dot: '🔴', label: 'अशुभ समय', badgeBg: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30' };
       case 'Udveg':
-        return { dot: '🔴', label: 'अशुभ समय (उद्वेग)', badgeBg: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30' };
+        return { dot: '🔴', label: 'अशुभ समय', badgeBg: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30' };
       default:
         return { dot: '🟡', label: 'सामान्य समय', badgeBg: 'bg-slate-500/15 text-slate-600 dark:text-slate-300 border-slate-500/30' };
     }
@@ -859,7 +859,7 @@ export function LiveMuhuratWatch({
                 <span className="text-base select-none">{statusInfo.dot}</span>
                 <div>
                   <h4 className="text-[14px] sm:text-[15.5px] font-black text-slate-900 dark:text-amber-100 font-serif leading-tight">
-                    अभी: {currentChoghadiya ? (currentChoghadiya.hindiName || currentChoghadiya.name) : 'सामान्य समय'} ({statusInfo.label})
+                    अभी: {currentChoghadiya ? (currentChoghadiya.hindiName || currentChoghadiya.name) : 'सामान्य'} चौघड़िया ({statusInfo.label})
                   </h4>
                   <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
                     समय: {currentChoghadiya ? `${formatHindiTime(currentChoghadiya.startTime)} - ${formatHindiTime(currentChoghadiya.endTime)}` : '—'}
@@ -898,7 +898,7 @@ export function LiveMuhuratWatch({
               <div className="pt-2 border-t border-orange-100/40 dark:border-zinc-800/60 flex items-center justify-between text-xs flex-wrap gap-1">
                 <span className="font-bold text-slate-500 dark:text-slate-400">⏭️ अगला चौघड़िया:</span>
                 <span className="font-bold font-serif text-slate-800 dark:text-slate-200">
-                  {nextStatusInfo.dot} {nextChoghadiya.hindiName || nextChoghadiya.name} ({formatHindiTime(nextChoghadiya.startTime)} से - {getNextPrecaution(nextChoghadiya.type)})
+                  {nextStatusInfo.dot} {nextChoghadiya.hindiName || nextChoghadiya.name} चौघड़िया ({formatHindiTime(nextChoghadiya.startTime)} से - {getNextPrecaution(nextChoghadiya.type)})
                 </span>
               </div>
             )}
