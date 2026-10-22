@@ -7,7 +7,7 @@ import React, { useState, useMemo } from 'react';
 import { Calendar, Search, Sparkles, X, Flame, Moon, Clock, Utensils, ChevronRight } from 'lucide-react';
 import { Festival } from '../types';
 import { getFestivalsForYear } from '../utils/festivalEngine';
-import { translateSanskritMonthName, translateTithiString } from '../utils/translations';
+import { translateSanskritMonthName, translateTithiString, translateFestivalTiming } from '../utils/translations';
 
 interface FestivalScreenProps {
   lat: number;
@@ -345,7 +345,7 @@ export function FestivalScreen({ lat, lon, year, language = 'Hindi' }: FestivalS
                 key={chip.id}
                 type="button"
                 onClick={() => setCategoryFilter(chip.id as CategoryFilter)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer border ${
+                className={`px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all cursor-pointer border leading-none ${
                   isActive
                     ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
                     : 'bg-orange-500/10 text-slate-700 dark:text-stone-300 hover:bg-orange-500/15 border-orange-300/40 dark:border-white/10'
@@ -394,19 +394,19 @@ export function FestivalScreen({ lat, lon, year, language = 'Hindi' }: FestivalS
               {upcomingHeroFestival.pujaMuhurat && (
                 <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-500/25 flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  <span>{isHindi ? "पूजा:" : "Puja:"} {upcomingHeroFestival.pujaMuhurat}</span>
+                  <span>{isHindi ? "पूजा:" : "Puja:"} {translateFestivalTiming(upcomingHeroFestival.pujaMuhurat, language)}</span>
                 </span>
               )}
               {upcomingHeroFestival.paranTime && (
                 <span className="px-2.5 py-0.5 rounded-lg bg-amber-500/10 text-amber-800 dark:text-amber-300 font-bold border border-amber-500/25 flex items-center gap-1">
                   <Utensils className="w-3 h-3" />
-                  <span>{isHindi ? "पारण:" : "Paran:"} {upcomingHeroFestival.paranTime}</span>
+                  <span>{isHindi ? "पारण:" : "Paran:"} {translateFestivalTiming(upcomingHeroFestival.paranTime, language)}</span>
                 </span>
               )}
               {upcomingHeroFestival.moonriseTime && (
                 <span className="px-2.5 py-0.5 rounded-lg bg-sky-500/10 text-sky-800 dark:text-sky-300 font-bold border border-sky-500/25 flex items-center gap-1">
                   <Moon className="w-3 h-3" />
-                  <span>{isHindi ? "चंद्रोदय:" : "Moonrise:"} {upcomingHeroFestival.moonriseTime}</span>
+                  <span>{isHindi ? "चंद्रोदय:" : "Moonrise:"} {translateFestivalTiming(upcomingHeroFestival.moonriseTime, language)}</span>
                 </span>
               )}
             </div>
@@ -578,7 +578,7 @@ export function FestivalScreen({ lat, lon, year, language = 'Hindi' }: FestivalS
                     <span>{formatFestivalDate(fest.date)}</span>
                     {fest.secondaryDate && (
                       <span className="text-[11px] px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-700 dark:text-amber-300 border border-orange-300/40 dark:border-amber-500/30 font-bold">
-                        {isHindi ? "विस्तार:" : "Extended:"} {fest.secondaryDate}
+                        {isHindi ? "विस्तार:" : "Extended:"} {translateFestivalTiming(fest.secondaryDate, language)}
                       </span>
                     )}
                   </div>
@@ -595,19 +595,19 @@ export function FestivalScreen({ lat, lon, year, language = 'Hindi' }: FestivalS
                     {fest.pujaMuhurat && (
                       <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-500/25 flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        <span>{isHindi ? "पूजा:" : "Puja:"} {fest.pujaMuhurat}</span>
+                        <span>{isHindi ? "पूजा:" : "Puja:"} {translateFestivalTiming(fest.pujaMuhurat, language)}</span>
                       </span>
                     )}
                     {fest.paranTime && (
                       <span className="px-2.5 py-0.5 rounded-lg bg-amber-500/10 text-amber-800 dark:text-amber-300 font-bold border border-amber-500/25 flex items-center gap-1">
                         <Utensils className="w-3 h-3" />
-                        <span>{isHindi ? "पारण:" : "Paran:"} {fest.paranTime}</span>
+                        <span>{isHindi ? "पारण:" : "Paran:"} {translateFestivalTiming(fest.paranTime, language)}</span>
                       </span>
                     )}
                     {fest.moonriseTime && (
                       <span className="px-2.5 py-0.5 rounded-lg bg-sky-500/10 text-sky-800 dark:text-sky-300 font-bold border border-sky-500/25 flex items-center gap-1">
                         <Moon className="w-3 h-3" />
-                        <span>{isHindi ? "चंद्रोदय:" : "Moonrise:"} {fest.moonriseTime}</span>
+                        <span>{isHindi ? "चंद्रोदय:" : "Moonrise:"} {translateFestivalTiming(fest.moonriseTime, language)}</span>
                       </span>
                     )}
                   </div>

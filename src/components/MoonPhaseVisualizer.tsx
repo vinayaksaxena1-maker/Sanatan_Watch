@@ -256,7 +256,7 @@ export function MoonPhaseVisualizer({ panchang, language = 'Hindi' }: MoonPhaseV
               textAnchor="middle"
               className="text-[12px] font-extrabold fill-slate-700 dark:fill-zinc-200 font-serif"
             >
-              प्रारंभ
+              {isHin ? 'प्रारंभ' : 'Start'}
             </text>
             <text
               x={cx + rOrbit + 15}
@@ -264,7 +264,9 @@ export function MoonPhaseVisualizer({ panchang, language = 'Hindi' }: MoonPhaseV
               textAnchor="middle"
               className="text-[12px] font-extrabold fill-slate-700 dark:fill-zinc-200 font-serif"
             >
-              {paksha === 'Shukla' ? 'पूर्णिमा' : 'अमावस्या'}
+              {isHin 
+                ? (paksha === 'Shukla' ? 'पूर्णिमा' : 'अमावस्या')
+                : (paksha === 'Shukla' ? 'Full Moon' : 'New Moon')}
             </text>
 
             <g transform={`translate(${cx}, ${cy})`}>

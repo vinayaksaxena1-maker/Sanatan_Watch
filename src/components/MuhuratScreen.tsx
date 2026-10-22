@@ -254,6 +254,19 @@ export function MuhuratScreen({
 }: MuhuratScreenProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const dateInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCategorySelect = (id: string) => {
+    setSelectedCategory(id);
+    setTimeout(() => {
+      const targetId = id === 'all' 
+        ? 'muhurat_cards_container' 
+        : (id === 'rituals' ? 'rituals_card' : `muhurat_card_${id}`);
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 60);
+  };
   
   const allMuhurats = getMuhuratsForPanchang(panchang);
   const ruleMuhurats = checkMuhurats(panchang);
@@ -697,7 +710,7 @@ export function MuhuratScreen({
       {/* 2. CATEGORY FILTER CHIPS (Horizontal Scrollable Chips) */}
       <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-2 px-2 scrollbar-hide">
         <button
-          onClick={() => setSelectedCategory('all')}
+          onClick={() => handleCategorySelect('all')}
           className={`px-3.5 py-1.5 rounded-full text-[12.5px] font-bold whitespace-nowrap transition-all cursor-pointer border ${
             selectedCategory === 'all'
               ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
@@ -709,7 +722,7 @@ export function MuhuratScreen({
         {processedCategories.map(cat => (
           <button
             key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
+            onClick={() => handleCategorySelect(cat.id)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all cursor-pointer border ${
               selectedCategory === cat.id
                 ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
@@ -722,7 +735,7 @@ export function MuhuratScreen({
         ))}
         {/* Rituals Filter Chip */}
         <button
-          onClick={() => setSelectedCategory('rituals')}
+          onClick={() => handleCategorySelect('rituals')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all cursor-pointer border ${
             selectedCategory === 'rituals'
               ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
@@ -762,7 +775,7 @@ export function MuhuratScreen({
                 quickUttam.map((item, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setSelectedCategory(item.id)}
+                    onClick={() => handleCategorySelect(item.id)}
                     className="px-2 py-0.5 rounded-lg bg-emerald-100/80 hover:bg-emerald-200 dark:bg-emerald-950/40 dark:hover:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border border-emerald-300/40 font-bold text-[11px] cursor-pointer transition-colors"
                   >
                     {item.name}
@@ -785,7 +798,7 @@ export function MuhuratScreen({
                 quickMadhyam.map((item, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setSelectedCategory(item.id)}
+                    onClick={() => handleCategorySelect(item.id)}
                     className="px-2 py-0.5 rounded-lg bg-amber-100/70 hover:bg-amber-200 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 text-amber-900 dark:text-amber-200 border border-amber-300/40 font-bold text-[11px] cursor-pointer transition-colors"
                   >
                     {item.name}
@@ -808,7 +821,7 @@ export function MuhuratScreen({
                 quickTalen.map((item, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setSelectedCategory(item.id)}
+                    onClick={() => handleCategorySelect(item.id)}
                     className="px-2 py-0.5 rounded-lg bg-rose-100/70 hover:bg-rose-200 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-900 dark:text-rose-200 border border-rose-300/40 font-bold text-[11px] cursor-pointer transition-colors"
                   >
                     {item.name} <span className="opacity-75 font-normal text-[10px]">({item.reason})</span>
@@ -868,9 +881,9 @@ export function MuhuratScreen({
 
       {/* 5. SPECIFIC MUHURAT CARDS (With Synchronized Stars & Conditional Badges) */}
       {categoriesFiltered.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+        <div id="muhurat_cards_container" className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
           {categoriesFiltered.map((cat) => (
-            <div key={cat.id} className="bg-white/85 dark:bg-[#120B08]/70 backdrop-blur-md p-3.5 sm:p-4 rounded-3xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 hover:border-[#FF9933]/65 transition-all duration-300 flex flex-col justify-between text-left shadow-xs">
+            <div key={cat.id} id={`muhurat_card_${cat.id}`} className="bg-white/85 dark:bg-[#120B08]/70 backdrop-blur-md p-3.5 sm:p-4 rounded-3xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 hover:border-[#FF9933]/65 transition-all duration-300 flex flex-col justify-between text-left shadow-xs">
               <div>
                 {/* Header: Title + Stars */}
                 <div className="flex justify-between items-start pb-1">

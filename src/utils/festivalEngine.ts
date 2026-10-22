@@ -94,6 +94,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       month: month,
       tithi: 'Shukla Ekadashi',
       description: `भगवान श्रीहरि विष्णु की विशेष आराधना, सुख-समृद्धि एवं आत्मिक शांति के लिए ${nameHin} का पावन व्रत।`,
+      descriptionEnglish: `Sacred fasting day of ${nameEng} dedicated to Lord Vishnu for spiritual peace, happiness, and liberation.`,
       type: 'Ekadashi',
       isAuspicious: true,
       paranTime: 'द्वादशी प्रातः 06:30 AM - 08:45 AM',
@@ -123,6 +124,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       month: month,
       tithi: 'Krishna Ekadashi',
       description: `भगवान श्रीहरि विष्णु की कृपा, पाप-निवारण एवं संकट मुक्ति के लिए ${nameHin} का पावन व्रत।`,
+      descriptionEnglish: `Sacred fasting day of ${nameEng} dedicated to Lord Vishnu for removing obstacles, cleansing negativity, and divine blessings.`,
       type: 'Ekadashi',
       isAuspicious: true,
       paranTime: 'द्वादशी प्रातः 06:30 AM - 08:45 AM',
@@ -185,6 +187,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       month: month,
       tithi: 'Shukla Ashtami',
       description: `भगवती दुर्गा एवं माँ पार्वती की विशेष कृपा, शक्ति और संकट नाश के लिए ${nameHin} का पावन व्रत।`,
+      descriptionEnglish: `Auspicious fast of ${nameEng} dedicated to Goddess Durga and Goddess Parvati for strength, protection, and fulfillment of virtues.`,
       type: 'Major',
       pujaMuhurat: 'प्रातः एवं सायंकाल देवी पूजन',
       isAuspicious: true
@@ -202,6 +205,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         month: month,
         tithi: 'Krishna Ashtami',
         description: 'भगवान श्री कृष्ण का मध्यरात्रि का पावन जन्मोत्सव व्रत, बाल गोपाल पूजन एवं दिव्य संकीर्तन।',
+        descriptionEnglish: 'Grand midnight celebration of Lord Krishna\'s divine appearance, Gopal puja, devotional chants, and fasting.',
         type: 'Major',
         isAuspicious: true,
         pujaMuhurat: 'निशिता काल (11:58 PM - 12:45 AM)'
@@ -215,6 +219,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         month: month,
         tithi: 'Krishna Ashtami',
         description: 'भगवान कालभैरव की विशेष पूजा-अर्चना, भय मुक्ति, रोग-कष्ट निवारण और आत्मबल के लिए पावन कालाष्टमी व्रत।',
+        descriptionEnglish: 'Sacred fast dedicated to Lord Kalabhairava for overcoming fear, protection against negativity, and inner courage.',
         type: 'Major',
         isAuspicious: true,
         pujaMuhurat: 'सायंकाल कालभैरव पूजन'
@@ -233,6 +238,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         month: month,
         tithi: 'Krishna Chaturdashi',
         description: 'भगवान शिव एवं माता पार्वती के महामिलन का महापर्व। चार प्रहर पूजन, रुद्राभिषेक एवं रात्रि जागरण का कल्याणकारी व्रत।',
+        descriptionEnglish: 'Great night of Lord Shiva and Goddess Parvati. Four-prahara worship, Rudrabhishek, and night-long spiritual vigil.',
         type: 'Major',
         isAuspicious: true,
         pujaMuhurat: 'निशिता काल (11:45 PM - 12:35 AM)'
@@ -246,6 +252,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         month: month,
         tithi: 'Krishna Chaturdashi',
         description: 'भगवान भोलेनाथ की विशेष आराधना, रात्रि जागरण और रुद्राभिषेक का मासिक पावन व्रत।',
+        descriptionEnglish: 'Monthly fast dedicated to Lord Shiva with night vigil, mantra chanting, and sacred prayer.',
         type: 'Major',
         isAuspicious: true,
         pujaMuhurat: 'निशिता काल (11:45 PM - 12:35 AM)'
@@ -264,6 +271,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         month: month,
         tithi: 'Krishna Chaturthi',
         description: 'पति की दीर्घायु, अखंड सौभाग्य और परिवार के सुख-कल्याण के लिए सुहागिनों का पावन निर्जला व्रत।',
+        descriptionEnglish: 'Sacred fast observed by married women for the longevity, health, and prosperity of their spouses, concluding with moonrise arghya.',
         type: 'Major',
         isAuspicious: true,
         pujaMuhurat: 'सायं 05:45 PM - 07:05 PM',
@@ -278,6 +286,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         month: month,
         tithi: 'Krishna Chaturthi',
         description: 'विघ्नहर्ता श्री गणेश की कृपा से समस्त बाधाओं और संकटों के निवारण हेतु पावन संकष्टी चतुर्थी व्रत।',
+        descriptionEnglish: 'Auspicious fast dedicated to Lord Ganesha for removing difficulties and obstacles, concluding after moonrise.',
         type: 'Major',
         isAuspicious: true,
         pujaMuhurat: 'सायंकाल गणेश पूजन',
@@ -296,6 +305,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         month: month,
         tithi: 'Shukla Chaturthi',
         description: 'विघ्नहर्ता श्री गणेश जी के प्राकट्य का दस दिवसीय पावन भक्ति एवं गणेशोत्सव महापर्व।',
+        descriptionEnglish: 'Grand 10-day festival commemorating the birth of Lord Ganesha, embodiment of wisdom and prosperity.',
         type: 'Major',
         isAuspicious: true,
         pujaMuhurat: 'मध्याह्न 11:05 AM - 01:35 PM'
@@ -309,6 +319,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         month: month,
         tithi: 'Shukla Chaturthi',
         description: 'श्री गणेश जी के पूजन से ज्ञान, बुद्धि, रिद्धि-सिद्धि और कार्य सफलता का पावन विनायक चतुर्थी व्रत।',
+        descriptionEnglish: 'Monthly fast dedicated to Lord Ganesha during waxing moon for wisdom, clarity, and success in endeavors.',
         type: 'Major',
         isAuspicious: true,
         pujaMuhurat: 'मध्याह्न गणेश पूजन'
@@ -336,6 +347,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       month: month,
       tithi: 'Shukla Purnima',
       description: `भगवान श्री सत्यनारायण पूजन, पवित्र नदी स्नान, दान-पुण्य एवं चंद्र देव की उपासना का पावन दिन।`,
+      descriptionEnglish: `Sacred Full Moon day dedicated to Lord Satyanarayan, holy river bath, charity, and honoring Chandra Dev.`,
       type: 'Major',
       isAuspicious: true,
       pujaMuhurat: 'सायंकाल प्रदोष वेला',
@@ -359,6 +371,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       month: month,
       tithi: 'Krishna Amavasya',
       description: `पितृ तर्पण, श्राद्ध कर्म, दीपदान और पवित्र नदियों में स्नान के लिए परम कल्याणकारी अमावस्या तिथि।`,
+      descriptionEnglish: `Auspicious New Moon day for ancestral prayers (Tarpan), charity, meditation, and lighting lamps.`,
       type: 'Major',
       isAuspicious: true,
       pujaMuhurat: 'प्रातःकाल स्नान-दान व तर्पण'
@@ -375,6 +388,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       month: month,
       tithi: 'Shukla Pratipada',
       description: 'वैदिक नव संवत्सर का शुभारंभ, सृष्टि निर्माण दिवस और चैत्र नवरात्र कलश स्थापना का पावन पर्व।',
+      descriptionEnglish: 'Auspicious Vedic New Year celebration, day of creation, and commencement of Chaitra Navratri Ghatasthapana.',
       type: 'Major',
       isAuspicious: true,
       pujaMuhurat: 'प्रातः 06:20 AM - 10:15 AM (घटस्थापना)'
@@ -390,6 +404,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       month: month,
       tithi: 'Shukla Navami',
       description: 'मर्यादा पुरुषोत्तम भगवान श्री राम का पावन जन्मोत्सव, मध्याह्न अभिषेक व रामायण पाठ।',
+      descriptionEnglish: 'Divine appearance day of Lord Rama, celebrated with midday prayers, Abhishek, and chanting sacred scriptures.',
       type: 'Major',
       isAuspicious: true,
       pujaMuhurat: 'मध्याह्न 11:05 AM - 01:30 PM'
@@ -405,6 +420,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       month: month,
       tithi: 'Shukla Pratipada',
       description: 'नवदुर्गा की विशेष उपासना, अखंड ज्योति एवं कलश स्थापना के साथ 9-दिवसीय शारदीय नवरात्र का शुभारंभ।',
+      descriptionEnglish: 'Commencement of the 9-day Sharadiya Navratri with Ghatasthapana, Akhand Jyoti, and invocations of Maa Durga.',
       type: 'Major',
       isAuspicious: true,
       pujaMuhurat: 'प्रातः 06:20 AM - 10:15 AM (घटस्थापना)'
@@ -420,6 +436,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       month: month,
       tithi: 'Shukla Dashami',
       description: 'अधर्म पर धर्म और बुराई पर अच्छाई की विजय का प्रतीक पावन विजयादशमी एवं अपराजिता पूजन पर्व।',
+      descriptionEnglish: 'Celebration of the victory of righteousness over evil, marking Lord Rama\'s triumph and Maa Durga\'s Vijaya Dashami.',
       type: 'Major',
       isAuspicious: true,
       pujaMuhurat: 'अपराह्न 01:20 PM - 03:40 PM (विजय मुहूर्त)'
@@ -435,6 +452,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       month: month,
       tithi: 'Shukla Pratipada',
       description: 'भगवान श्री कृष्ण द्वारा गोवर्धन पर्वत धारण करने की पावन स्मृति में अन्नकूट महोत्सव एवं गो-माता पूजन।',
+      descriptionEnglish: 'Commemoration of Lord Krishna lifting Mount Govardhan, celebrated with Annakut feast and worship of cows.',
       type: 'Major',
       isAuspicious: true,
       pujaMuhurat: 'प्रातः 06:30 AM - 08:45 AM'
@@ -450,6 +468,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       month: month,
       tithi: 'Shukla Dwitiya',
       description: 'भाई-बहन के पवित्र स्नेह, सुरक्षा और दीर्घायु का प्रतीक पावन यमद्वितीया (भैया दूज) पर्व।',
+      descriptionEnglish: 'Sacred festival celebrating the bond of love between brothers and sisters, symbol of affection, protection, and long life.',
       type: 'Major',
       isAuspicious: true,
       pujaMuhurat: 'दोपहर 01:15 PM - 03:30 PM (अपराह्न मुहूर्त)'
@@ -468,6 +487,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       month: month,
       tithi: panchang.hinduDate.tithi.name,
       description: 'सूर्य देव का मकर राशि में प्रवेश। पवित्र तीर्थ स्नान, तिल-गुड़ दान और सूर्य देव की उपासना का महापर्व।',
+      descriptionEnglish: 'Solar transition into Capricorn (Makara). Sacred day for holy bathing, charity of sesame and jaggery, and Surya worship.',
       type: 'Major',
       isAuspicious: true,
       pujaMuhurat: 'पुण्यकाल: सूर्योदय से सूर्यास्त',

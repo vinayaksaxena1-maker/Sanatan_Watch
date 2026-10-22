@@ -779,3 +779,53 @@ export function translateTithiString(tithi: string, lang: Language): string {
     .replace(/Purnima/gi, 'पूर्णिमा')
     .replace(/Amavasya/gi, 'अमावस्या');
 }
+
+export function formatKaranaEndTime(timeStr: string, lang: Language): string {
+  if (!timeStr) return '';
+  if (lang === 'Hindi') {
+    return formatHindiTime(timeStr);
+  }
+  return timeStr
+    .replace(/(\d{1,2}:\d{2}\s*(?:AM|PM|am|pm))\s*तक/g, 'until $1')
+    .replace(/पर \(समाप्त\)/g, '(ended)')
+    .replace(/समाप्त/g, 'Ended')
+    .replace(/व्यतीत/g, 'Concluded')
+    .replace(/तक/g, 'until')
+    .trim();
+}
+
+export function translateFestivalTiming(timingStr: string, lang: Language): string {
+  if (!timingStr) return '';
+  if (lang === 'Hindi') return timingStr;
+  return timingStr
+    .replace(/प्रातःकाल शुभ वेला/g, 'Morning Auspicious Time')
+    .replace(/प्रातः एवं सायंकाल देवी पूजन/g, 'Morning & Evening Devi Puja')
+    .replace(/सायंकाल कालभैरव पूजन/g, 'Evening Kalabhairav Puja')
+    .replace(/सायंकाल गणेश पूजन/g, 'Evening Ganesha Puja')
+    .replace(/मध्याह्न गणेश पूजन/g, 'Midday Ganesha Puja')
+    .replace(/सायंकाल प्रदोष वेला/g, 'Evening Pradosh Kaal')
+    .replace(/प्रातःकाल स्नान-दान व तर्पण/g, 'Morning Sacred Bath & Tarpan')
+    .replace(/पुण्यकाल: सूर्योदय से सूर्यास्त/g, 'Punya Kaal: Sunrise to Sunset')
+    .replace(/चंद्रोदय उपरांत अर्घ्य व पारण/g, 'After Moonrise (Arghya & Paran)')
+    .replace(/प्रदोष काल/g, 'Pradosh Kaal')
+    .replace(/निशिता काल/g, 'Nishita Kaal')
+    .replace(/घटस्थापना/g, 'Ghatasthapana')
+    .replace(/विजय मुहूर्त/g, 'Vijaya Muhurat')
+    .replace(/अपराह्न मुहूर्त/g, 'Aparahna Muhurat')
+    .replace(/चंद्र दर्शन व अर्घ्य/g, 'Moonrise & Arghya')
+    .replace(/शरद पूर्णिमा चंद्र अर्घ्य/g, 'Sharad Purnima Moon Arghya')
+    .replace(/चंद्र अर्घ्य/g, 'Moon Arghya')
+    .replace(/महापुण्यकाल/g, 'Maha Punya Kaal')
+    .replace(/द्वादशी प्रातः/g, 'Dwadashi Morning')
+    .replace(/द्वादशी/g, 'Dwadashi')
+    .replace(/प्रातः/g, 'Morning')
+    .replace(/सायं/g, 'Evening')
+    .replace(/सायंकाल/g, 'Evening')
+    .replace(/दोपहर/g, 'Afternoon')
+    .replace(/अपराह्न/g, 'Afternoon')
+    .replace(/मध्याह्न/g, 'Midday')
+    .replace(/रात्रि/g, 'Night')
+    .replace(/जनवरी/g, 'January')
+    .trim();
+}
+

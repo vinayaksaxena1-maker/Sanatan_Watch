@@ -80,7 +80,7 @@ import { MoonPhaseVisualizer } from './components/MoonPhaseVisualizer';
 // Hindu Dharmik Sacred Additions
 import { StotraSangrah } from './components/StotraSangrah';
 import dialBg from './components/VintageDialBackground.png';
-import { getTranslation, formatHindiTime, translateCityNameToHindi, formatLocalizedTime, translateDishaShool, translatePanchak } from './utils/translations';
+import { getTranslation, formatHindiTime, translateCityNameToHindi, formatLocalizedTime, translateDishaShool, translatePanchak, formatKaranaEndTime } from './utils/translations';
 import { getFestivalsForYear } from './utils/festivalEngine';
 import { getDishaShoolForDay } from './utils/alarmUtils';
 
@@ -854,12 +854,17 @@ export default function App() {
     const remHours = remDeg / speedPerHour;
     const hours = Math.floor(remHours);
     const minutes = Math.floor((remHours - hours) * 60);
+    const isHindi = settings.language === 'Hindi';
     if (hours > 24) {
       const days = Math.floor(hours / 24);
       const leftHours = hours % 24;
-      return `${days} दिन, ${leftHours} घंटे तक`;
+      return isHindi 
+        ? `${days} दिन, ${leftHours} घंटे तक`
+        : `${days}d, ${leftHours}h remaining`;
     }
-    return `${hours} घंटे, ${minutes} मिनट तक`;
+    return isHindi 
+      ? `${hours} घंटे, ${minutes} मिनट तक`
+      : `${hours}h, ${minutes}m remaining`;
   };
 
   const getDishaShoolInfo = (day: number) => {
@@ -1339,11 +1344,11 @@ export default function App() {
                 </div>
 
                 {/* Middle: Title & Tagline PROPERLY DEAD-CENTERED between Left Wing and Right Wing */}
-                <div className="flex-1 flex flex-col items-center justify-center gap-1 text-center min-w-0">
-                  <h1 className="text-[20px] sm:text-[23px] font-serif font-black text-orange-950 dark:text-amber-100 tracking-wider leading-none whitespace-nowrap">
+                <div className="flex-1 flex flex-col items-center justify-center gap-1 text-center min-w-0 px-1 overflow-hidden">
+                  <h1 className="text-[19px] sm:text-[23px] font-serif font-black text-orange-950 dark:text-amber-100 tracking-wider leading-none truncate max-w-full">
                     {getTranslation(settings.language, 'home')}
                   </h1>
-                  <span className="text-[11px] sm:text-[13px] font-serif font-extrabold text-orange-850 dark:text-amber-400 tracking-wide leading-none whitespace-nowrap">
+                  <span className="text-[10.5px] sm:text-[13px] font-serif font-extrabold text-orange-850 dark:text-amber-400 tracking-wide leading-none truncate max-w-full">
                     {getTranslation(settings.language, 'tagline')}
                   </span>
                 </div>
@@ -1352,11 +1357,11 @@ export default function App() {
                 <div className="w-[84px] sm:w-[94px] flex flex-col items-end justify-center gap-1 shrink-0">
                   <div 
                     onClick={() => setIsCityModalOpen(true)}
-                    className="flex items-center gap-1.5 rounded-full px-2.5 py-1 bg-orange-100/50 dark:bg-zinc-900/40 border border-orange-200/40 dark:border-zinc-800/40 hover:bg-orange-200/50 cursor-pointer transition-all duration-300 shrink-0"
+                    className="flex items-center gap-1 rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 bg-orange-100/50 dark:bg-zinc-900/40 border border-orange-200/40 dark:border-zinc-800/40 hover:bg-orange-200/50 cursor-pointer transition-all duration-300 shrink-0 max-w-[84px] sm:max-w-[94px]"
                     title={settings.language === 'Hindi' ? "स्थान बदलें" : "Change Location"}
                   >
-                    <MapPin className="w-3.5 h-3.5 text-orange-600 animate-pulse shrink-0" />
-                    <span className="text-[12px] font-extrabold text-orange-950 dark:text-amber-100 font-serif leading-normal whitespace-nowrap">
+                    <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-orange-600 animate-pulse shrink-0" />
+                    <span className="text-[11px] sm:text-[12px] font-extrabold text-orange-950 dark:text-amber-100 font-serif leading-normal truncate">
                       {settings.language === 'Hindi' ? translateCityNameToHindi(coords.city) : coords.city}
                     </span>
                   </div>
@@ -2149,7 +2154,7 @@ export default function App() {
                         })()}
                       </span>
                       <span className="text-[13px] sm:text-[13.5px] text-slate-800 dark:text-slate-200 font-bold flex items-center gap-1 font-sans">
-                        🕒 {settings.language === 'Hindi' ? formatHindiTime(panchangInfo.hinduDate.karana1?.endTime || '') : (panchangInfo.hinduDate.karana1?.endTime || '')}
+                        🕒 {formatKaranaEndTime(panchangInfo.hinduDate.karana1?.endTime || '', settings.language)}
                       </span>
                     </div>
 
@@ -2163,7 +2168,7 @@ export default function App() {
                         })()}
                       </span>
                       <span className="text-[13px] sm:text-[13.5px] text-slate-800 dark:text-slate-200 font-bold flex items-center gap-1 font-sans">
-                        🕒 {settings.language === 'Hindi' ? formatHindiTime(panchangInfo.hinduDate.karana2?.endTime || '') : (panchangInfo.hinduDate.karana2?.endTime || '')}
+                        🕒 {formatKaranaEndTime(panchangInfo.hinduDate.karana2?.endTime || '', settings.language)}
                       </span>
                     </div>
 

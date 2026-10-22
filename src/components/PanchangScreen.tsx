@@ -27,7 +27,7 @@ import {
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { PanchangInfo } from '../types';
 import { HoraSystem } from './HoraSystem';
-import { getTranslation } from '../utils/translations';
+import { getTranslation, formatKaranaEndTime } from '../utils/translations';
 import { getMuhuratsForPanchang, NAKSHATRA_DETAILS } from '../utils/panchangCalc';
 
 const translatePlanetNameHindi = (name: string): string => {
@@ -1124,7 +1124,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                           <div className="flex flex-wrap items-center gap-2 mt-1.5">
                             <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/60 px-2 py-0.5 rounded-md text-[10.5px] text-slate-600 dark:text-slate-400 font-mono">
                               <span>{language === 'Hindi' ? "समाप्ति:" : "Ends:"}</span>
-                              <strong className="text-slate-800 dark:text-slate-200 font-bold">{k1.endTime}</strong>
+                              <strong className="text-slate-800 dark:text-slate-200 font-bold">{formatKaranaEndTime(k1.endTime, language)}</strong>
                             </div>
                             <span className={`text-[9.5px] font-bold px-1.5 py-0.25 rounded border font-mono ${
                               k1.classification === 'Shubh'
@@ -1152,7 +1152,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                           <div className="flex flex-wrap items-center gap-2 mt-1.5">
                             <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/60 px-2 py-0.5 rounded-md text-[10.5px] text-slate-600 dark:text-slate-400 font-mono">
                               <span>{language === 'Hindi' ? "समाप्ति:" : "Ends:"}</span>
-                              <strong className="text-slate-800 dark:text-slate-200 font-bold">{k2.endTime}</strong>
+                              <strong className="text-slate-800 dark:text-slate-200 font-bold">{formatKaranaEndTime(k2.endTime, language)}</strong>
                             </div>
                             <span className={`text-[9.5px] font-bold px-1.5 py-0.25 rounded border font-mono ${
                               k2.classification === 'Shubh'
