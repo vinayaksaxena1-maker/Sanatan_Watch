@@ -5,10 +5,11 @@ interface HoraRingProps {
   horaList: HoraInterval[];
   activeHora: HoraInterval | null | undefined;
   currentTime: Date;
+  language?: 'English' | 'Hindi';
   onSelectHora?: (hora: HoraInterval) => void;
 }
 
-export function HoraRing({ horaList, activeHora, currentTime, onSelectHora }: HoraRingProps) {
+export function HoraRing({ horaList, activeHora, currentTime, language = 'Hindi', onSelectHora }: HoraRingProps) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   const getPlanetSolidColor = (lord: string): string => {
@@ -32,16 +33,17 @@ export function HoraRing({ horaList, activeHora, currentTime, onSelectHora }: Ho
   };
 
   const getPlanetLordInfo = (lord: string) => {
+    const isHin = language === 'Hindi';
     const map: Record<string, { label: string; color: string }> = {
-      'Sun': { label: 'सूर्य', color: '#FDBA74' }, // Orange-gold
-      'Moon': { label: 'चन्द्र', color: '#E2E8F0' }, // Silver-white
-      'Mars': { label: 'मंगल', color: '#FCA5A5' }, // Soft Red
-      'Mercury': { label: 'बुध', color: '#86EFAC' }, // Soft Green
-      'Jupiter': { label: 'गुरु', color: '#FDE047' }, // Soft Yellow
-      'Venus': { label: 'शुक्र', color: '#93C5FD' }, // Soft Cyan-blue
-      'Saturn': { label: 'शनि', color: '#C084FC' }  // Muted Purple
+      'Sun': { label: isHin ? 'सूर्य' : 'Sun', color: '#FDBA74' }, // Orange-gold
+      'Moon': { label: isHin ? 'चन्द्र' : 'Moon', color: '#E2E8F0' }, // Silver-white
+      'Mars': { label: isHin ? 'मंगल' : 'Mars', color: '#FCA5A5' }, // Soft Red
+      'Mercury': { label: isHin ? 'बुध' : 'Merc', color: '#86EFAC' }, // Soft Green
+      'Jupiter': { label: isHin ? 'गुरु' : 'Jup', color: '#FDE047' }, // Soft Yellow
+      'Venus': { label: isHin ? 'शुक्र' : 'Ven', color: '#93C5FD' }, // Soft Cyan-blue
+      'Saturn': { label: isHin ? 'शनि' : 'Sat', color: '#C084FC' }  // Muted Purple
     };
-    return map[lord] || { label: lord.substring(0, 1), color: '#94A3B8' };
+    return map[lord] || { label: lord.substring(0, 3), color: '#94A3B8' };
   };
 
   const currentMin = currentTime.getHours() * 60 + currentTime.getMinutes();

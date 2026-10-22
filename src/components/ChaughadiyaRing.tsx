@@ -7,6 +7,7 @@ interface ChaughadiyaRingProps {
   displayStartTime: string;
   displayEndTime: string;
   currentTime: Date;
+  language?: 'English' | 'Hindi';
   onSelectSegment?: (segment: ChoghadiyaInterval) => void;
 }
 
@@ -16,6 +17,7 @@ export function ChaughadiyaRing({
   displayStartTime,
   displayEndTime,
   currentTime,
+  language = 'Hindi',
   onSelectSegment
 }: ChaughadiyaRingProps) {
   const [blurEnabled, setBlurEnabled] = useState(false);
@@ -393,7 +395,10 @@ export function ChaughadiyaRing({
     const x = 200 + labelRadius * Math.cos(rad);
     const y = 200 + labelRadius * Math.sin(rad);
     const isHovered = hoveredIdx === originalIndex;
-    const isLongLabel = segment.hindiName && segment.hindiName.length > 4;
+    const isHin = language === 'Hindi';
+    const englishName = (segment.name || segment.type || '').split(' ')[0] || 'Shubh';
+    const labelText = isHin ? segment.hindiName : englishName;
+    const isLongLabel = labelText && labelText.length > 4;
     const isActive = originalIndex === activeIdx;
 
     // Noticeably larger font size per user request: "Chaiiyghadiya ring ke ander box ke name thoda or bade ho"
@@ -449,7 +454,7 @@ export function ChaughadiyaRing({
               : "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.9))" 
           }}
         >
-          {segment.hindiName}
+          {labelText}
         </text>
       </g>
     );

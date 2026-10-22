@@ -205,41 +205,64 @@ const translateYoniHindi = (yoni: string): string => {
 
 const translateSymbolHindi = (symbol: string): string => {
   const map: Record<string, string> = {
+    // Exact keys from panchangCalc.ts
+    'Horse Head': 'घोड़े का सिर',
     'Horse\'s Head': 'घोड़े का सिर',
+    'Yoni (Creativity)': 'योनि (सृजन)',
     'Yoni': 'योनि',
+    'Knife/Razor': 'छुरा या उस्तरा',
     'Razor or Knife': 'छुरा या चाकू',
+    'Cart/Chariot': 'रथ या छकड़ा',
     'Temple or Chariot': 'मंदिर या रथ',
-    'Bow or Quiver': 'धनुष या बाण',
-    'Weaving Loom': 'करघा',
+    'Deer Head': 'मृगशीर्ष (हिरन का सिर)',
+    'Tear-drop': 'आँसू या मणि',
     'Teardrop or Jewel': 'आँसू या मणि',
-    'Earring or Leaf': 'कुंडल या पत्ता',
-    'Lotus or Wheel': 'कमल या चक्र',
-    'Serpent': 'सर्प',
-    'Palanquin or Bed': 'पालकी या शय्या',
-    'Hammock or Couch': 'झूला या पलंग',
-    'Hand or Fist': 'हाथ या मुट्ठी',
-    'Pearl or Coral': 'मोती या मूंगा',
-    'Potter\'s Wheel': 'कुम्हार का चाक',
-    'Archway or Garland': 'तोरण या माला',
-    'Triumphal Arch': 'विजय द्वार',
-    'Lotus Flower': 'कमल का फूल',
+    'Bow & Quiver': 'धनुष-बाण',
+    'Bow or Quiver': 'धनुष या बाण',
+    'Flower/Cow Udder': 'कमल / गाय का थन',
     'Cow\'s Udder': 'गाय का थन',
-    'Bed or Cot': 'शय्या या खाट',
-    'Twin Fishes': 'जुड़वां मछलियां',
-    'Drum or Clay Pot': 'डमरू या मिट्टी का बर्तन',
+    'Coiled Snake': 'कुंडलिनी सर्प',
+    'Serpent': 'सर्प',
+    'Royal Throne': 'राजसिंहासन',
+    'Front Legs of Bed': 'शय्या के अग्र पावे',
+    'Palanquin or Bed': 'पालकी या शय्या',
+    'Back Legs of Bed': 'शय्या के पृष्ठ पावे',
+    'Hammock or Couch': 'झूला या पलंग',
+    'Clenched Fist': 'मुट्ठी या खुला हाथ',
+    'Hand or Fist': 'हाथ या मुट्ठी',
+    'Bright Pearl/Gem': 'चमकता मोती या मणि',
+    'Pearl or Coral': 'मोती या मूंगा',
+    'Shoot of Plant/Sword': 'पौधे का अंकुर या तलवार',
     'Sword or Shield': 'तलवार या ढाल',
-    'Three Footsteps': 'तीन कदम',
-    'Winnowing Basket': 'सूप या टोकरी',
-    'Flute or Bamboo': 'बांसुरी या बांस',
-    'Circle or Ring': 'वृत्त या वलय',
-    'Thunderbolt': 'वज्र',
-    'Umbrella/Round Amulet': 'छत्र या ताबीज',
+    'Triumphal Arch': 'विजय द्वार (तोरण)',
+    'Archway or Garland': 'तोरण या माला',
+    'Lotus Flower': 'कमल का फूल',
+    'Lotus or Wheel': 'कमल या चक्र',
+    'Umbrella/Round Amulet': 'छत्र या गोल ताबीज',
     'Circular Amulet or Umbrella': 'छत्र या ताबीज',
     'Umbrella': 'छत्र',
     'Amulet': 'ताबीज',
+    'Tied Bunch of Roots': 'जड़ों का बंधा गुच्छा',
+    'Elephant Tusk': 'हाथी का दांत',
+    'Winnowing Basket': 'सूप (अनाज फटकने का पात्र)',
+    'Three Footprints': 'तीन चरण (वामन पग)',
+    'Three Footsteps': 'तीन कदम',
+    'Drum/Flute': 'डमरू या बांसुरी',
+    'Drum or Clay Pot': 'डमरू या मिट्टी का बर्तन',
+    'Flute or Bamboo': 'बांसुरी या बांस',
     'Empty Circle/100 Stars': 'सौ तारों का समूह (रिक्त वृत्त)',
     'Empty Circle': 'रिक्त वृत्त',
     '100 Stars': 'सौ तारों का समूह',
+    'Two-Faced Man': 'दो मुख वाला मनुष्य',
+    'Twins in Back of Bed': 'शय्या के पिछले पावे',
+    'Fish/Drum': 'मछली का जोड़ा या मृदंग',
+    'Twin Fishes': 'जुड़वां मछलियां',
+    'Weaving Loom': 'करघा',
+    'Earring or Leaf': 'कुंडल या पत्ता',
+    'Potter\'s Wheel': 'कुम्हार का चाक',
+    'Bed or Cot': 'शय्या या खाट',
+    'Circle or Ring': 'वृत्त या वलय',
+    'Thunderbolt': 'वज्र',
     'Movable (Chara)': 'चर (गतिशील)'
   };
   return map[symbol] || symbol;
@@ -1513,9 +1536,13 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
               </span>
             </div>
             <p className="text-[12px] text-slate-650 dark:text-slate-350 mt-1.5 leading-relaxed font-sans">
-              {panchang.agniVaas?.description || (panchang.agniVaas?.isAuspicious 
-                ? (language === 'Hindi' ? "आज अग्नि का वास पृथ्वी पर है। हवन व यज्ञ अनुष्ठान करने से मनोवांछित फल व सुख-समृद्धि की प्राप्ति होगी।" : "Agni resides on Earth today. Highly auspicious for performing havan and yagya rituals.")
-                : (language === 'Hindi' ? "आज अग्नि का वास आकाश/पाताल में है। नित्य अग्निहोत्र को छोड़कर काम्य हवन करने से विघ्न हो सकता है।" : "Agni does not reside on Earth today. Avoid special havan ceremonies."))}
+              {language === 'Hindi'
+                ? (panchang.agniVaas?.isAuspicious 
+                    ? "आज अग्नि का वास पृथ्वी पर है। हवन व यज्ञ अनुष्ठान करने से मनोवांछित फल व सुख-समृद्धि की प्राप्ति होगी।" 
+                    : "आज अग्नि का वास आकाश/पाताल में है। नित्य अग्निहोत्र को छोड़कर काम्य हवन करने से विघ्न हो सकता है।")
+                : (panchang.agniVaas?.description || (panchang.agniVaas?.isAuspicious 
+                    ? "Agni resides on Earth today. Highly auspicious for performing havan and yagya rituals." 
+                    : "Agni does not reside on Earth today. Avoid special havan ceremonies."))}
             </p>
           </div>
 
@@ -1546,9 +1573,13 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
               </span>
             </div>
             <p className="text-[12px] text-slate-650 dark:text-slate-350 mt-1.5 leading-relaxed font-sans">
-              {panchang.shivaVaas?.description || (panchang.shivaVaas?.isAuspicious
-                ? (language === 'Hindi' ? "भगवान शिव आज अनुकूल स्थिति में विराजमान हैं। आज रुद्राभिषेक, महामृत्युंजय जप व शिव पूजन सर्वकार्य सिद्धि देगा।" : "Lord Shiva resides favorably today. Excellent for Rudrabhishek and Shiva Pooja.")
-                : (language === 'Hindi' ? "आज शिव वास अनुकूल नहीं है। रुद्राभिषेक अनुष्ठान टालें, सामान्य दैनिक शिव स्तुति व ॐ नमः शिवाय जप श्रेयस्कर है।" : "Shiva Vaas is unfavorable today. Avoid special Rudrabhishek rituals."))}
+              {language === 'Hindi'
+                ? (panchang.shivaVaas?.isAuspicious
+                    ? "भगवान शिव आज अनुकूल स्थिति में विराजमान हैं। आज रुद्राभिषेक, महामृत्युंजय जप व शिव पूजन सर्वकार्य सिद्धि देगा।"
+                    : "आज शिव वास अनुकूल नहीं है। रुद्राभिषेक अनुष्ठान टालें, सामान्य दैनिक शिव स्तुति व ॐ नमः शिवाय जप श्रेयस्कर है।")
+                : (panchang.shivaVaas?.description || (panchang.shivaVaas?.isAuspicious
+                    ? "Lord Shiva resides favorably today. Excellent for Rudrabhishek and Shiva Pooja."
+                    : "Shiva Vaas is unfavorable today. Avoid special Rudrabhishek rituals."))}
             </p>
           </div>
         </div>

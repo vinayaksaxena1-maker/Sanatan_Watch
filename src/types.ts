@@ -285,6 +285,7 @@ export interface Festival {
   month: string;
   tithi: string;
   description: string;
+  descriptionEnglish?: string;
   type: 'Ekadashi' | 'Purnima' | 'Amavasya' | 'Sankashti' | 'Jayanti' | 'Major';
   isAuspicious: boolean;
   secondaryDate?: string;

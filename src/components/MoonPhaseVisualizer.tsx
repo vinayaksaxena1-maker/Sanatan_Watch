@@ -10,6 +10,7 @@ import { PanchangInfo, PakshaType } from '../types';
 
 interface MoonPhaseVisualizerProps {
   panchang: PanchangInfo;
+  language?: 'English' | 'Hindi';
 }
 
 interface TithiDetail {
@@ -17,30 +18,34 @@ interface TithiDetail {
   name: string;
   hindiName: string;
   energy: string;
+  energyEng: string;
   deity: string;
+  deityEng: string;
   spirituality: string;
+  spiritualityEng: string;
 }
 
 // 15 Tithis within a single Paksha
 const MOON_PAKSHA_DAYS: TithiDetail[] = [
-  { value: 1, name: 'Pratipada', hindiName: 'प्रतिपदा (१)', energy: 'नया आरंभ', deity: 'अग्नि देव', spirituality: 'सकारात्मक संकल्प व नए कार्यों की शुरुआत हेतु श्रेष्ठ।' },
-  { value: 2, name: 'Dwitiya', hindiName: 'द्वितीया (२)', energy: 'स्थिरता व संचय', deity: 'ब्रह्मा जी', spirituality: 'गृह निर्माण, स्थिरता और स्थायी संपत्तियों के लिए लाभकारी।' },
-  { value: 3, name: 'Tritiya', hindiName: 'तृतीया (३)', energy: 'समृद्धि व कला', deity: 'माँ गौरी', spirituality: 'संगीत, कला और मांगलिक उत्सवों के लिए सर्वोत्तम दिन।' },
-  { value: 4, name: 'Chaturthi', hindiName: 'चतुर्थी (४)', energy: 'बाधा निवारण', deity: 'श्री गणेश', spirituality: 'श्री गणेश पूजा से विघ्न शांत होते हैं, साधना के लिए तीव्र दिन।' },
-  { value: 5, name: 'Panchami', hindiName: 'पंचमी (५)', energy: 'ज्ञान व चेतना', deity: 'नाग देवता', spirituality: 'विद्या आरंभ, आध्यात्मिक प्रगति और नाग आराधना हेतु श्रेष्ठ।' },
-  { value: 6, name: 'Shashti', hindiName: 'षष्ठी (६)', energy: 'अनुशासन व ओज', deity: 'कार्तिकेय', spirituality: 'यश, कीर्ति और शत्रुओं पर विजय प्राप्त करने की साधना।' },
-  { value: 7, name: 'Saptami', hindiName: 'सप्तमी (७)', energy: 'आरोग्य व तेज', deity: 'सूर्य देव', spirituality: 'आरोग्य लाभ और सूर्य देव की उपासना हेतु विशेष रूप से ऊर्जावान।' },
-  { value: 8, name: 'Ashtami', hindiName: 'अष्टमी (८)', energy: 'शक्ति संचय', deity: 'माँ दुर्गा', spirituality: 'मंत्र दीक्षा, ध्यान व दिव्य ऊर्जा की पूजा हेतु पवित्र अर्धचंद्र।' },
-  { value: 9, name: 'Navami', hindiName: 'नवमी (९)', energy: 'आत्मबल व मर्यादा', deity: 'माँ दुर्गा/राम', spirituality: 'कठिन संकल्पों और आंतरिक शत्रुओं पर विजय हेतु आत्मबल।' },
-  { value: 10, name: 'Dashami', hindiName: 'दशमी (१०)', energy: 'दिग्विजय', deity: 'यमराज', spirituality: 'दशों दिशाओं में कीर्ति और धर्म कार्यों की स्थापना के लिए शुभ।' },
-  { value: 11, name: 'Ekadashi', hindiName: 'एकादशी (११)', energy: 'पूर्ण शुद्धि व व्रत', deity: 'श्री विष्णु', spirituality: 'परम मोक्षदायिनी एकादशी। उपवास और विशेष ध्यान के योग्य।' },
-  { value: 12, name: 'Dwadashi', hindiName: 'द्वादशी (१२)', energy: 'तप व सेवा', deity: 'सूर्य देव', spirituality: 'साधना के पूर्ण फल की प्राप्ति, दान और पवित्र अनुष्ठान।' },
-  { value: 13, name: 'Trayodashi', hindiName: 'त्रयोदशी (१३)', energy: 'शिव शक्ति मिलन', deity: 'कामदेव', spirituality: 'प्रदोष काल व्रत और भगवान शिव की असीम कृपा प्राप्त करने का योग।' },
-  { value: 14, name: 'Chaturdashi', hindiName: 'चतुर्दशी (१४)', energy: 'गहन अध्यात्म', deity: 'भगवान शिव', spirituality: 'शिव आराधना व ध्यान के द्वारा मानसिक विकारों की शुद्धि।' },
-  { value: 15, name: 'Purnima / Amavasya', hindiName: 'पूर्णिमा / अमावस्या (१५)', energy: 'पूर्णत्व / मौन', deity: 'चंद्रमा / पितृ', spirituality: 'पूर्णिमा: पूर्ण ऊर्जा, ध्यान व संतोष; अमावस्या: मौन, ध्यान व पितृ तर्पण।' }
+  { value: 1, name: 'Pratipada', hindiName: 'प्रतिपदा (१)', energy: 'नया आरंभ', energyEng: 'New Beginnings', deity: 'अग्नि देव', deityEng: 'Lord Agni', spirituality: 'सकारात्मक संकल्प व नए कार्यों की शुरुआत हेतु श्रेष्ठ।', spiritualityEng: 'Best for positive resolutions, fresh commitments, and commencing new work.' },
+  { value: 2, name: 'Dwitiya', hindiName: 'द्वितीया (२)', energy: 'स्थिरता व संचय', energyEng: 'Stability & Wealth', deity: 'ब्रह्मा जी', deityEng: 'Lord Brahma', spirituality: 'गृह निर्माण, स्थिरता और स्थायी संपत्तियों के लिए लाभकारी।', spiritualityEng: 'Auspicious for construction, laying foundations, and long-term security.' },
+  { value: 3, name: 'Tritiya', hindiName: 'तृतीया (३)', energy: 'समृद्धि व कला', energyEng: 'Prosperity & Arts', deity: 'माँ गौरी', deityEng: 'Goddess Gauri', spirituality: 'संगीत, कला और मांगलिक उत्सवों के लिए सर्वोत्तम दिन।', spiritualityEng: 'Best for creative arts, music, weddings, and celebration of prosperity.' },
+  { value: 4, name: 'Chaturthi', hindiName: 'चतुर्थी (४)', energy: 'बाधा निवारण', energyEng: 'Obstacle Removal', deity: 'श्री गणेश', deityEng: 'Lord Ganesha', spirituality: 'श्री गणेश पूजा से विघ्न शांत होते हैं, साधना के लिए तीव्र दिन।', spiritualityEng: 'Worship of Lord Ganesha removes obstacles; powerful day for focused spiritual practice.' },
+  { value: 5, name: 'Panchami', hindiName: 'पंचमी (५)', energy: 'ज्ञान व चेतना', energyEng: 'Wisdom & Healing', deity: 'नाग देवता', deityEng: 'Naga Devatas', spirituality: 'विद्या आरंभ, आध्यात्मिक प्रगति और नाग आराधना हेतु श्रेष्ठ।', spiritualityEng: 'Ideal for commencing education, intellectual study, and spiritual purification.' },
+  { value: 6, name: 'Shashti', hindiName: 'षष्ठी (६)', energy: 'अनुशासन व ओज', energyEng: 'Discipline & Valor', deity: 'कार्तिकेय', deityEng: 'Lord Kartikeya', spirituality: 'यश, कीर्ति और शत्रुओं पर विजय प्राप्त करने की साधना।', spiritualityEng: 'Cultivates victory over obstacles, courage, and athletic pursuits.' },
+  { value: 7, name: 'Saptami', hindiName: 'सप्तमी (७)', energy: 'आरोग्य व तेज', energyEng: 'Health & Radiance', deity: 'सूर्य देव', deityEng: 'Lord Surya', spirituality: 'आरोग्य लाभ और सूर्य देव की उपासना हेतु विशेष रूप से ऊर्जावान।', spiritualityEng: 'Vibrant solar vitality; highly auspicious for health recovery and Surya worship.' },
+  { value: 8, name: 'Ashtami', hindiName: 'अष्टमी (८)', energy: 'शक्ति संचय', energyEng: 'Inner Power', deity: 'माँ दुर्गा', deityEng: 'Goddess Durga', spirituality: 'मंत्र दीक्षा, ध्यान व दिव्य ऊर्जा की पूजा हेतु पवित्र अर्धचंद्र।', spiritualityEng: 'Sacred half-moon day for mantra chanting, meditation, and invoking divine strength.' },
+  { value: 9, name: 'Navami', hindiName: 'नवमी (९)', energy: 'आत्मबल व मर्यादा', energyEng: 'Strength & Righteousness', deity: 'माँ दुर्गा/राम', deityEng: 'Lord Rama / Durga', spirituality: 'कठिन संकल्पों और आंतरिक शत्रुओं पर विजय हेतु आत्मबल।', spiritualityEng: 'Inspires inner fortitude and mastery over negative thoughts and adversity.' },
+  { value: 10, name: 'Dashami', hindiName: 'दशमी (१०)', energy: 'दिग्विजय', energyEng: 'Triumph & Success', deity: 'यमराज', deityEng: 'Lord Yamraj', spirituality: 'दशों दिशाओं में कीर्ति और धर्म कार्यों की स्थापना के लिए शुभ।', spiritualityEng: 'Favorable for righteous victories, new ventures, and social leadership.' },
+  { value: 11, name: 'Ekadashi', hindiName: 'एकादशी (११)', energy: 'पूर्ण शुद्धि व व्रत', energyEng: 'Fasting & Purification', deity: 'श्री विष्णु', deityEng: 'Lord Vishnu', spirituality: 'परम मोक्षदायिनी एकादशी। उपवास और विशेष ध्यान के योग्य।', spiritualityEng: 'Highly sacred day for fasting, devotional contemplation, and mental detox.' },
+  { value: 12, name: 'Dwadashi', hindiName: 'द्वादशी (१२)', energy: 'तप व सेवा', energyEng: 'Service & Charity', deity: 'सूर्य देव', deityEng: 'Lord Vishnu/Surya', spirituality: 'साधना के पूर्ण फल की प्राप्ति, दान और पवित्र अनुष्ठान।', spiritualityEng: 'Auspicious for charity, feeding others, and concluding devotional vrats.' },
+  { value: 13, name: 'Trayodashi', hindiName: 'त्रयोदशी (१३)', energy: 'शिव शक्ति मिलन', energyEng: 'Divine Grace', deity: 'कामदेव / शिव', deityEng: 'Lord Shiva', spirituality: 'प्रदोष काल व्रत और भगवान शिव की असीम कृपा प्राप्त करने का योग।', spiritualityEng: 'Pradosh twilight fast; invites immense blessings and peace from Lord Shiva.' },
+  { value: 14, name: 'Chaturdashi', hindiName: 'चतुर्दशी (१४)', energy: 'गहन अध्यात्म', energyEng: 'Deep Meditation', deity: 'भगवान शिव', deityEng: 'Lord Shiva', spirituality: 'शिव आराधना व ध्यान के द्वारा मानसिक विकारों की शुद्धि।', spiritualityEng: 'Powerful day for deep meditation, overcoming fear, and spiritual renewal.' },
+  { value: 15, name: 'Purnima / Amavasya', hindiName: 'पूर्णिमा / अमावस्या (१५)', energy: 'पूर्णत्व / मौन', energyEng: 'Culmination / Reflection', deity: 'चंद्रमा / पितृ', deityEng: 'Chandra / Ancestors', spirituality: 'पूर्णिमा: पूर्ण ऊर्जा, ध्यान व संतोष; अमावस्या: मौन, ध्यान व पितृ तर्पण।', spiritualityEng: 'Full Moon: fullness of consciousness; New Moon: quiet introspection and ancestral blessings.' }
 ];
 
-export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
+export function MoonPhaseVisualizer({ panchang, language = 'Hindi' }: MoonPhaseVisualizerProps) {
+  const isHin = language === 'Hindi';
   const currentTithiValue = panchang.hinduDate.tithi.value;
   const paksha: PakshaType = panchang.hinduDate.paksha;
 
@@ -154,7 +159,7 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
       <div className="flex items-center justify-center gap-1.5 border-b border-orange-100/20 dark:border-orange-950/10 pb-1 w-full text-center">
         <span className="text-[14px] sm:text-[15px]">✨</span>
         <h3 className="text-[15px] font-bold tracking-wider text-[#FF9933] dark:text-amber-500 leading-none font-serif text-center">
-          ॥ खगोलीय चंद्र स्थिति ॥
+          {isHin ? "॥ खगोलीय चंद्र स्थिति ॥" : "॥ Astronomical Moon Phase ॥"}
         </h3>
       </div>
 
@@ -162,10 +167,12 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-0.5">
         <div>
           <h4 className="text-[13px] sm:text-[15px] font-bold text-slate-800 dark:text-amber-100 font-serif leading-tight">
-            पक्ष चंद्र कला एवं तिथि चक्र 
+            {isHin ? "पक्ष चंद्र कला एवं तिथि चक्र" : "Moon Phase & Paksha Cycle"}
           </h4>
           <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5 max-w-lg leading-snug">
-            चंद्रमा के {paksha === 'Shukla' ? 'शुक्ल पक्ष (वैश्विक उदय)' : 'कृष्ण पक्ष (वैश्विक क्षय)'} की गति। चक्र के बिंदुओं पर स्पर्श करके अन्य तिथियों का प्रभाव देखें।
+            {isHin
+              ? `चंद्रमा के ${paksha === 'Shukla' ? 'शुक्ल पक्ष (वैश्विक उदय)' : 'कृष्ण पक्ष (वैश्विक क्षय)'} की गति। चक्र के बिंदुओं पर स्पर्श करके अन्य तिथियों का प्रभाव देखें।`
+              : `Progression of the Moon during ${paksha === 'Shukla' ? 'Shukla Paksha (Waxing Phase)' : 'Krishna Paksha (Waning Phase)'}. Tap on any orbit point to inspect its phase and attributes.`}
           </p>
         </div>
 
@@ -176,12 +183,12 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
             className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-black text-amber-950 dark:text-black bg-gradient-to-r from-amber-400 via-orange-400 to-amber-400 border border-amber-300 dark:border-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.5)] rounded-full transition-all shrink-0 cursor-pointer hover:scale-105 active:scale-95 animate-pulse"
           >
             <RefreshCw className="w-3.5 h-3.5 animate-spin text-black" style={{ animationDuration: '3s' }} />
-            🔄 आज की तिथि ({todayPakshaDay})
+            {isHin ? `🔄 आज की तिथि (${todayPakshaDay})` : `🔄 Today's Tithi (${todayPakshaDay})`}
           </button>
         ) : (
           <div className="flex items-center gap-1.5 px-2.5 py-1 text-[10.5px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800/60 rounded-full shrink-0 shadow-xs">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            आज की तिथि ({todayPakshaDay})
+            {isHin ? `आज की तिथि (${todayPakshaDay})` : `Today's Tithi (${todayPakshaDay})`}
           </div>
         )}
       </div>
@@ -402,26 +409,36 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
           <div className="p-3 sm:p-3.5 rounded-2xl border border-[#ff9933]/45 dark:border-[#ff9933]/30 bg-white dark:bg-[#1E1914]/80 shadow-sm">
             <div className="flex justify-between items-center">
               <span className={`text-[14px] sm:text-[15px] font-bold tracking-wider font-mono ${systemColorAccent}`}>
-                तारीख स्थिति: दिन {selectedDay} / १५ ({paksha === 'Shukla' ? 'शुक्ल पक्ष' : 'कृष्ण पक्ष'})
+                {isHin
+                  ? `तारीख स्थिति: दिन ${selectedDay} / १५ (${paksha === 'Shukla' ? 'शुक्ल पक्ष' : 'कृष्ण पक्ष'})`
+                  : `Phase Status: Day ${selectedDay} / 15 (${paksha === 'Shukla' ? 'Waxing Moon' : 'Waning Moon'})`}
               </span>
               <span className="text-[12px] font-extrabold text-slate-500 dark:text-slate-400 font-mono">
-                चंद्र कला: {Math.round(calculatedIllumination * 100)}%
+                {isHin ? `चंद्र कला: ${Math.round(calculatedIllumination * 100)}%` : `Illumination: ${Math.round(calculatedIllumination * 100)}%`}
               </span>
             </div>
 
             <h4 className="text-[20px] sm:text-[22px] font-bold font-serif text-slate-800 dark:text-orange-100 flex items-center gap-1.5 mt-1.5">
               <Moon className={`w-4 h-4 ${systemColorAccent} shrink-0 animate-pulse`} />
-              {activeTithiInfo.hindiName}
+              {isHin ? activeTithiInfo.hindiName : activeTithiInfo.name}
             </h4>
 
             <div className="grid grid-cols-2 gap-2.5 mt-2.5 pt-2.5 border-t border-slate-100 dark:border-zinc-800/80">
               <div>
-                <span className="text-[12px] text-slate-500 dark:text-slate-400 font-mono block">ऊर्जा तत्त्व</span>
-                <span className="text-[13.5px] font-black text-slate-700 dark:text-slate-300 block">{activeTithiInfo.energy}</span>
+                <span className="text-[12px] text-slate-500 dark:text-slate-400 font-mono block">
+                  {isHin ? "ऊर्जा तत्त्व" : "Energy Element"}
+                </span>
+                <span className="text-[13.5px] font-black text-slate-700 dark:text-slate-300 block">
+                  {isHin ? activeTithiInfo.energy : activeTithiInfo.energyEng}
+                </span>
               </div>
               <div>
-                <span className="text-[12px] text-slate-500 dark:text-slate-400 font-mono block">अधिपति देवता</span>
-                <span className="text-[13.5px] font-black text-slate-700 dark:text-slate-300 block">{activeTithiInfo.deity}</span>
+                <span className="text-[12px] text-slate-500 dark:text-slate-400 font-mono block">
+                  {isHin ? "अधिपति देवता" : "Presiding Deity"}
+                </span>
+                <span className="text-[13.5px] font-black text-slate-700 dark:text-slate-300 block">
+                  {isHin ? activeTithiInfo.deity : activeTithiInfo.deityEng}
+                </span>
               </div>
             </div>
           </div>
@@ -430,9 +447,13 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
           <div className="p-3 sm:p-3.5 rounded-2xl bg-orange-50/30 dark:bg-orange-950/20 border border-orange-200/30 dark:border-orange-900/30 text-left text-xs text-slate-700 dark:text-slate-300 flex gap-2">
             <Info className="w-5 h-5 text-[#FF9933] shrink-0 mt-0.5" />
             <div>
-              <strong className="text-slate-850 dark:text-amber-100 font-bold block mb-0.5 text-[14px]">वैदिक प्रभाव और साधना निर्देश:</strong>
+              <strong className="text-slate-850 dark:text-amber-100 font-bold block mb-0.5 text-[14px]">
+                {isHin ? "वैदिक प्रभाव और साधना निर्देश:" : "Vedic Guidance & Significance:"}
+              </strong>
               <p className="leading-relaxed font-sans text-[13px] sm:text-[14px]">
-                {activeTithiInfo.spirituality} इस दिन चंद्र कलाओं का मानसिक शक्तियों पर गहरा सूक्ष्म प्रभाव पड़ता है।
+                {isHin 
+                  ? `${activeTithiInfo.spirituality} इस दिन चंद्र कलाओं का मानसिक शक्तियों पर गहरा सूक्ष्म प्रभाव पड़ता है।` 
+                  : `${activeTithiInfo.spiritualityEng} The subtle lunar rays deeply influence mental and spiritual faculties today.`}
               </p>
             </div>
           </div>
@@ -441,7 +462,9 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
           <div className="text-[13px] sm:text-[14px] font-serif font-bold text-slate-800 dark:text-amber-200 leading-relaxed flex items-center gap-2 bg-amber-500/10 dark:bg-amber-950/20 border border-amber-500/25 p-2.5 rounded-xl text-left">
             <span className="text-base shrink-0 select-none">🧠</span>
             <span>
-              चंद्र बल / मानसिक ऊर्जा: {Math.round(calculatedIllumination * 100)}% ({paksha === 'Shukla' ? 'मानसिक एकाग्रता, ध्यान, सात्विक भोजन और रचनात्मक चिंतन के लिए श्रेष्ठ दिन' : 'मानसिक शांति, आत्मचिंतन, ध्यान और विश्राम के लिए अनुकूल चंद्र बल'})
+              {isHin
+                ? `चंद्र बल / मानसिक ऊर्जा: ${Math.round(calculatedIllumination * 100)}% (${paksha === 'Shukla' ? 'मानसिक एकाग्रता, ध्यान, सात्विक भोजन और रचनात्मक चिंतन के लिए श्रेष्ठ दिन' : 'मानसिक शांति, आत्मचिंतन, ध्यान और विश्राम के लिए अनुकूल चंद्र बल'})`
+                : `Lunar Strength / Mental Energy: ${Math.round(calculatedIllumination * 100)}% (${paksha === 'Shukla' ? 'Ideal for creative focus, clarity, nourishing food, and active meditation' : 'Ideal for peace of mind, self-reflection, rest, and serene contemplation'})`}
             </span>
           </div>
 
@@ -449,9 +472,13 @@ export function MoonPhaseVisualizer({ panchang }: MoonPhaseVisualizerProps) {
           <div className="text-[12px] sm:text-[12.5px] text-slate-500 dark:text-zinc-400 font-sans leading-tight flex items-center gap-1.5 bg-slate-100/30 dark:bg-stone-900/10 p-2 rounded-lg">
             <ThumbsUp className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
             <span>
-              {paksha === 'Shukla' 
-                ? 'शुक्ल पक्ष में चंद्रमा बढ़ता है, यह नए कार्यों के सृजन, समृद्धि और विकास का समय है।' 
-                : 'कृष्ण पक्ष में चंद्रमा घटता है, यह आंतरिक शुद्धि, साधना और तनाव विमुक्ति का समय है।'}
+              {isHin
+                ? (paksha === 'Shukla' 
+                  ? 'शुक्ल पक्ष में चंद्रमा बढ़ता है, यह नए कार्यों के सृजन, समृद्धि और विकास का समय है।' 
+                  : 'कृष्ण पक्ष में चंद्रमा घटता है, यह आंतरिक शुद्धि, साधना और तनाव विमुक्ति का समय है।')
+                : (paksha === 'Shukla'
+                  ? 'The waxing Moon supports new creative actions, expansion, and prosperity.'
+                  : 'The waning Moon fosters introspection, internal purification, and letting go of stress.')}
             </span>
           </div>
 

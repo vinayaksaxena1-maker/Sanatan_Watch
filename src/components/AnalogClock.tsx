@@ -13,6 +13,7 @@ interface AnalogClockProps {
   horaList?: HoraInterval[];
   sunriseTimeStr?: string;
   sunsetTimeStr?: string;
+  language?: 'English' | 'Hindi';
   onSelectChoghadiya?: (segment: ChoghadiyaInterval) => void;
   onSelectHora?: (hora: HoraInterval) => void;
 }
@@ -27,6 +28,7 @@ export function AnalogClock({
   horaList = [],
   sunriseTimeStr = '',
   sunsetTimeStr = '',
+  language = 'Hindi',
   onSelectChoghadiya,
   onSelectHora
 }: AnalogClockProps) {
@@ -202,6 +204,7 @@ export function AnalogClock({
             horaList={horaList}
             activeHora={activeHora}
             currentTime={currentTime}
+            language={language}
             onSelectHora={onSelectHora}
           />
         </g>
@@ -240,6 +243,7 @@ export function AnalogClock({
           displayStartTime=""
           displayEndTime=""
           currentTime={currentTime}
+          language={language}
           onSelectSegment={onSelectChoghadiya}
         />
 
@@ -270,28 +274,36 @@ export function AnalogClock({
           {/* Curved Text showing active Choghadiya period */}
           <text fontSize="26" fontWeight="bold" letterSpacing="0.1em" className="fill-[#3B2314] dark:fill-white select-none">
             <textPath href="#outerTextPathTop" startOffset="50%" textAnchor="middle">
-              {isDaytime ? "।। ☀️ दिन की चौघड़िया ।।" : "।। 🌙 रात की चौघड़िया ।।"}
+              {language === 'Hindi'
+                ? (isDaytime ? "।। ☀️ दिन की चौघड़िया ।।" : "।। 🌙 रात की चौघड़िया ।।")
+                : (isDaytime ? "|| ☀️ Day Choghadiya ||" : "|| 🌙 Night Choghadiya ||")}
             </textPath>
           </text>
 
           {/* Sunset (Left Side) */}
           <text fontSize="26" fontWeight="bold" letterSpacing="0.05em" className="fill-[#3B2314] dark:fill-white select-none">
             <textPath href="#outerTextPathLeft" startOffset="50%" textAnchor="middle">
-              ।। 🌇 सूर्यास्त {sunsetTimeStr} ।।
+              {language === 'Hindi'
+                ? `।। 🌇 सूर्यास्त ${sunsetTimeStr} ।।`
+                : `|| 🌇 Sunset ${sunsetTimeStr} ||`}
             </textPath>
           </text>
 
           {/* Sunrise (Right Side) */}
           <text fontSize="26" fontWeight="bold" letterSpacing="0.05em" className="fill-[#3B2314] dark:fill-white select-none">
             <textPath href="#outerTextPathRight" startOffset="50%" textAnchor="middle">
-              ।। 🌅 सूर्योदय {sunriseTimeStr} ।।
+              {language === 'Hindi'
+                ? `।। 🌅 सूर्योदय ${sunriseTimeStr} ।।`
+                : `|| 🌅 Sunrise ${sunriseTimeStr} ||`}
             </textPath>
           </text>
 
           {/* Current Hora (Bottom Side) */}
           <text fontSize="26" fontWeight="bold" letterSpacing="0.1em" className="fill-[#3B2314] dark:fill-white select-none">
             <textPath href="#outerTextPathBottom" startOffset="50%" textAnchor="middle">
-              {activeHora ? `।। ⌛ सक्रिय होरा: ${activeHora.lordHindi} (${activeHora.startTime} - ${activeHora.endTime}) ।।` : "।। ⌛ सक्रिय होरा ।।"}
+              {language === 'Hindi'
+                ? (activeHora ? `।। ⌛ सक्रिय होरा: ${activeHora.lordHindi} (${activeHora.startTime} - ${activeHora.endTime}) ।।` : "।। ⌛ सक्रिय होरा ।।")
+                : (activeHora ? `|| ⌛ Active Hora: ${activeHora.lord} (${activeHora.startTime} - ${activeHora.endTime}) ||` : "|| ⌛ Active Hora ||")}
             </textPath>
           </text>
         </g>

@@ -140,6 +140,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       month: month,
       tithi: 'Shukla Trayodashi',
       description: 'भगवान शिव की आराधना, आरोग्य लाभ और समस्त दोषों की शांति के लिए प्रदोष काल में किया जाने वाला पावन व्रत।',
+      descriptionEnglish: 'Sacred twilight fast dedicated to Lord Shiva for good health, relief from ailments, and spiritual well-being.',
       type: 'Major',
       isAuspicious: true,
       pujaMuhurat: 'सायं 05:45 PM - 08:15 PM (प्रदोष काल)'
@@ -153,6 +154,7 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       month: month,
       tithi: 'Krishna Trayodashi',
       description: 'भगवान भोलेनाथ की कृपा, ऋण मुक्ति और आत्मिक कल्याण के लिए त्रयोदशी प्रदोष वेला का पावन व्रत।',
+      descriptionEnglish: 'Auspicious Trayodashi twilight fast dedicated to Lord Shiva for freedom from debts and spiritual liberation.',
       type: 'Major',
       isAuspicious: true,
       pujaMuhurat: 'सायं 05:45 PM - 08:15 PM (प्रदोष काल)'

@@ -71,25 +71,26 @@ export const HeaderClock: React.FC<HeaderClockProps> = React.memo(({ selectedDat
     }
     
     const { quality, hindiName, name } = activeChoghadiya;
-    const label = hindiName || name;
+    const label = language === 'Hindi' ? (hindiName || name) : (name || hindiName);
+    const isHin = language === 'Hindi';
     
     if (quality === 'Excellent' || quality === 'Good') {
       return {
         icon: <TrendingUp className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />,
         colorClass: 'border-emerald-200/50 dark:border-emerald-950/40 bg-emerald-50/65 dark:bg-emerald-950/25 text-emerald-800 dark:text-emerald-300',
-        tooltip: `शुभ चौघड़िया: ${label} (उत्तम/शुभ समय) - Click to toggle format`
+        tooltip: isHin ? `शुभ चौघड़िया: ${label} (उत्तम/शुभ समय)` : `Auspicious Choghadiya: ${label}`
       };
     } else if (quality === 'Inauspicious' || quality === 'Bad') {
       return {
         icon: <TrendingDown className="w-3 h-3 text-rose-600 dark:text-rose-455 shrink-0" />,
         colorClass: 'border-rose-200/50 dark:border-rose-950/40 bg-rose-50/65 dark:bg-rose-950/25 text-rose-855 dark:text-rose-355',
-        tooltip: `अशुभ चौघड़िया: ${label} (वर्जित/अशुभ समय) - Click to toggle format`
+        tooltip: isHin ? `अशुभ चौघड़िया: ${label} (वर्जित/अशुभ समय)` : `Inauspicious Choghadiya: ${label}`
       };
     } else {
       return {
         icon: <Minus className="w-3 h-3 text-blue-500 dark:text-blue-400 shrink-0" />,
         colorClass: 'border-blue-100/50 dark:border-zinc-800/40 bg-blue-50/40 dark:bg-zinc-900/30 text-blue-600 dark:text-blue-300',
-        tooltip: `मध्यम चौघड़िया: ${label} (सामान्य/चल समय) - Click to toggle format`
+        tooltip: isHin ? `मध्यम चौघड़िया: ${label} (सामान्य/चल समय)` : `Neutral Choghadiya: ${label}`
       };
     }
   };
@@ -113,7 +114,9 @@ export const HeaderClock: React.FC<HeaderClockProps> = React.memo(({ selectedDat
         {trendInfo.icon && (
           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] sm:text-xs font-bold leading-none whitespace-nowrap shrink-0 shadow-3xs hover:shadow-2xs transition-shadow duration-300 ${trendInfo.colorClass}`}>
             {trendInfo.icon}
-            <span className="font-serif whitespace-nowrap [text-shadow:0_0.5px_1px_rgba(255,255,255,0.45)] dark:[text-shadow:0_0.5px_1px_rgba(0,0,0,0.35)]">{activeChoghadiya?.hindiName}</span>
+            <span className="font-serif whitespace-nowrap [text-shadow:0_0.5px_1px_rgba(255,255,255,0.45)] dark:[text-shadow:0_0.5px_1px_rgba(0,0,0,0.35)]">
+              {language === 'Hindi' ? (activeChoghadiya?.hindiName || activeChoghadiya?.name) : (activeChoghadiya?.name || activeChoghadiya?.hindiName)}
+            </span>
           </span>
         )}
       </div>

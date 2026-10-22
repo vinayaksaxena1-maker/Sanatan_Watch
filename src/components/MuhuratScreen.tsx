@@ -89,12 +89,67 @@ const translateAdviceHindi = (advice: string): string => {
     .replace(/Navami/g, 'नवमी').replace(/Dashami/g, 'दशमी').replace(/Ekadashi/g, 'एकादशी').replace(/Dwadashi/g, 'द्वादशी')
     .replace(/Trayodashi/g, 'त्रयोदशी').replace(/Chaturdashi/g, 'चतुर्दशी').replace(/Purnima/g, 'पूर्णिमा').replace(/Amavasya/g, 'अमावस्या')
     .replace(/Ashwini/g, 'अश्विनी').replace(/Bharani/g, 'भरणी').replace(/Krittika/g, 'कृत्तिका').replace(/Rohini/g, 'रोहिणी')
-    .replace(/Mrigashirsha/g, 'मृगशिरा').replace(/Ardra/g, 'आर्द्रा').replace(/Punarvasu/g, 'पुनर्वसु').replace(/Pushya/g, 'पुष्य')
-    .replace(/Ashlesha/g, 'आश्लेषा').replace(/Magha/g, 'मघा').replace(/Purvaphalguni/g, 'पूर्वाफाल्गुनी').replace(/Uttaraphalguni/g, 'उत्तराफाल्गुनी')
-    .replace(/Hasta/g, 'हस्त').replace(/Chitra/g, 'चित्रा').replace(/Swati/g, 'स्वाति').replace(/Vishakha/g, 'विशाखा')
-    .replace(/Anuradha/g, 'अनुराधा').replace(/Jyeshtha/g, 'ज्येष्ठा').replace(/Mula/g, 'मूल').replace(/Purvashadha/g, 'पूर्वाषाढ़ा')
-    .replace(/Uttarashadha/g, 'उत्तराषाढ़ा').replace(/Shravana/g, 'श्रवण').replace(/Dhanishta/g, 'धनिष्ठा').replace(/Shatabhisha/g, 'शतभिषा')
-    .replace(/Purvabhadrapada/g, 'पूर्वाभाद्रपद').replace(/Uttarabhadrapada/g, 'उत्तराभाद्रपद').replace(/Revati/g, 'रेवती');
+    .replace(/Mrigashirsha/gi, 'मृगशिरा').replace(/Ardra/gi, 'आर्द्रा').replace(/Punarvasu/gi, 'पुनर्वसु').replace(/Pushya/gi, 'पुष्य')
+    .replace(/Ashlesha/gi, 'आश्लेषा').replace(/Magha/gi, 'मघा')
+    .replace(/Purva\s*Phalguni/gi, 'पूर्वाफाल्गुनी').replace(/Purvaphalguni/gi, 'पूर्वाफाल्गुनी')
+    .replace(/Uttara\s*Phalguni/gi, 'उत्तराफाल्गुनी').replace(/Uttaraphalguni/gi, 'उत्तराफाल्गुनी')
+    .replace(/Hasta/gi, 'हस्त').replace(/Chitra/gi, 'चित्रा').replace(/Swati/gi, 'स्वाति').replace(/Vishakha/gi, 'विशाखा')
+    .replace(/Anuradha/gi, 'अनुराधा').replace(/Jyeshtha/gi, 'ज्येष्ठा').replace(/Mula/gi, 'मूल')
+    .replace(/Purva\s*Ashadha/gi, 'पूर्वाषाढ़ा').replace(/Purvashadha/gi, 'पूर्वाषाढ़ा')
+    .replace(/Uttara\s*Ashadha/gi, 'उत्तराषाढ़ा').replace(/Uttarashadha/gi, 'उत्तराषाढ़ा')
+    .replace(/Shravana/gi, 'श्रवण').replace(/Dhanishta/gi, 'धनिष्ठा').replace(/Shatabhisha/gi, 'शतभिषा')
+    .replace(/Purva\s*Bhadrapada/gi, 'पूर्वाभाद्रपद').replace(/Purvabhadrapada/gi, 'पूर्वाभाद्रपद')
+    .replace(/Uttara\s*Bhadrapada/gi, 'उत्तराभाद्रपद').replace(/Uttarabhadrapada/gi, 'उत्तराभाद्रपद')
+    .replace(/Revati/gi, 'रेवती');
+};
+
+const translateAdviceEnglish = (advice: string): string => {
+  if (!advice) return '';
+  return advice
+    .replace(/शुक्ल पक्ष अत्यंत अनुकूल है।/g, 'Shukla Paksha is favorable.')
+    .replace(/कृष्ण पक्ष में नए गृह प्रवेश को सामान्यतः वर्जित माना जाता है।/g, 'Krishna Paksha is generally avoided for entering new homes.')
+    .replace(/गृह प्रवेश हेतु ([^ ]+) नक्षत्र अति उत्तम है।/g, 'Nakshatra $1 is auspicious for Griha Pravesh.')
+    .replace(/([^ ]+) नक्षत्र में गृह प्रवेश वर्जित है \(टालें\)।/g, 'Nakshatra $1 is not recommended for Griha Pravesh.')
+    .replace(/विवाह हेतु ([^ ]+) नक्षत्र अत्यंत शुभ एवं मंगलकारी है।/g, 'Nakshatra $1 is highly auspicious for wedding.')
+    .replace(/([^ ]+) नक्षत्र विवाह हेतु उत्तम नहीं है।/g, 'Nakshatra $1 is not favorable for wedding.')
+    .replace(/चातुर्मास में विवाह संस्कार सर्वथा वर्जित हैं।/g, 'Chaturmas is ongoing; wedding ceremonies are deferred.')
+    .replace(/वाहन क्रय हेतु ([^ ]+) नक्षत्र शुभ है।/g, 'Nakshatra $1 is favorable for vehicle purchase.')
+    .replace(/नक्षत्र ([^ ]+) सामान्य प्रभाव वाला है।/g, 'Nakshatra $1 has moderate effect.')
+    .replace(/नक्षत्र (.+) सामान्य है।/g, 'Nakshatra $1 has moderate effect.')
+    .replace(/नामकरण संस्कार के लिए ([^ ]+) नक्षत्र अनुकूल है।/g, 'Nakshatra $1 is favorable for naming ceremony.')
+    .replace(/व्यापार आरंभ हेतु ([^ ]+) नक्षत्र अत्यंत शुभ है।/g, 'Nakshatra $1 is favorable for business opening.')
+    .replace(/व्यापार आरंभ हेतु ([^ ]+) नक्षत्र अत्यंत अनुकूल व फलदायी है।/g, 'Nakshatra $1 is highly favorable for business opening.')
+    .replace(/भूमि पूजन हेतु ([^ ]+) नक्षत्र शुभ है।/g, 'Nakshatra $1 is auspicious for foundation laying.')
+    .replace(/भूमि पूजन व निर्माण हेतु ([^ ]+) नक्षत्र उत्तम है।/g, 'Nakshatra $1 is auspicious for foundation laying.')
+    .replace(/तिथि ([^ ]+) व्यवसाय वृद्धि हेतु शुभ है।/g, 'Tithi $1 is auspicious for business growth.')
+    .replace(/तिथि ([^ ]+) में नया व्यवसाय शुरू करने से बचें।/g, 'Avoid starting a new business on Tithi $1.')
+    .replace(/वार \(दिन\) व्यापार वृद्धि कारक है।/g, 'Weekday is favorable for business growth.')
+    .replace(/तिथि ([^ ]+) नींव पूजन हेतु शुभ है।/g, 'Tithi $1 is auspicious for laying foundation.')
+    .replace(/तिथि ([^ ]+) में भूमि पूजन टालें।/g, 'Avoid foundation laying on Tithi $1.')
+    .replace(/वार \(दिन\) अनुकूल है।/g, 'Weekday is favorable.')
+    .replace(/वार \(दिन\) उत्तम नहीं है।/g, 'Weekday is not ideal.')
+    .replace(/वार \(दिन\) वाहन क्रय हेतु अनुकूल है।/g, 'Weekday is favorable for vehicle purchase.')
+    .replace(/मंगलवार या शनिवार को वाहन क्रय करने से बचें।/g, 'Avoid purchasing vehicles on Tuesday or Saturday.')
+    .replace(/तिथि ([^ ]+) अत्यंत शुभ है।/g, 'Tithi $1 is highly auspicious.')
+    .replace(/तिथि ([^ ]+) अनुकूल है।/g, 'Tithi $1 is favorable.')
+    .replace(/तिथि ([^ ]+) में यह कार्य वर्जित है।/g, 'Avoid this activity on Tithi $1.')
+    .replace(/तिथि ([^ ]+) अशुभ मानी जाती है।/g, 'Tithi $1 is inauspicious.')
+    .replace(/तिथि ([^ ]+) खरीदारी हेतु शुभ है।/g, 'Tithi $1 is favorable for major purchases.')
+    .replace(/तिथि ([^ ]+) में वाहन खरीदारी से बचें।/g, 'Avoid vehicle purchase on Tithi $1.')
+    .replace(/तिथि ([^ ]+) में नामकरण संस्कार न करें।/g, 'Avoid naming ceremonies on Tithi $1.')
+    .replace(/अमावस्या या चतुर्दशी को व्यापार आरंभ न करें।/g, 'Avoid starting new business on Amavasya or Chaturdashi.')
+    .replace(/अमावस्या को नींव पूजन न करें।/g, 'Avoid laying foundation on Amavasya.')
+    .replace(/प्रतिपदा/g, 'Pratipada').replace(/द्वितीया/g, 'Dwitiya').replace(/तृतीया/g, 'Tritiya').replace(/चतुर्थी/g, 'Chaturthi')
+    .replace(/पंचमी/g, 'Panchami').replace(/षष्ठी/g, 'Shashthi').replace(/सप्तमी/g, 'Saptami').replace(/अष्टमी/g, 'Ashtami')
+    .replace(/नवमी/g, 'Navami').replace(/दशमी/g, 'Dashami').replace(/एकादशी/g, 'Ekadashi').replace(/द्वादशी/g, 'Dwadashi')
+    .replace(/त्रयोदशी/g, 'Trayodashi').replace(/चतुर्दशी/g, 'Chaturdashi').replace(/पूर्णिमा/g, 'Purnima').replace(/अमावस्या/g, 'Amavasya')
+    .replace(/अश्विनी/g, 'Ashwini').replace(/भरणी/g, 'Bharani').replace(/कृत्तिका/g, 'Krittika').replace(/रोहिणी/g, 'Rohini')
+    .replace(/मृगशिरा/g, 'Mrigashirsha').replace(/आर्द्रा/g, 'Ardra').replace(/पुनर्वसु/g, 'Punarvasu').replace(/पुष्य/g, 'Pushya')
+    .replace(/आश्लेषा/g, 'Ashlesha').replace(/मघा/g, 'Magha').replace(/पूर्वाफाल्गुनी/g, 'Purvaphalguni').replace(/उत्तराफाल्गुनी/g, 'Uttaraphalguni')
+    .replace(/हस्त/g, 'Hasta').replace(/चित्रा/g, 'Chitra').replace(/स्वाति/g, 'Swati').replace(/विशाखा/g, 'Vishakha')
+    .replace(/अनुराधा/g, 'Anuradha').replace(/ज्येष्ठा/g, 'Jyeshtha').replace(/मूल/g, 'Mula').replace(/पूर्वाषाढ़ा/g, 'Purvashadha')
+    .replace(/उत्तराषाढ़ा/g, 'Uttarashadha').replace(/श्रवण/g, 'Shravana').replace(/धनिष्ठा/g, 'Dhanishta').replace(/शतभिषा/g, 'Shatabhisha')
+    .replace(/पूर्वाभाद्रपद/g, 'Purvabhadrapada').replace(/उत्तराभाद्रपद/g, 'Uttarabhadrapada').replace(/रेवती/g, 'Revati');
 };
 
 // Helper time parser and formatter
@@ -132,7 +187,8 @@ const trimSlotForRahuKaal = (
   slotStartMin: number,
   slotEndMin: number,
   rahuStartMin: number,
-  rahuEndMin: number
+  rahuEndMin: number,
+  isHindi: boolean = true
 ): TrimmedSlot => {
   // If no valid Rahu Kaal interval
   if (rahuStartMin <= 0 || rahuEndMin <= 0 || rahuEndMin <= rahuStartMin) {
@@ -144,7 +200,7 @@ const trimSlotForRahuKaal = (
     return {
       timeStr: `${formatMinStr(slotStartMin)} - ${formatMinStr(slotEndMin)}`,
       isCancelled: true,
-      warningNote: 'राहुकाल व्याप्त होने के कारण त्याज्य'
+      warningNote: isHindi ? 'राहुकाल व्याप्त होने के कारण त्याज्य' : 'Avoided due to Rahu Kaal overlap'
     };
   }
 
@@ -153,7 +209,9 @@ const trimSlotForRahuKaal = (
     return {
       timeStr: `${formatMinStr(slotStartMin)} - ${formatMinStr(rahuStartMin)}`,
       isCancelled: false,
-      warningNote: `${formatMinStr(rahuStartMin)} से राहुकाल प्रारंभ, अतः पूर्व ही संपन्न करें`
+      warningNote: isHindi 
+        ? `${formatMinStr(rahuStartMin)} से राहुकाल प्रारंभ, अतः पूर्व ही संपन्न करें` 
+        : `Rahu Kaal begins at ${formatMinStr(rahuStartMin)}, conclude prior`
     };
   }
 
@@ -162,7 +220,9 @@ const trimSlotForRahuKaal = (
     return {
       timeStr: `${formatMinStr(rahuEndMin)} - ${formatMinStr(slotEndMin)}`,
       isCancelled: false,
-      warningNote: `${formatMinStr(rahuEndMin)} राहुकाल समाप्ति उपरांत अनुकूल`
+      warningNote: isHindi 
+        ? `${formatMinStr(rahuEndMin)} राहुकाल समाप्ति उपरांत अनुकूल` 
+        : `Favorable after Rahu Kaal ends at ${formatMinStr(rahuEndMin)}`
     };
   }
 
@@ -171,7 +231,9 @@ const trimSlotForRahuKaal = (
     return {
       timeStr: `${formatMinStr(slotStartMin)} - ${formatMinStr(rahuStartMin)}`,
       isCancelled: false,
-      warningNote: `${formatMinStr(rahuStartMin)} से ${formatMinStr(rahuEndMin)} तक राहुकाल का त्याग करें`
+      warningNote: isHindi 
+        ? `${formatMinStr(rahuStartMin)} से ${formatMinStr(rahuEndMin)} तक राहुकाल का त्याग करें` 
+        : `Avoid Rahu Kaal period from ${formatMinStr(rahuStartMin)} to ${formatMinStr(rahuEndMin)}`
     };
   }
 
@@ -259,6 +321,8 @@ export function MuhuratScreen({
   const vyaparRule = ruleMuhurats.find(r => r.type === 'business');
   const bhoomiRule = ruleMuhurats.find(r => r.type === 'land');
 
+  const isHindi = language === 'Hindi';
+
   // Categories with Computed Rules and Trimmed Rahu Kaal slots
   const muhuratCategories = [
     {
@@ -266,7 +330,8 @@ export function MuhuratScreen({
       name: 'Business Opening',
       hindiName: 'व्यापार आरंभ मुहूर्त',
       shortName: 'व्यापार आरंभ',
-      desc: language === 'Hindi' ? 'नया व्यवसाय, दुकान, प्रतिष्ठान या व्यावसायिक समझौते की शुरुआत के लिए।' : 'For starting a new business, shop, or commercial office.',
+      shortNameEnglish: 'Business',
+      desc: isHindi ? 'नया व्यवसाय, दुकान, प्रतिष्ठान या व्यावसायिक समझौते की शुरुआत के लिए।' : 'For starting a new business, shop, or commercial office.',
       icon: <ShoppingBag className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />,
       rule: vyaparRule,
       isSuitable: vyaparRule ? vyaparRule.isSuitable : true,
@@ -276,16 +341,20 @@ export function MuhuratScreen({
         { 
           startMin: sMin + 345,
           endMin: sMin + 435,
-          lagna: `${getDynamicLagna(9)} (स्थिर/शुभ) • अभिजीत संयोग`,
-          suitability: 'सर्वोत्तम (अमृत चौघड़िया)', 
-          advice: 'व्यवसाय में निरंतर वृद्धि और ग्राहकों से लाभ के लिए दिन का सर्वश्रेष्ठ समय।' 
+          lagna: `${getDynamicLagna(9)} (${isHindi ? 'स्थिर/शुभ' : 'Fixed/Auspicious'}) • ${isHindi ? 'अभिजीत संयोग' : 'Abhijit'}`,
+          suitability: isHindi ? 'सर्वोत्तम (अमृत चौघड़िया)' : 'Best (Amrit Choghadiya)', 
+          advice: isHindi 
+            ? 'व्यवसाय में निरंतर वृद्धि और ग्राहकों से लाभ के लिए दिन का सर्वश्रेष्ठ समय।' 
+            : 'Best time of the day for steady business growth and customer prosperity.'
         },
         { 
           startMin: eMin - 120,
           endMin: eMin - 30,
-          lagna: `${getDynamicLagna(8)} (शुभ)`,
-          suitability: 'अच्छा (लाभ चौघड़िया)', 
-          advice: 'डिजाइन, तकनीक, नवीन सौदों व संपर्क स्थापित करने हेतु शुभ।' 
+          lagna: `${getDynamicLagna(8)} (${isHindi ? 'शुभ' : 'Auspicious'})`,
+          suitability: isHindi ? 'अच्छा (लाभ चौघड़िया)' : 'Good (Labh Choghadiya)', 
+          advice: isHindi 
+            ? 'डिजाइन, तकनीक, नवीन सौदों व संपर्क स्थापित करने हेतु शुभ।' 
+            : 'Favorable for creative work, technology, new deals, and networking.'
         }
       ]
     },
@@ -294,7 +363,8 @@ export function MuhuratScreen({
       name: 'Bhoomi Pujan',
       hindiName: 'भूमि पूजन व निर्माण मुहूर्त',
       shortName: 'भूमि पूजन',
-      desc: language === 'Hindi' ? 'भूमि क्रय, शिलान्यास, नींव पूजन और नवीन निर्माण कार्य शुरू करने के लिए।' : 'Auspicious beginning for property, land worship, and foundation laying.',
+      shortNameEnglish: 'Bhoomi Pujan',
+      desc: isHindi ? 'भूमि क्रय, शिलान्यास, नींव पूजन और नवीन निर्माण कार्य शुरू करने के लिए।' : 'Auspicious beginning for property, land worship, and foundation laying.',
       icon: <Building className="w-5 h-5 text-teal-600 dark:text-teal-400" />,
       rule: bhoomiRule,
       isSuitable: bhoomiRule ? bhoomiRule.isSuitable : true,
@@ -304,16 +374,20 @@ export function MuhuratScreen({
         { 
           startMin: sMin + 30,
           endMin: sMin + 150,
-          lagna: `${getDynamicLagna(7)} (स्थिर)`,
-          suitability: 'शुभ (शुभ चौघड़िया)', 
-          advice: 'प्रातःकाल भूमि का शुद्धिकरण व प्रथम पूजन करने हेतु अनुकूल।' 
+          lagna: `${getDynamicLagna(7)} (${isHindi ? 'स्थिर' : 'Fixed'})`,
+          suitability: isHindi ? 'शुभ (शुभ चौघड़िया)' : 'Auspicious (Shubh Choghadiya)', 
+          advice: isHindi 
+            ? 'प्रातःकाल भूमि का शुद्धिकरण व प्रथम पूजन करने हेतु अनुकूल।' 
+            : 'Auspicious for morning land purification and initial worship.'
         },
         { 
           startMin: sMin + 225,
           endMin: sMin + 330,
-          lagna: `${getDynamicLagna(9)} (मकर लग्न)`,
-          suitability: 'उत्तम (स्थिर लग्न)', 
-          advice: 'स्थायी नींव रखने और निर्माण कार्य प्रारंभ करने के लिए श्रेष्ठ।' 
+          lagna: `${getDynamicLagna(9)} (${isHindi ? 'मकर लग्न' : 'Capricorn Lagna'})`,
+          suitability: isHindi ? 'उत्तम (स्थिर लग्न)' : 'Excellent (Fixed Lagna)', 
+          advice: isHindi 
+            ? 'स्थायी नींव रखने और निर्माण कार्य प्रारंभ करने के लिए श्रेष्ठ।' 
+            : 'Ideal for laying permanent foundation stones and starting construction.'
         }
       ]
     },
@@ -322,7 +396,8 @@ export function MuhuratScreen({
       name: 'Naamkaran',
       hindiName: 'नामकरण संस्कार मुहूर्त',
       shortName: 'नामकरण',
-      desc: language === 'Hindi' ? 'नवजात शिशु के नामकरण संस्कार और प्रथम मंगल विधान हेतु।' : 'Muhurat for newborn baby naming ceremony.',
+      shortNameEnglish: 'Naming',
+      desc: isHindi ? 'नवजात शिशु के नामकरण संस्कार और प्रथम मंगल विधान हेतु।' : 'Muhurat for newborn baby naming ceremony.',
       icon: <Feather className="w-5 h-5 text-amber-600 dark:text-amber-400" />,
       rule: namkaranRule,
       isSuitable: namkaranRule ? namkaranRule.isSuitable : true,
@@ -332,16 +407,20 @@ export function MuhuratScreen({
         { 
           startMin: sMin + 180,
           endMin: sMin + 360,
-          lagna: `${getDynamicLagna(4)} (शुभ)`,
-          suitability: 'शुभ (उत्तम)', 
-          advice: 'शिशु की दीर्घायु, उत्तम स्वास्थ्य व बुद्धिमत्ता हेतु शुभ मुहूर्त।' 
+          lagna: `${getDynamicLagna(4)} (${isHindi ? 'शुभ' : 'Auspicious'})`,
+          suitability: isHindi ? 'शुभ (उत्तम)' : 'Auspicious (Best)', 
+          advice: isHindi 
+            ? 'शिशु की दीर्घायु, उत्तम स्वास्थ्य व बुद्धिमत्ता हेतु शुभ मुहूर्त।' 
+            : 'Auspicious time for infant longevity, health, and wisdom.'
         },
         { 
           startMin: sMin + 480,
           endMin: sMin + 570,
           lagna: `${getDynamicLagna(5)}`,
-          suitability: 'शुभ (लाभ)', 
-          advice: 'स्वर्ण आभूषण धारण कराने व आशीर्वाद प्राप्ति हेतु अनुकूल।' 
+          suitability: isHindi ? 'शुभ (लाभ)' : 'Auspicious (Labh)', 
+          advice: isHindi 
+            ? 'स्वर्ण आभूषण धारण कराने व आशीर्वाद प्राप्ति हेतु अनुकूल।' 
+            : 'Favorable for gifting gold, sacred blessings, and family celebrations.'
         }
       ]
     },
@@ -350,7 +429,8 @@ export function MuhuratScreen({
       name: 'Vehicle Purchase',
       hindiName: 'वाहन क्रय मुहूर्त',
       shortName: 'वाहन क्रय',
-      desc: language === 'Hindi' ? 'कार, बाइक, स्कूटर या व्यावसायिक वाहन की खरीद व घर लाने हेतु।' : 'For purchase and delivery of vehicles or commercial transports.',
+      shortNameEnglish: 'Vehicle',
+      desc: isHindi ? 'कार, बाइक, स्कूटर या व्यावसायिक वाहन की खरीद व घर लाने हेतु।' : 'For purchase and delivery of vehicles or commercial transports.',
       icon: <Truck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />,
       rule: vahanRule,
       isSuitable: vahanRule ? vahanRule.isSuitable : true,
@@ -360,16 +440,20 @@ export function MuhuratScreen({
         { 
           startMin: sMin + 270,
           endMin: sMin + 450,
-          lagna: `${getDynamicLagna(10)} (चर)`,
-          suitability: 'अत्यंत शुभ (शुभ चौघड़िया)', 
-          advice: 'धातु व इलेक्ट्रॉनिक वाहनों की खरीद के लिए शुभ समय।' 
+          lagna: `${getDynamicLagna(10)} (${isHindi ? 'चर' : 'Movable'})`,
+          suitability: isHindi ? 'अत्यंत शुभ (शुभ चौघड़िया)' : 'Highly Auspicious (Shubh Choghadiya)', 
+          advice: isHindi 
+            ? 'धातु व इलेक्ट्रॉनिक वाहनों की खरीद के लिए शुभ समय।' 
+            : 'Auspicious time for purchase of metallic and electronic vehicles.'
         },
         { 
           startMin: eMin - 210,
           endMin: eMin - 120,
-          lagna: `${getDynamicLagna(0)} (चर लग्न)`,
-          suitability: 'शुभ (चल चौघड़िया)', 
-          advice: 'वाहन की डिलीवरी लेकर घर में प्रवेश कराने हेतु उपयुक्त।' 
+          lagna: `${getDynamicLagna(0)} (${isHindi ? 'चर लग्न' : 'Movable Lagna'})`,
+          suitability: isHindi ? 'शुभ (चल चौघड़िया)' : 'Auspicious (Chal Choghadiya)', 
+          advice: isHindi 
+            ? 'वाहन की डिलीवरी लेकर घर में प्रवेश कराने हेतु उपयुक्त।' 
+            : 'Suitable for taking delivery and driving the vehicle home.'
         }
       ]
     },
@@ -378,7 +462,8 @@ export function MuhuratScreen({
       name: 'Griha Pravesh',
       hindiName: 'गृह प्रवेश मुहूर्त',
       shortName: 'गृह प्रवेश',
-      desc: language === 'Hindi' ? 'नए घर, फ्लैट या संपत्ति में गृह प्रवेश व वास्तु पूजन के लिए।' : 'For entering and starting living in a new home or property.',
+      shortNameEnglish: 'Griha Pravesh',
+      desc: isHindi ? 'नए घर, फ्लैट या संपत्ति में गृह प्रवेश व वास्तु पूजन के लिए।' : 'For entering and starting living in a new home or property.',
       icon: <Key className="w-5 h-5 text-orange-600 dark:text-amber-500" />,
       rule: gpRule,
       isSuitable: gpRule ? gpRule.isSuitable : false,
@@ -388,16 +473,20 @@ export function MuhuratScreen({
         { 
           startMin: sMin + 165,
           endMin: sMin + 330,
-          lagna: `${getDynamicLagna(1)} (वृषभ लग्न)`,
-          suitability: 'वैकल्पिक समय', 
-          advice: 'यदि अति आवश्यक हो तो केवल सामान्य घरेलू सामान शिफ्टिंग हेतु उपयोग करें।' 
+          lagna: `${getDynamicLagna(1)} (${isHindi ? 'वृषभ लग्न' : 'Taurus Lagna'})`,
+          suitability: isHindi ? 'वैकल्पिक समय' : 'Alternative Time', 
+          advice: isHindi 
+            ? 'यदि अति आवश्यक हो तो केवल सामान्य घरेलू सामान शिफ्टिंग हेतु उपयोग करें।' 
+            : 'Use only for minor household shifting if urgently necessary.'
         },
         { 
           startMin: sMin + 345,
           endMin: sMin + 395,
-          lagna: `${getDynamicLagna(3)} (कर्क लग्न)`,
-          suitability: 'वैकल्पिक समय', 
-          advice: 'अभिजीत वेला का सामान्य संयोग। मुख्य गृह प्रवेश मंगल दिवस पर ही करें।' 
+          lagna: `${getDynamicLagna(3)} (${isHindi ? 'कर्क लग्न' : 'Cancer Lagna'})`,
+          suitability: isHindi ? 'वैकल्पिक समय' : 'Alternative Time', 
+          advice: isHindi 
+            ? 'अभिजीत वेला का सामान्य संयोग। मुख्य गृह प्रवेश मंगल दिवस पर ही करें।' 
+            : 'Moderate Abhijit period. Perform primary house warming on a favorable day.'
         }
       ]
     },
@@ -406,7 +495,8 @@ export function MuhuratScreen({
       name: 'Vivah (Marriage)',
       hindiName: 'विवाह मुहूर्त',
       shortName: 'विवाह',
-      desc: language === 'Hindi' ? 'पाणिग्रहण संस्कार, विवाह फेरे व वैवाहिक मंगल विधान के लिए।' : 'For the sacred bond of marriage under the blessings of Vedic deities.',
+      shortNameEnglish: 'Marriage',
+      desc: isHindi ? 'पाणिग्रहण संस्कार, विवाह फेरे व वैवाहिक मंगल विधान के लिए।' : 'For the sacred bond of marriage under the blessings of Vedic deities.',
       icon: <Heart className="w-5 h-5 text-rose-600 dark:text-rose-400" />,
       rule: vivahRule,
       isSuitable: vivahRule ? vivahRule.isSuitable : false,
@@ -416,16 +506,20 @@ export function MuhuratScreen({
         { 
           startMin: sMin + 75,
           endMin: sMin + 270,
-          lagna: `${getDynamicLagna(2)} (मिथुन लग्न)`,
-          suitability: 'वैकल्पिक समय', 
-          advice: 'वर्तमान में विवाह मुहूर्त शास्त्रसम्मत नहीं है। सगाई या वार्तालाप कर सकते हैं।' 
+          lagna: `${getDynamicLagna(2)} (${isHindi ? 'मिथुन लग्न' : 'Gemini Lagna'})`,
+          suitability: isHindi ? 'वैकल्पिक समय' : 'Alternative Time', 
+          advice: isHindi 
+            ? 'वर्तमान में विवाह मुहूर्त शास्त्रसम्मत नहीं है। सगाई या वार्तालाप कर सकते हैं।' 
+            : 'Not recommended for wedding vows today. Engagement or talks may proceed.'
         },
         { 
           startMin: eMin - 165,
           endMin: eMin + 60,
-          lagna: `${getDynamicLagna(6)} (तुला लग्न)`,
-          suitability: 'वैकल्पिक समय', 
-          advice: 'केवल सामान्य पारिवारिक मेल-मिलाप हेतु समय।' 
+          lagna: `${getDynamicLagna(6)} (${isHindi ? 'तुला लग्न' : 'Libra Lagna'})`,
+          suitability: isHindi ? 'वैकल्पिक समय' : 'Alternative Time', 
+          advice: isHindi 
+            ? 'केवल सामान्य पारिवारिक मेल-मिलाप हेतु समय।' 
+            : 'Suitable only for general family meetings and gatherings.'
         }
       ]
     }
@@ -434,18 +528,18 @@ export function MuhuratScreen({
   // Process categories with trimmed Rahu Kaal slots
   const processedCategories = muhuratCategories.map(cat => {
     const slots = cat.rawSlots.map(raw => {
-      const trimmed = trimSlotForRahuKaal(raw.startMin, raw.endMin, rahuStartMin, rahuEndMin);
+      const trimmed = trimSlotForRahuKaal(raw.startMin, raw.endMin, rahuStartMin, rahuEndMin, isHindi);
       return {
         time: trimmed.timeStr,
         isCancelled: trimmed.isCancelled,
         warningNote: trimmed.warningNote,
         lagna: raw.lagna,
         suitability: cat.isSuitable 
-          ? (language === 'Hindi' ? raw.suitability : raw.suitability)
-          : (language === 'Hindi' ? 'वैकल्पिक समय (अति आवश्यक होने पर)' : 'Alternative Time (Urgent Only)'),
+          ? raw.suitability
+          : (isHindi ? 'वैकल्पिक समय (अति आवश्यक होने पर)' : 'Alternative Time (Urgent Only)'),
         advice: cat.rule && cat.rule.reasons.length > 0
-          ? (language === 'Hindi' ? cat.rule.reasons[0] : cat.rule.reasons[0])
-          : (language === 'Hindi' ? raw.advice : raw.advice)
+          ? (isHindi ? translateAdviceHindi(cat.rule.reasons[0]) : translateAdviceEnglish(cat.rule.reasons[0]))
+          : raw.advice
       };
     });
 
@@ -464,32 +558,40 @@ export function MuhuratScreen({
   const quickTalen: Array<{ name: string; id: string; reason: string }> = [];
 
   processedCategories.forEach(cat => {
+    const displayName = isHindi ? cat.shortName : cat.shortNameEnglish;
     if (cat.score >= 70) {
-      quickUttam.push({ name: cat.shortName, id: cat.id, score: cat.score });
+      quickUttam.push({ name: displayName, id: cat.id, score: cat.score });
     } else if (cat.score >= 40) {
-      quickMadhyam.push({ name: cat.shortName, id: cat.id, score: cat.score });
+      quickMadhyam.push({ name: displayName, id: cat.id, score: cat.score });
     } else {
-      const reason = cat.id === 'house'
-        ? `शतभिषा नक्षत्र`
-        : cat.id === 'marriage'
-          ? `चातुर्मास / नक्षत्र`
-          : 'नक्षत्र प्रतिकूल';
-      quickTalen.push({ name: cat.shortName, id: cat.id, reason });
+      const reason = isHindi
+        ? (cat.id === 'house' ? 'शतभिषा नक्षत्र' : cat.id === 'marriage' ? 'चातुर्मास / नक्षत्र' : 'नक्षत्र प्रतिकूल')
+        : (cat.id === 'house' ? 'Shatabhisha Nakshatra' : cat.id === 'marriage' ? 'Chaturmas / Nakshatra' : 'Adverse Nakshatra');
+      quickTalen.push({ name: displayName, id: cat.id, reason });
     }
   });
 
   // Add Rituals to Quick Verdict
   if (shivaIsAuspicious) {
-    quickUttam.push({ name: 'रुद्राभिषेक', id: 'rituals', score: 85 });
+    quickUttam.push({ name: isHindi ? 'रुद्राभिषेक' : 'Rudrabhishek', id: 'rituals', score: 85 });
   } else {
-    quickTalen.push({ name: 'रुद्राभिषेक', id: 'rituals', reason: 'शिव सभा/क्रीड़ा में' });
+    quickTalen.push({ 
+      name: isHindi ? 'रुद्राभिषेक' : 'Rudrabhishek', 
+      id: 'rituals', 
+      reason: isHindi ? 'शिव सभा/क्रीड़ा में' : (panchang.shivaVaas?.residence ? `Shiva in ${panchang.shivaVaas.residence}` : 'Inauspicious') 
+    });
   }
 
   if (agniIsAuspicious) {
-    quickUttam.push({ name: 'हवन/यज्ञ', id: 'rituals', score: 80 });
+    quickUttam.push({ name: isHindi ? 'हवन/यज्ञ' : 'Havan/Yajna', id: 'rituals', score: 80 });
   } else {
     const agniLoc = panchang.agniVaas?.residenceHindi || 'पाताल';
-    quickTalen.push({ name: 'हवन/यज्ञ', id: 'rituals', reason: `अग्नि ${agniLoc} में` });
+    const agniLocEng = panchang.agniVaas?.residence || 'Paataal';
+    quickTalen.push({ 
+      name: isHindi ? 'हवन/यज्ञ' : 'Havan/Yajna', 
+      id: 'rituals', 
+      reason: isHindi ? `अग्नि ${agniLoc} में` : `Agni in ${agniLocEng}` 
+    });
   }
 
   // Active Slots for Live Indicator
@@ -552,10 +654,10 @@ export function MuhuratScreen({
         <button 
           onClick={goToPreviousDay}
           className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 dark:bg-white/5 dark:hover:bg-white/10 text-orange-800 dark:text-orange-200 text-xs font-bold font-sans cursor-pointer transition-colors"
-          title="पिछला दिन"
+          title={isHindi ? "पिछला दिन" : "Previous Day"}
         >
           <ChevronLeft className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">पिछला दिन</span>
+          <span className="hidden sm:inline">{isHindi ? "पिछला दिन" : "Previous Day"}</span>
         </button>
 
         {/* WebView-Safe Date Display with Transparent Input Overlay */}
@@ -568,7 +670,7 @@ export function MuhuratScreen({
             value={dateInputVal}
             onChange={handleDateChange}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-            title="मुहूर्त तिथि बदलें"
+            title={isHindi ? "मुहूर्त तिथि बदलें" : "Change Muhurat Date"}
           />
         </div>
 
@@ -578,15 +680,15 @@ export function MuhuratScreen({
               onClick={goToToday}
               className="px-2.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-900 dark:text-amber-200 text-xs font-bold hover:bg-amber-500/30 font-sans cursor-pointer transition-colors"
             >
-              आज
+              {isHindi ? "आज" : "Today"}
             </button>
           )}
           <button 
             onClick={goToNextDay}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 dark:bg-white/5 dark:hover:bg-white/10 text-orange-800 dark:text-orange-200 text-xs font-bold font-sans cursor-pointer transition-colors"
-            title="अगला दिन"
+            title={isHindi ? "अगला दिन" : "Next Day"}
           >
-            <span className="hidden sm:inline">अगला दिन</span>
+            <span className="hidden sm:inline">{isHindi ? "अगला दिन" : "Next Day"}</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -731,7 +833,9 @@ export function MuhuratScreen({
               </span>
               {language === 'Hindi' ? "लाइव सक्रिय मुहूर्त संसूचक" : "Live Active Muhurat"}
             </span>
-            <span className="text-[10px] text-slate-400 font-mono">वर्तमान समय अनुकूल</span>
+            <span className="text-[10px] text-slate-400 font-mono">
+              {isHindi ? "वर्तमान समय अनुकूल" : "Currently Favorable"}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -778,7 +882,7 @@ export function MuhuratScreen({
                       <h3 className="text-[16px] sm:text-[17.5px] font-extrabold text-[#9A3412] dark:text-amber-300 font-serif leading-none">
                         {language === 'Hindi' ? cat.hindiName : cat.name}
                       </h3>
-                      {language !== 'Hindi' && <span className="text-[10px] text-slate-400 block mt-0.5">{cat.name}</span>}
+                      {language !== 'Hindi' && <span className="text-[10px] text-slate-400 block mt-0.5">{cat.hindiName}</span>}
                     </div>
                   </div>
 
@@ -820,7 +924,11 @@ export function MuhuratScreen({
                   ) : (
                     <>
                       <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
-                      <span>{language === 'Hindi' ? (cat.rule?.reasons[0] || "आज नक्षत्र/तिथि प्रतिकूल है। मुख्य कार्य टालें।") : "Adverse conditions today. Avoid major events."}</span>
+                      <span>
+                        {language === 'Hindi' 
+                          ? (cat.rule?.reasons[0] ? translateAdviceHindi(cat.rule.reasons[0]) : "आज नक्षत्र/तिथि प्रतिकूल है। मुख्य कार्य टालें।") 
+                          : (cat.rule?.reasons[0] ? translateAdviceEnglish(cat.rule.reasons[0]) : "Adverse conditions today. Avoid major events.")}
+                      </span>
                     </>
                   )}
                 </div>
@@ -871,7 +979,7 @@ export function MuhuratScreen({
                       </div>
 
                       <div className="text-[12px] text-stone-700 dark:text-stone-300 mt-1 leading-normal font-sans font-normal">
-                        🌿 {language === 'Hindi' ? translateAdviceHindi(sl.advice) : sl.advice}
+                        🌿 {language === 'Hindi' ? translateAdviceHindi(sl.advice) : translateAdviceEnglish(sl.advice)}
                       </div>
 
                       {sl.warningNote && !sl.isCancelled && (
@@ -1009,7 +1117,7 @@ export function MuhuratScreen({
                         </span>
                         {isRahuOverlap && (
                           <span className="text-[9.5px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 px-1 py-0.2 rounded border border-rose-300/40">
-                            राहुकाल
+                            {language === 'Hindi' ? "राहुकाल" : "Rahu Kaal"}
                           </span>
                         )}
                       </div>

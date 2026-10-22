@@ -3,15 +3,19 @@ import { Plus, Trash2, Clock, Volume2, ShieldAlert, ChevronDown, ChevronUp, Bell
 import { AppNotification } from '../types';
 import { getMuhuratsForPanchang } from '../utils/panchangCalc';
 import { toggleQuickAlarm, isAlarmActive, formatTimeWithOffset } from '../utils/alarmUtils';
+import { Language } from '../utils/translations';
 
 interface NotificationSimulatorProps {
   notificationsList: AppNotification[];
   setNotificationsList: React.Dispatch<React.SetStateAction<AppNotification[]>>;
   onPushToast: (title: string, body: string) => void;
   panchangInfo?: any;
+  language?: Language;
 }
 
-export function NotificationSimulator({ notificationsList, setNotificationsList, onPushToast, panchangInfo }: NotificationSimulatorProps) {
+export function NotificationSimulator({ notificationsList, setNotificationsList, onPushToast, panchangInfo, language = 'Hindi' }: NotificationSimulatorProps) {
+  const isHin = language !== 'English';
+
   // Custom Alarm form states
   const [isCustomOpen, setIsCustomOpen] = useState(false);
   const [customTitle, setCustomTitle] = useState('');
@@ -35,18 +39,18 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
     window.onRingtonePicked = (alarmId, uri, title) => {
       setRingtoneUri(uri);
       setRingtoneTitle(title);
-      onPushToast("🎵 टोन सेट की गई", `${title} को अलार्म टोन सेट किया गया!`);
+      onPushToast(isHin ? "🎵 टोन सेट की गई" : "🎵 Tone Set", isHin ? `${title} को अलार्म टोन सेट किया गया!` : `${title} has been set as alarm tone!`);
     };
     return () => {
       window.onRingtonePicked = undefined;
     };
-  }, [onPushToast]);
+  }, [onPushToast, isHin]);
 
   const handleSelectCustomRingtone = () => {
     if (window.AndroidAlarm) {
       window.AndroidAlarm.selectRingtone("custom_reminder_id");
     } else {
-      onPushToast("⚠️ सुविधा अनुपलब्ध", "कस्टम टोन केवल एंड्रॉइड मोबाइल ऐप पर चुना जा सकता है।");
+      onPushToast(isHin ? "⚠️ सुविधा अनुपलब्ध" : "⚠️ Feature Unavailable", isHin ? "कस्टम टोन केवल एंड्रॉइड मोबाइल ऐप पर चुना जा सकता है।" : "Custom tone can only be selected on Android mobile app.");
     }
   };
 
@@ -74,54 +78,54 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
     return [
       {
         id: 'alert_brahma',
-        title: 'ब्रह्म मुहूर्त साधना',
-        subtitle: 'प्रातः ध्यान, योग व विद्याध्ययन हेतु',
+        title: isHin ? 'ब्रह्म मुहूर्त साधना' : 'Brahma Muhurat Sadhana',
+        subtitle: isHin ? 'प्रातः ध्यान, योग व विद्याध्ययन हेतु' : 'For morning meditation, yoga & studies',
         time: brahma?.startTime || '04:43 AM',
         endTime: brahma?.endTime || '05:34 AM',
         displayTime: `${brahma?.startTime || '04:43 AM'} - ${brahma?.endTime || '05:34 AM'}`,
-        body: 'ईश्वर स्मरण, योग, साधना व अध्ययन हेतु ब्रह्म मुहूर्त प्रारंभ हो चुका है।',
+        body: isHin ? 'ईश्वर स्मरण, योग, साधना व अध्ययन हेतु ब्रह्म मुहूर्त प्रारंभ हो चुका है।' : 'Brahma Muhurat has commenced for prayer, meditation & study.',
         icon: '☀️',
         colorKey: 'amber' as const,
         offsetMinutes: 0
       },
       {
         id: 'alert_abhijit',
-        title: 'अभिजित मुहूर्त',
-        subtitle: 'दिन का सर्वश्रेष्ठ शुभ समय प्रारंभ',
+        title: isHin ? 'अभिजित मुहूर्त' : 'Abhijit Muhurat',
+        subtitle: isHin ? 'दिन का सर्वश्रेष्ठ शुभ समय प्रारंभ' : 'Best auspicious timing of the day',
         time: abhijit?.startTime || '11:42 AM',
         endTime: abhijit?.endTime || '12:27 PM',
         displayTime: `${abhijit?.startTime || '11:42 AM'} - ${abhijit?.endTime || '12:27 PM'}`,
-        body: 'सर्वकार्य सिद्धि हेतु अभिजीत मुहूर्त प्रारंभ हो चुका है।',
+        body: isHin ? 'सर्वकार्य सिद्धि हेतु अभिजीत मुहूर्त प्रारंभ हो चुका है।' : 'Abhijit Muhurat has started for success in all endeavors.',
         icon: '✨',
         colorKey: 'emerald' as const,
         offsetMinutes: 0
       },
       {
         id: 'alert_sandhya',
-        title: 'सांध्य वंदन / आरती',
-        subtitle: 'गोधूलि वेला दीप प्रज्वलन व पूजा स्मरण',
+        title: isHin ? 'सांध्य वंदन / आरती' : 'Sandhya Vandana / Aarti',
+        subtitle: isHin ? 'गोधूलि वेला दीप प्रज्वलन व पूजा स्मरण' : 'Twilight lamp lighting & evening prayers',
         time: godhuli?.startTime || panchangInfo?.sunset || '05:44 PM',
         endTime: godhuli?.endTime || '06:08 PM',
         displayTime: `${godhuli?.startTime || panchangInfo?.sunset || '05:44 PM'} - ${godhuli?.endTime || '06:08 PM'}`,
-        body: 'गोधूलि वेला में दीप प्रज्वलन व सांध्य आरती का पावन समय।',
+        body: isHin ? 'गोधूलि वेला में दीप प्रज्वलन व सांध्य आरती का पावन समय।' : 'Auspicious twilight time for lighting evening lamps and Aarti.',
         icon: '🪔',
         colorKey: 'orange' as const,
         offsetMinutes: 0
       },
       {
         id: 'alert_rahukaal',
-        title: 'राहुकाल पूर्व चेतावनी',
-        subtitle: 'राहुकाल प्रारंभ से 5 मिनट पूर्व सावधानी संदेश',
+        title: isHin ? 'राहुकाल पूर्व चेतावनी' : 'Rahukaal Warning Alert',
+        subtitle: isHin ? 'राहुकाल प्रारंभ से 5 मिनट पूर्व सावधानी संदेश' : 'Warning alert 5 minutes before Rahukaal starts',
         time: rahuStart,
         endTime: rahuEnd,
-        displayTime: `${rahuWarningTime} (शुरू: ${rahuStart})`,
-        body: `राहुकाल ${rahuStart} से प्रारंभ होने वाला है। शुभ कार्य टालें।`,
+        displayTime: isHin ? `${rahuWarningTime} (शुरू: ${rahuStart})` : `${rahuWarningTime} (Starts: ${rahuStart})`,
+        body: isHin ? `राहुकाल ${rahuStart} से प्रारंभ होने वाला है। शुभ कार्य टालें।` : `Rahukaal begins at ${rahuStart}. Avoid vital new beginnings.`,
         icon: '⚠️',
         colorKey: 'rose' as const,
         offsetMinutes: -5
       }
     ];
-  }, [panchangInfo, brahma, abhijit, godhuli]);
+  }, [panchangInfo, brahma, abhijit, godhuli, isHin]);
 
   // 1-Tap Toggle for Preset Alarms (Two-Way Reactivity)
   const handleTogglePreset = (preset: typeof presetAlarms[0]) => {
@@ -143,7 +147,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
     const safeId = `alert_${item.name.replace(/[^a-zA-Z0-9\u0900-\u097F]/g, '_')}_${item.start.replace(/[^a-zA-Z0-9]/g, '')}`;
     const result = toggleQuickAlarm(notificationsList, {
       id: safeId,
-      title: `${item.name} ${isAdverse ? 'चेतावनी' : 'प्रारंभ'}`,
+      title: `${item.name} ${isAdverse ? (isHin ? 'चेतावनी' : 'Warning') : (isHin ? 'प्रारंभ' : 'Starts')}`,
       body: `${item.name} (${item.time}). ${item.desc}`,
       time: item.start,
       endTime: item.end,
@@ -159,7 +163,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
       window.AndroidAlarm.cancelAlarm(id);
     }
     setNotificationsList(prev => prev.filter(alert => alert.id !== id));
-    onPushToast("🗑️ अलार्म हटाया गया", "अलार्म सफलतापूर्वक रद्द कर दिया गया है।");
+    onPushToast(isHin ? "🗑️ अलार्म हटाया गया" : "🗑️ Alarm Cancelled", isHin ? "अलार्म सफलतापूर्वक रद्द कर दिया गया है।" : "Alarm successfully cancelled.");
   };
 
   const parseTimeToMs = (timeStr: string): number | null => {
@@ -200,7 +204,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
     if (nextEnabled) {
       const triggerTimeMs = parseTimeToMs(alert.time);
       if (!triggerTimeMs) {
-        onPushToast("⚠️ अमान्य समय", `"${alert.title}" का समय अमान्य है, कृपया इसे पुनः सेट करें।`);
+        onPushToast(isHin ? "⚠️ अमान्य समय" : "⚠️ Invalid Time", isHin ? `"${alert.title}" का समय अमान्य है, कृपया इसे पुनः सेट करें।` : `"${alert.title}" time is invalid, please reset.`);
         return;
       }
       if (window.AndroidAlarm && typeof window.AndroidAlarm.scheduleAlarm === 'function') {
@@ -213,12 +217,12 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
           alert.ringtoneUri || ''
         );
       }
-      onPushToast("🔔 अलार्म सक्रिय", `"${alert.title}" अलार्म चालू कर दिया गया है।`);
+      onPushToast(isHin ? "🔔 अलार्म सक्रिय" : "🔔 Alarm Enabled", isHin ? `"${alert.title}" अलार्म चालू कर दिया गया है।` : `"${alert.title}" alarm turned on.`);
     } else {
       if (window.AndroidAlarm && typeof window.AndroidAlarm.cancelAlarm === 'function') {
         window.AndroidAlarm.cancelAlarm(alert.id);
       }
-      onPushToast("🔕 अलार्म बंद", `"${alert.title}" अलार्म बंद कर दिया गया है।`);
+      onPushToast(isHin ? "🔕 अलार्म बंद" : "🔕 Alarm Disabled", isHin ? `"${alert.title}" अलार्म बंद कर दिया गया है।` : `"${alert.title}" alarm turned off.`);
     }
 
     setNotificationsList(prev => prev.map(a => a.id === id ? { ...a, enabled: nextEnabled } : a));
@@ -230,20 +234,22 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
 
     const triggerTimeMs = parseTimeToMs(customTime);
     if (!triggerTimeMs) {
-      onPushToast("⚠️ अमान्य समय प्रारूप", "कृपया सही समय लिखें, जैसे 06:45 AM या 18:45");
+      onPushToast(isHin ? "⚠️ अमान्य समय प्रारूप" : "⚠️ Invalid Time Format", isHin ? "कृपया सही समय लिखें, जैसे 06:45 AM या 18:45" : "Please enter a valid time, e.g. 06:45 AM or 18:45");
       return;
     }
 
-    const detailsSuffix = ` (कंपन: ${customVibrate ? 'हाँ' : 'नहीं'}, स्नूज़: ${customSnooze} मिनट)`;
+    const detailsSuffix = isHin 
+      ? ` (कंपन: ${customVibrate ? 'हाँ' : 'नहीं'}, स्नूज़: ${customSnooze} मिनट)`
+      : ` (Vibrate: ${customVibrate ? 'Yes' : 'No'}, Snooze: ${customSnooze}m)`;
 
     let finalUri = '';
-    let selectedRingtoneTitle = 'डिफ़ॉल्ट टोन (Flute)';
+    let selectedRingtoneTitle = isHin ? 'डिफ़ॉल्ट टोन (Flute)' : 'Default Tone (Flute)';
     if (ringtoneType === 'system') {
       finalUri = 'SYSTEM_DEFAULT';
-      selectedRingtoneTitle = 'सिस्टम अलार्म टोन';
+      selectedRingtoneTitle = isHin ? 'सिस्टम अलार्म टोन' : 'System Alarm Tone';
     } else if (ringtoneType === 'custom') {
       finalUri = ringtoneUri;
-      selectedRingtoneTitle = ringtoneTitle || 'कस्टम टोन';
+      selectedRingtoneTitle = ringtoneTitle || (isHin ? 'कस्टम टोन' : 'Custom Tone');
     }
 
     const newAlert: AppNotification = {
@@ -307,33 +313,33 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
     // 1. Rahu Kaal
     if (panchangInfo.rahuKaal) {
       list.push({
-        name: 'राहुकाल',
+        name: isHin ? 'राहुकाल' : 'Rahukaal',
         time: `${panchangInfo.rahuKaal.start} - ${panchangInfo.rahuKaal.end}`,
         start: panchangInfo.rahuKaal.start,
         end: panchangInfo.rahuKaal.end,
-        desc: 'राहुकाल के दौरान कोई भी नया या मांगलिक कार्य शुरू करना वर्जित है।'
+        desc: isHin ? 'राहुकाल के दौरान कोई भी नया या मांगलिक कार्य शुरू करना वर्जित है।' : 'Avoid starting new endeavors or auspicious actions during Rahukaal.'
       });
     }
 
     // 2. Yamagandam
     if (panchangInfo.yamagandam) {
       list.push({
-        name: 'यमगण्ड काल',
+        name: isHin ? 'यमगण्ड काल' : 'Yamaganda Kaal',
         time: `${panchangInfo.yamagandam.start} - ${panchangInfo.yamagandam.end}`,
         start: panchangInfo.yamagandam.start,
         end: panchangInfo.yamagandam.end,
-        desc: 'यमगण्डम में मांगलिक कार्य करने पर अशुभ परिणाम प्राप्त होते हैं।'
+        desc: isHin ? 'यमगण्डम में मांगलिक कार्य करने पर अशुभ परिणाम प्राप्त होते हैं।' : 'Auspicious work performed during Yamagandam yields adverse results.'
       });
     }
 
     // 3. Gulik Kaal
     if (panchangInfo.gulikKaal) {
       list.push({
-        name: 'गुलिक काल',
+        name: isHin ? 'गुलिक काल' : 'Gulika Kaal',
         time: `${panchangInfo.gulikKaal.start} - ${panchangInfo.gulikKaal.end}`,
         start: panchangInfo.gulikKaal.start,
         end: panchangInfo.gulikKaal.end,
-        desc: 'गुलिक काल के प्रभाव में शुभ और संचय कार्य टालना चाहिए।'
+        desc: isHin ? 'गुलिक काल के प्रभाव में शुभ और संचय कार्य टालना चाहिए।' : 'Auspicious accumulation tasks should be avoided during Gulika Kaal.'
       });
     }
 
@@ -341,11 +347,11 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
     if (panchangInfo.durmuhurat && panchangInfo.durmuhurat.length > 0) {
       panchangInfo.durmuhurat.forEach((dm: any, idx: number) => {
         list.push({
-          name: `दुर्मुहूर्त ${idx + 1}`,
+          name: `${isHin ? 'दुर्मुहूर्त' : 'Durmuhurat'} ${idx + 1}`,
           time: `${dm.start} - ${dm.end}`,
           start: dm.start,
           end: dm.end,
-          desc: 'दुर्मुहूर्त काल ज्योतिषीय दृष्टि से प्रतिकूल समय माना जाता है।'
+          desc: isHin ? 'दुर्मुहूर्त काल ज्योतिषीय दृष्टि से प्रतिकूल समय माना जाता है।' : 'Durmuhurat is considered unfavorable in Vedic astrology.'
         });
       });
     }
@@ -354,11 +360,11 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
     if (panchangInfo.varjyam && panchangInfo.varjyam.length > 0) {
       panchangInfo.varjyam.forEach((vj: any, idx: number) => {
         list.push({
-          name: `वर्ज्यम काल ${idx + 1}`,
+          name: `${isHin ? 'वर्ज्यम काल' : 'Varjyam Period'} ${idx + 1}`,
           time: `${vj.start} - ${vj.end}`,
           start: vj.start,
           end: vj.end,
-          desc: 'वर्ज्यम काल में यात्रा, शुभ कार्य और गृह प्रवेश वर्जित हैं।'
+          desc: isHin ? 'वर्ज्यम काल में यात्रा, शुभ कार्य और गृह प्रवेश वर्जित हैं।' : 'Travel, celebrations and ceremonies are prohibited during Varjyam.'
         });
       });
     }
@@ -368,13 +374,13 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
       panchangInfo.choghadiya.forEach((chog: any) => {
         if (chog.type === 'Kaal' || chog.type === 'Rog' || chog.type === 'Udveg') {
           const typeMap: Record<string, string> = { 'Kaal': 'काल', 'Rog': 'रोग', 'Udveg': 'उद्वेग' };
-          const name = `${typeMap[chog.type]} चौघड़िया (${chog.isDay ? 'दिन' : 'रात्रि'})`;
+          const name = isHin ? `${typeMap[chog.type]} चौघड़िया (${chog.isDay ? 'दिन' : 'रात्रि'})` : `${chog.type} Choghadiya (${chog.isDay ? 'Day' : 'Night'})`;
           list.push({
             name,
             time: `${chog.startTime} - ${chog.endTime}`,
             start: chog.startTime,
             end: chog.endTime,
-            desc: `${chog.type === 'Rog' ? 'स्वास्थ्य हानि' : chog.type === 'Kaal' ? 'कलह' : 'चिंता'} कारक चौघड़िया मुहूर्त।`
+            desc: isHin ? `${chog.type === 'Rog' ? 'स्वास्थ्य हानि' : chog.type === 'Kaal' ? 'कलह' : 'चिंता'} कारक चौघड़िया मुहूर्त।` : `Inauspicious Choghadiya (${chog.type}) unfavorable for vital tasks.`
           });
         }
       });
@@ -383,11 +389,11 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
     // 7. Bhadra Kaal Warning
     if (panchangInfo.bhadra && (panchangInfo.bhadra.active || panchangInfo.bhadra.startTime)) {
       list.push({
-        name: 'भद्रा काल चेतावनी',
+        name: isHin ? 'भद्रा काल चेतावनी' : 'Bhadra Kaal Warning',
         time: `${panchangInfo.bhadra.startTime || panchangInfo.sunrise} - ${panchangInfo.bhadra.endTime || panchangInfo.sunset}`,
         start: panchangInfo.bhadra.startTime || panchangInfo.sunrise,
         end: panchangInfo.bhadra.endTime || panchangInfo.sunset,
-        desc: `भद्रा काल (${panchangInfo.bhadra.vasHindi || 'पाताल'}) के दौरान रक्षासूत्र, विवाह व शुभ कार्य वर्जित हैं।`
+        desc: isHin ? `भद्रा काल (${panchangInfo.bhadra.vasHindi || 'पाताल'}) के दौरान रक्षासूत्र, विवाह व शुभ कार्य वर्जित हैं।` : 'Auspicious rites, marriages and sacred threads are prohibited during Bhadra Kaal.'
       });
     }
 
@@ -406,11 +412,11 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
       activeM.forEach(muh => {
         if (muh.type === 'Amrit' || muh.type === 'Shubh') {
           list.push({
-            name: muh.hindiName || muh.name,
+            name: isHin ? (muh.hindiName || muh.name) : (muh.name || muh.hindiName),
             time: `${muh.startTime} - ${muh.endTime}`,
             start: muh.startTime,
             end: muh.endTime,
-            desc: muh.description || 'मांगलिक कार्यों और नवीन शुरुआत के लिए अत्यंत शुभ काल।'
+            desc: isHin ? (muh.description || 'मांगलिक कार्यों और नवीन शुरुआत के लिए अत्यंत शुभ काल।') : 'Highly auspicious period for new beginnings and ceremonies.'
           });
         }
       });
@@ -421,29 +427,29 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
     // 2. Solar & Lunar Milestones
     if (panchangInfo.sunrise) {
       list.push({
-        name: 'सूर्योदय (प्रातः संध्या समय)',
+        name: isHin ? 'सूर्योदय (प्रातः संध्या समय)' : 'Sunrise (Morning Prayers Time)',
         time: panchangInfo.sunrise,
         start: panchangInfo.sunrise,
         end: panchangInfo.sunrise,
-        desc: 'प्रातः सूर्य आराधना, गायत्री जाप एवं सूर्य देव को जल अर्पित करने का पावन समय।'
+        desc: isHin ? 'प्रातः सूर्य आराधना, गायत्री जाप एवं सूर्य देव को जल अर्पित करने का पावन समय।' : 'Sacred time for morning Surya worship, Gayatri chanting and offering water.'
       });
     }
     if (panchangInfo.sunset) {
       list.push({
-        name: 'सूर्यास्त (सायं संध्या आरती)',
+        name: isHin ? 'सूर्यास्त (सायं संध्या आरती)' : 'Sunset (Evening Aarti Time)',
         time: panchangInfo.sunset,
         start: panchangInfo.sunset,
         end: panchangInfo.sunset,
-        desc: 'सायंकाल मंदिर दर्शन, गृह दीप प्रज्वलन एवं संध्या आरती का पवित्र समय।'
+        desc: isHin ? 'सायंकाल मंदिर दर्शन, गृह दीप प्रज्वलन एवं संध्या आरती का पवित्र समय।' : 'Sacred evening time for temple visits, lamp lighting and Aarti.'
       });
     }
     if (panchangInfo.moonrise && panchangInfo.moonrise !== '---') {
       list.push({
-        name: 'चन्द्रोदय (चन्द्र अर्घ्य समय)',
+        name: isHin ? 'चन्द्रोदय (चन्द्र अर्घ्य समय)' : 'Moonrise (Chandra Arghya Time)',
         time: panchangInfo.moonrise,
         start: panchangInfo.moonrise,
         end: panchangInfo.moonrise,
-        desc: 'संकष्टी चतुर्थी, करवा चौथ व पूर्णिमा व्रत पारण हेतु चन्द्र दर्शन समय।'
+        desc: isHin ? 'संकष्टी चतुर्थी, करवा चौथ व पूर्णिमा व्रत पारण हेतु चन्द्र दर्शन समय।' : 'Moon sighting and offering time for fasting rituals.'
       });
     }
 
@@ -452,13 +458,13 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
       panchangInfo.choghadiya.forEach((chog: any) => {
         if (chog.type === 'Shubh' || chog.type === 'Amrit' || chog.type === 'Labh') {
           const typeMap: Record<string, string> = { 'Shubh': 'शुभ', 'Amrit': 'अमृत', 'Labh': 'लाभ' };
-          const name = `${typeMap[chog.type]} चौघड़िया (${chog.isDay ? 'दिन' : 'रात्रि'})`;
+          const name = isHin ? `${typeMap[chog.type]} चौघड़िया (${chog.isDay ? 'दिन' : 'रात्रि'})` : `${chog.type} Choghadiya (${chog.isDay ? 'Day' : 'Night'})`;
           list.push({
             name,
             time: `${chog.startTime} - ${chog.endTime}`,
             start: chog.startTime,
             end: chog.endTime,
-            desc: 'उन्नति, समृद्धि और शुभ कार्यों के संपादन के लिए सर्वोत्तम समय।'
+            desc: isHin ? 'उन्नति, समृद्धि और शुभ कार्यों के संपादन के लिए सर्वोत्तम समय।' : 'Best timing for prosperity, success and auspicious endeavors.'
           });
         }
       });
@@ -469,11 +475,11 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
       panchangInfo.hora.forEach((h: any) => {
         if (h.quality === 'Auspicious') {
           list.push({
-            name: `${h.lordHindi} होरा (${h.isDay ? 'दिन' : 'रात्रि'})`,
+            name: isHin ? `${h.lordHindi} होरा (${h.isDay ? 'दिन' : 'रात्रि'})` : `${h.lord} Hora (${h.isDay ? 'Day' : 'Night'})`,
             time: `${h.startTime} - ${h.endTime}`,
             start: h.startTime,
             end: h.endTime,
-            desc: h.benefits || 'शुभ ग्रह होरा काल कार्य सिद्धि एवं शुभ खरीदारी के लिए उत्तम।'
+            desc: isHin ? (h.benefits || 'शुभ ग्रह होरा काल कार्य सिद्धि एवं शुभ खरीदारी के लिए उत्तम।') : 'Auspicious planetary Hora optimal for success and important purchases.'
           });
         }
       });
@@ -490,15 +496,15 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
       <div className="p-3 sm:p-3.5 rounded-2xl bg-linear-to-r from-orange-500/10 via-amber-500/10 to-transparent border !border-[#FF9933]/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div>
           <h3 className="text-sm sm:text-base font-bold font-serif text-slate-900 dark:text-amber-100 flex items-center gap-1.5">
-            <span>॥</span> धार्मिक एवं नित्य साधना अलार्म <span>॥</span>
+            <span>॥</span> {isHin ? 'धार्मिक एवं नित्य साधना अलार्म' : 'Religious & Daily Sadhana Alarms'} <span>॥</span>
           </h3>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-            सूर्योदय-सूर्यास्त अनुसार स्वचालित समय • 1-टैप में सक्रिय करें
+            {isHin ? 'सूर्योदय-सूर्यास्त अनुसार स्वचालित समय • 1-टैप में सक्रिय करें' : 'Auto-calculated by Sunrise & Sunset • Activate in 1-Tap'}
           </p>
         </div>
         <div className="flex items-center gap-1 text-[11px] font-mono text-orange-600 dark:text-amber-400 bg-orange-500/10 dark:bg-orange-950/40 px-2.5 py-1 rounded-full border border-orange-500/25 shrink-0">
           <Clock className="w-3.5 h-3.5" />
-          <span>{notificationsList.filter(a => a.enabled !== false).length} सक्रिय</span>
+          <span>{notificationsList.filter(a => a.enabled !== false).length} {isHin ? 'सक्रिय' : 'Active'}</span>
         </div>
       </div>
 
@@ -506,10 +512,10 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
       <div className="space-y-2.5">
         <div className="flex items-center justify-between px-0.5">
           <span className="text-[11.5px] sm:text-xs font-bold text-slate-700 dark:text-amber-300 font-mono uppercase tracking-wider flex items-center gap-1.5">
-            <span>✨</span> नित्य वैदिक अलार्म्स (दैनिक साधना व सावधानी)
+            <span>✨</span> {isHin ? 'नित्य वैदिक अलार्म्स (दैनिक साधना व सावधानी)' : 'Daily Vedic Alarms (Routines & Caution)'}
           </span>
           <span className="text-[10px] text-slate-400 font-sans">
-            स्वचालित लाइव गणना
+            {isHin ? 'स्वचालित लाइव गणना' : 'Live Auto Calculation'}
           </span>
         </div>
 
@@ -565,7 +571,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                         </h4>
                         {isActive && (
                           <span className="text-[9.5px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-                            सक्रिय
+                            {isHin ? 'सक्रिय' : 'Active'}
                           </span>
                         )}
                       </div>
@@ -580,10 +586,10 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                     type="button"
                     role="switch"
                     aria-checked={isActive}
-                    aria-label={`${preset.title} अलार्म ${isActive ? 'बंद करें' : 'चालू करें'}`}
+                    aria-label={isHin ? `${preset.title} अलार्म ${isActive ? 'बंद करें' : 'चालू करें'}` : `${isActive ? 'Turn off' : 'Turn on'} ${preset.title} alarm`}
                     onClick={() => handleTogglePreset(preset)}
                     className="min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer p-1 rounded-xl transition-all shrink-0"
-                    title={isActive ? "अलार्म बंद करें" : "अलार्म चालू करें"}
+                    title={isActive ? (isHin ? "अलार्म बंद करें" : "Disable alarm") : (isHin ? "अलार्म चालू करें" : "Enable alarm")}
                   >
                     <div className={`w-10 h-5.5 rounded-full transition-colors relative flex items-center p-0.5 border ${
                       isActive 
@@ -603,7 +609,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                   </span>
 
                   <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-sans truncate">
-                    {preset.id === 'alert_rahukaal' ? '5 मिनट पूर्व चेतावनी' : 'दैनिक स्वतः शेड्यूल्ड'}
+                    {preset.id === 'alert_rahukaal' ? (isHin ? '5 मिनट पूर्व चेतावनी' : '5-min prior warning') : (isHin ? 'दैनिक स्वतः शेड्यूल्ड' : 'Daily auto-scheduled')}
                   </span>
                 </div>
               </div>
@@ -615,7 +621,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
       {/* 3. SECTION: QUICK PICKERS (2 WIDE ACTION BUTTONS) */}
       <div className="space-y-1.5">
         <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 font-mono uppercase tracking-wider block px-0.5">
-          🎯 अन्य ज्योतिषीय काल एवं चौघड़िया से त्वरित चयन:
+          🎯 {isHin ? 'अन्य ज्योतिषीय काल एवं चौघड़िया से त्वरित चयन:' : 'Quick Selection from Astrological Timings:'}
         </span>
         <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
           <button
@@ -624,7 +630,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
             className="p-2.5 sm:p-3 min-h-[44px] rounded-xl bg-emerald-950/15 dark:bg-emerald-950/30 hover:bg-emerald-950/25 border border-emerald-500/35 text-emerald-700 dark:text-emerald-300 text-xs sm:text-[13px] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all shadow-2xs text-center"
           >
             <span>🟢</span>
-            <span>शुभ काल व चौघड़िया ▾</span>
+            <span>{isHin ? 'शुभ काल व चौघड़िया ▾' : 'Auspicious Timings & Choghadiya ▾'}</span>
           </button>
 
           <button
@@ -633,7 +639,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
             className="p-2.5 sm:p-3 min-h-[44px] rounded-xl bg-rose-950/15 dark:bg-rose-950/30 hover:bg-rose-950/25 border border-rose-500/35 text-rose-700 dark:text-rose-300 text-xs sm:text-[13px] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all shadow-2xs text-center"
           >
             <span>🔴</span>
-            <span>वर्जित काल (यमगण्ड, गुलिक) ▾</span>
+            <span>{isHin ? 'वर्जित काल (यमगण्ड, गुलिक) ▾' : 'Inauspicious Timings (Yamaganda, Gulika) ▾'}</span>
           </button>
         </div>
       </div>
@@ -656,10 +662,10 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
             </div>
             <div>
               <span className="text-xs sm:text-[13.5px] font-bold text-slate-800 dark:text-amber-200 block font-serif">
-                अपना कस्टम अलार्म बनाएं (व्यक्तिगत पाठ व अनुष्ठान)
+                {isHin ? 'अपना कस्टम अलार्म बनाएं (व्यक्तिगत पाठ व अनुष्ठान)' : 'Create Custom Alarm (Personal Prayers & Rituals)'}
               </span>
               <span className="text-[10.5px] text-slate-500 dark:text-slate-400">
-                विशेष व्यक्तिगत समय, स्नूज़ व कस्टम रिंगटोन सेट करने हेतु टैप करें
+                {isHin ? 'विशेष व्यक्तिगत समय, स्नूज़ व कस्टम रिंगटोन सेट करने हेतु टैप करें' : 'Tap to set custom time, snooze & personalized ringtones'}
               </span>
             </div>
           </div>
@@ -673,11 +679,11 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
             <form onSubmit={handleCreateCustom} className="space-y-3 font-sans">
               <div>
                 <label className="text-[10.5px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">
-                  रिमाइंडर का शीर्षक
+                  {isHin ? 'रिमाइंडर का शीर्षक' : 'Reminder Title'}
                 </label>
                 <input
                   type="text"
-                  placeholder="जैसे: श्री सुंदरकांड पाठ या सायंकालीन आरती"
+                  placeholder={isHin ? "जैसे: श्री सुंदरकांड पाठ या सायंकालीन आरती" : "e.g., Sundarkand Path or Evening Aarti"}
                   value={customTitle}
                   onChange={(e) => setCustomTitle(e.target.value)}
                   className="w-full text-xs sm:text-[13px] p-2.5 rounded-xl bg-white dark:bg-zinc-950 border !border-[#FF9933]/30 dark:!border-[#FF9933]/20 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none"
@@ -687,10 +693,10 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
               
               <div>
                 <label className="text-[10.5px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">
-                  विवरण (जानकारी / निर्देश)
+                  {isHin ? 'विवरण (जानकारी / निर्देश)' : 'Description (Details / Notes)'}
                 </label>
                 <textarea
-                  placeholder="जैसे: घी का दीपक प्रज्वलित करें एवं हनुमान चालीसा का पाठ करें।"
+                  placeholder={isHin ? "जैसे: घी का दीपक प्रज्वलित करें एवं हनुमान चालीसा का पाठ करें।" : "e.g., Light a lamp and chant Hanuman Chalisa."}
                   value={customBody}
                   rows={2}
                   onChange={(e) => setCustomBody(e.target.value)}
@@ -702,11 +708,11 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
                   <label className="text-[10.5px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">
-                    समय सेट करें
+                    {isHin ? 'समय सेट करें' : 'Set Time'}
                   </label>
                   <input
                     type="text"
-                    placeholder="जैसे: 06:45 PM"
+                    placeholder={isHin ? "जैसे: 06:45 PM" : "e.g., 06:45 PM"}
                     value={customTime}
                     onChange={(e) => {
                       setCustomTime(e.target.value);
@@ -719,25 +725,25 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
 
                 <div>
                   <label className="text-[10.5px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">
-                    स्नूज़ अवधि
+                    {isHin ? 'स्नूज़ अवधि' : 'Snooze Duration'}
                   </label>
                   <select
                     value={customSnooze}
                     onChange={(e) => setCustomSnooze(parseInt(e.target.value, 10))}
                     className="w-full text-xs sm:text-[13px] p-2.5 rounded-xl bg-white dark:bg-zinc-950 border !border-[#FF9933]/30 dark:!border-[#FF9933]/20 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none cursor-pointer"
                   >
-                    <option value={1}>1 मिनट</option>
-                    <option value={2}>2 मिनट (मानक)</option>
-                    <option value={3}>3 मिनट</option>
-                    <option value={5}>5 मिनट</option>
-                    <option value={10}>10 मिनट</option>
+                    <option value={1}>1 {isHin ? 'मिनट' : 'minute'}</option>
+                    <option value={2}>2 {isHin ? 'मिनट (मानक)' : 'minutes (Standard)'}</option>
+                    <option value={3}>3 {isHin ? 'मिनट' : 'minutes'}</option>
+                    <option value={5}>5 {isHin ? 'मिनट' : 'minutes'}</option>
+                    <option value={10}>10 {isHin ? 'मिनट' : 'minutes'}</option>
                   </select>
                 </div>
               </div>
 
               <div className="flex items-center justify-between p-2.5 bg-slate-500/5 dark:bg-zinc-900/50 rounded-xl px-3 border !border-[#FF9933]/20">
                 <span className="text-[11.5px] font-bold text-slate-700 dark:text-slate-300">
-                  अलार्म कंपन (Vibrate on alert)
+                  {isHin ? 'अलार्म कंपन (Vibrate on alert)' : 'Vibrate on Alert'}
                 </span>
                 <input
                   type="checkbox"
@@ -749,25 +755,25 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
 
               <div>
                 <label className="text-[10.5px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono block mb-1">
-                  अलार्म रिंगटोन
+                  {isHin ? 'अलार्म रिंगटोन' : 'Alarm Ringtone'}
                 </label>
                 <select
                   value={ringtoneType}
                   onChange={(e) => setRingtoneType(e.target.value as any)}
                   className="w-full text-xs sm:text-[13px] p-2.5 rounded-xl bg-white dark:bg-zinc-950 border !border-[#FF9933]/30 dark:!border-[#FF9933]/20 text-slate-800 dark:text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none cursor-pointer"
                 >
-                  <option value="default">ऐप डिफ़ॉल्ट टोन (Flute Melody)</option>
-                  <option value="system">सिस्टम अलार्म टोन</option>
-                  <option value="custom">फ़ोन स्टोरेज से टोन चुनें...</option>
+                  <option value="default">{isHin ? 'ऐप डिफ़ॉल्ट टोन (Flute Melody)' : 'App Default Tone (Flute Melody)'}</option>
+                  <option value="system">{isHin ? 'सिस्टम अलार्म टोन' : 'System Alarm Tone'}</option>
+                  <option value="custom">{isHin ? 'फ़ोन स्टोरेज से टोन चुनें...' : 'Choose from phone storage...'}</option>
                 </select>
               </div>
 
               {ringtoneType === 'custom' && (
                 <div className="p-2.5 bg-orange-500/5 dark:bg-orange-950/20 rounded-xl border !border-[#FF9933]/30 flex flex-col gap-1.5">
                   <div className="flex justify-between items-center text-[11px]">
-                    <span className="text-slate-500 dark:text-slate-400">चुनी हुई टोन:</span>
+                    <span className="text-slate-500 dark:text-slate-400">{isHin ? 'चुनी हुई टोन:' : 'Selected Tone:'}</span>
                     <span className="font-bold text-orange-900 dark:text-orange-400 truncate max-w-[150px] font-mono">
-                      {ringtoneTitle || 'कोई नहीं'}
+                      {ringtoneTitle || (isHin ? 'कोई नहीं' : 'None')}
                     </span>
                   </div>
                   <button
@@ -775,7 +781,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                     onClick={handleSelectCustomRingtone}
                     className="p-2 min-h-[44px] bg-orange-600 text-white font-bold text-xs rounded-xl cursor-pointer hover:bg-orange-700 transition-all border border-orange-500/40 flex items-center justify-center"
                   >
-                    फ़ोन से टोन फ़ाइल चुनें
+                    {isHin ? 'फ़ोन से टोन फ़ाइल चुनें' : 'Choose tone file from phone'}
                   </button>
                 </div>
               )}
@@ -785,7 +791,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                 className="w-full min-h-[44px] bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold rounded-xl shadow-xs text-xs sm:text-[13px] flex items-center justify-center gap-1.5 cursor-pointer transition-all border !border-[#FF9933]"
               >
                 <Plus className="w-4 h-4" />
-                कस्टम रिमाइंडर शेड्यूल करें
+                {isHin ? 'कस्टम रिमाइंडर शेड्यूल करें' : 'Schedule Custom Reminder'}
               </button>
             </form>
           </div>
@@ -797,11 +803,11 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
         <div className="flex justify-between items-center flex-wrap gap-2">
           <h3 className="text-[13px] sm:text-[14px] font-bold text-slate-800 dark:text-amber-200 uppercase tracking-wider font-mono flex items-center gap-1.5">
             <Clock className="w-4 h-4 text-orange-500" />
-            सक्रिय अलार्म सूची (Active Scheduled Alarms)
+            {isHin ? 'सक्रिय अलार्म सूची (Active Scheduled Alarms)' : 'Active Scheduled Alarms'}
           </h3>
           {notificationsList.length > 0 && (
             <span className="text-[10.5px] font-bold bg-orange-500/10 text-orange-600 dark:text-amber-400 px-2.5 py-0.5 rounded-full font-mono border !border-[#FF9933]/25">
-              {notificationsList.length} सेट हैं
+              {notificationsList.length} {isHin ? 'सेट हैं' : 'Set'}
             </span>
           )}
         </div>
@@ -812,10 +818,10 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
             <div className="text-center py-8 sm:py-10 flex flex-col items-center justify-center gap-2 border border-dashed border-slate-500/20 dark:border-zinc-800 rounded-2xl">
               <ShieldAlert className="w-8 h-8 text-slate-350 dark:text-zinc-700" />
               <span className="text-xs text-slate-500 dark:text-zinc-400 italic">
-                अभी कोई अलार्म सक्रिय नहीं है।
+                {isHin ? 'अभी कोई अलार्म सक्रिय नहीं है।' : 'No active alarms scheduled yet.'}
               </span>
               <span className="text-[11px] text-slate-400 dark:text-zinc-500 max-w-xs text-center">
-                ऊपर दिए 4 नित्य वैदिक कार्ड्स या शुभ/अशुभ काल से 1-टैप में अलार्म चालू करें।
+                {isHin ? 'ऊपर दिए 4 नित्य वैदिक कार्ड्स या शुभ/अशुभ काल से 1-टैप में अलार्म चालू करें।' : 'Enable alarms in 1-tap using the 4 Daily Vedic Cards or Auspicious/Inauspicious pickers above.'}
               </span>
             </div>
           ) : (
@@ -842,7 +848,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                       {/* Alarm Time duration details */}
                       <span className="text-[11px] font-bold text-orange-600 dark:text-amber-400 font-mono bg-orange-500/5 dark:bg-orange-950/30 px-2.5 py-0.5 rounded-lg border !border-[#FF9933]/20 shrink-0">
                         {alert.time}
-                        {alert.endTime ? ` से ${alert.endTime}` : ''}
+                        {alert.endTime ? (isHin ? ` से ${alert.endTime}` : ` to ${alert.endTime}`) : ''}
                       </span>
                     </div>
                     
@@ -854,7 +860,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                     <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-zinc-500 font-mono pt-0.5 flex-wrap">
                       <span className="flex items-center gap-0.5">
                         <Volume2 className="w-3 h-3" />
-                        {alert.ringtoneTitle || 'डिफ़ॉल्ट टोन'}
+                        {alert.ringtoneTitle || (isHin ? 'डिफ़ॉल्ट टोन' : 'Default Tone')}
                       </span>
                       <span>•</span>
                       <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded border ${
@@ -862,12 +868,12 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                           ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/25'
                           : 'text-zinc-500 dark:text-zinc-400 bg-zinc-500/10 border-zinc-500/20'
                       }`}>
-                        {isEnabled ? 'सक्रिय' : 'निष्क्रिय'}
+                        {isEnabled ? (isHin ? 'सक्रिय' : 'Active') : (isHin ? 'निष्क्रिय' : 'Disabled')}
                       </span>
                       {alert.vibrate !== false && (
                         <>
                           <span>•</span>
-                          <span>कंपन चालू</span>
+                          <span>{isHin ? 'कंपन चालू' : 'Vibration On'}</span>
                         </>
                       )}
                     </div>
@@ -879,10 +885,10 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                       type="button"
                       role="switch"
                       aria-checked={isEnabled}
-                      aria-label={`${alert.title} अलार्म ${isEnabled ? 'बंद करें' : 'चालू करें'}`}
+                      aria-label={isHin ? `${alert.title} अलार्म ${isEnabled ? 'बंद करें' : 'चालू करें'}` : `${isEnabled ? 'Turn off' : 'Turn on'} ${alert.title} alarm`}
                       onClick={() => handleToggleAlert(alert.id)}
                       className="min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer p-1 rounded-xl hover:bg-orange-500/5 transition-all"
-                      title={isEnabled ? "अलार्म बंद करें" : "अलार्म चालू करें"}
+                      title={isEnabled ? (isHin ? "अलार्म बंद करें" : "Turn off alarm") : (isHin ? "अलार्म चालू करें" : "Turn on alarm")}
                     >
                       <div className={`w-9 h-5 rounded-full transition-colors relative flex items-center p-0.5 border ${
                         isEnabled 
@@ -898,8 +904,8 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                       type="button"
                       onClick={() => handleDeleteAlert(alert.id)}
                       className="text-slate-400 hover:text-red-500 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-red-500/10 transition-all flex-shrink-0"
-                      title="अलार्म हटाएं"
-                      aria-label="अलार्म हटाएं"
+                      title={isHin ? "अलार्म हटाएं" : "Remove alarm"}
+                      aria-label={isHin ? "अलार्म हटाएं" : "Remove alarm"}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -917,25 +923,25 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
           <div className="bg-[#1C1714] border !border-[#FF9933]/45 rounded-3xl w-full max-w-md p-4 sm:p-5 shadow-2xl max-h-[82vh] flex flex-col">
             <div className="flex justify-between items-center border-b !border-[#FF9933]/20 pb-2.5 mb-2.5">
               <h3 className="text-[14.5px] sm:text-[15.5px] font-bold text-red-400 font-serif flex items-center gap-1.5">
-                <span>🔴</span> आज के अशुभ काल एवं वर्जित समय
+                <span>🔴</span> {isHin ? 'आज के अशुभ काल एवं वर्जित समय' : "Today's Inauspicious & Prohibited Timings"}
               </h3>
               <button 
                 onClick={() => setShowAdverseModal(false)}
                 className="text-slate-400 hover:text-white cursor-pointer font-bold text-base min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl"
-                aria-label="बंद करें"
+                aria-label={isHin ? "बंद करें" : "Close"}
               >
                 ✕
               </button>
             </div>
             
             <p className="text-[11px] text-slate-400 mb-2">
-              किसी भी समय का अलार्म सक्रिय करने हेतु सीधे "अलार्म सेट करें" दबाएं:
+              {isHin ? 'किसी भी समय का अलार्म सक्रिय करने हेतु सीधे "अलार्म सेट करें" दबाएं:' : 'Tap "Set Alarm" to enable an alert for any timing:'}
             </p>
 
             <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
               {getAdverseTimesList().length === 0 ? (
                 <div className="text-center py-6 text-xs text-slate-400 italic">
-                  आज के शेष समय में कोई अशुभ काल उपलब्ध नहीं है।
+                  {isHin ? 'आज के शेष समय में कोई अशुभ काल उपलब्ध नहीं है।' : 'No inauspicious timings remaining today.'}
                 </div>
               ) : (
                 getAdverseTimesList().map((item, idx) => {
@@ -962,7 +968,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                             : 'bg-red-950/60 hover:bg-red-900 active:bg-red-800 text-red-200 border-red-500/30'
                         }`}
                       >
-                        {isItemActive ? 'सक्रिय ✓' : isPassed ? 'अलार्म (कल)' : 'अलार्म सेट'}
+                        {isItemActive ? (isHin ? 'सक्रिय ✓' : 'Active ✓') : isPassed ? (isHin ? 'अलार्म (कल)' : 'Alarm (Tom)') : (isHin ? 'अलार्म सेट' : 'Set Alarm')}
                       </button>
                     </div>
                   );
@@ -979,25 +985,25 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
           <div className="bg-[#1C1714] border !border-[#FF9933]/45 rounded-3xl w-full max-w-md p-4 sm:p-5 shadow-2xl max-h-[82vh] flex flex-col">
             <div className="flex justify-between items-center border-b !border-[#FF9933]/20 pb-2.5 mb-2.5">
               <h3 className="text-[14.5px] sm:text-[15.5px] font-bold text-emerald-400 font-serif flex items-center gap-1.5">
-                <span>🟢</span> आज के शुभ काल एवं चौघड़िया
+                <span>🟢</span> {isHin ? 'आज के शुभ काल एवं चौघड़िया' : "Today's Auspicious Timings & Choghadiya"}
               </h3>
               <button 
                 onClick={() => setShowAuspiciousModal(false)}
                 className="text-slate-400 hover:text-white cursor-pointer font-bold text-base min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl"
-                aria-label="बंद करें"
+                aria-label={isHin ? "बंद करें" : "Close"}
               >
                 ✕
               </button>
             </div>
             
             <p className="text-[11px] text-slate-400 mb-2">
-              किसी भी शुभ मुहूर्त का अलार्म सीधे 1-टैप में चालू करें:
+              {isHin ? 'किसी भी शुभ मुहूर्त का अलार्म सीधे 1-टैप में चालू करें:' : 'Enable an alarm for any auspicious muhurat in 1-tap:'}
             </p>
 
             <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
               {getAuspiciousTimesList().length === 0 ? (
                 <div className="text-center py-6 text-xs text-slate-400 italic">
-                  आज के शेष समय में कोई शुभ काल उपलब्ध नहीं है।
+                  {isHin ? 'आज के शेष समय में कोई शुभ काल उपलब्ध नहीं है।' : 'No auspicious timings remaining today.'}
                 </div>
               ) : (
                 getAuspiciousTimesList().map((item, idx) => {
@@ -1024,7 +1030,7 @@ export function NotificationSimulator({ notificationsList, setNotificationsList,
                             : 'bg-emerald-950/60 hover:bg-emerald-900 active:bg-emerald-800 text-emerald-200 border-emerald-500/30'
                         }`}
                       >
-                        {isItemActive ? 'सक्रिय ✓' : isPassed ? 'अलार्म (कल)' : 'अलार्म सेट'}
+                        {isItemActive ? (isHin ? 'सक्रिय ✓' : 'Active ✓') : isPassed ? (isHin ? 'अलार्म (कल)' : 'Alarm (Tom)') : (isHin ? 'अलार्म सेट' : 'Set Alarm')}
                       </button>
                     </div>
                   );

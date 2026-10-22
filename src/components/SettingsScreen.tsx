@@ -97,10 +97,12 @@ export function SettingsScreen({
       window.AndroidAlarm.setPermanentNotificationEnabled(val);
     }
     onPushToast(
-      val ? '🔔 स्थायी नोटिफिकेशन चालू' : '🔕 स्थायी नोटिफिकेशन बंद',
       val 
-        ? 'आज का पंचांग व शुभ समय फोन के नोटिफिकेशन बार में हमेशा पिन रहेगा।'
-        : 'नोटिफिकेशन बार से स्थायी पंचांग पिन हटा दिया गया है।'
+        ? (language === 'Hindi' ? '🔔 स्थायी नोटिफिकेशन चालू' : '🔔 Permanent Notification Enabled')
+        : (language === 'Hindi' ? '🔕 स्थायी नोटिफिकेशन बंद' : '🔕 Permanent Notification Disabled'),
+      val 
+        ? (language === 'Hindi' ? 'आज का पंचांग व शुभ समय फोन के नोटिफिकेशन बार में हमेशा पिन रहेगा।' : 'Today\'s Panchang and auspicious timing will remain pinned in notification bar.')
+        : (language === 'Hindi' ? 'नोटिफिकेशन बार से स्थायी पंचांग पिन हटा दिया गया है।' : 'Panchang notification pin removed from notification drawer.')
     );
   };
 
@@ -119,7 +121,7 @@ export function SettingsScreen({
           }`}
         >
           <Settings className="w-4 h-4 text-orange-600 dark:text-amber-400" />
-          <span>⚙️ ऐप सेटिंग्स</span>
+          <span>{language === 'Hindi' ? '⚙️ ऐप सेटिंग्स' : '⚙️ App Settings'}</span>
         </button>
 
         <button
@@ -132,7 +134,7 @@ export function SettingsScreen({
           }`}
         >
           <ImageIcon className="w-4 h-4 text-orange-600 dark:text-amber-400" />
-          <span>🎨 पोस्टर व विजेट्स</span>
+          <span>{language === 'Hindi' ? '🎨 पोस्टर व विजेट्स' : '🎨 Posters & Widgets'}</span>
         </button>
       </div>
 
@@ -147,7 +149,7 @@ export function SettingsScreen({
             <div className="flex items-center gap-2 border-b !border-[#FF9933]/20 pb-2.5">
               <Sun className="w-4 h-4 text-orange-600 dark:text-amber-400" />
               <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-amber-100 font-serif">
-                दृश्य एवं भाषा प्राथमिकताएं
+                {language === 'Hindi' ? 'दृश्य एवं भाषा प्राथमिकताएं' : 'Display & Language Preferences'}
               </h3>
             </div>
 
@@ -155,10 +157,10 @@ export function SettingsScreen({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 font-mono uppercase">
-                  ऐप थीम (रंग शैली)
+                  {language === 'Hindi' ? 'ऐप थीम (रंग शैली)' : 'App Theme (Color Mode)'}
                 </label>
                 <span className="text-[11px] text-slate-400">
-                  {settings.theme === 'light' ? 'दिन के समय' : 'रात्रि के समय'}
+                  {settings.theme === 'light' ? (language === 'Hindi' ? 'दिन के समय' : 'Daytime') : (language === 'Hindi' ? 'रात्रि के समय' : 'Nighttime')}
                 </span>
               </div>
               
@@ -175,12 +177,12 @@ export function SettingsScreen({
                   <div className="flex items-center justify-between">
                     <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-amber-100 flex items-center gap-1.5">
                       <Sun className="w-3.5 h-3.5 text-amber-500" />
-                      ☀️ लाइट मोड
+                      {language === 'Hindi' ? '☀️ लाइट मोड' : '☀️ Light Mode'}
                     </span>
                     {settings.theme === 'light' && <Check className="w-3.5 h-3.5 text-orange-600 dark:text-amber-400" />}
                   </div>
                   <p className="text-[10.5px] text-slate-500 dark:text-slate-400 leading-tight">
-                    दिन के समय स्पष्ट व पारंपरिक वैदिक रूप।
+                    {language === 'Hindi' ? 'दिन के समय स्पष्ट व पारंपरिक वैदिक रूप।' : 'Clear and vibrant layout optimal for daytime.'}
                   </p>
                 </button>
 
@@ -196,12 +198,12 @@ export function SettingsScreen({
                   <div className="flex items-center justify-between">
                     <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-amber-100 flex items-center gap-1.5">
                       <Moon className="w-3.5 h-3.5 text-indigo-400" />
-                      🌙 डार्क मोड
+                      {language === 'Hindi' ? '🌙 डार्क मोड' : '🌙 Dark Mode'}
                     </span>
                     {settings.theme === 'dark' && <Check className="w-3.5 h-3.5 text-amber-400" />}
                   </div>
                   <p className="text-[10.5px] text-slate-500 dark:text-slate-400 leading-tight">
-                    रात्रि में नेत्रों की सुरक्षा व बैटरी बचत।
+                    {language === 'Hindi' ? 'रात्रि में नेत्रों की सुरक्षा व बैटरी बचत।' : 'Comfortable for eyes at night and saves battery.'}
                   </p>
                 </button>
               </div>
@@ -211,7 +213,7 @@ export function SettingsScreen({
             <div className="space-y-2 pt-1 border-t border-slate-500/10 dark:border-zinc-800/80">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 font-mono uppercase flex items-center gap-1">
-                  <Globe className="w-3.5 h-3.5 text-orange-500" /> भाषा (Language)
+                  <Globe className="w-3.5 h-3.5 text-orange-500" /> {language === 'Hindi' ? 'भाषा (Language)' : 'Language'}
                 </label>
                 <span className="text-[11px] text-slate-400">
                   {language === 'Hindi' ? 'हिन्दी में' : 'In English'}
@@ -236,7 +238,7 @@ export function SettingsScreen({
                 ))}
               </div>
               <p className="text-[10.5px] text-slate-500 dark:text-slate-400">
-                पूरे पंचांग, मुहूर्त, चौघड़िया और त्योहारों के विवरण की भाषा बदलें।
+                {language === 'Hindi' ? 'पूरे पंचांग, मुहूर्त, चौघड़िया और त्योहारों के विवरण की भाषा बदलें।' : 'Switch the display language for Panchang, Muhurat, Choghadiya, and Festivals.'}
               </p>
             </div>
 
@@ -244,18 +246,18 @@ export function SettingsScreen({
             <div className="space-y-2 pt-1 border-t border-slate-500/10 dark:border-zinc-800/80">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 font-mono uppercase flex items-center gap-1">
-                  <Type className="w-3.5 h-3.5 text-orange-500" /> अक्षरों का आकार (Font Size)
+                  <Type className="w-3.5 h-3.5 text-orange-500" /> {language === 'Hindi' ? 'अक्षरों का आकार (Font Size)' : 'Font Size'}
                 </label>
                 <span className="text-[11px] font-bold text-orange-600 dark:text-amber-400 font-mono">
-                  {settings.fontSize === 'small' ? '14px' : settings.fontSize === 'large' ? '18px' : '16px (मानक)'}
+                  {settings.fontSize === 'small' ? '14px' : settings.fontSize === 'large' ? '18px' : (language === 'Hindi' ? '16px (मानक)' : '16px (Standard)')}
                 </span>
               </div>
 
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { id: 'small', label: 'छोटा (14px)', desc: 'अधिक सामग्री' },
-                  { id: 'medium', label: 'मध्यम (16px)', desc: 'अनुशंसित' },
-                  { id: 'large', label: 'बड़ा (18px)', desc: 'स्पष्ट दृष्टि' }
+                  { id: 'small', label: language === 'Hindi' ? 'छोटा (14px)' : 'Small (14px)', desc: language === 'Hindi' ? 'अधिक सामग्री' : 'More content' },
+                  { id: 'medium', label: language === 'Hindi' ? 'मध्यम (16px)' : 'Medium (16px)', desc: language === 'Hindi' ? 'अनुशंसित' : 'Recommended' },
+                  { id: 'large', label: language === 'Hindi' ? 'बड़ा (18px)' : 'Large (18px)', desc: language === 'Hindi' ? 'स्पष्ट दृष्टि' : 'Clear vision' }
                 ].map((sz) => (
                   <button
                     key={sz.id}
@@ -283,18 +285,20 @@ export function SettingsScreen({
                 <div className="flex items-center gap-2">
                   <Bell className="w-4 h-4 text-orange-600 dark:text-amber-400 shrink-0" />
                   <h4 className="text-sm font-bold text-slate-800 dark:text-amber-100 font-serif">
-                    स्थायी पंचांग नोटिफिकेशन
+                    {language === 'Hindi' ? 'स्थायी पंचांग नोटिफिकेशन' : 'Permanent Panchang Notification'}
                   </h4>
                   <span className={`text-[9.5px] font-bold font-mono px-2 py-0.5 rounded-full border ${
                     notificationEnabled
                       ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
                       : 'bg-zinc-500/10 text-zinc-500 dark:text-zinc-400 border-zinc-500/20'
                   }`}>
-                    {notificationEnabled ? '🟢 सक्रिय' : '⚪ बंद'}
+                    {notificationEnabled ? (language === 'Hindi' ? '🟢 सक्रिय' : '🟢 Active') : (language === 'Hindi' ? '⚪ बंद' : '⚪ Off')}
                   </span>
                 </div>
                 <p className="text-[11.5px] text-slate-500 dark:text-slate-400 leading-normal">
-                  बिना ऐप खोले अपने फोन के नोटिफिकेशन बार में आज की तिथि, शुभ चौघड़िया और राहुकाल समय हमेशा लाइव देखें।
+                  {language === 'Hindi' 
+                    ? 'बिना ऐप खोले अपने फोन के नोटिफिकेशन बार में आज की तिथि, शुभ चौघड़िया और राहुकाल समय हमेशा लाइव देखें।' 
+                    : 'View today\'s Tithi, active Choghadiya, and Rahukaal timing live in your phone notification drawer without opening the app.'}
                 </p>
               </div>
 
@@ -303,7 +307,7 @@ export function SettingsScreen({
                 type="button"
                 role="switch"
                 aria-checked={notificationEnabled}
-                aria-label="स्थायी पंचांग नोटिफिकेशन टॉगल करें"
+                aria-label={language === 'Hindi' ? "स्थायी पंचांग नोटिफिकेशन टॉगल करें" : "Toggle permanent Panchang notification"}
                 onClick={() => handleTogglePermanentNotification(!notificationEnabled)}
                 className="min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer p-1 rounded-xl transition-all shrink-0"
               >
@@ -323,12 +327,14 @@ export function SettingsScreen({
             <div className="flex items-center gap-2 border-b !border-[#FF9933]/20 pb-2">
               <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <h4 className="text-sm font-bold text-slate-800 dark:text-amber-100 font-serif">
-                पंचांग गणना की शुद्धता एवं तकनीकी आधार
+                {language === 'Hindi' ? 'पंचांग गणना की शुद्धता एवं तकनीकी आधार' : 'Panchang Precision & Astronomical Core'}
               </h4>
             </div>
 
             <p className="text-[12px] text-slate-600 dark:text-slate-350 leading-relaxed">
-              इस ऐप में सभी ग्रह स्पष्ट अंश, सूर्योदय-सूर्यास्त और नक्षत्र की गणना नासा (NASA) आधारित विश्व-प्रसिद्ध <strong>Swiss Ephemeris (GNU GPL v2/v3)</strong> शुद्ध गणितीय इंजन द्वारा की जाती है। यह दृक-गणित पर आधारित पूर्णतः वैज्ञानिक व प्रामाणिक पंचांग है।
+              {language === 'Hindi' 
+                ? 'इस ऐप में सभी ग्रह स्पष्ट अंश, सूर्योदय-सूर्यास्त और नक्षत्र की गणना नासा (NASA) आधारित विश्व-प्रसिद्ध Swiss Ephemeris (GNU GPL v2/v3) शुद्ध गणितीय इंजन द्वारा की जाती है। यह दृक-गणित पर आधारित पूर्णतः वैज्ञानिक व प्रामाणिक पंचांग है।' 
+                : 'All planetary positions, sunrise-sunset, and nakshatra calculations in this app are computed via the world-renowned NASA-based Swiss Ephemeris (GNU GPL v2/v3) high-precision engine. This is an authentic Drik-ganita Vedic Panchang.'}
             </p>
 
             <div className="flex flex-wrap gap-2 pt-1 text-xs">
@@ -338,7 +344,7 @@ export function SettingsScreen({
                 rel="noopener noreferrer"
                 className="px-3 py-1.5 min-h-[40px] rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-950 dark:text-amber-200 border border-orange-500/30 font-bold flex items-center gap-1.5 cursor-pointer transition-all"
               >
-                <span>GitHub रिपॉजिटरी</span>
+                <span>{language === 'Hindi' ? 'GitHub रिपॉजिटरी' : 'GitHub Repository'}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
 
@@ -347,7 +353,7 @@ export function SettingsScreen({
                 onClick={() => setIsLicenseModalOpen(true)}
                 className="px-3 py-1.5 min-h-[40px] rounded-xl bg-slate-500/10 hover:bg-slate-500/20 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-zinc-700 font-bold flex items-center gap-1.5 cursor-pointer transition-all"
               >
-                <span>📜 GPL v2/v3 लाइसेंस</span>
+                <span>{language === 'Hindi' ? '📜 GPL v2/v3 लाइसेंस' : '📜 GPL v2/v3 License'}</span>
               </button>
 
               <a
@@ -356,7 +362,7 @@ export function SettingsScreen({
                 rel="noopener noreferrer"
                 className="px-3 py-1.5 min-h-[40px] rounded-xl bg-slate-500/10 hover:bg-slate-500/20 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-zinc-700 font-bold flex items-center gap-1.5 cursor-pointer transition-all"
               >
-                <span>गोपनीयता नीति (Privacy)</span>
+                <span>{language === 'Hindi' ? 'गोपनीयता नीति (Privacy)' : 'Privacy Policy'}</span>
               </a>
             </div>
 
@@ -364,7 +370,10 @@ export function SettingsScreen({
             <div className="p-2.5 rounded-xl bg-amber-500/5 dark:bg-amber-950/20 border border-amber-500/20 text-[10.5px] text-slate-500 dark:text-slate-400 leading-normal flex items-start gap-1.5">
               <Info className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               <span>
-                <strong>खगोलीय अस्वीकरण:</strong> भू-स्थानिक ऊंचाई एवं वायुमंडलीय अपवर्तन के कारण विभिन्न स्थानों पर 1 से 2 मिनट का सूक्ष्म समय-अंतर संभव है।
+                <strong>{language === 'Hindi' ? 'खगोलीय अस्वीकरण:' : 'Astronomical Disclaimer:'}</strong>{' '}
+                {language === 'Hindi' 
+                  ? 'भू-स्थानिक ऊंचाई एवं वायुमंडलीय अपवर्तन के कारण विभिन्न स्थानों पर 1 से 2 मिनट का सूक्ष्म समय-अंतर संभव है।' 
+                  : 'A minor difference of 1-2 minutes is possible across locations due to local altitude and atmospheric refraction.'}
               </span>
             </div>
           </div>
@@ -372,7 +381,7 @@ export function SettingsScreen({
           {/* D. डेवलपर, संपर्क व संस्करण */}
           <div className="text-center py-2 space-y-1.5 text-slate-500 dark:text-slate-400 font-sans">
             <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-              सनातन घड़ी v1.0.0 (वैदिक कालचक्र यंत्र)
+              {language === 'Hindi' ? 'सनातन घड़ी v1.0.0 (वैदिक कालचक्र यंत्र)' : 'Sanatan Ghadi v1.0.0 (Vedic Kaalchakra Yantra)'}
             </p>
             <p className="text-[11px] text-orange-600 dark:text-amber-400 font-semibold">
               Innovix • Proudly Crafted in India 🇮🇳
@@ -382,7 +391,7 @@ export function SettingsScreen({
               className="inline-flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 hover:text-orange-600 dark:hover:text-amber-300 underline font-mono pt-1"
             >
               <Mail className="w-3 h-3" />
-              <span>सुझाव या सहायता: vinayaksaxena1@gmail.com</span>
+              <span>{language === 'Hindi' ? 'सुझाव या सहायता: vinayaksaxena1@gmail.com' : 'Feedback & Support: vinayaksaxena1@gmail.com'}</span>
             </a>
           </div>
 
@@ -398,7 +407,7 @@ export function SettingsScreen({
             <div className="flex items-center justify-center gap-2 mb-3 border-b !border-[#FF9933]/20 pb-2">
               <span className="text-lg">📲</span>
               <h3 className="text-[16px] sm:text-[17px] font-bold font-serif text-slate-800 dark:text-amber-100 text-center">
-                सुप्रभात एवं दैनिक पंचांग पोस्टर (WhatsApp / Social Share)
+                {language === 'Hindi' ? 'सुप्रभात एवं दैनिक पंचांग पोस्टर (WhatsApp / Social Share)' : 'Morning & Daily Panchang Posters (WhatsApp / Social Share)'}
               </h3>
             </div>
             
@@ -406,6 +415,7 @@ export function SettingsScreen({
               panchang={panchangInfo} 
               city={city} 
               activeMuhurats={activeMuhurats} 
+              language={language}
             />
           </div>
 
@@ -414,27 +424,27 @@ export function SettingsScreen({
             <div className="flex items-center justify-center gap-2 border-b !border-[#FF9933]/20 pb-2">
               <Smartphone className="w-5 h-5 text-orange-600 dark:text-amber-400" />
               <h3 className="text-[16px] sm:text-[17px] font-bold font-serif text-slate-800 dark:text-amber-100 text-center">
-                मोबाइल होम स्क्रीन विजेट्स (Android Widgets)
+                {language === 'Hindi' ? 'मोबाइल होम स्क्रीन विजेट्स (Android Widgets)' : 'Mobile Home Screen Widgets (Android Widgets)'}
               </h3>
             </div>
 
             {/* 3-Step Setup Guide Card */}
             <div className="p-3 rounded-2xl bg-orange-500/5 dark:bg-orange-950/20 border border-orange-500/25 space-y-2">
               <span className="text-xs font-bold text-orange-900 dark:text-amber-200 block font-serif">
-                📖 अपने फोन की होम स्क्रीन पर विजेट कैसे लगाएं:
+                {language === 'Hindi' ? '📖 अपने फोन की होम स्क्रीन पर विजेट कैसे लगाएं:' : '📖 How to add widgets to your home screen:'}
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-slate-600 dark:text-slate-350">
                 <div className="p-2 rounded-xl bg-white/70 dark:bg-zinc-900/60 border border-orange-500/15 flex items-start gap-1.5">
                   <span className="w-4 h-4 rounded-full bg-orange-500 text-white font-bold flex items-center justify-center shrink-0 text-[10px]">1</span>
-                  <span>होम स्क्रीन के खाली स्थान पर उंगली दबाकर रखें (Long Press)।</span>
+                  <span>{language === 'Hindi' ? 'होम स्क्रीन के खाली स्थान पर उंगली दबाकर रखें (Long Press)।' : 'Long-press any empty space on your home screen.'}</span>
                 </div>
                 <div className="p-2 rounded-xl bg-white/70 dark:bg-zinc-900/60 border border-orange-500/15 flex items-start gap-1.5">
                   <span className="w-4 h-4 rounded-full bg-orange-500 text-white font-bold flex items-center justify-center shrink-0 text-[10px]">2</span>
-                  <span>मेनू से <strong>'Widgets'</strong> चुनें और <strong>'सनातन घड़ी'</strong> खोजें।</span>
+                  <span>{language === 'Hindi' ? "मेनू से 'Widgets' चुनें और 'सनातन घड़ी' खोजें।" : "Select 'Widgets' from the menu and search for 'Sanatan Ghadi'."}</span>
                 </div>
                 <div className="p-2 rounded-xl bg-white/70 dark:bg-zinc-900/60 border border-orange-500/15 flex items-start gap-1.5">
                   <span className="w-4 h-4 rounded-full bg-orange-500 text-white font-bold flex items-center justify-center shrink-0 text-[10px]">3</span>
-                  <span>पसंद का साइज (<strong>4x2</strong> या <strong>2x2</strong>) ड्रैग करके स्क्रीन पर लगाएं।</span>
+                  <span>{language === 'Hindi' ? 'पसंद का साइज (4x2 या 2x2) ड्रैग करके स्क्रीन पर लगाएं।' : 'Drag your preferred size (4x2 or 2x2) onto your screen.'}</span>
                 </div>
               </div>
             </div>
@@ -444,6 +454,7 @@ export function SettingsScreen({
               panchang={panchangInfo} 
               muhurats={activeMuhurats} 
               city={city} 
+              language={language}
             />
           </div>
 
@@ -462,7 +473,7 @@ export function SettingsScreen({
                 type="button"
                 onClick={() => setIsLicenseModalOpen(false)}
                 className="text-slate-400 hover:text-white cursor-pointer font-bold text-base min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl"
-                aria-label="बंद करें"
+                aria-label={language === 'Hindi' ? "बंद करें" : "Close"}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -500,7 +511,7 @@ export function SettingsScreen({
                 onClick={() => setIsLicenseModalOpen(false)}
                 className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs cursor-pointer"
               >
-                समझ आ गया (बंद करें)
+                {language === 'Hindi' ? 'समझ आ गया (बंद करें)' : 'Got it (Close)'}
               </button>
             </div>
           </div>

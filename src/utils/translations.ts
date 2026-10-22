@@ -69,6 +69,64 @@ export const translations = {
     themeDark: "Dark Mode",
     languageEnglish: "English",
     languageHindi: "Hindi",
+
+    // Home Page Keys
+    watchCardFestivals: "Today's Festivals & Travel Guidelines",
+    watchCardTimings: "Today's Auspicious & Inauspicious Timings",
+    watchShubhHeader: "🟢 Auspicious Periods (Best for New Tasks)",
+    watchVarjitHeader: "🔴 Inauspicious Periods (Avoid New Tasks)",
+    abhijitName: "Abhijit Muhurat",
+    abhijitSub: "For success in all undertakings",
+    brahmaName: "Brahma Muhurat",
+    brahmaSub: "For prayer, meditation & study",
+    rahukaalName: "Rahukaal",
+    rahukaalSub: "Major inauspicious time",
+    allAlarmsBtn: "All Alarms ➔",
+    todayVratLabel: "Today's Fast & Festival (Udaya Tithi based)",
+    dishaShoolLabel: "Today's Disha Shool:",
+    travelCautionLabel: "Travel Caution",
+    remedyLabel: "Remedy:",
+    nextFestivalLabel: "Next Festival:",
+    panchakActiveLabel: "Panchak Period Active",
+    
+    // Live Dial & Watch Keys
+    smartWatchMode: "Smart Watch",
+    analogWatchMode: "Analog Watch",
+    dialTip: "Tap any Choghadiya or Hora segment to view details",
+    nightChoghadiyaHeader: "Night Choghadiya",
+    dayChoghadiyaHeader: "Day Choghadiya",
+    activeChoghadiyaLabel: "Active:",
+    activeHoraLabel: "Active Hora:",
+    timeLabel: "Time:",
+    timeLeftLabel: "remaining",
+    whatToDoLabel: "Recommended Activity:",
+    nextChoghadiyaLabel: "Next Choghadiya:",
+    remindMeBtn: "Remind",
+    legendShubh: "Auspicious (Amrit / Shubh / Labh)",
+    legendChar: "Neutral (Char)",
+    legendAshubh: "Inauspicious (Rog / Kaal / Udveg)",
+
+    // Alarms Screen Keys
+    alarmsMainTitle: "Religious & Daily Sadhana Alarms",
+    alarmsSubtitle: "Automatic times based on sunrise & sunset • 1-tap activation",
+    alarmsPresetHeader: "Daily Vedic Alarms (Sadhana & Cautions)",
+    alarmsAutoCalc: "Automatic Live Calculation",
+    brahmaAlarmTitle: "Brahma Muhurat Sadhana",
+    brahmaAlarmSub: "For morning meditation, yoga & study",
+    abhijitAlarmTitle: "Abhijit Muhurat",
+    abhijitAlarmSub: "Best auspicious period of the day begins",
+    sandhyaAlarmTitle: "Sandhya Vandanam / Aarti",
+    sandhyaAlarmSub: "Twilight lamp lighting & evening prayer reminder",
+    rahukaalAlarmTitle: "Rahukaal Warning",
+    rahukaalAlarmSub: "Alert 5 minutes before Rahukaal begins",
+    alarmsQuickPickHeader: "Quick Pick from Astrological Periods & Choghadiya:",
+    btnShubhChoghadiya: "Auspicious Periods & Choghadiya ▾",
+    btnVarjitKaal: "Inauspicious Periods (Yamaganda, Gulika) ▾",
+    customAlarmAccordion: "Create Custom Alarm (Personal Prayer & Rituals)",
+    customAlarmAccordionSub: "Tap to set custom time, snooze, and sacred ringtone",
+    activeAlarmsListHeader: "Active Scheduled Alarms",
+    activeAlarmsEmpty: "No alarms active currently.",
+    activeAlarmsEmptySub: "Activate any of the 4 ready Vedic cards above with a single tap.",
     
     // Nakshatra Screen
     nakshatraGuide: "27 Nakshatras Guide",
@@ -232,6 +290,64 @@ export const translations = {
     themeDark: "डार्क",
     languageEnglish: "English",
     languageHindi: "हिन्दी",
+
+    // Home Page Keys
+    watchCardFestivals: "आज का पर्व व यात्रा विचार",
+    watchCardTimings: "आज का शुभ एवं वर्जित समय",
+    watchShubhHeader: "🟢 शुभ समय (कार्य प्रारंभ हेतु श्रेष्ठ)",
+    watchVarjitHeader: "🔴 वर्जित समय (नया कार्य टालें)",
+    abhijitName: "अभिजीत मुहूर्त",
+    abhijitSub: "सर्वकार्य सिद्धि हेतु",
+    brahmaName: "ब्रह्म मुहूर्त",
+    brahmaSub: "पूजा व साधना हेतु",
+    rahukaalName: "राहुकाल",
+    rahukaalSub: "मुख्य वर्जित समय",
+    allAlarmsBtn: "सभी अलार्म ➔",
+    todayVratLabel: "आज का व्रत एवं त्योहार (उदया तिथि आधारित)",
+    dishaShoolLabel: "आज का दिशा शूल:",
+    travelCautionLabel: "यात्रा सावधानी",
+    remedyLabel: "निवारण उपाय:",
+    nextFestivalLabel: "अगला पर्व:",
+    panchakActiveLabel: "पंचक काल सक्रिय",
+    
+    // Live Dial & Watch Keys
+    smartWatchMode: "सनातन स्मार्टवॉच",
+    analogWatchMode: "एनालॉग वॉच",
+    dialTip: "किसी भी चौघड़िया या होरा का समय देखने के लिए उस खाने को छुएं",
+    nightChoghadiyaHeader: "रात की चौघड़िया",
+    dayChoghadiyaHeader: "दिन की चौघड़िया",
+    activeChoghadiyaLabel: "अभी:",
+    activeHoraLabel: "सक्रिय होरा:",
+    timeLabel: "समय:",
+    timeLeftLabel: "शेष",
+    whatToDoLabel: "क्या करें:",
+    nextChoghadiyaLabel: "अगला चौघड़िया:",
+    remindMeBtn: "याद दिलाएं",
+    legendShubh: "शुभ (अमृत/शुभ/लाभ)",
+    legendChar: "सामान्य (चर)",
+    legendAshubh: "अशुभ (रोग/काल/उद्वेग)",
+
+    // Alarms Screen Keys
+    alarmsMainTitle: "धार्मिक एवं नित्य साधना अलार्म",
+    alarmsSubtitle: "सूर्योदय-सूर्यास्त अनुसार स्वचालित समय • 1-टैप में सक्रिय करें",
+    alarmsPresetHeader: "नित्य वैदिक अलार्म्स (दैनिक साधना व सावधानी)",
+    alarmsAutoCalc: "स्वचालित लाइव गणना",
+    brahmaAlarmTitle: "ब्रह्म मुहूर्त साधना",
+    brahmaAlarmSub: "प्रातः ध्यान, योग व विद्याध्ययन हेतु",
+    abhijitAlarmTitle: "अभिजित मुहूर्त",
+    abhijitAlarmSub: "दिन का सर्वश्रेष्ठ शुभ समय प्रारंभ",
+    sandhyaAlarmTitle: "सांध्य वंदन / आरती",
+    sandhyaAlarmSub: "गोधूलि वेला दीप प्रज्वलन व पूजा स्मरण",
+    rahukaalAlarmTitle: "राहुकाल पूर्व चेतावनी",
+    rahukaalAlarmSub: "राहुकाल प्रारंभ से 5 मिनट पूर्व सावधानी संदेश",
+    alarmsQuickPickHeader: "अन्य ज्योतिषीय काल एवं चौघड़िया से त्वरित चयन:",
+    btnShubhChoghadiya: "शुभ काल व चौघड़िया ▾",
+    btnVarjitKaal: "वर्जित काल (यमगण्ड, गुलिक) ▾",
+    customAlarmAccordion: "अपना कस्टम अलार्म बनाएं (व्यक्तिगत पाठ व अनुष्ठान)",
+    customAlarmAccordionSub: "विशेष व्यक्तिगत समय, स्नूज़ व कस्टम रिंगटोन सेट करने हेतु टैप करें",
+    activeAlarmsListHeader: "सक्रिय अलार्म सूची (ACTIVE SCHEDULED ALARMS)",
+    activeAlarmsEmpty: "अभी कोई अलार्म सक्रिय नहीं है।",
+    activeAlarmsEmptySub: "ऊपर दिए 4 नित्य वैदिक कार्ड्स या शुभ/अशुभ काल से 1-टैप में अलार्म चालू करें।",
 
     // Nakshatra Screen
     nakshatraGuide: "२७ नक्षत्र मार्गदर्शिका",
@@ -434,4 +550,232 @@ export function formatHindiTime(timeStr: string): string {
     // Generic fallback if no hour match
     .replace(/\bAM\b/gi, 'प्रातः')
     .replace(/\bPM\b/gi, 'सायं');
+}
+
+export function formatLocalizedTime(timeStr: string, lang: Language): string {
+  if (!timeStr) return '';
+  if (lang === 'Hindi') {
+    return formatHindiTime(timeStr);
+  }
+  return timeStr;
+}
+
+export function translateChoghadiya(name: string, lang: Language): {
+  name: string;
+  nature: string;
+  sub: string;
+  advice: string;
+} {
+  const clean = (name || '').trim().toLowerCase();
+  
+  const map: Record<string, {
+    hin: { name: string; nature: string; sub: string; advice: string };
+    eng: { name: string; nature: string; sub: string; advice: string };
+  }> = {
+    'udveg': {
+      hin: { name: 'उद्वेग', nature: 'अशुभ समय', sub: 'सूर्य का प्रभाव', advice: 'मानसिक शांति हेतु ध्यान व शयन। देर रात वाद-विवाद या भारी तनाव से बचें।' },
+      eng: { name: 'Udveg', nature: 'Inauspicious Period', sub: 'Ruled by Sun', advice: 'Focus on rest, meditation and inner peace. Avoid stressful arguments or major new beginnings.' }
+    },
+    'shubh': {
+      hin: { name: 'शुभ', nature: 'कल्याणकारी समय', sub: 'गुरु का प्रभाव', advice: 'पूजा, पाठ, अध्ययन, मांगलिक चर्चा व शुभ कार्य प्रारंभ करने हेतु उत्तम।' },
+      eng: { name: 'Shubh', nature: 'Auspicious Period', sub: 'Ruled by Jupiter', advice: 'Excellent for prayer, learning, auspicious discussions, and noble undertakings.' }
+    },
+    'amrit': {
+      hin: { name: 'अमृत', nature: 'सर्वोत्तम समय', sub: 'चंद्रमा का प्रभाव', advice: 'समस्त शुभ कार्यों, साधना, देव पूजन व नए संकल्प हेतु सर्वश्रेष्ठ।' },
+      eng: { name: 'Amrit', nature: 'Best Period (Nectar)', sub: 'Ruled by Moon', advice: 'Superb for all auspicious beginnings, spiritual sadhana, deity worship, and noble decisions.' }
+    },
+    'labh': {
+      hin: { name: 'लाभ', nature: 'उन्नति कारक', sub: 'बुध का प्रभाव', advice: 'व्यापार, शिक्षा, धन-संचय व बौद्धिक कार्यों के लिए अत्यंत फलदायी।' },
+      eng: { name: 'Labh', nature: 'Prosperity & Gain', sub: 'Ruled by Mercury', advice: 'Highly beneficial for business, commerce, education, finances, and intellectual tasks.' }
+    },
+    'char': {
+      hin: { name: 'चल', nature: 'सामान्य समय', sub: 'शुक्र का प्रभाव', advice: 'यात्रा, गतिशीलता, सामान्य घरेलू कार्य व मिलन-मुलाकात हेतु अनुकूल।' },
+      eng: { name: 'Char', nature: 'Neutral / Movement', sub: 'Ruled by Venus', advice: 'Suitable for travel, commuting, routine activities, creative work, and social meetings.' }
+    },
+    'chal': {
+      hin: { name: 'चल', nature: 'सामान्य समय', sub: 'शुक्र का प्रभाव', advice: 'यात्रा, गतिशीलता, सामान्य घरेलू कार्य व मिलन-मुलाकात हेतु अनुकूल।' },
+      eng: { name: 'Char', nature: 'Neutral / Movement', sub: 'Ruled by Venus', advice: 'Suitable for travel, commuting, routine activities, creative work, and social meetings.' }
+    },
+    'rog': {
+      hin: { name: 'रोग', nature: 'अशुभ समय', sub: 'मंगल का प्रभाव', advice: 'नया कार्य टालें। वाद-विवाद से बचें और स्वास्थ्य का ध्यान रखें।' },
+      eng: { name: 'Rog', nature: 'Adverse Period (Evil)', sub: 'Ruled by Mars', advice: 'Avoid starting new ventures. Exercise caution, protect health, and stay calm.' }
+    },
+    'kaal': {
+      hin: { name: 'काल', nature: 'हानिकारक समय', sub: 'शनि का प्रभाव', advice: 'सावधानी रखें। महत्वपूर्ण वित्तीय लेन-देन या जोखिम भरे काम टालें।' },
+      eng: { name: 'Kaal', nature: 'Harmful Period (Loss)', sub: 'Ruled by Saturn', advice: 'Exercise high caution. Avoid risky investments, major agreements, or disputes.' }
+    }
+  };
+
+  let matchedKey = 'udveg';
+  if (clean.includes('उद्वेग') || clean.includes('udveg')) matchedKey = 'udveg';
+  else if (clean.includes('शुभ') || clean.includes('shubh')) matchedKey = 'shubh';
+  else if (clean.includes('अमृत') || clean.includes('amrit')) matchedKey = 'amrit';
+  else if (clean.includes('लाभ') || clean.includes('labh')) matchedKey = 'labh';
+  else if (clean.includes('चल') || clean.includes('char') || clean.includes('chal')) matchedKey = 'char';
+  else if (clean.includes('रोग') || clean.includes('rog')) matchedKey = 'rog';
+  else if (clean.includes('काल') || clean.includes('kaal')) matchedKey = 'kaal';
+
+  const entry = map[matchedKey] || map['udveg'];
+  return lang === 'Hindi' ? entry.hin : entry.eng;
+}
+
+export function translateHora(horaLord: string, lang: Language): {
+  name: string;
+  lord: string;
+  details: string;
+} {
+  const clean = (horaLord || '').trim().toLowerCase();
+  const map: Record<string, {
+    hin: { name: string; lord: string; details: string };
+    eng: { name: string; lord: string; details: string };
+  }> = {
+    'sun': {
+      hin: { name: 'सूर्य', lord: 'सूर्य', details: 'तेज/प्रभुत्व • राजकीय कार्य, आत्मबल, प्रशासनिक निर्णय' },
+      eng: { name: 'Sun', lord: 'Sun', details: 'Vitality & Power • Leadership, administrative tasks, confidence' }
+    },
+    'moon': {
+      hin: { name: 'चन्द्र', lord: 'चन्द्र', details: 'शांति/सौम्यता • जल, यात्रा, संबंध, मानसिक शांति' },
+      eng: { name: 'Moon', lord: 'Moon', details: 'Peace & Intuition • Reflection, journeys, relationships, tranquility' }
+    },
+    'mars': {
+      hin: { name: 'मंगल', lord: 'मंगल', details: 'पराक्रम/ऊर्जा • खेल, तकनीकी कार्य, साहस, भूमि' },
+      eng: { name: 'Mars', lord: 'Mars', details: 'Courage & Energy • Sports, technical tasks, enterprise, property' }
+    },
+    'mercury': {
+      hin: { name: 'बुध', lord: 'बुध', details: 'बुद्धि/व्यापार • अध्ययन, लेखा, संचार, वाणिज्य' },
+      eng: { name: 'Mercury', lord: 'Mercury', details: 'Intellect & Trade • Learning, accounting, communication, commerce' }
+    },
+    'jupiter': {
+      hin: { name: 'गुरु', lord: 'गुरु', details: 'ज्ञान/धर्म • पूजा, साधना, उच्च शिक्षा, मांगलिक कार्य' },
+      eng: { name: 'Jupiter', lord: 'Jupiter', details: 'Wisdom & Dharma • Prayers, meditation, higher learning, sacred rituals' }
+    },
+    'venus': {
+      hin: { name: 'शुक्र', lord: 'शुक्र', details: 'सौंदर्य/आनंद • कला, वस्त्र-आभूषण, सौंदर्य व सुख-सुविधा' },
+      eng: { name: 'Venus', lord: 'Venus', details: 'Beauty & Joy • Arts, music, celebrations, comfort, harmony' }
+    },
+    'saturn': {
+      hin: { name: 'शनि', lord: 'शनि', details: 'धैर्य/स्थिरता • सेवा, मशीनरी, गहन चिंतन, श्रम' },
+      eng: { name: 'Saturn', lord: 'Saturn', details: 'Patience & Endurance • Service, machinery, deep contemplation, discipline' }
+    }
+  };
+
+  let matched = 'sun';
+  if (clean.includes('सूर्य') || clean.includes('sun')) matched = 'sun';
+  else if (clean.includes('चन्द्र') || clean.includes('moon')) matched = 'moon';
+  else if (clean.includes('मंगल') || clean.includes('mars')) matched = 'mars';
+  else if (clean.includes('बुध') || clean.includes('mercury')) matched = 'mercury';
+  else if (clean.includes('गुरु') || clean.includes('jupiter')) matched = 'jupiter';
+  else if (clean.includes('शुक्र') || clean.includes('venus')) matched = 'venus';
+  else if (clean.includes('शनि') || clean.includes('saturn')) matched = 'saturn';
+
+  const entry = map[matched] || map['sun'];
+  return lang === 'Hindi' ? entry.hin : entry.eng;
+}
+
+export function translateDishaShool(disha: string, lang: Language): { direction: string; remedy: string } {
+  const d = (disha || '').toLowerCase();
+  if (d.includes('पश्चिम') || d.includes('west')) {
+    return {
+      direction: lang === 'Hindi' ? 'पश्चिम दिशा' : 'West Direction',
+      remedy: lang === 'Hindi' ? 'यदि पश्चिम दिशा में यात्रा अनिवार्य हो तो जौ या राई खाकर प्रस्थान करें।' : 'If West travel is essential, consume barley (jau) or mustard seeds before departure.'
+    };
+  } else if (d.includes('पूर्व') || d.includes('east')) {
+    return {
+      direction: lang === 'Hindi' ? 'पूर्व दिशा' : 'East Direction',
+      remedy: lang === 'Hindi' ? 'यदि पूर्व दिशा में यात्रा अनिवार्य हो तो अदरक या घी खाकर प्रस्थान करें।' : 'If East travel is essential, consume ginger or pure ghee before departure.'
+    };
+  } else if (d.includes('उत्तर') || d.includes('north')) {
+    return {
+      direction: lang === 'Hindi' ? 'उत्तर दिशा' : 'North Direction',
+      remedy: lang === 'Hindi' ? 'यदि उत्तर दिशा में यात्रा अनिवार्य हो तो दूध या तिल खाकर प्रस्थान करें।' : 'If North travel is essential, consume warm milk or sesame seeds before departure.'
+    };
+  } else if (d.includes('दक्षिण') || d.includes('south')) {
+    return {
+      direction: lang === 'Hindi' ? 'दक्षिण दिशा' : 'South Direction',
+      remedy: lang === 'Hindi' ? 'यदि दक्षिण दिशा में यात्रा अनिवार्य हो तो गुड़ या दही खाकर प्रस्थान करें।' : 'If South travel is essential, consume jaggery or curd before departure.'
+    };
+  }
+  return {
+    direction: lang === 'Hindi' ? disha : 'Unspecified',
+    remedy: lang === 'Hindi' ? 'यात्रा पूर्व भगवान गणेश का स्मरण करें।' : 'Pray to Lord Ganesha before commencing your journey.'
+  };
+}
+
+export function translatePanchak(name: string, lang: Language): { title: string; advice: string } {
+  if (lang === 'Hindi') {
+    return {
+      title: name || 'पंचक काल सक्रिय (चोर पंचक)',
+      advice: 'पंचक में छत डालना, लकड़ी संग्रह, तृण संचय और दक्षिण दिशा की यात्रा वर्जित मानी जाती है।'
+    };
+  }
+  let engName = 'Panchak Active';
+  if (name?.includes('चोर')) engName = 'Chor Panchak (Theft Risk)';
+  else if (name?.includes('रोग')) engName = 'Rog Panchak (Illness Risk)';
+  else if (name?.includes('अग्नि')) engName = 'Agni Panchak (Fire Hazard)';
+  else if (name?.includes('मृत्यु')) engName = 'Mrityu Panchak (Major Danger)';
+  else if (name?.includes('राज')) engName = 'Raj Panchak (Auspicious Tasks)';
+
+  return {
+    title: `Panchak Active (${engName})`,
+    advice: 'Roofing, timber collection, grass storage, and traveling South are traditionally avoided during Panchak.'
+  };
+}
+
+export function translateSanskritMonthName(month: string, lang: Language): string {
+  const map: Record<string, { hin: string; eng: string }> = {
+    'Chaitra': { hin: 'चैत्र', eng: 'Chaitra' },
+    'Vaisakha': { hin: 'वैशाख', eng: 'Vaisakha' },
+    'Vaishakh': { hin: 'वैशाख', eng: 'Vaishakh' },
+    'Vaishakha': { hin: 'वैशाख', eng: 'Vaishakha' },
+    'Jyeshtha': { hin: 'ज्येष्ठ', eng: 'Jyeshtha' },
+    'Jyeshth': { hin: 'ज्येष्ठ', eng: 'Jyeshth' },
+    'Ashadha': { hin: 'आषाढ़', eng: 'Ashadha' },
+    'Ashadh': { hin: 'आषाढ़', eng: 'Ashadh' },
+    'Shravana': { hin: 'श्रावण', eng: 'Shravana' },
+    'Shravan': { hin: 'श्रावण', eng: 'Shravan' },
+    'Sawan': { hin: 'श्रावण', eng: 'Sawan' },
+    'Bhadrapada': { hin: 'भाद्रपद', eng: 'Bhadrapada' },
+    'Bhadrapad': { hin: 'भाद्रपद', eng: 'Bhadrapad' },
+    'Ashwin': { hin: 'आश्विन', eng: 'Ashwin' },
+    'Ashvina': { hin: 'आश्विन', eng: 'Ashvina' },
+    'Kartika': { hin: 'कार्तिक', eng: 'Kartika' },
+    'Kartik': { hin: 'कार्तिक', eng: 'Kartik' },
+    'Margashirsha': { hin: 'मार्गशीर्ष', eng: 'Margashirsha' },
+    'Margashirsh': { hin: 'मार्गशीर्ष', eng: 'Margashirsh' },
+    'Agrahayana': { hin: 'मार्गशीर्ष', eng: 'Agrahayana' },
+    'Pausha': { hin: 'पौष', eng: 'Pausha' },
+    'Paush': { hin: 'पौष', eng: 'Paush' },
+    'Magha': { hin: 'माघ', eng: 'Magha' },
+    'Magh': { hin: 'माघ', eng: 'Magh' },
+    'Phalguna': { hin: 'फाल्गुन', eng: 'Phalguna' },
+    'Phalgun': { hin: 'फाल्गुन', eng: 'Phalgun' }
+  };
+  const mLow = (month || '').trim().toLowerCase();
+  const key = Object.keys(map).find(k => k.toLowerCase() === mLow || mLow.includes(k.toLowerCase()) || k.toLowerCase().includes(mLow));
+  if (!key) return month || '';
+  return lang === 'Hindi' ? map[key].hin : map[key].eng;
+}
+
+export function translateTithiString(tithi: string, lang: Language): string {
+  if (!tithi) return '';
+  if (lang !== 'Hindi') return tithi;
+  return tithi
+    .replace(/Shukla/gi, 'शुक्ल')
+    .replace(/Krishna/gi, 'कृष्ण')
+    .replace(/Pratipada/gi, 'प्रतिपदा')
+    .replace(/Dwitiya/gi, 'द्वितीया')
+    .replace(/Tritiya/gi, 'तृतीया')
+    .replace(/Chaturthi/gi, 'चतुर्थी')
+    .replace(/Panchami/gi, 'पंचमी')
+    .replace(/Shashthi/gi, 'षष्ठी')
+    .replace(/Saptami/gi, 'सप्तमी')
+    .replace(/Ashtami/gi, 'अष्टमी')
+    .replace(/Navami/gi, 'नवमी')
+    .replace(/Dashami/gi, 'दशमी')
+    .replace(/Ekadashi/gi, 'एकादशी')
+    .replace(/Dwadashi/gi, 'द्वादशी')
+    .replace(/Trayodashi/gi, 'त्रयोदशी')
+    .replace(/Chaturdashi/gi, 'चतुर्दशी')
+    .replace(/Purnima/gi, 'पूर्णिमा')
+    .replace(/Amavasya/gi, 'अमावस्या');
 }

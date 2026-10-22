@@ -16,7 +16,7 @@ import {
 import { MuhuratItem, HoraInterval, ChoghadiyaInterval, AppNotification } from '../types';
 import { isAlarmActive, QuickAlarmParams } from '../utils/alarmUtils';
 import { AnalogClock } from './AnalogClock';
-import { formatHindiTime } from '../utils/translations';
+import { formatHindiTime, formatLocalizedTime, translateChoghadiya, translateHora, Language } from '../utils/translations';
 
 interface LiveMuhuratWatchProps {
   muhurats: MuhuratItem[];
@@ -35,6 +35,7 @@ interface LiveMuhuratWatchProps {
   minimalMode?: boolean;
   notificationsList?: AppNotification[];
   onToggleAlarm?: (params: QuickAlarmParams) => void;
+  language?: Language;
 }
 
 const translateType = (type: string) => {
@@ -59,7 +60,16 @@ const translateTimeStr = (timeStr: string) => {
     .replace(' - ', ' से ');
 };
 
-const getHoraAdvice = (quality: string) => {
+const getHoraAdvice = (quality: string, lang: Language = 'Hindi') => {
+  if (lang !== 'Hindi') {
+    if (quality === 'Inauspicious') {
+      return 'This Hora is sharp or adverse. Avoid starting vital new tasks and prevent disputes.';
+    } else if (quality === 'Auspicious') {
+      return 'This is an auspicious, harmonious Hora. Efforts commenced now tend to be fruitful.';
+    } else {
+      return 'This is a neutral Hora. Day-to-day general tasks can be carried out smoothly.';
+    }
+  }
   if (quality === 'Inauspicious') {
     return 'यह होरा क्रूर या अशुभ मानी जाती है। इसमें नए या मांगलिक कार्यों की शुरुआत टालना ही हितैषी है। वाद-विवाद से दूर रहें।';
   } else if (quality === 'Auspicious') {
@@ -69,7 +79,32 @@ const getHoraAdvice = (quality: string) => {
   }
 };
 
-const getChoghadiyaUpyuktKarya = (type: string, isNight: boolean = false) => {
+const getChoghadiyaUpyuktKarya = (type: string, isNight: boolean = false, lang: Language = 'Hindi') => {
+  if (lang !== 'Hindi') {
+    if (isNight) {
+      const nightEng: Record<string, string> = {
+        Amrit: 'Spiritual contemplation, divine remembrance, deep study, mental peace, and restful recovery.',
+        Labh: 'Digital tasks, planning next day commercial activities, accounts, and creative strategy.',
+        Shubh: 'Family harmony, reading, positive affirmations, peaceful sleep, and relaxation.',
+        Chal: 'Travel, next day preparation, packing, routine household chores.',
+        Kaal: 'Rest and sleep. Avoid excessive worrying and late-night disputes.',
+        Rog: 'Physical rest and deep sleep. Prioritize health and timely sleep.',
+        Udveg: 'Meditation and quiet rest. Avoid stressful arguments or vital decisions late at night.'
+      };
+      return nightEng[type] || 'Rest and routine activities.';
+    }
+    const dayEng: Record<string, string> = {
+      Amrit: 'Spiritual rituals, sacred beginnings, yajna, starting important endeavors.',
+      Labh: 'Commercial enterprise, new investment, starting employment, financial transactions.',
+      Shubh: 'Auspicious ceremonies, entering new homes, noble family discussions, deity worship.',
+      Chal: 'Travel departure, purchasing vehicle/gadget, sports, routine general work.',
+      Kaal: 'Machinery maintenance, resolving legal issues (all other auspicious tasks avoided).',
+      Rog: 'Physical recovery, medical treatments (all auspicious ceremonies avoided).',
+      Udveg: 'Government and administrative formalities, property or legal matters.'
+    };
+    return dayEng[type] || 'General daily activities.';
+  }
+
   if (isNight) {
     const nightMap: Record<string, string> = {
       Amrit: 'आध्यात्मिक साधना, भगवत्-स्मरण, गंभीर पठन-पाठन, मानसिक शांति व विश्राम।',
@@ -95,8 +130,33 @@ const getChoghadiyaUpyuktKarya = (type: string, isNight: boolean = false) => {
   return map[type] || 'दैनिक सामान्य कार्य।';
 };
 
-const getHoraPracticalNuance = (lordHindi?: string, lord?: string) => {
+const getHoraPracticalNuance = (lordHindi?: string, lord?: string, lang: Language = 'Hindi') => {
   const l = (lord || lordHindi || '').toLowerCase();
+  if (lang !== 'Hindi') {
+    if (l.includes('mangal') || l.includes('mars') || l.includes('मंगल')) {
+      return 'Mars (Dynamic & Energetic • Suitable for sports, technical tasks, enterprise; avoid disputes)';
+    }
+    if (l.includes('surya') || l.includes('sun') || l.includes('सूर्य')) {
+      return 'Sun (Authoritative & Leading • Administration, governance, vitality & confidence)';
+    }
+    if (l.includes('chandra') || l.includes('moon') || l.includes('चंद्र')) {
+      return 'Moon (Tranquil & Intuitive • Creative arts, journeys, relationships, inner peace)';
+    }
+    if (l.includes('budh') || l.includes('mercury') || l.includes('बुध')) {
+      return 'Mercury (Intellectual & Auspicious • Trade, commerce, communication, learning, accounting)';
+    }
+    if (l.includes('guru') || l.includes('jupiter') || l.includes('बृहस्पति') || l.includes('गुरु')) {
+      return 'Jupiter (Highly Auspicious • Wisdom, spiritual rituals, higher education, noble beginnings)';
+    }
+    if (l.includes('shukra') || l.includes('venus') || l.includes('शुक्र')) {
+      return 'Venus (Harmonious & Joyful • Arts, celebrations, aesthetics, luxury & comfort)';
+    }
+    if (l.includes('shani') || l.includes('saturn') || l.includes('शनि')) {
+      return 'Saturn (Disciplined & Deliberate • Service, patience, machinery, deep contemplation; avoid haste)';
+    }
+    return `${lord || 'Planet'} Hora`;
+  }
+
   if (l.includes('mangal') || l.includes('mars') || l.includes('मंगल')) {
     return 'मंगल (तेज/ऊर्जावान • साहसिक व तकनीकी कार्यों हेतु ठीक, वाद-विवाद से बचें)';
   }
@@ -121,7 +181,19 @@ const getHoraPracticalNuance = (lordHindi?: string, lord?: string) => {
   return `${lordHindi || 'ग्रह'} की होरा`;
 };
 
-const getChoghadiyaAdvice = (type: string) => {
+const getChoghadiyaAdvice = (type: string, lang: Language = 'Hindi') => {
+  if (lang !== 'Hindi') {
+    const engMap: Record<string, string> = {
+      Amrit: 'Highly auspicious and best period. Sacred beginnings and important ceremonies are fruitful.',
+      Labh: 'Highly auspicious and gainful. Excellent for business, commerce, and profitable investments.',
+      Shubh: 'Very auspicious. Optimal for noble family discussions, rituals, and pious undertakings.',
+      Chal: 'Neutral and dynamic. Favorable for commuting, travel, and routine household activities.',
+      Kaal: 'Inauspicious period. Avoid beginning major new endeavors; delay high-risk decisions.',
+      Rog: 'Adverse period. Ceremonies and major investments are strictly discouraged.',
+      Udveg: 'Inauspicious period causing restlessness. Defer major new tasks except urgent administrative work.'
+    };
+    return engMap[type] || 'Standard period. Routine tasks can be performed.';
+  }
   const map: Record<string, string> = {
     Amrit: 'यह अत्यंत शुभ और उन्नतिदायक समय है। इस अवधि में किए गए मांगलिक कार्य अत्यंत सफल होते हैं।',
     Labh: 'यह अत्यंत शुभ और धन-लाभदायक समय है। नए उद्यम या व्यापारिक सौदे करने के लिए श्रेष्ठ काल है।',
@@ -198,8 +270,10 @@ export function LiveMuhuratWatch({
   hideSelectors = false,
   minimalMode = false,
   notificationsList,
-  onToggleAlarm
+  onToggleAlarm,
+  language = 'Hindi'
 }: LiveMuhuratWatchProps) {
+  const isHin = language === 'Hindi';
   const [time, setTime] = useState(new Date());
   const [currentMuhurat, setCurrentMuhurat] = useState<MuhuratItem | null>(null);
   const [nextMuhurat, setNextMuhurat] = useState<MuhuratItem | null>(null);
@@ -225,13 +299,14 @@ export function LiveMuhuratWatch({
 
   const handleSelectChoghadiya = (seg: ChoghadiyaInterval) => {
     const status = getChoghadiyaStatusInfo(seg.type);
+    const chogName = isHin ? (seg.hindiName || seg.name) : (seg.name || seg.hindiName);
     setSelectedSlot({
       type: 'choghadiya',
-      name: `${seg.hindiName || seg.name} चौघड़िया`,
-      startTime: formatHindiTime(seg.startTime),
-      endTime: formatHindiTime(seg.endTime),
+      name: isHin ? `${chogName} चौघड़िया` : `${chogName} Choghadiya`,
+      startTime: formatLocalizedTime(seg.startTime, language),
+      endTime: formatLocalizedTime(seg.endTime, language),
       quality: status.label,
-      desc: getChoghadiyaAdvice(seg.type),
+      desc: getChoghadiyaAdvice(seg.type, language),
       dot: status.dot
     });
   };
@@ -240,14 +315,17 @@ export function LiveMuhuratWatch({
     const isShubh = h.quality === 'Auspicious';
     const isAshubh = h.quality === 'Inauspicious';
     const dot = isShubh ? '🟢' : isAshubh ? '🔴' : '🟡';
-    const qualityLabel = isShubh ? 'शुभ होरा' : isAshubh ? 'अशुभ होरा' : 'सामान्य होरा';
+    const qualityLabel = isHin
+      ? (isShubh ? 'शुभ होरा' : isAshubh ? 'अशुभ होरा' : 'सामान्य होरा')
+      : (isShubh ? 'Auspicious Hora' : isAshubh ? 'Inauspicious Hora' : 'Neutral Hora');
+    const lordName = isHin ? (h.lordHindi || h.lord) : (h.lord || h.lordHindi);
     setSelectedSlot({
       type: 'hora',
-      name: `${h.lordHindi || h.lord} की होरा`,
-      startTime: formatHindiTime(h.startTime),
-      endTime: formatHindiTime(h.endTime),
+      name: isHin ? `${lordName} की होरा` : `${lordName} Hora`,
+      startTime: formatLocalizedTime(h.startTime, language),
+      endTime: formatLocalizedTime(h.endTime, language),
       quality: qualityLabel,
-      desc: getHoraPracticalNuance(h.lordHindi, h.lord),
+      desc: getHoraPracticalNuance(h.lordHindi, h.lord, language),
       dot
     });
   };
@@ -270,22 +348,20 @@ export function LiveMuhuratWatch({
   const getChoghadiyaStatusInfo = (type?: string) => {
     switch (type) {
       case 'Amrit':
-        return { dot: '🟢', label: 'सर्वोत्तम समय', badgeBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' };
+        return { dot: '🟢', label: isHin ? 'सर्वोत्तम समय' : 'Best Timing', badgeBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' };
       case 'Shubh':
-        return { dot: '🟢', label: 'शुभ समय', badgeBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' };
+        return { dot: '🟢', label: isHin ? 'शुभ समय' : 'Auspicious', badgeBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' };
       case 'Labh':
-        return { dot: '🟢', label: 'शुभ समय', badgeBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' };
+        return { dot: '🟢', label: isHin ? 'शुभ समय' : 'Beneficial', badgeBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' };
       case 'Chal':
       case 'Char':
-        return { dot: '🟡', label: 'सामान्य समय', badgeBg: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30' };
+        return { dot: '🟡', label: isHin ? 'सामान्य समय' : 'Neutral Timing', badgeBg: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30' };
       case 'Rog':
-        return { dot: '🔴', label: 'अशुभ समय', badgeBg: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30' };
       case 'Kaal':
-        return { dot: '🔴', label: 'अशुभ समय', badgeBg: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30' };
       case 'Udveg':
-        return { dot: '🔴', label: 'अशुभ समय', badgeBg: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30' };
+        return { dot: '🔴', label: isHin ? 'अशुभ समय' : 'Inauspicious', badgeBg: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30' };
       default:
-        return { dot: '🟡', label: 'सामान्य समय', badgeBg: 'bg-slate-500/15 text-slate-600 dark:text-slate-300 border-slate-500/30' };
+        return { dot: '🟡', label: isHin ? 'सामान्य समय' : 'Neutral Timing', badgeBg: 'bg-slate-500/15 text-slate-600 dark:text-slate-300 border-slate-500/30' };
     }
   };
 
@@ -294,18 +370,18 @@ export function LiveMuhuratWatch({
       case 'Amrit':
       case 'Shubh':
       case 'Labh':
-        return 'शुभ कार्य प्रारंभ करें';
+        return isHin ? 'शुभ कार्य प्रारंभ करें' : 'Start auspicious works';
       case 'Chal':
       case 'Char':
-        return 'दैनिक व सामान्य कार्य निपटाएं';
+        return isHin ? 'दैनिक व सामान्य कार्य निपटाएं' : 'Handle routine tasks';
       case 'Rog':
-        return 'मांगलिक कार्य टालें';
+        return isHin ? 'मांगलिक कार्य टालें' : 'Avoid auspicious events';
       case 'Kaal':
-        return 'नया काम टालें';
+        return isHin ? 'नया काम टालें' : 'Avoid new ventures';
       case 'Udveg':
-        return 'महत्वपूर्ण निर्णय टालें';
+        return isHin ? 'महत्वपूर्ण निर्णय टालें' : 'Defer key decisions';
       default:
-        return 'दैनिक कार्य';
+        return isHin ? 'दैनिक कार्य' : 'Routine works';
     }
   };
 
@@ -502,6 +578,7 @@ export function LiveMuhuratWatch({
               horaList={horaList}
               sunriseTimeStr={sunriseTimeStr}
               sunsetTimeStr={sunsetTimeStr}
+              language={language}
             />
           </div>
         ) : (
@@ -517,9 +594,9 @@ export function LiveMuhuratWatch({
                 </linearGradient>
               </defs>
               {/* Left - Sunset */}
-              <text transform="translate(14,200) rotate(-90)" textAnchor="middle" dominantBaseline="central" fontSize="13" fontFamily="monospace" fontWeight="900" className="fill-[#C2410C] dark:fill-white select-none">।। 🌇 सूर्यास्त {sunsetTimeStr} ।।</text>
+              <text transform="translate(14,200) rotate(-90)" textAnchor="middle" dominantBaseline="central" fontSize="13" fontFamily="monospace" fontWeight="900" className="fill-[#C2410C] dark:fill-white select-none">{isHin ? `।। 🌇 सूर्यास्त ${sunsetTimeStr} ।।` : `|| 🌇 Sunset ${sunsetTimeStr} ||`}</text>
               {/* Right - Sunrise */}
-              <text transform="translate(386,200) rotate(90)" textAnchor="middle" dominantBaseline="central" fontSize="13" fontFamily="monospace" fontWeight="900" className="fill-[#C2410C] dark:fill-white select-none">।। 🌅 सूर्योदय {sunriseTimeStr} ।।</text>
+              <text transform="translate(386,200) rotate(90)" textAnchor="middle" dominantBaseline="central" fontSize="13" fontFamily="monospace" fontWeight="900" className="fill-[#C2410C] dark:fill-white select-none">{isHin ? `।। 🌅 सूर्योदय ${sunriseTimeStr} ।।` : `|| 🌅 Sunrise ${sunriseTimeStr} ||`}</text>
             </svg>
 
             {/* Shadow Drop Element representing watch bezel profile */}
@@ -560,11 +637,11 @@ export function LiveMuhuratWatch({
                 {/* Top Row: Dial Sacred symbol (OM) with Vikram and Shak Samvat */}
                 <div className="flex justify-between items-center w-full px-3 text-orange-400 text-3xs mt-0.5 relative z-10 select-none">
                   <span className="font-serif font-black text-[8px] sm:text-[9.5px] text-[#A67E5D] tracking-wide leading-none">
-                    वि.सं. {samvatVikram}
+                    {isHin ? 'वि.सं.' : 'V.S.'} {samvatVikram}
                   </span>
                   <span className="font-serif font-black text-[15px] sm:text-[18px] leading-none hover:rotate-12 transition-transform cursor-pointer" onClick={triggerVibe}>ॐ</span>
                   <span className="font-serif font-black text-[8px] sm:text-[9.5px] text-[#A67E5D] tracking-wide leading-none">
-                    श.सं. {samvatShaka}
+                    {isHin ? 'श.सं.' : 'Sh.S.'} {samvatShaka}
                   </span>
                 </div>
 
@@ -572,7 +649,7 @@ export function LiveMuhuratWatch({
                 <div className="w-full flex items-center justify-between px-1.5 my-1.5 relative z-10 select-none">
                   {/* Left Complication: Tithi */}
                   <div className="flex flex-col items-start justify-center text-left w-[27%] shrink-0">
-                    <span className="text-[6.5px] sm:text-[7.5px] text-stone-500 font-bold tracking-wider uppercase leading-none mb-0.5">वर्तमान तिथि</span>
+                    <span className="text-[6.5px] sm:text-[7.5px] text-stone-500 font-bold tracking-wider uppercase leading-none mb-0.5">{isHin ? 'वर्तमान तिथि' : 'Current Tithi'}</span>
                     <span className="text-[10px] sm:text-[11px] font-black text-amber-300 font-serif leading-tight whitespace-pre-line w-[45px] sm:w-[50px] text-center">
                       {tithiHindiName.replace(' ', '\n')}
                     </span>
@@ -609,7 +686,7 @@ export function LiveMuhuratWatch({
 
                   {/* Right Complication: Nakshatra */}
                   <div className="flex flex-col items-end justify-center text-right w-[27%] shrink-0">
-                    <span className="text-[6.5px] sm:text-[7.5px] text-stone-500 font-bold tracking-wider uppercase leading-none mb-0.5">सक्रिय नक्षत्र</span>
+                    <span className="text-[6.5px] sm:text-[7.5px] text-stone-500 font-bold tracking-wider uppercase leading-none mb-0.5">{isHin ? 'सक्रिय नक्षत्र' : 'Active Nakshatra'}</span>
                     <span className="text-[10px] sm:text-[11px] font-black text-amber-300 font-serif leading-tight whitespace-pre-line w-[45px] sm:w-[50px] text-center">
                       {nakshatraHindiName.replace(' ', '\n')}
                     </span>
@@ -621,7 +698,7 @@ export function LiveMuhuratWatch({
                   <div className="flex items-center gap-1">
                     <Sparkles className="w-2.5 h-2.5 text-orange-500 animate-spin-slow" />
                     <span className="text-[8px] sm:text-[9.5px] font-black text-orange-400 font-serif uppercase tracking-wider">
-                      {currentChoghadiya ? `${currentChoghadiya.hindiName || currentChoghadiya.name} चौघड़िया` : '—'}
+                      {currentChoghadiya ? (isHin ? `${currentChoghadiya.hindiName || currentChoghadiya.name} चौघड़िया` : `${currentChoghadiya.name || currentChoghadiya.hindiName} Choghadiya`) : '—'}
                     </span>
                   </div>
                   <div className="text-[8px] sm:text-[9.5px] font-black text-[#27AE60] font-mono leading-none mt-0.5">
@@ -652,7 +729,7 @@ export function LiveMuhuratWatch({
                 : 'text-orange-950 dark:text-orange-200 opacity-60 hover:opacity-100'
             }`}
           >
-            सनातन स्मार्टवॉच
+            {isHin ? 'सनातन स्मार्टवॉच' : 'Sanatan Smartwatch'}
           </button>
           <button
             type="button"
@@ -663,7 +740,7 @@ export function LiveMuhuratWatch({
                 : 'text-orange-950 dark:text-orange-200 opacity-60 hover:opacity-100'
             }`}
           >
-            एनालॉग वॉच
+            {isHin ? 'एनालॉग वॉच' : 'Analog Watch'}
           </button>
         </div>
       )}
@@ -686,6 +763,7 @@ export function LiveMuhuratWatch({
               horaList={horaList}
               sunriseTimeStr={sunriseTimeStr}
               sunsetTimeStr={sunsetTimeStr}
+              language={language}
               onSelectChoghadiya={handleSelectChoghadiya}
               onSelectHora={handleSelectHora}
             />
@@ -714,20 +792,30 @@ export function LiveMuhuratWatch({
           <circle cx="386" cy="386" r="2.8" fill="#C9A227" stroke="#FFD700" strokeWidth="0.5" />
           {/* Top Labels (Left: Hora, Center: Kaalkhand, Right: Choghadiya) */}
           <text x="50" y="14" textAnchor="start" dominantBaseline="central" fontSize="13" fontFamily="serif" fontWeight="900" className="fill-[#C2410C] dark:fill-white select-none">
-            {activeHora ? 'होरा - ' + activeHora.lordHindi : 'होरा - -'}
+            {isHin 
+              ? (activeHora ? 'होरा - ' + activeHora.lordHindi : 'होरा - -') 
+              : (activeHora ? 'Hora - ' + activeHora.lord : 'Hora - -')}
           </text>
           <text x="200" y="14" textAnchor="middle" dominantBaseline="central" fontSize="13" fontFamily="serif" fontWeight="900" letterSpacing="1" className="fill-[#C2410C] dark:fill-white select-none">
-            ।। सनातन कालखण्ड ।।
+            {isHin ? "।। सनातन कालखण्ड ।।" : "|| Sanatan Timeframe ||"}
           </text>
           <text x="350" y="14" textAnchor="end" dominantBaseline="central" fontSize="13" fontFamily="serif" fontWeight="900" className="fill-[#C2410C] dark:fill-white select-none">
-            {currentChoghadiya ? 'चौघड़िया - ' + (currentChoghadiya.hindiName || currentChoghadiya.name) : 'चौघड़िया - -'}
+            {isHin 
+              ? (currentChoghadiya ? 'चौघड़िया - ' + (currentChoghadiya.hindiName || currentChoghadiya.name) : 'चौघड़िया - -') 
+              : (currentChoghadiya ? 'Choghadiya - ' + (currentChoghadiya.name || currentChoghadiya.hindiName) : 'Choghadiya - -')}
           </text>
           {/* Bottom Label */}
-          <text x="200" y="386" textAnchor="middle" dominantBaseline="central" fontSize="13" fontFamily="serif" fontWeight="900" letterSpacing="1" className="fill-[#C2410C] dark:fill-white select-none">।। वैदिक समय दिखाने वाला यंत्र ।।</text>
+          <text x="200" y="386" textAnchor="middle" dominantBaseline="central" fontSize="13" fontFamily="serif" fontWeight="900" letterSpacing="1" className="fill-[#C2410C] dark:fill-white select-none">
+            {isHin ? "।। वैदिक समय दिखाने वाला यंत्र ।।" : "|| Vedic Time Machine ||"}
+          </text>
           {/* Left - Sunset */}
-          <text transform="translate(14,200) rotate(-90)" textAnchor="middle" dominantBaseline="central" fontSize="13" fontFamily="monospace" fontWeight="900" className="fill-[#C2410C] dark:fill-white select-none">।। 🌇 सूर्यास्त {sunsetTimeStr} ।।</text>
+          <text transform="translate(14,200) rotate(-90)" textAnchor="middle" dominantBaseline="central" fontSize="13" fontFamily="monospace" fontWeight="900" className="fill-[#C2410C] dark:fill-white select-none">
+            {isHin ? `।। 🌇 सूर्यास्त ${sunsetTimeStr} ।।` : `|| 🌇 Sunset ${sunsetTimeStr} ||`}
+          </text>
           {/* Right - Sunrise */}
-          <text transform="translate(386,200) rotate(90)" textAnchor="middle" dominantBaseline="central" fontSize="13" fontFamily="monospace" fontWeight="900" className="fill-[#C2410C] dark:fill-white select-none">।। 🌅 सूर्योदय {sunriseTimeStr} ।।</text>
+          <text transform="translate(386,200) rotate(90)" textAnchor="middle" dominantBaseline="central" fontSize="13" fontFamily="monospace" fontWeight="900" className="fill-[#C2410C] dark:fill-white select-none">
+            {isHin ? `।। 🌅 सूर्योदय ${sunriseTimeStr} ।।` : `|| 🌅 Sunrise ${sunriseTimeStr} ||`}
+          </text>
         </svg>
 
         {/* Shadow Drop Element representing watch bezel profile */}
@@ -771,11 +859,11 @@ export function LiveMuhuratWatch({
             {/* Top Row: Dial Sacred symbol (OM) with Vikram and Shak Samvat */}
             <div className="flex justify-between items-center w-full px-3 text-orange-400 text-3xs mt-0.5 relative z-10 select-none">
               <span className="font-serif font-black text-[8px] sm:text-[9.5px] text-[#A67E5D] tracking-wide leading-none">
-                वि.सं. {samvatVikram}
+                {isHin ? 'वि.सं.' : 'V.S.'} {samvatVikram}
               </span>
               <span className="font-serif font-black text-[15px] sm:text-[18px] leading-none hover:rotate-12 transition-transform cursor-pointer" onClick={triggerVibe}>ॐ</span>
               <span className="font-serif font-black text-[8px] sm:text-[9.5px] text-[#A67E5D] tracking-wide leading-none">
-                श.सं. {samvatShaka}
+                {isHin ? 'श.सं.' : 'Sh.S.'} {samvatShaka}
               </span>
             </div>
 
@@ -783,7 +871,7 @@ export function LiveMuhuratWatch({
             <div className="w-full flex items-center justify-between px-1.5 my-1.5 relative z-10 select-none">
               {/* Left Complication: Tithi */}
               <div className="flex flex-col items-start justify-center text-left w-[27%] shrink-0">
-                <span className="text-[6.5px] sm:text-[7.5px] text-stone-500 font-bold tracking-wider uppercase leading-none mb-0.5">वर्तमान तिथि</span>
+                <span className="text-[6.5px] sm:text-[7.5px] text-stone-500 font-bold tracking-wider uppercase leading-none mb-0.5">{isHin ? 'वर्तमान तिथि' : 'Current Tithi'}</span>
                 <span className="text-[10px] sm:text-[11px] font-black text-amber-300 font-serif leading-tight whitespace-pre-line w-[45px] sm:w-[50px] text-center" title={tithiHindiName}>
                   {tithiHindiName.replace(' ', '\n')}
                 </span>
@@ -803,13 +891,13 @@ export function LiveMuhuratWatch({
                 
                 {/* Watch info bar */}
                 <p className="text-[7.5px] sm:text-[8.5px] text-stone-500 font-mono tracking-wide uppercase leading-none mt-1 whitespace-nowrap">
-                  📍 {sunriseTimeStr ? 'वैदिक काल' : 'सनातन समय'} • {hindiDayOfWeek} • {hindiDateStr}
+                  📍 {isHin ? (sunriseTimeStr ? 'वैदिक काल' : 'सनातन समय') : 'Vedic Time'} • {isHin ? hindiDayOfWeek : time.toLocaleDateString('en-US', { weekday: 'short' })} • {isHin ? hindiDateStr : time.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
                 </p>
               </div>
 
               {/* Right Complication: Nakshatra */}
               <div className="flex flex-col items-end justify-center text-right w-[27%] shrink-0">
-                <span className="text-[6.5px] sm:text-[7.5px] text-stone-500 font-bold tracking-wider uppercase leading-none mb-0.5">नक्षत्र</span>
+                <span className="text-[6.5px] sm:text-[7.5px] text-stone-500 font-bold tracking-wider uppercase leading-none mb-0.5">{isHin ? 'नक्षत्र' : 'Nakshatra'}</span>
                 <span className="text-[10px] sm:text-[12px] font-black text-amber-300 font-serif leading-tight truncate w-full" title={nakshatraHindiName}>
                   {nakshatraHindiName}
                 </span>
@@ -820,20 +908,20 @@ export function LiveMuhuratWatch({
             <div className="w-full grid grid-cols-3 gap-1 px-1 relative z-10 max-w-[94%] mx-auto mb-2 select-none">
               {/* Left Box: Hora */}
               <div className="flex flex-col items-center justify-between p-1 py-1.5 bg-orange-950/30 border border-orange-900/40 rounded-lg min-h-[52px] text-center shadow-inner relative overflow-hidden">
-                <span className="text-[7.5px] sm:text-[8.5px] text-stone-500 font-bold uppercase tracking-wider leading-none">होरा</span>
+                <span className="text-[7.5px] sm:text-[8.5px] text-stone-500 font-bold uppercase tracking-wider leading-none">{isHin ? 'होरा' : 'Hora'}</span>
                 <span className="text-[9.5px] sm:text-[11px] font-black text-amber-300 font-serif leading-tight truncate w-full mt-0.5">
-                  {activeHora ? activeHora.lordHindi : '-'}
+                  {activeHora ? (isHin ? activeHora.lordHindi : activeHora.lord) : '-'}
                 </span>
                 <span className="text-[6.5px] sm:text-[7.5px] font-mono text-stone-400 leading-none mt-1">
-                  {activeHora ? `${formatHindiTime(activeHora.startTime)}-${formatHindiTime(activeHora.endTime)}` : '-'}
+                  {activeHora ? (isHin ? `${formatHindiTime(activeHora.startTime)}-${formatHindiTime(activeHora.endTime)}` : `${activeHora.startTime}-${activeHora.endTime}`) : '-'}
                 </span>
               </div>
 
               {/* Center Box: Active Muhurat (Kaalkhand) */}
               <div className="flex flex-col items-center justify-between p-1 py-1.5 bg-orange-950/30 border border-orange-900/40 rounded-lg min-h-[52px] text-center shadow-inner relative overflow-hidden">
-                <span className="text-[6px] sm:text-[7px] text-amber-500 font-black uppercase tracking-wider leading-none">सक्रीय काल</span>
+                <span className="text-[6px] sm:text-[7px] text-amber-500 font-black uppercase tracking-wider leading-none">{isHin ? 'सक्रीय काल' : 'Active Period'}</span>
                 <span className="text-[8.5px] sm:text-[9.5px] font-black text-amber-100 font-serif leading-tight whitespace-pre-line w-full mt-0.5">
-                  {currentMuhurat ? (currentMuhurat.hindiName || currentMuhurat.name).replace(' ', '\n') : 'सामान्य'}
+                  {currentMuhurat ? (isHin ? (currentMuhurat.hindiName || currentMuhurat.name) : (currentMuhurat.name || currentMuhurat.hindiName)).replace(' ', '\n') : (isHin ? 'सामान्य' : 'Normal')}
                 </span>
                 <div className="flex items-center gap-0.5 mt-1 bg-black/40 px-1 py-0.5 rounded-full border border-orange-900/30 scale-[0.85] origin-center">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping shrink-0" />
@@ -845,12 +933,12 @@ export function LiveMuhuratWatch({
 
               {/* Right Box: Choghadiya */}
               <div className="flex flex-col items-center justify-between p-1 py-1.5 bg-orange-950/30 border border-orange-900/40 rounded-lg min-h-[52px] text-center shadow-inner relative overflow-hidden">
-                <span className="text-[6px] sm:text-[7px] text-stone-500 font-bold uppercase tracking-wider leading-none">चौघड़िया</span>
+                <span className="text-[6px] sm:text-[7px] text-stone-500 font-bold uppercase tracking-wider leading-none">{isHin ? 'चौघड़िया' : 'Choghadiya'}</span>
                 <span className="text-[9.5px] sm:text-[11px] font-black text-amber-300 font-serif leading-tight truncate w-full mt-0.5">
-                  {currentChoghadiya ? (currentChoghadiya.hindiName || currentChoghadiya.name) : '-'}
+                  {currentChoghadiya ? (isHin ? (currentChoghadiya.hindiName || currentChoghadiya.name) : (currentChoghadiya.name || currentChoghadiya.hindiName)) : '-'}
                 </span>
                 <span className="text-[6.5px] sm:text-[7.5px] font-mono text-stone-400 leading-none mt-1">
-                  {currentChoghadiya ? `${formatHindiTime(currentChoghadiya.startTime)}-${formatHindiTime(currentChoghadiya.endTime)}` : '-'}
+                  {currentChoghadiya ? (isHin ? `${formatHindiTime(currentChoghadiya.startTime)}-${formatHindiTime(currentChoghadiya.endTime)}` : `${currentChoghadiya.startTime}-${currentChoghadiya.endTime}`) : '-'}
                 </span>
               </div>
             </div>
@@ -860,32 +948,32 @@ export function LiveMuhuratWatch({
               
               {/* Brahma Muhurat */}
               <div className="flex flex-col items-center">
-                <span className="text-[8px] sm:text-[9px] font-black text-orange-400 leading-none">ब्रह्म</span>
+                <span className="text-[8px] sm:text-[9px] font-black text-orange-400 leading-none">{isHin ? 'ब्रह्म' : 'Brahma'}</span>
                 <Flame className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-orange-500 my-0.5" />
                 <span className="text-[8px] sm:text-[9px] font-mono font-black text-slate-200 leading-none">
                   {brahmaMuh ? brahmaMuh.startTime.replace(' AM', '').replace(' PM', '') : '4:24'}
                 </span>
-                <span className="text-[6.5px] sm:text-[7.5px] text-slate-400 font-bold uppercase leading-none mt-0.5">मुहूर्त</span>
+                <span className="text-[6.5px] sm:text-[7.5px] text-slate-400 font-bold uppercase leading-none mt-0.5">{isHin ? 'मुहूर्त' : 'Muhurat'}</span>
               </div>
 
               {/* Abhijit Muhurat */}
               <div className="flex flex-col items-center">
-                <span className="text-[8px] sm:text-[9px] font-black text-amber-400 leading-none">अभिजीत</span>
+                <span className="text-[8px] sm:text-[9px] font-black text-amber-400 leading-none">{isHin ? 'अभिजीत' : 'Abhijit'}</span>
                 <span className="text-[10px] sm:text-[11px] text-amber-500/90 font-serif font-black my-0.5 leading-none">卐</span>
                 <span className="text-[8px] sm:text-[9px] font-mono font-black text-amber-400 leading-none">
                   {abhijitMuh ? abhijitMuh.startTime.replace(' AM', '').replace(' PM', '') : '11:48'}
                 </span>
-                <span className="text-[6.5px] sm:text-[7.5px] text-slate-400 font-bold uppercase leading-none mt-0.5">मुहूर्त</span>
+                <span className="text-[6.5px] sm:text-[7.5px] text-slate-400 font-bold uppercase leading-none mt-0.5">{isHin ? 'मुहूर्त' : 'Muhurat'}</span>
               </div>
 
               {/* Godhuli Muhurat */}
               <div className="flex flex-col items-center">
-                <span className="text-[8px] sm:text-[9px] font-black text-rose-400 leading-none">गोधूलि</span>
+                <span className="text-[8px] sm:text-[9px] font-black text-rose-400 leading-none">{isHin ? 'गोधूलि' : 'Godhuli'}</span>
                 <Heart className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-rose-500 my-0.5" />
                 <span className="text-[8px] sm:text-[9px] font-mono font-black text-slate-200 leading-none">
                   {godhuliMuh ? godhuliMuh.startTime.replace(' AM', '').replace(' PM', '') : '18:40'}
                 </span>
-                <span className="text-[6.5px] sm:text-[7.5px] text-slate-400 font-bold uppercase leading-none mt-0.5">मुहूर्त</span>
+                <span className="text-[6.5px] sm:text-[7.5px] text-slate-400 font-bold uppercase leading-none mt-0.5">{isHin ? 'मुहूर्त' : 'Muhurat'}</span>
               </div>
             </div>
 
@@ -928,8 +1016,10 @@ export function LiveMuhuratWatch({
                   onClick={() => {
                     onToggleAlarm({
                       id: slotAlarmId,
-                      title: `${selectedSlot.name} ${selectedSlot.type === 'choghadiya' ? 'चौघड़िया' : 'होरा'}`,
-                      body: `${selectedSlot.name} (${selectedSlot.quality || 'शुभ'}) का समय प्रारंभ हो रहा है।`,
+                      title: `${selectedSlot.name} ${selectedSlot.type === 'choghadiya' ? (isHin ? 'चौघड़िया' : 'Choghadiya') : (isHin ? 'होरा' : 'Hora')}`,
+                      body: isHin
+                        ? `${selectedSlot.name} (${selectedSlot.quality || 'शुभ'}) का समय प्रारंभ हो रहा है।`
+                        : `${selectedSlot.name} (${selectedSlot.quality || 'Auspicious'}) is starting.`,
                       time: selectedSlot.startTime,
                       endTime: selectedSlot.endTime,
                       type: 'muhurat'
@@ -940,10 +1030,10 @@ export function LiveMuhuratWatch({
                       ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
                       : 'text-amber-800 dark:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border-amber-400/40 dark:border-amber-500/30'
                   }`}
-                  title={isSlotActive ? "अलार्म बंद करें" : "इस समय का अलार्म सेट करें"}
+                  title={isSlotActive ? (isHin ? "अलार्म बंद करें" : "Disable alarm") : (isHin ? "इस समय का अलार्म सेट करें" : "Set alarm for this timing")}
                 >
                   <Bell className={`w-3 h-3 ${isSlotActive ? 'fill-current' : ''}`} />
-                  <span>{isSlotActive ? 'सक्रिय' : 'याद दिलाएं'}</span>
+                  <span>{isSlotActive ? (isHin ? 'सक्रिय' : 'Active') : (isHin ? 'याद दिलाएं' : 'Remind')}</span>
                 </button>
               );
             })()}
@@ -955,13 +1045,13 @@ export function LiveMuhuratWatch({
               }}
               className="text-[10px] sm:text-xs font-bold text-orange-700 dark:text-amber-300 hover:text-orange-950 dark:hover:text-white bg-orange-500/15 hover:bg-orange-500/25 dark:bg-amber-600/30 dark:hover:bg-amber-600/50 border border-orange-300/60 dark:border-amber-500/40 px-2.5 py-1 rounded-xl transition-all cursor-pointer whitespace-nowrap"
             >
-              तालिका 📋
+              {isHin ? 'तालिका 📋' : 'Table 📋'}
             </button>
             <button
               type="button"
               onClick={() => setSelectedSlot(null)}
               className="text-slate-500 hover:text-slate-900 dark:text-stone-400 dark:hover:text-white text-base w-7 h-7 rounded-full bg-orange-100/60 hover:bg-orange-200/60 dark:bg-white/5 dark:hover:bg-white/10 flex items-center justify-center cursor-pointer transition-all border border-orange-200/50 dark:border-transparent"
-              title="बंद करें"
+              title={isHin ? "बंद करें" : "Close"}
             >
               ✕
             </button>
@@ -972,7 +1062,7 @@ export function LiveMuhuratWatch({
       {/* HINT LINE BELOW DIAL (WHEN NO SLOT SELECTED) */}
       {effectiveViewMode === 'analog' && !selectedSlot && (
         <div className="text-[11px] sm:text-xs text-amber-800/80 dark:text-amber-300/80 font-serif flex items-center justify-center gap-1 mt-1.5 animate-pulse select-none">
-          <span>👆 किसी भी चौघड़िया या होरा का समय देखने के लिए उस खाने को छुएं</span>
+          <span>{isHin ? '👆 किसी भी चौघड़िया या होरा का समय देखने के लिए उस खाने को छुएं' : '👆 Tap any Choghadiya or Hora sector to view timing details'}</span>
         </div>
       )}
 
@@ -981,13 +1071,13 @@ export function LiveMuhuratWatch({
         {/* 3-Color Legend: Green = Shubh, Yellow = Chal, Red = Ashubh */}
         <div className="flex items-center justify-center gap-3 sm:gap-4 text-[11px] sm:text-xs font-bold font-serif flex-wrap pt-0.5">
           <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-            🟢 शुभ (अमृत/शुभ/लाभ)
+            🟢 {isHin ? 'शुभ (अमृत/शुभ/लाभ)' : 'Auspicious (Amrit/Shubh/Labh)'}
           </span>
           <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-            🟡 सामान्य (चर)
+            🟡 {isHin ? 'सामान्य (चर)' : 'Neutral (Char)'}
           </span>
           <span className="flex items-center gap-1 text-rose-600 dark:text-rose-400">
-            🔴 अशुभ (रोग/काल/उद्वेग)
+            🔴 {isHin ? 'अशुभ (रोग/काल/उद्वेग)' : 'Inauspicious (Rog/Kaal/Udveg)'}
           </span>
         </div>
       </div>
@@ -1016,25 +1106,25 @@ export function LiveMuhuratWatch({
                 <span className="text-base select-none">{statusInfo.dot}</span>
                 <div>
                   <h4 className="text-[14px] sm:text-[15.5px] font-black text-slate-900 dark:text-amber-100 font-serif leading-tight">
-                    अभी: {currentChoghadiya ? (currentChoghadiya.hindiName || currentChoghadiya.name) : 'सामान्य'} चौघड़िया ({statusInfo.label})
+                    {isHin ? 'अभी:' : 'Now:'} {currentChoghadiya ? (isHin ? (currentChoghadiya.hindiName || currentChoghadiya.name) : (currentChoghadiya.name || currentChoghadiya.hindiName)) : (isHin ? 'सामान्य' : 'Neutral')} {isHin ? 'चौघड़िया' : 'Choghadiya'} ({statusInfo.label})
                   </h4>
                   <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
-                    समय: {currentChoghadiya ? `${formatHindiTime(currentChoghadiya.startTime)} - ${formatHindiTime(currentChoghadiya.endTime)}` : '—'}
+                    {isHin ? 'समय:' : 'Time:'} {currentChoghadiya ? `${formatLocalizedTime(currentChoghadiya.startTime, language)} - ${formatLocalizedTime(currentChoghadiya.endTime, language)}` : '—'}
                   </div>
                 </div>
               </div>
 
               {/* Remaining Countdown Badge */}
               <div className={`px-2.5 py-1 rounded-full border text-[11px] sm:text-xs font-mono font-black shrink-0 ${statusInfo.badgeBg}`}>
-                ⏳ {choghadiyaRemainingMinutes > 0 ? `${choghadiyaRemainingMinutes} मिनट शेष` : `${timeRemainingStr} शेष`}
+                ⏳ {choghadiyaRemainingMinutes > 0 ? (isHin ? `${choghadiyaRemainingMinutes} मिनट शेष` : `${choghadiyaRemainingMinutes} mins left`) : (isHin ? `${timeRemainingStr} शेष` : `${timeRemainingStr} left`)}
               </div>
             </div>
 
             {/* Active Hora Status Bar */}
             <div className="flex items-center justify-between text-xs py-1.5 px-3 bg-orange-500/5 dark:bg-zinc-900/40 rounded-xl border border-orange-200/25 dark:border-zinc-800/50">
-              <span className="font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">सक्रिय होरा:</span>
+              <span className="font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">{isHin ? 'सक्रिय होरा:' : 'Active Hora:'}</span>
               <span className="font-bold font-serif text-[#78350F] dark:text-amber-300 text-[12.5px] leading-relaxed text-right pl-2">
-                {activeHora ? getHoraPracticalNuance(activeHora.lordHindi, activeHora.lord) : '—'}
+                {activeHora ? getHoraPracticalNuance(activeHora.lordHindi, activeHora.lord, language) : '—'}
               </span>
             </div>
 
@@ -1042,10 +1132,10 @@ export function LiveMuhuratWatch({
             {currentChoghadiya && (
               <div className="text-xs space-y-0.5 pt-0.5">
                 <span className="font-black text-slate-800 dark:text-slate-200 block">
-                  ✅ क्या करें:
+                  {isHin ? '✅ क्या करें:' : '✅ Recommended Action:'}
                 </span>
                 <p className="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
-                  {getChoghadiyaUpyuktKarya(currentChoghadiya.type, isNightTime)}
+                  {getChoghadiyaUpyuktKarya(currentChoghadiya.type, isNightTime, language)}
                 </p>
               </div>
             )}
@@ -1054,9 +1144,9 @@ export function LiveMuhuratWatch({
             {nextChoghadiya && (
               <div className="pt-1.5 border-t border-orange-100/40 dark:border-zinc-800/60 flex items-center justify-between text-xs flex-wrap gap-1.5">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="font-bold text-slate-500 dark:text-slate-400">⏭️ अगला चौघड़िया:</span>
+                  <span className="font-bold text-slate-500 dark:text-slate-400">{isHin ? '⏭️ अगला चौघड़िया:' : '⏭️ Next Choghadiya:'}</span>
                   <span className="font-bold font-serif text-slate-800 dark:text-slate-200">
-                    {nextStatusInfo.dot} {nextChoghadiya.hindiName || nextChoghadiya.name} ({formatHindiTime(nextChoghadiya.startTime)} से)
+                    {nextStatusInfo.dot} {isHin ? (nextChoghadiya.hindiName || nextChoghadiya.name) : (nextChoghadiya.name || nextChoghadiya.hindiName)} ({isHin ? `${formatLocalizedTime(nextChoghadiya.startTime, language)} से` : `From ${formatLocalizedTime(nextChoghadiya.startTime, language)}`})
                   </span>
                 </div>
                 {onToggleAlarm && (() => {
@@ -1068,8 +1158,10 @@ export function LiveMuhuratWatch({
                       onClick={() => {
                         onToggleAlarm({
                           id: nextAlarmId,
-                          title: `${nextChoghadiya.hindiName || nextChoghadiya.name} चौघड़िया`,
-                          body: `${nextChoghadiya.hindiName || nextChoghadiya.name} चौघड़िया प्रारंभ हो रहा है (${nextStatusInfo.label})।`,
+                          title: `${isHin ? (nextChoghadiya.hindiName || nextChoghadiya.name) : nextChoghadiya.name} ${isHin ? 'चौघड़िया' : 'Choghadiya'}`,
+                          body: isHin 
+                            ? `${nextChoghadiya.hindiName || nextChoghadiya.name} चौघड़िया प्रारंभ हो रहा है (${nextStatusInfo.label})।`
+                            : `${nextChoghadiya.name} Choghadiya starting (${nextStatusInfo.label}).`,
                           time: nextChoghadiya.startTime,
                           endTime: nextChoghadiya.endTime,
                           type: 'muhurat'
@@ -1080,10 +1172,10 @@ export function LiveMuhuratWatch({
                           ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
                           : 'text-amber-800 dark:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border-amber-400/40 dark:border-amber-500/30'
                       }`}
-                      title={isNextActive ? "अलार्म बंद करें" : "अगले चौघड़िया का अलार्म सेट करें"}
+                      title={isNextActive ? (isHin ? "अलार्म बंद करें" : "Disable alarm") : (isHin ? "अगले चौघड़िया का अलार्म सेट करें" : "Set alarm for next Choghadiya")}
                     >
                       <Bell className={`w-3 h-3 ${isNextActive ? 'fill-current' : ''}`} />
-                      <span>{isNextActive ? 'सक्रिय' : 'याद दिलाएं'}</span>
+                      <span>{isNextActive ? (isHin ? 'सक्रिय' : 'Active') : (isHin ? 'याद दिलाएं' : 'Remind')}</span>
                     </button>
                   );
                 })()}
@@ -1105,10 +1197,10 @@ export function LiveMuhuratWatch({
             </button>
             <div className="pb-3 border-b border-orange-200/50 dark:border-orange-500/20 mb-4">
               <span className="text-[10.5px] uppercase font-mono font-bold tracking-widest text-[#EA580C] dark:text-amber-400 block">
-                ॥ दैनिक चौघड़िया मुहूर्त ॥
+                {isHin ? '॥ दैनिक चौघड़िया मुहूर्त ॥' : '॥ Daily Choghadiya Muhurat ॥'}
               </span>
               <h3 className="text-lg sm:text-xl font-bold font-serif text-slate-900 dark:text-amber-100">
-                सम्पूर्ण दिन-रात्रि चौघड़िया तालिका
+                {isHin ? 'सम्पूर्ण दिन-रात्रि चौघड़िया तालिका' : 'Complete Day & Night Choghadiya Table'}
               </h3>
             </div>
             
@@ -1116,7 +1208,7 @@ export function LiveMuhuratWatch({
               {/* Day Choghadiya */}
               <div className="space-y-2.5">
                 <h4 className="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
-                  ☀️ दिन का चौघड़िया (Daytime)
+                  {isHin ? '☀️ दिन का चौघड़िया (Daytime)' : '☀️ Day Choghadiya (Daytime)'}
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {choghadiyaList.filter(ch => ch.isDay).map((ch, i) => {
@@ -1129,10 +1221,10 @@ export function LiveMuhuratWatch({
                         <div>
                           <div className="flex items-center gap-1">
                             <span className="text-xs">{status.dot}</span>
-                            <span className="text-xs font-black text-slate-850 dark:text-amber-100 font-serif leading-tight">{ch.hindiName || ch.name}</span>
+                            <span className="text-xs font-black text-slate-850 dark:text-amber-100 font-serif leading-tight">{isHin ? (ch.hindiName || ch.name) : (ch.name || ch.hindiName)}</span>
                           </div>
                           <span className="text-[9.5px] text-slate-500 dark:text-stone-300 font-mono mt-0.5 block leading-none font-semibold">
-                            {formatHindiTime(ch.startTime)} - {formatHindiTime(ch.endTime)}
+                            {formatLocalizedTime(ch.startTime, language)} - {formatLocalizedTime(ch.endTime, language)}
                           </span>
                         </div>
                         <span className={`text-[8.5px] font-black uppercase text-center py-0.5 rounded-md mt-2 tracking-wider ${status.badgeBg}`}>
@@ -1147,7 +1239,7 @@ export function LiveMuhuratWatch({
               {/* Night Choghadiya */}
               <div className="space-y-2.5">
                 <h4 className="text-xs sm:text-sm font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
-                  🌙 रात का चौघड़िया (Nighttime)
+                  {isHin ? '🌙 रात का चौघड़िया (Nighttime)' : '🌙 Night Choghadiya (Nighttime)'}
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {choghadiyaList.filter(ch => !ch.isDay).map((ch, i) => {
@@ -1160,10 +1252,10 @@ export function LiveMuhuratWatch({
                         <div>
                           <div className="flex items-center gap-1">
                             <span className="text-xs">{status.dot}</span>
-                            <span className="text-xs font-black text-slate-850 dark:text-amber-100 font-serif leading-tight">{ch.hindiName || ch.name}</span>
+                            <span className="text-xs font-black text-slate-850 dark:text-amber-100 font-serif leading-tight">{isHin ? (ch.hindiName || ch.name) : (ch.name || ch.hindiName)}</span>
                           </div>
                           <span className="text-[9.5px] text-slate-500 dark:text-stone-300 font-mono mt-0.5 block leading-none font-semibold">
-                            {formatHindiTime(ch.startTime)} - {formatHindiTime(ch.endTime)}
+                            {formatLocalizedTime(ch.startTime, language)} - {formatLocalizedTime(ch.endTime, language)}
                           </span>
                         </div>
                         <span className={`text-[8.5px] font-black uppercase text-center py-0.5 rounded-md mt-2 tracking-wider ${status.badgeBg}`}>
@@ -1191,10 +1283,10 @@ export function LiveMuhuratWatch({
             </button>
             <div className="pb-3 border-b border-orange-200/50 dark:border-orange-500/20 mb-4">
               <span className="text-[10.5px] uppercase font-mono font-bold tracking-widest text-[#EA580C] dark:text-amber-400 block">
-                ॥ दैनिक होरा चक्र ॥
+                {isHin ? '॥ दैनिक होरा चक्र ॥' : '॥ Daily Hora Cycle ॥'}
               </span>
               <h3 className="text-lg sm:text-xl font-bold font-serif text-slate-900 dark:text-amber-100">
-                सम्पूर्ण २४ घंटे की होरा स्थिति तालिका
+                {isHin ? 'सम्पूर्ण २४ घंटे की होरा स्थिति तालिका' : 'Complete 24-Hour Hora Table'}
               </h3>
             </div>
             
@@ -1202,7 +1294,7 @@ export function LiveMuhuratWatch({
               {/* Day Hora */}
               <div className="space-y-2.5">
                 <h4 className="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
-                  ☀️ दिन की होरा (Daytime 12 Horas)
+                  {isHin ? '☀️ दिन की होरा (Daytime 12 Horas)' : '☀️ Day Hora (Daytime 12 Horas)'}
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {horaList.filter(h => h.isDay).map((h, i) => {
@@ -1222,14 +1314,14 @@ export function LiveMuhuratWatch({
                         <div>
                           <div className="flex items-center gap-1">
                             <span className="text-xs">{dot}</span>
-                            <span className="text-xs font-black text-slate-850 dark:text-amber-100 font-serif leading-tight">{h.lordHindi || h.lord} की होरा</span>
+                            <span className="text-xs font-black text-slate-850 dark:text-amber-100 font-serif leading-tight">{isHin ? `${h.lordHindi || h.lord} की होरा` : `${h.lord || h.lordHindi} Hora`}</span>
                           </div>
                           <span className="text-[9.5px] text-slate-500 dark:text-stone-300 font-mono mt-0.5 block leading-none font-semibold">
-                            {formatHindiTime(h.startTime)} - {formatHindiTime(h.endTime)}
+                            {formatLocalizedTime(h.startTime, language)} - {formatLocalizedTime(h.endTime, language)}
                           </span>
                         </div>
                         <span className={`text-[8.5px] font-black uppercase text-center py-0.5 rounded-md mt-2 tracking-wider ${badgeClass}`}>
-                          {isShubh ? 'शुभ' : isAshubh ? 'अशुभ' : 'सामान्य'}
+                          {isShubh ? (isHin ? 'शुभ' : 'Auspicious') : isAshubh ? (isHin ? 'अशुभ' : 'Inauspicious') : (isHin ? 'सामान्य' : 'Neutral')}
                         </span>
                       </div>
                     );
@@ -1240,7 +1332,7 @@ export function LiveMuhuratWatch({
               {/* Night Hora */}
               <div className="space-y-2.5">
                 <h4 className="text-xs sm:text-sm font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
-                  🌙 रात की होरा (Nighttime 12 Horas)
+                  {isHin ? '🌙 रात की होरा (Nighttime 12 Horas)' : '🌙 Night Hora (Nighttime 12 Horas)'}
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {horaList.filter(h => !h.isDay).map((h, i) => {
@@ -1260,14 +1352,14 @@ export function LiveMuhuratWatch({
                         <div>
                           <div className="flex items-center gap-1">
                             <span className="text-xs">{dot}</span>
-                            <span className="text-xs font-black text-slate-850 dark:text-amber-100 font-serif leading-tight">{h.lordHindi || h.lord} की होरा</span>
+                            <span className="text-xs font-black text-slate-850 dark:text-amber-100 font-serif leading-tight">{isHin ? `${h.lordHindi || h.lord} की होरा` : `${h.lord || h.lordHindi} Hora`}</span>
                           </div>
                           <span className="text-[9.5px] text-slate-500 dark:text-stone-300 font-mono mt-0.5 block leading-none font-semibold">
-                            {formatHindiTime(h.startTime)} - {formatHindiTime(h.endTime)}
+                            {formatLocalizedTime(h.startTime, language)} - {formatLocalizedTime(h.endTime, language)}
                           </span>
                         </div>
                         <span className={`text-[8.5px] font-black uppercase text-center py-0.5 rounded-md mt-2 tracking-wider ${badgeClass}`}>
-                          {isShubh ? 'शुभ' : isAshubh ? 'अशुभ' : 'सामान्य'}
+                          {isShubh ? (isHin ? 'शुभ' : 'Auspicious') : isAshubh ? (isHin ? 'अशुभ' : 'Inauspicious') : (isHin ? 'सामान्य' : 'Neutral')}
                         </span>
                       </div>
                     );

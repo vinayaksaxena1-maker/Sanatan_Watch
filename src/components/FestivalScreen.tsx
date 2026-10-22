@@ -7,6 +7,7 @@ import React, { useState, useMemo } from 'react';
 import { Calendar, Search, Sparkles, X, Flame, Moon, Clock, Utensils, ChevronRight } from 'lucide-react';
 import { Festival } from '../types';
 import { getFestivalsForYear } from '../utils/festivalEngine';
+import { translateSanskritMonthName, translateTithiString } from '../utils/translations';
 
 interface FestivalScreenProps {
   lat: number;
@@ -20,12 +21,21 @@ const GREGORIAN_MONTHS_HINDI = [
   'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर'
 ];
 
+const GREGORIAN_MONTHS_EN = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
 const WEEKDAYS_HINDI_SHORT = ['रवि', 'सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि'];
 const WEEKDAYS_HINDI_FULL = ['रविवार', 'सोमवार', 'मंगलवार', 'बुधवार', 'गुरुवार', 'शुक्रवार', 'शनिवार'];
 
+const WEEKDAYS_EN_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const WEEKDAYS_EN_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 type CategoryFilter = 'all' | 'major' | 'ekadashi' | 'pradosh_shiv' | 'purnima_sankranti';
 
-export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
+export function FestivalScreen({ lat, lon, year, language = 'Hindi' }: FestivalScreenProps) {
+  const isHindi = language === 'Hindi';
   const [selectedYear, setSelectedYear] = useState<number>(() => year || 2026);
   const [selectedMonth, setSelectedMonth] = useState<number>(() => new Date().getMonth());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
@@ -89,15 +99,30 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
   const getCategoryBadge = (category: string) => {
     switch (category) {
       case 'major':
-        return { label: '🌸 प्रमुख महापर्व', bg: 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30' };
+        return { 
+          label: isHindi ? '🌸 प्रमुख महापर्व' : '🌸 Major Festival', 
+          bg: 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30' 
+        };
       case 'ekadashi':
-        return { label: '📿 एकादशी व्रत', bg: 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30' };
+        return { 
+          label: isHindi ? '📿 एकादशी व्रत' : '📿 Ekadashi Vrat', 
+          bg: 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30' 
+        };
       case 'pradosh_shiv':
-        return { label: '🔱 शिव आराधना / प्रदोष', bg: 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30' };
+        return { 
+          label: isHindi ? '🔱 शिव आराधना / प्रदोष' : '🔱 Shiva / Pradosh', 
+          bg: 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30' 
+        };
       case 'purnima_sankranti':
-        return { label: '🌕 पूर्णिमा / संक्रान्ति', bg: 'bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30' };
+        return { 
+          label: isHindi ? '🌕 पूर्णिमा / संक्रान्ति' : '🌕 Purnima / Sankranti', 
+          bg: 'bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30' 
+        };
       default:
-        return { label: '✨ पावन व्रत व पर्व', bg: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30' };
+        return { 
+          label: isHindi ? '✨ पावन व्रत व पर्व' : '✨ Sacred Vrat / Parva', 
+          bg: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30' 
+        };
     }
   };
 
@@ -190,12 +215,18 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
     return list.sort((a, b) => a.date.localeCompare(b.date));
   }, [allYearFestivals, selectedYear, selectedMonth, selectedDay, searchQuery, categoryFilter]);
 
-  const formatFestivalDateHindi = (dateStr: string) => {
+  const formatFestivalDate = (dateStr: string) => {
     const [y, m, d] = dateStr.split('-').map(Number);
     const dateObj = new Date(y, m - 1, d);
-    const weekday = WEEKDAYS_HINDI_FULL[dateObj.getDay()];
-    const month = GREGORIAN_MONTHS_HINDI[m - 1];
-    return `${d} ${month} ${y}, ${weekday}`;
+    if (isHindi) {
+      const weekday = WEEKDAYS_HINDI_FULL[dateObj.getDay()];
+      const month = GREGORIAN_MONTHS_HINDI[m - 1];
+      return `${d} ${month} ${y}, ${weekday}`;
+    } else {
+      const weekday = WEEKDAYS_EN_FULL[dateObj.getDay()];
+      const month = GREGORIAN_MONTHS_EN[m - 1];
+      return `${weekday}, ${month} ${d}, ${y}`;
+    }
   };
 
   const calculateDaysRemaining = (targetDateStr: string) => {
@@ -208,10 +239,10 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
     const diffMs = target.getTime() - today.getTime();
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return '🟢 आज है!';
-    if (diffDays === 1) return '⏳ केवल 1 दिन शेष (कल)';
-    if (diffDays > 1) return `⏳ केवल ${diffDays} दिन शेष`;
-    return 'समाप्त';
+    if (diffDays === 0) return isHindi ? '🟢 आज है!' : '🟢 Today!';
+    if (diffDays === 1) return isHindi ? '⏳ केवल 1 दिन शेष (कल)' : '⏳ 1 Day Left (Tomorrow)';
+    if (diffDays > 1) return isHindi ? `⏳ केवल ${diffDays} दिन शेष` : `⏳ ${diffDays} Days Left`;
+    return isHindi ? 'समाप्त' : 'Passed';
   };
 
   const isToday = (dayNum: number) => {
@@ -234,10 +265,10 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
             <span className="text-xl">🗓️</span>
             <div>
               <h2 className="text-[17px] sm:text-[19px] font-black font-serif text-[#9A3412] dark:text-amber-300 leading-tight">
-                सनातन पर्व एवं व्रत पंचांग
+                {isHindi ? "सनातन पर्व एवं व्रत पंचांग" : "Sanatan Festivals & Vrat Calendar"}
               </h2>
               <p className="text-[11.5px] text-slate-500 dark:text-stone-400 font-medium">
-                समस्त 12 माह के व्रत, एकादशी, पूर्णिमा व प्रमुख हिंदू त्योहार
+                {isHindi ? "समस्त 12 माह के व्रत, एकादशी, पूर्णिमा व प्रमुख हिंदू त्योहार" : "Complete 12-month Vrats, Ekadashi, Purnima & major Hindu festivals"}
               </p>
             </div>
           </div>
@@ -252,7 +283,7 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
               }}
               className="px-2.5 py-1.5 rounded-xl bg-orange-500/10 dark:bg-zinc-900 border border-orange-300/60 dark:border-amber-500/30 text-xs sm:text-[13px] font-bold text-slate-800 dark:text-amber-200 focus:outline-none cursor-pointer"
             >
-              {GREGORIAN_MONTHS_HINDI.map((m, idx) => (
+              {(isHindi ? GREGORIAN_MONTHS_HINDI : GREGORIAN_MONTHS_EN).map((m, idx) => (
                 <option key={idx} value={idx}>{m}</option>
               ))}
             </select>
@@ -277,7 +308,7 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-orange-600 dark:text-amber-400 pointer-events-none" />
           <input
             type="text"
-            placeholder="पर्व या व्रत खोजें (उदा. एकादशी, करवा चौथ, शिवरात्रि, होली)..."
+            placeholder={isHindi ? "पर्व या व्रत खोजें (उदा. एकादशी, करवा चौथ, शिवरात्रि, होली)..." : "Search festivals or vrats (e.g. Ekadashi, Karwa Chauth, Shivratri)..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-9 py-2 rounded-2xl bg-white dark:bg-zinc-900/80 border border-orange-200/80 dark:border-zinc-800 text-xs sm:text-[13px] text-slate-800 dark:text-amber-100 placeholder:text-slate-400 dark:placeholder:text-stone-500 focus:outline-none focus:border-orange-500 font-sans shadow-inner"
@@ -295,13 +326,19 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
 
         {/* 3. CATEGORY FILTER CHIPS (HORIZONTAL SCROLL) */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
-          {[
+          {(isHindi ? [
             { id: 'all', label: '✨ सभी पर्व' },
             { id: 'major', label: '🌸 प्रमुख महापर्व' },
             { id: 'ekadashi', label: '📿 एकादशी व्रत' },
             { id: 'pradosh_shiv', label: '🔱 प्रदोष व शिवरात्रि' },
             { id: 'purnima_sankranti', label: '🌕 पूर्णिमा व संक्रान्ति' }
-          ].map(chip => {
+          ] : [
+            { id: 'all', label: '✨ All Festivals' },
+            { id: 'major', label: '🌸 Major Festivals' },
+            { id: 'ekadashi', label: '📿 Ekadashi Vrats' },
+            { id: 'pradosh_shiv', label: '🔱 Pradosh & Shivratri' },
+            { id: 'purnima_sankranti', label: '🌕 Purnima & Sankranti' }
+          ]).map(chip => {
             const isActive = categoryFilter === chip.id;
             return (
               <button
@@ -327,7 +364,7 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
         <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 dark:from-[#2A180E] dark:via-[#1E110A] dark:to-[#2A180E] border border-orange-400/50 dark:border-amber-500/40 shadow-sm relative overflow-hidden">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <span className="text-[11px] uppercase font-mono font-bold tracking-wider text-orange-700 dark:text-amber-400 bg-orange-500/10 px-2.5 py-0.5 rounded-full border border-orange-300/40 dark:border-amber-500/30">
-              🔔 अगला पावन महापर्व
+              {isHindi ? "🔔 अगला पावन महापर्व" : "🔔 Upcoming Sacred Festival"}
             </span>
             <span className="text-xs font-bold font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
               {calculateDaysRemaining(upcomingHeroFestival.date)}
@@ -336,18 +373,20 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
 
           <div className="mt-2">
             <h3 className="text-lg sm:text-xl font-black font-serif text-[#9A3412] dark:text-amber-200 leading-tight">
-              {upcomingHeroFestival.hindiName || upcomingHeroFestival.name}
+              {isHindi ? (upcomingHeroFestival.hindiName || upcomingHeroFestival.name) : upcomingHeroFestival.name}
             </h3>
             <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-stone-300 mt-1 font-medium">
               <Calendar className="w-3.5 h-3.5 text-orange-600 shrink-0" />
-              <span>{formatFestivalDateHindi(upcomingHeroFestival.date)}</span>
+              <span>{formatFestivalDate(upcomingHeroFestival.date)}</span>
               <span>•</span>
-              <span className="font-serif text-orange-800 dark:text-amber-300">{upcomingHeroFestival.month} {upcomingHeroFestival.tithi}</span>
+              <span className="font-serif text-orange-800 dark:text-amber-300">
+                {isHindi ? translateSanskritMonthName(upcomingHeroFestival.month, 'Hindi') : upcomingHeroFestival.month} {isHindi ? translateTithiString(upcomingHeroFestival.tithi, 'Hindi') : upcomingHeroFestival.tithi}
+              </span>
             </div>
           </div>
 
           <p className="text-[12.5px] sm:text-[13px] text-slate-700 dark:text-stone-300 mt-2 leading-relaxed font-normal">
-            {upcomingHeroFestival.description}
+            {isHindi ? upcomingHeroFestival.description : (upcomingHeroFestival.descriptionEnglish || upcomingHeroFestival.description)}
           </p>
 
           {(upcomingHeroFestival.pujaMuhurat || upcomingHeroFestival.paranTime || upcomingHeroFestival.moonriseTime) && (
@@ -355,19 +394,19 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
               {upcomingHeroFestival.pujaMuhurat && (
                 <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-500/25 flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  <span>पूजा: {upcomingHeroFestival.pujaMuhurat}</span>
+                  <span>{isHindi ? "पूजा:" : "Puja:"} {upcomingHeroFestival.pujaMuhurat}</span>
                 </span>
               )}
               {upcomingHeroFestival.paranTime && (
                 <span className="px-2.5 py-0.5 rounded-lg bg-amber-500/10 text-amber-800 dark:text-amber-300 font-bold border border-amber-500/25 flex items-center gap-1">
                   <Utensils className="w-3 h-3" />
-                  <span>पारण: {upcomingHeroFestival.paranTime}</span>
+                  <span>{isHindi ? "पारण:" : "Paran:"} {upcomingHeroFestival.paranTime}</span>
                 </span>
               )}
               {upcomingHeroFestival.moonriseTime && (
                 <span className="px-2.5 py-0.5 rounded-lg bg-sky-500/10 text-sky-800 dark:text-sky-300 font-bold border border-sky-500/25 flex items-center gap-1">
                   <Moon className="w-3 h-3" />
-                  <span>चंद्रोदय: {upcomingHeroFestival.moonriseTime}</span>
+                  <span>{isHindi ? "चंद्रोदय:" : "Moonrise:"} {upcomingHeroFestival.moonriseTime}</span>
                 </span>
               )}
             </div>
@@ -383,7 +422,7 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
             <div className="flex items-center gap-1.5">
               <span className="text-sm">📅</span>
               <span className="text-xs sm:text-sm font-bold font-serif text-slate-800 dark:text-amber-200">
-                {GREGORIAN_MONTHS_HINDI[selectedMonth]} {selectedYear} कैलेंडर
+                {isHindi ? GREGORIAN_MONTHS_HINDI[selectedMonth] : GREGORIAN_MONTHS_EN[selectedMonth]} {selectedYear} {isHindi ? "कैलेंडर" : "Calendar"}
               </span>
             </div>
             {selectedDay !== null && (
@@ -392,7 +431,7 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
                 onClick={() => setSelectedDay(null)}
                 className="text-[11px] font-bold text-orange-700 dark:text-amber-400 bg-orange-500/10 hover:bg-orange-500/20 px-2 py-0.5 rounded-lg transition-all cursor-pointer flex items-center gap-0.5 border border-orange-300/40 dark:border-amber-500/30"
               >
-                <span>चयनित: {selectedDay} {GREGORIAN_MONTHS_HINDI[selectedMonth]}</span>
+                <span>{isHindi ? `चयनित: ${selectedDay} ${GREGORIAN_MONTHS_HINDI[selectedMonth]}` : `Selected: ${GREGORIAN_MONTHS_EN[selectedMonth]} ${selectedDay}`}</span>
                 <X className="w-3 h-3" />
               </button>
             )}
@@ -400,7 +439,7 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
 
           {/* Weekday Header */}
           <div className="grid grid-cols-7 gap-1 text-center mb-1">
-            {WEEKDAYS_HINDI_SHORT.map((wd, idx) => (
+            {(isHindi ? WEEKDAYS_HINDI_SHORT : WEEKDAYS_EN_SHORT).map((wd, idx) => (
               <span
                 key={idx}
                 className={`text-[11px] sm:text-xs font-bold py-1 ${
@@ -457,11 +496,11 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
           <div className="flex items-center justify-center gap-4 text-[10.5px] text-slate-500 dark:text-stone-400 pt-2.5 mt-2 border-t border-orange-100/40 dark:border-white/5">
             <span className="flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-orange-500" />
-              <span>पर्व / व्रत का दिन (टैप करें)</span>
+              <span>{isHindi ? "पर्व / व्रत का दिन (टैप करें)" : "Festival / Vrat Day (Tap)"}</span>
             </span>
             <span className="flex items-center gap-1">
               <span className="w-2 h-2 rounded-full border border-orange-400 bg-orange-500/20" />
-              <span>आज का दिन</span>
+              <span>{isHindi ? "आज का दिन" : "Today"}</span>
             </span>
           </div>
 
@@ -474,10 +513,10 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
         <div className="flex items-center justify-between px-1">
           <h3 className="text-sm sm:text-[15px] font-black font-serif text-slate-800 dark:text-amber-200">
             {searchQuery
-              ? `खोज परिणाम (${displayedFestivals.length} मिले)`
+              ? (isHindi ? `खोज परिणाम (${displayedFestivals.length} मिले)` : `Search Results (${displayedFestivals.length} found)`)
               : selectedDay !== null
-              ? `${selectedDay} ${GREGORIAN_MONTHS_HINDI[selectedMonth]} के पर्व`
-              : `${GREGORIAN_MONTHS_HINDI[selectedMonth]} ${selectedYear} के पर्व एवं व्रत (${displayedFestivals.length})`}
+              ? (isHindi ? `${selectedDay} ${GREGORIAN_MONTHS_HINDI[selectedMonth]} के पर्व` : `Festivals on ${GREGORIAN_MONTHS_EN[selectedMonth]} ${selectedDay}`)
+              : (isHindi ? `${GREGORIAN_MONTHS_HINDI[selectedMonth]} ${selectedYear} के पर्व एवं व्रत (${displayedFestivals.length})` : `Festivals & Vrats of ${GREGORIAN_MONTHS_EN[selectedMonth]} ${selectedYear} (${displayedFestivals.length})`)}
           </h3>
           {(selectedDay !== null || searchQuery || categoryFilter !== 'all') && (
             <button
@@ -489,14 +528,14 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
               }}
               className="text-[11px] font-bold text-orange-600 dark:text-amber-400 hover:underline cursor-pointer"
             >
-              फ़िल्टर रीसेट करें
+              {isHindi ? "फ़िल्टर रीसेट करें" : "Reset Filter"}
             </button>
           )}
         </div>
 
         {displayedFestivals.length === 0 ? (
           <div className="p-8 text-center glass-card-light dark:glass-card-dark rounded-3xl border border-orange-200/60 dark:border-orange-950/40 text-slate-500 dark:text-stone-400 space-y-2">
-            <p className="text-sm font-medium">चयनित फ़िल्टर के अनुसार कोई पर्व या व्रत नहीं मिला।</p>
+            <p className="text-sm font-medium">{isHindi ? "चयनित फ़िल्टर के अनुसार कोई पर्व या व्रत नहीं मिला।" : "No festivals or vrats found matching the selected filter."}</p>
             <button
               type="button"
               onClick={() => {
@@ -506,7 +545,7 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
               }}
               className="px-3 py-1.5 rounded-xl bg-orange-500 text-white text-xs font-bold cursor-pointer hover:bg-orange-600 transition-all"
             >
-              सभी पर्व देखें
+              {isHindi ? "सभी पर्व देखें" : "View All Festivals"}
             </button>
           </div>
         ) : (
@@ -525,29 +564,29 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
                     {badge.label}
                   </span>
                   <span className="text-[11.5px] font-serif font-bold text-slate-500 dark:text-stone-400">
-                    {fest.month} • {fest.tithi}
+                    {isHindi ? translateSanskritMonthName(fest.month, 'Hindi') : fest.month} • {isHindi ? translateTithiString(fest.tithi, 'Hindi') : fest.tithi}
                   </span>
                 </div>
 
                 {/* Festival Name & Formatted Date */}
                 <div>
                   <h4 className="text-[16px] sm:text-[17.5px] font-black font-serif text-[#9A3412] dark:text-amber-200 leading-tight">
-                    {fest.hindiName || fest.name}
+                    {isHindi ? (fest.hindiName || fest.name) : fest.name}
                   </h4>
                   <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-stone-300 mt-1 font-medium flex-wrap">
                     <Calendar className="w-3.5 h-3.5 text-orange-600 shrink-0" />
-                    <span>{formatFestivalDateHindi(fest.date)}</span>
+                    <span>{formatFestivalDate(fest.date)}</span>
                     {fest.secondaryDate && (
                       <span className="text-[11px] px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-700 dark:text-amber-300 border border-orange-300/40 dark:border-amber-500/30 font-bold">
-                        विस्तार: {fest.secondaryDate}
+                        {isHindi ? "विस्तार:" : "Extended:"} {fest.secondaryDate}
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Pure Hindi Dignified Description */}
+                {/* Description */}
                 <p className="text-[12.5px] sm:text-[13px] text-slate-700 dark:text-stone-300 leading-relaxed font-normal">
-                  {fest.description}
+                  {isHindi ? fest.description : (fest.descriptionEnglish || fest.description)}
                 </p>
 
                 {/* Actionable Puja / Paran / Moonrise timings */}
@@ -556,19 +595,19 @@ export function FestivalScreen({ lat, lon, year }: FestivalScreenProps) {
                     {fest.pujaMuhurat && (
                       <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-500/25 flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        <span>पूजा: {fest.pujaMuhurat}</span>
+                        <span>{isHindi ? "पूजा:" : "Puja:"} {fest.pujaMuhurat}</span>
                       </span>
                     )}
                     {fest.paranTime && (
                       <span className="px-2.5 py-0.5 rounded-lg bg-amber-500/10 text-amber-800 dark:text-amber-300 font-bold border border-amber-500/25 flex items-center gap-1">
                         <Utensils className="w-3 h-3" />
-                        <span>पारण: {fest.paranTime}</span>
+                        <span>{isHindi ? "पारण:" : "Paran:"} {fest.paranTime}</span>
                       </span>
                     )}
                     {fest.moonriseTime && (
                       <span className="px-2.5 py-0.5 rounded-lg bg-sky-500/10 text-sky-800 dark:text-sky-300 font-bold border border-sky-500/25 flex items-center gap-1">
                         <Moon className="w-3 h-3" />
-                        <span>चंद्रोदय: {fest.moonriseTime}</span>
+                        <span>{isHindi ? "चंद्रोदय:" : "Moonrise:"} {fest.moonriseTime}</span>
                       </span>
                     )}
                   </div>

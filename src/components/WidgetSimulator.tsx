@@ -6,16 +6,18 @@ interface WidgetSimulatorProps {
   panchang: PanchangInfo;
   muhurats: MuhuratItem[];
   city: string;
+  language?: 'English' | 'Hindi';
 }
 
-export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorProps) {
+export function WidgetSimulator({ panchang, muhurats, city, language = 'Hindi' }: WidgetSimulatorProps) {
+  const isHindi = language === 'Hindi';
   const [selectedSize, setSelectedSize] = useState<'small' | 'medium' | 'lockscreen'>('medium');
   const [wallpaperBase64, setWallpaperBase64] = useState<string>('');
 
   if (!panchang || !panchang.hinduDate) {
     return (
       <div className="flex justify-center p-8 text-slate-400 font-bold bg-white dark:bg-zinc-950/20 border border-slate-100 dark:border-zinc-900/45 rounded-3xl">
-        विजेट्स लोड हो रहे हैं...
+        {isHindi ? "विजेट्स लोड हो रहे हैं..." : "Loading widgets..."}
       </div>
     );
   }
@@ -24,10 +26,12 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
     ? (muhurats.find(m => m?.id === 'abhijit') || muhurats[0])
     : null;
 
-  const activeTithi = panchang.hinduDate.tithi?.hindiName
-    ? panchang.hinduDate.tithi.hindiName.split(' ')[0]
-    : 'तिथि';
-  const activeNakshatra = panchang.hinduDate.nakshatra?.hindiName || 'नक्षत्र';
+  const activeTithi = isHindi
+    ? (panchang.hinduDate.tithi?.hindiName ? panchang.hinduDate.tithi.hindiName.split(' ')[0] : 'तिथि')
+    : (panchang.hinduDate.tithi?.name || 'Tithi');
+  const activeNakshatra = isHindi 
+    ? (panchang.hinduDate.nakshatra?.hindiName || 'नक्षत्र')
+    : (panchang.hinduDate.nakshatra?.name || 'Nakshatra');
 
   // Load system wallpaper on android mount
   useEffect(() => {
@@ -49,10 +53,10 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
         <div>
           <h2 className="text-base sm:text-lg font-black text-slate-800 dark:text-amber-100 flex items-center gap-2 font-serif">
             <Layout className="w-5 h-5 text-orange-600" />
-            होम स्क्रीन विजेट प्रीव्यू
+            {isHindi ? "होम स्क्रीन विजेट प्रीव्यू" : "Home Screen Widget Preview"}
           </h2>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-normal">
-            सुंदर मोबाइल विजेट का लाइव अनुभव करें। देखने के लिए प्रारूप का आकार चुनें।
+            {isHindi ? "सुंदर मोबाइल विजेट का लाइव अनुभव करें। देखने के लिए प्रारूप का आकार चुनें।" : "Experience live mobile widgets. Select a size to preview."}
           </p>
         </div>
       </div>
@@ -60,9 +64,9 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
       {/* Selector: Selecting Sizes to Preview */}
       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 mb-5 text-[11px] font-bold">
         {[
-          { id: 'small', label: 'छोटा (२x२)' },
-          { id: 'medium', label: 'मध्यम (४x२)' },
-          { id: 'lockscreen', label: 'लॉक स्क्रीन' }
+          { id: 'small', label: isHindi ? 'छोटा (२x२)' : 'Small (2x2)' },
+          { id: 'medium', label: isHindi ? 'मध्यम (४x२)' : 'Medium (4x2)' },
+          { id: 'lockscreen', label: isHindi ? 'लॉक स्क्रीन' : 'Lock Screen' }
         ].map((size, index, arr) => (
           <React.Fragment key={size.id}>
             <span
@@ -115,13 +119,17 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
             {selectedSize === 'small' && (
               <div className="w-32 h-32 rounded-[22px] bg-gradient-to-b from-[#FFFDF8] to-[#FFF6EB] border border-orange-100 p-3 flex flex-col justify-between shadow-2xl relative overflow-hidden text-slate-800">
                 <div className="flex justify-between items-start">
-                  <span className="text-[9px] font-extrabold text-orange-600 block uppercase font-serif tracking-normal leading-3">ॐ पंचक</span>
+                  <span className="text-[9px] font-extrabold text-orange-600 block uppercase font-serif tracking-normal leading-3">
+                    {isHindi ? "ॐ पंचक" : "ॐ Panchang"}
+                  </span>
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
                 </div>
                 <div>
-                  <h3 className="text-[9px] font-bold text-slate-400 block leading-3">सक्रिय समय:</h3>
-                  <span className="text-xs font-black text-slate-800 block mt-0.5 truncate leading-tight">{currMuhurat.name.split(' ')[0]}</span>
-                  <span className="text-[9.5px] text-green-700 font-extrabold block leading-none mt-1">{currMuhurat.startTime} - {currMuhurat.endTime}</span>
+                  <h3 className="text-[9px] font-bold text-slate-400 block leading-3">
+                    {isHindi ? "सक्रिय समय:" : "Active:"}
+                  </h3>
+                  <span className="text-xs font-black text-slate-800 block mt-0.5 truncate leading-tight">{currMuhurat?.name?.split(' ')[0] || 'Abhijit'}</span>
+                  <span className="text-[9.5px] text-green-700 font-extrabold block leading-none mt-1">{currMuhurat?.startTime} - {currMuhurat?.endTime}</span>
                 </div>
                 <div className="border-t border-orange-100/70 pt-1.5 flex justify-between items-center text-[8.5px] text-slate-500 font-medium">
                   <span>{activeTithi}</span>
@@ -137,7 +145,9 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
 
                 <div className="flex justify-between items-center border-b border-orange-100/70 pb-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-orange-900 font-serif">ॐ आज का धर्मिक समय</span>
+                    <span className="text-[10px] font-bold text-orange-900 font-serif">
+                      {isHindi ? "ॐ आज का धर्मिक समय" : "ॐ Today's Vedic Time"}
+                    </span>
                   </div>
                   <span className="text-[8px] font-black text-orange-600 uppercase bg-orange-100/60 px-1.5 py-0.5 rounded">
                     📍 {city}
@@ -146,33 +156,47 @@ export function WidgetSimulator({ panchang, muhurats, city }: WidgetSimulatorPro
 
                 <div className="grid grid-cols-2 gap-3 my-1">
                   <div>
-                    <span className="text-[9px] font-bold text-slate-400 block">आज की तिथि</span>
-                    <span className="text-xs font-bold text-slate-850 block mt-0.5 leading-tight truncate">{panchang.hinduDate.tithi.hindiName.split(' ')[0]}</span>
-                    <span className="text-[9px] text-slate-500 block">देवता: {panchang.hinduDate.tithi.lord}</span>
+                    <span className="text-[9px] font-bold text-slate-400 block">
+                      {isHindi ? "आज की तिथि" : "Today's Tithi"}
+                    </span>
+                    <span className="text-xs font-bold text-slate-850 block mt-0.5 leading-tight truncate">
+                      {isHindi ? (panchang.hinduDate.tithi.hindiName?.split(' ')[0] || activeTithi) : activeTithi}
+                    </span>
+                    <span className="text-[9px] text-slate-500 block">
+                      {isHindi ? `देवता: ${panchang.hinduDate.tithi.lord}` : `Lord: ${panchang.hinduDate.tithi.lord}`}
+                    </span>
                   </div>
                   <div className="border-l border-orange-100 pl-2">
-                    <span className="text-[9px] font-bold text-slate-400 block">सक्रिय चौघड़िया</span>
-                    <span className="text-xs font-bold text-slate-850 block mt-0.5 leading-tight truncate">{currMuhurat.name.replace(' Choghadiya','')}</span>
-                    <span className="text-[9px] font-extrabold text-[#27AE60] block">{currMuhurat.startTime} - {currMuhurat.endTime}</span>
+                    <span className="text-[9px] font-bold text-slate-400 block">
+                      {isHindi ? "सक्रिय चौघड़िया" : "Active Choghadiya"}
+                    </span>
+                    <span className="text-xs font-bold text-slate-850 block mt-0.5 leading-tight truncate">{currMuhurat?.name?.replace(' Choghadiya','') || 'Amrit'}</span>
+                    <span className="text-[9px] font-extrabold text-[#27AE60] block">{currMuhurat?.startTime} - {currMuhurat?.endTime}</span>
                   </div>
                 </div>
 
                 <div className="flex justify-between items-center text-[8.5px] text-slate-500 border-t border-orange-100/40 pt-1">
-                  <span>नक्षत्र: {activeNakshatra.split(' ')[0]}</span>
-                  <span className="text-orange-700 font-bold">अगला: अभिजीत</span>
+                  <span>{isHindi ? `नक्षत्र: ${activeNakshatra.split(' ')[0]}` : `Nakshatra: ${activeNakshatra.split(' ')[0]}`}</span>
+                  <span className="text-orange-700 font-bold">{isHindi ? "अगला: अभिजीत" : "Next: Abhijit"}</span>
                 </div>
               </div>
             )}
 
             {selectedSize === 'lockscreen' && (
               <div className="w-full max-w-[240px] p-3 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md shadow-lg text-white text-center">
-                <span className="text-[10px] font-black tracking-wide block uppercase text-amber-300">ॐ संवत्सर मुहूर्त</span>
-                <span className="text-sm font-black block mt-1">{currMuhurat?.name?.replace(' Choghadiya','') || 'अभिजीत'}</span>
-                <span className="text-[10px] font-bold block opacity-95 mt-0.5">{currMuhurat?.startTime || '11:45 AM'} से {currMuhurat?.endTime || '12:35 PM'} तक</span>
+                <span className="text-[10px] font-black tracking-wide block uppercase text-amber-300">
+                  {isHindi ? "ॐ संवत्सर मुहूर्त" : "ॐ Samvatsar Muhurat"}
+                </span>
+                <span className="text-sm font-black block mt-1">{currMuhurat?.name?.replace(' Choghadiya','') || (isHindi ? 'अभिजीत' : 'Abhijit')}</span>
+                <span className="text-[10px] font-bold block opacity-95 mt-0.5">
+                  {isHindi 
+                    ? `${currMuhurat?.startTime || '11:45 AM'} से ${currMuhurat?.endTime || '12:35 PM'} तक` 
+                    : `${currMuhurat?.startTime || '11:45 AM'} to ${currMuhurat?.endTime || '12:35 PM'}`}
+                </span>
                 <div className="border-t border-white/10 mt-2 pt-1.5 flex justify-around text-[9px] opacity-80 font-mono">
-                  <span>तिथि: {activeTithi}</span>
+                  <span>{isHindi ? `तिथि: ${activeTithi}` : `Tithi: ${activeTithi}`}</span>
                   <span>•</span>
-                  <span>नक्षत्र: {activeNakshatra.split(' ')[0]}</span>
+                  <span>{isHindi ? `नक्षत्र: ${activeNakshatra.split(' ')[0]}` : `Nakshatra: ${activeNakshatra.split(' ')[0]}`}</span>
                 </div>
               </div>
             )}
