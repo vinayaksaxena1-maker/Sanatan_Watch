@@ -2,6 +2,8 @@ package com.samayghadi.app;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.KeyguardManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -12,8 +14,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.content.SharedPreferences;
-import android.app.NotificationManager;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.view.Gravity;
@@ -28,6 +28,7 @@ public class AlarmRingerActivity extends Activity {
     private Vibrator vibrator;
     private String alarmId;
     private String alarmLabel;
+    private String subtitleText;
     private boolean vibrateOption = true;
     private int snoozeMinutes = 2;
     private String ringtoneUriString = "";
@@ -38,10 +39,14 @@ public class AlarmRingerActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Bypass Lock Screen and wake up screen
+        // 1. Bypass Lock Screen and wake up screen
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true);
             setTurnScreenOn(true);
+            KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+            if (km != null) {
+                km.requestDismissKeyguard(this, null);
+            }
         } else {
             getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
@@ -51,20 +56,25 @@ public class AlarmRingerActivity extends Activity {
         }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        alarmId = getIntent().getStringExtra("alarmId");
-        alarmLabel = getIntent().getStringExtra("alarmLabel");
+        // 2. Extract Intent Extras
+        alarmId = getIntent().getStringExtra("alarm_id");
+        if (alarmId == null) alarmId = getIntent().getStringExtra("alarmId");
+
+        alarmLabel = getIntent().getStringExtra("title");
+        if (alarmLabel == null) alarmLabel = getIntent().getStringExtra("alarmLabel");
+        if (alarmLabel == null) alarmLabel = "साधना एवं शुभ मुहूर्त";
+
+        subtitleText = getIntent().getStringExtra("subtitle");
+        if (subtitleText == null) subtitleText = "शुभ समय प्रारंभ हो चुका है।";
+
         vibrateOption = getIntent().getBooleanExtra("vibrate", true);
-        snoozeMinutes = getIntent().getIntExtra("snoozeMinutes", 2);
-        ringtoneUriString = getIntent().getStringExtra("ringtoneUri");
-        if (ringtoneUriString == null) {
-            ringtoneUriString = "";
-        }
+        snoozeMinutes = getIntent().getIntExtra("snooze_min", getIntent().getIntExtra("snoozeMinutes", 2));
 
-        if (alarmLabel == null) {
-            alarmLabel = "साधना एवं शुभ मुहूर्त";
-        }
+        ringtoneUriString = getIntent().getStringExtra("tone");
+        if (ringtoneUriString == null) ringtoneUriString = getIntent().getStringExtra("ringtoneUri");
+        if (ringtoneUriString == null) ringtoneUriString = "";
 
-        // Setup UI Layout programmatically
+        // 3. Setup UI Layout programmatically (Dark Vedic theme)
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setGravity(Gravity.CENTER);
@@ -90,7 +100,7 @@ public class AlarmRingerActivity extends Activity {
 
         // Subtitle message
         TextView subtitleView = new TextView(this);
-        subtitleView.setText("शुभ समय प्रारंभ हो चुका है।");
+        subtitleView.setText(subtitleText);
         subtitleView.setTextSize(16);
         subtitleView.setTextColor(Color.parseColor("#B0BEC5")); // Greyish white
         subtitleView.setGravity(Gravity.CENTER);
@@ -105,19 +115,19 @@ public class AlarmRingerActivity extends Activity {
         dismissButton.setTextSize(16);
         dismissButton.setTypeface(null, Typeface.BOLD);
         dismissButton.setPadding(40, 30, 40, 30);
-        
+
         LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
         btnParams.setMargins(0, 0, 0, 30);
         dismissButton.setLayoutParams(btnParams);
-        
+
         dismissButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 cancelStatusBarNotification();
-                removeAlarmFromRegistry();
+                SanatanAlarmRegistry.removeAlarm(AlarmRingerActivity.this, alarmId);
                 stopAlarmMedia();
                 launchMainActivity();
                 finish();
@@ -145,7 +155,7 @@ public class AlarmRingerActivity extends Activity {
 
         setContentView(layout);
 
-        // Start ringing and vibrating
+        // 4. Start ringing and vibrating
         startAlarmMedia();
     }
 
@@ -166,8 +176,7 @@ public class AlarmRingerActivity extends Activity {
         // Media Player setup
         try {
             mediaPlayer = new MediaPlayer();
-            
-            // Set audio attributes
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_ALARM)
@@ -176,7 +185,7 @@ public class AlarmRingerActivity extends Activity {
             }
 
             boolean loaded = false;
-            
+
             // 1. Try loading custom picked URI if provided
             if (!ringtoneUriString.isEmpty() && !ringtoneUriString.equals("SYSTEM_DEFAULT")) {
                 try {
@@ -184,10 +193,10 @@ public class AlarmRingerActivity extends Activity {
                     mediaPlayer.prepare();
                     loaded = true;
                 } catch (Exception e) {
-                    e.printStackTrace(); // fallback
+                    e.printStackTrace();
                 }
             }
-            
+
             // 2. Try loading system default alarm if requested or custom failed
             if (!loaded && ringtoneUriString.equals("SYSTEM_DEFAULT")) {
                 try {
@@ -202,8 +211,8 @@ public class AlarmRingerActivity extends Activity {
                     e.printStackTrace();
                 }
             }
-            
-            // 3. Try loading app bundled sound file
+
+            // 3. Try loading app bundled sound file (Flute)
             if (!loaded) {
                 try {
                     int resId = getResources().getIdentifier("alarm_sound", "raw", getPackageName());
@@ -216,7 +225,7 @@ public class AlarmRingerActivity extends Activity {
                     e.printStackTrace();
                 }
             }
-            
+
             // 4. Ultimate fallback to default system notification sound
             if (!loaded) {
                 mediaPlayer = new MediaPlayer();
@@ -266,10 +275,15 @@ public class AlarmRingerActivity extends Activity {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlarmReceiver.class);
         intent.putExtra("alarmId", alarmId);
+        intent.putExtra("alarm_id", alarmId);
         intent.putExtra("alarmLabel", alarmLabel);
+        intent.putExtra("title", alarmLabel);
+        intent.putExtra("subtitle", subtitleText);
         intent.putExtra("vibrate", vibrateOption);
         intent.putExtra("snoozeMinutes", snoozeMinutes);
+        intent.putExtra("snooze_min", snoozeMinutes);
         intent.putExtra("ringtoneUri", ringtoneUriString);
+        intent.putExtra("tone", ringtoneUriString);
 
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -283,7 +297,7 @@ public class AlarmRingerActivity extends Activity {
                 flags
         );
 
-        long triggerTime = System.currentTimeMillis() + (snoozeMinutes * 60 * 1000); // dynamic snooze duration
+        long triggerTime = System.currentTimeMillis() + (snoozeMinutes * 60 * 1000L);
 
         if (alarmManager != null) {
             try {
@@ -306,32 +320,7 @@ public class AlarmRingerActivity extends Activity {
             }
         }
 
-        updateSnoozeInRegistry(triggerTime);
-    }
-
-    private void removeAlarmFromRegistry() {
-        if (alarmId == null) return;
-        try {
-            SharedPreferences alarmPrefs = getSharedPreferences("SanatanAlarmRegistry", Context.MODE_PRIVATE);
-            alarmPrefs.edit().remove(alarmId).apply();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void updateSnoozeInRegistry(long triggerTime) {
-        if (alarmId == null) return;
-        try {
-            SharedPreferences alarmPrefs = getSharedPreferences("SanatanAlarmRegistry", Context.MODE_PRIVATE);
-            String serialized = (alarmLabel != null ? alarmLabel : "") + ":::" +
-                                triggerTime + ":::" +
-                                vibrateOption + ":::" +
-                                snoozeMinutes + ":::" +
-                                (ringtoneUriString != null ? ringtoneUriString : "");
-            alarmPrefs.edit().putString(alarmId, serialized).apply();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        SanatanAlarmRegistry.updateSnooze(this, alarmId, triggerTime);
     }
 
     private void cancelStatusBarNotification() {
@@ -358,41 +347,11 @@ public class AlarmRingerActivity extends Activity {
 
         cancelStatusBarNotification();
         stopAlarmMedia();
-
-        alarmId = intent.getStringExtra("alarmId");
-        alarmLabel = intent.getStringExtra("alarmLabel");
-        vibrateOption = intent.getBooleanExtra("vibrate", true);
-        snoozeMinutes = intent.getIntExtra("snoozeMinutes", 2);
-        ringtoneUriString = intent.getStringExtra("ringtoneUri");
-        if (ringtoneUriString == null) {
-            ringtoneUriString = "";
-        }
-        if (alarmLabel == null) {
-            alarmLabel = "साधना एवं शुभ मुहूर्त";
-        }
-
-        if (titleView != null) {
-            titleView.setText(alarmLabel);
-        }
-        if (snoozeButton != null) {
-            snoozeButton.setText("सूनोज़ (" + snoozeMinutes + " मिनट बाद)");
-        }
-
-        startAlarmMedia();
     }
 
     @Override
     protected void onDestroy() {
+        stopAlarmMedia();
         super.onDestroy();
-        cancelStatusBarNotification();
-        stopAlarmMedia();
-    }
-
-    @Override
-    public void onBackPressed() {
-        cancelStatusBarNotification();
-        stopAlarmMedia();
-        snoozeAlarm();
-        super.onBackPressed();
     }
 }

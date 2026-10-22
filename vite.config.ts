@@ -4,24 +4,6 @@ import path from 'path';
 import {defineConfig} from 'vite';
 import fs from 'fs';
 
-// Helper to list all files recursively
-function findVideoFiles(dir, filesList = []) {
-  const files = fs.readdirSync(dir);
-  for (const file of files) {
-    const name = path.join(dir, file);
-    if (name.includes('node_modules') || name.includes('.git')) continue;
-    if (fs.statSync(name).isDirectory()) {
-      findVideoFiles(name, filesList);
-    } else {
-      filesList.push(name);
-    }
-  }
-  return filesList;
-}
-
-const foundVideos = findVideoFiles('.');
-console.log('--- ALL WORKSPACE FILES ---', foundVideos);
-
 export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
@@ -70,7 +52,9 @@ export default defineConfig(() => {
       // Do not modifyâ€”file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
-      watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      watch: process.env.DISABLE_HMR === 'true' ? null : {
+        ignored: ['**/android/**', '**/dist/**', '**/.git/**', '**/*.apk', '**/*.dm'],
+      },
       // Phase 0: Serve .se1 ephemeris files with correct MIME type
       headers: {
         'Cross-Origin-Opener-Policy': 'same-origin',

@@ -1,38 +1,41 @@
 package com.samayghadi.app;
 
+import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.WallpaperManager;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.util.Base64;
 import android.view.View;
 import android.view.Window;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
+import androidx.core.app.NotificationCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.app.WallpaperManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.util.Base64;
 import java.io.ByteArrayOutputStream;
-import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
-import android.content.SharedPreferences;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import androidx.core.app.NotificationCompat;
 
 public class MainActivity extends BridgeActivity {
     private static final int RINGTONE_PICKER_REQUEST_CODE = 999;
+    private static final String PERMANENT_CHANNEL_ID = "sanatan_panchang_permanent";
+    private static final int PERMANENT_NOTIFICATION_ID = 45678;
     private String pendingAlarmIdForRingtone = "";
 
     @Override
@@ -86,70 +89,16 @@ public class MainActivity extends BridgeActivity {
                     startActivityForResult(intent, RINGTONE_PICKER_REQUEST_CODE);
                 }
 
+                // 7-parameter version (From Architecture Implementation Plan)
+                @JavascriptInterface
+                public void scheduleAlarm(String alarmId, String title, String subtitle, long triggerTimeMs, String tone, boolean vibrate, int snoozeMinutes) {
+                    scheduleAlarmInternal(alarmId, title, subtitle, triggerTimeMs, tone, vibrate, snoozeMinutes);
+                }
+
+                // 6-parameter version (Backwards compatible with existing TypeScript/React calls)
                 @JavascriptInterface
                 public void scheduleAlarm(String id, String label, long triggerTimeMs, boolean vibrate, int snoozeMinutes, String ringtoneUri) {
-                    AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                    Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
-                    intent.putExtra("alarmId", id);
-                    intent.putExtra("alarmLabel", label);
-                    intent.putExtra("vibrate", vibrate);
-                    intent.putExtra("snoozeMinutes", snoozeMinutes);
-                    intent.putExtra("ringtoneUri", ringtoneUri);
-
-                    int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        flags |= PendingIntent.FLAG_IMMUTABLE;
-                    }
-
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                            MainActivity.this,
-                            id != null ? id.hashCode() : 0,
-                            intent,
-                            flags
-                    );
-
-                    if (alarmManager != null) {
-                        try {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                if (alarmManager.canScheduleExactAlarms()) {
-                                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
-                                } else {
-                                    // Schedule fallback inexact alarm so user never misses reminder
-                                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
-                                    try {
-                                        Intent permissionIntent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                                        startActivity(permissionIntent);
-                                    } catch (Exception ignored) {}
-                                }
-                            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
-                            } else {
-                                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
-                            }
-                        } catch (SecurityException se) {
-                            se.printStackTrace();
-                            try {
-                                alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    // Persist alarm in SharedPreferences for boot restoration
-                    try {
-                        SharedPreferences alarmPrefs = getSharedPreferences("SanatanAlarmRegistry", Context.MODE_PRIVATE);
-                        String serialized = (label != null ? label : "") + ":::" +
-                                            triggerTimeMs + ":::" +
-                                            vibrate + ":::" +
-                                            snoozeMinutes + ":::" +
-                                            (ringtoneUri != null ? ringtoneUri : "");
-                        alarmPrefs.edit().putString(id, serialized).apply();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    scheduleAlarmInternal(id, label, "शुभ समय प्रारंभ हो चुका है।", triggerTimeMs, ringtoneUri, vibrate, snoozeMinutes);
                 }
 
                 @JavascriptInterface
@@ -173,13 +122,8 @@ public class MainActivity extends BridgeActivity {
                         alarmManager.cancel(pendingIntent);
                     }
 
-                    // Remove alarm from SharedPreferences
-                    try {
-                        SharedPreferences alarmPrefs = getSharedPreferences("SanatanAlarmRegistry", Context.MODE_PRIVATE);
-                        alarmPrefs.edit().remove(id).apply();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    // Remove alarm from persistent registry
+                    SanatanAlarmRegistry.removeAlarm(MainActivity.this, id);
                 }
 
                 @JavascriptInterface
@@ -260,10 +204,19 @@ public class MainActivity extends BridgeActivity {
                         sendBroadcast(intentSmall);
 
                         // 3. Update Permanent Notification
-                        updatePermanentNotification();
+                        MainActivity.this.updatePermanentNotification();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                }
+
+                // Live Sticky Panchang Notification with color coding and actions
+                @JavascriptInterface
+                public void updatePermanentNotification(String city, String tithi, String nakshatra,
+                                                        String choghadiyaName, String choghadiyaType,
+                                                        int remainingMin, String abhijitTime,
+                                                        String rahuTime, String dishaShool) {
+                    MainActivity.this.updatePermanentNotification(city, tithi, nakshatra, choghadiyaName, choghadiyaType, remainingMin, abhijitTime, rahuTime, dishaShool);
                 }
 
                 @JavascriptInterface
@@ -275,11 +228,11 @@ public class MainActivity extends BridgeActivity {
                         editor.apply();
 
                         if (enabled) {
-                            updatePermanentNotification();
+                            MainActivity.this.updatePermanentNotification();
                         } else {
                             NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                             if (notificationManager != null) {
-                                notificationManager.cancel(45678);
+                                notificationManager.cancel(PERMANENT_NOTIFICATION_ID);
                             }
                         }
                     } catch (Exception e) {
@@ -293,9 +246,235 @@ public class MainActivity extends BridgeActivity {
                     return sharedPref.getBoolean("permanentNotificationEnabled", false);
                 }
             }, "AndroidAlarm");
-            
+
             // Refresh permanent notification on app start
             updatePermanentNotification();
+
+            // Handle potential initial notification intent
+            handleNotificationIntent(getIntent());
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleNotificationIntent(intent);
+    }
+
+    private void handleNotificationIntent(Intent intent) {
+        if (intent == null) return;
+        String targetTab = intent.getStringExtra("target_tab");
+        String action = intent.getStringExtra("action");
+
+        WebView webView = getBridge() != null ? getBridge().getWebView() : null;
+        if (webView != null) {
+            if (targetTab != null) {
+                webView.post(() -> webView.evaluateJavascript(
+                    "if (window.onNotificationAction) { window.onNotificationAction('tab', '" + targetTab + "'); }",
+                    null
+                ));
+            }
+            if (action != null) {
+                webView.post(() -> webView.evaluateJavascript(
+                    "if (window.onNotificationAction) { window.onNotificationAction('action', '" + action + "'); }",
+                    null
+                ));
+            }
+        }
+    }
+
+    private void scheduleAlarmInternal(String alarmId, String title, String subtitle, long triggerTimeMs, String tone, boolean vibrate, int snoozeMinutes) {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager == null) return;
+
+        // Android 14+ (API 34) Exact Alarm Check
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                try {
+                    Intent permIntent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                    startActivity(permIntent);
+                } catch (Exception ignored) {}
+            }
+        }
+
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        intent.putExtra("alarmId", alarmId);
+        intent.putExtra("alarm_id", alarmId);
+        intent.putExtra("alarmLabel", title);
+        intent.putExtra("title", title);
+        intent.putExtra("subtitle", subtitle);
+        intent.putExtra("tone", tone);
+        intent.putExtra("ringtoneUri", tone);
+        intent.putExtra("vibrate", vibrate);
+        intent.putExtra("snoozeMinutes", snoozeMinutes);
+        intent.putExtra("snooze_min", snoozeMinutes);
+
+        int requestCode = alarmId != null ? alarmId.hashCode() : 0;
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            flags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, requestCode, intent, flags);
+
+        // Save in persistent registry for Boot Recovery
+        SanatanAlarmRegistry.saveAlarm(this, alarmId, title, subtitle, triggerTimeMs, tone, vibrate, snoozeMinutes);
+
+        // Deep Sleep (Doze Mode) Safe Alarm
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
+                } else {
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
+                }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
+            }
+        } catch (SecurityException se) {
+            se.printStackTrace();
+            try {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, triggerTimeMs, pendingIntent);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updatePermanentNotification(String city, String tithi, String nakshatra,
+                                            String choghadiyaName, String choghadiyaType,
+                                            int remainingMin, String abhijitTime,
+                                            String rahuTime, String dishaShool) {
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (manager == null) return;
+
+        SharedPreferences sharedPref = getSharedPreferences("SanatanWidgetPrefs", Context.MODE_PRIVATE);
+        boolean enabled = sharedPref.getBoolean("permanentNotificationEnabled", false);
+        if (!enabled) {
+            manager.cancel(PERMANENT_NOTIFICATION_ID);
+            return;
+        }
+
+        // Cache parameters to SharedPreferences for offline/cold-start recall
+        SharedPreferences.Editor editor = sharedPref.edit();
+        if (city != null) editor.putString("city", city);
+        if (tithi != null) editor.putString("tithi", tithi);
+        if (nakshatra != null) editor.putString("nakshatra", nakshatra);
+        if (choghadiyaName != null) editor.putString("choghadiya", choghadiyaName);
+        if (choghadiyaType != null) editor.putString("choghadiyaType", choghadiyaType);
+        editor.putInt("remainingMin", remainingMin);
+        if (abhijitTime != null) editor.putString("abhijit", abhijitTime);
+        if (rahuTime != null) editor.putString("rahuKaal", rahuTime);
+        if (dishaShool != null) editor.putString("dishaShool", dishaShool);
+        editor.apply();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                PERMANENT_CHANNEL_ID,
+                "ॐ सनातन पंचांग अपडेट्स",
+                NotificationManager.IMPORTANCE_LOW // एकदम मूक (Silent) ताकि घंटी न बजे
+            );
+            channel.setDescription("दैनिक लाइव पंचांग, चौघड़िया व मुहूर्त की स्थायी सूचना");
+            channel.setShowBadge(false);
+            channel.setSound(null, null);
+            channel.enableVibration(false);
+            manager.createNotificationChannel(channel);
+        }
+
+        // Color-coded indicator
+        String typeSafe = choghadiyaType != null ? choghadiyaType : "madhyam";
+        String indicator = typeSafe.equalsIgnoreCase("shubh") ? "🟢" :
+                          (typeSafe.equalsIgnoreCase("madhyam") ? "🟡" : "🔴");
+
+        String cityName = (city != null && !city.isEmpty()) ? city : "सटीक स्थान";
+        String tithiName = (tithi != null && !tithi.isEmpty()) ? tithi : "—";
+        String nakshatraName = (nakshatra != null && !nakshatra.isEmpty()) ? nakshatra : "—";
+        String chogName = (choghadiyaName != null && !choghadiyaName.isEmpty()) ? choghadiyaName : "—";
+        String abhijitStr = (abhijitTime != null && !abhijitTime.isEmpty()) ? abhijitTime : "—";
+        String rahuStr = (rahuTime != null && !rahuTime.isEmpty()) ? rahuTime : "—";
+        String dishaStr = (dishaShool != null && !dishaShool.isEmpty()) ? dishaShool : "—";
+
+        // Collapsed Title & Subtitle
+        String contentTitle = indicator + " " + chogName + " चौघड़िया (" + remainingMin + " मि. शेष) • 📍 " + cityName;
+        String contentText = tithiName + " • अभिजित: " + abhijitStr + " • राहुकाल: " + rahuStr;
+
+        // Expanded BigText View
+        String bigText = "📅 तिथि: " + tithiName + " | नक्षत्र: " + nakshatraName + "\n" +
+                         "⏳ चालू चौघड़िया: " + chogName + " (" + remainingMin + " मिनट शेष)\n" +
+                         "✨ अभिजित मुहूर्त: " + abhijitStr + " (शुभ कार्य)\n" +
+                         "⚠️ राहुकाल: " + rahuStr + " (वर्जित समय)\n" +
+                         "🚫 दिशा शूल: " + dishaStr;
+
+        int pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            pendingFlags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        // Action 1: Open Clock / Home Tab
+        Intent openAppIntent = new Intent(this, MainActivity.class);
+        openAppIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        openAppIntent.putExtra("target_tab", "home");
+        PendingIntent pOpenApp = PendingIntent.getActivity(this, 101, openAppIntent, pendingFlags);
+
+        // Action 2: Open Panchang Tab
+        Intent panchangIntent = new Intent(this, MainActivity.class);
+        panchangIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        panchangIntent.putExtra("target_tab", "panchang");
+        PendingIntent pPanchang = PendingIntent.getActivity(this, 102, panchangIntent, pendingFlags);
+
+        // Action 3: Open Poster Share Action
+        Intent shareIntent = new Intent(this, MainActivity.class);
+        shareIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        shareIntent.putExtra("action", "share_poster");
+        PendingIntent pShare = PendingIntent.getActivity(this, 103, shareIntent, pendingFlags);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, PERMANENT_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification_om)
+            .setContentTitle(contentTitle)
+            .setContentText(contentText)
+            .setStyle(new NotificationCompat.BigTextStyle().bigText(bigText))
+            .setContentIntent(pOpenApp)
+            .setOngoing(true) // User cannot swipe away (Sticky)
+            .setOnlyAlertOnce(true) // Updating data doesn't buzz repeatedly
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .addAction(R.drawable.ic_watch, "🕒 घड़ी", pOpenApp)
+            .addAction(R.drawable.ic_panchang, "📜 पंचांग", pPanchang)
+            .addAction(R.drawable.ic_share, "📲 शेयर", pShare);
+
+        manager.notify(PERMANENT_NOTIFICATION_ID, builder.build());
+    }
+
+    private void updatePermanentNotification() {
+        try {
+            SharedPreferences sharedPref = getSharedPreferences("SanatanWidgetPrefs", Context.MODE_PRIVATE);
+            boolean enabled = sharedPref.getBoolean("permanentNotificationEnabled", false);
+            if (!enabled) {
+                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                if (notificationManager != null) {
+                    notificationManager.cancel(PERMANENT_NOTIFICATION_ID);
+                }
+                return;
+            }
+
+            String city = sharedPref.getString("city", "सटीक स्थान");
+            String tithi = sharedPref.getString("tithi", "—");
+            String nakshatra = sharedPref.getString("nakshatra", "—");
+            String choghadiya = sharedPref.getString("choghadiya", "—");
+            String choghadiyaType = sharedPref.getString("choghadiyaType", "madhyam");
+            int remainingMin = sharedPref.getInt("remainingMin", 0);
+            String abhijit = sharedPref.getString("abhijit", "—");
+            String rahuKaal = sharedPref.getString("rahuKaal", "—");
+            String dishaShool = sharedPref.getString("dishaShool", "—");
+
+            updatePermanentNotification(city, tithi, nakshatra, choghadiya, choghadiyaType, remainingMin, abhijit, rahuKaal, dishaShool);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -312,7 +491,7 @@ public class MainActivity extends BridgeActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                
+
                 final String finalTitle = ringtoneTitle;
                 WebView webView = getBridge().getWebView();
                 if (webView != null) {
@@ -321,66 +500,6 @@ public class MainActivity extends BridgeActivity {
                     });
                 }
             }
-        }
-    }
-
-    private void updatePermanentNotification() {
-        try {
-            SharedPreferences sharedPref = getSharedPreferences("SanatanWidgetPrefs", Context.MODE_PRIVATE);
-            boolean enabled = sharedPref.getBoolean("permanentNotificationEnabled", false);
-            if (!enabled) return;
-
-            String tithi = sharedPref.getString("tithi", "लोअडिंग...");
-            String nakshatra = sharedPref.getString("nakshatra", "लोअडिंग...");
-            String choghadiya = sharedPref.getString("choghadiya", "—");
-            String choghadiyaTime = sharedPref.getString("choghadiyaTime", "—");
-            String rahuKaal = sharedPref.getString("rahuKaal", "—");
-            String brahma = sharedPref.getString("brahma", "—");
-            String abhijit = sharedPref.getString("abhijit", "—");
-            String city = sharedPref.getString("city", "सटीक स्थान");
-
-            String channelId = "sanatan_panchang_permanent";
-            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notificationManager != null) {
-                CharSequence name = "ॐ सनातन पंचांग अपडेट्स";
-                String description = "स्थायी दैनिक पंचांग और शुभ-अशुभ समय नोटिफिकेशन";
-                int importance = NotificationManager.IMPORTANCE_LOW;
-                NotificationChannel channel = new NotificationChannel(channelId, name, importance);
-                channel.setDescription(description);
-                channel.setSound(null, null);
-                channel.enableVibration(false);
-                notificationManager.createNotificationChannel(channel);
-            }
-
-            Intent launchIntent = new Intent(this, MainActivity.class);
-            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                flags |= PendingIntent.FLAG_IMMUTABLE;
-            }
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 999, launchIntent, flags);
-
-            String title = "⛩️ आज का धार्मिक समय: " + city;
-            String text = "तिथि: " + tithi + " | नक्षत्र: " + nakshatra;
-            String bigText = "सक्रिय चौघड़िया: " + choghadiya + " (" + choghadiyaTime + ")\n" +
-                             "⚠️ राहुकाल: " + rahuKaal + "\n" +
-                             "ब्रह्म मुहूर्त: " + brahma + " | अभिजीत: " + abhijit;
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
-                    .setSmallIcon(android.R.drawable.ic_menu_compass)
-                    .setContentTitle(title)
-                    .setContentText(text)
-                    .setStyle(new NotificationCompat.BigTextStyle().bigText(bigText))
-                    .setPriority(NotificationCompat.PRIORITY_LOW)
-                    .setOngoing(true)
-                    .setContentIntent(pendingIntent)
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-
-            if (notificationManager != null) {
-                notificationManager.notify(45678, builder.build());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

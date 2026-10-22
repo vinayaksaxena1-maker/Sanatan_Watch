@@ -82,6 +82,7 @@ import { StotraSangrah } from './components/StotraSangrah';
 import dialBg from './components/VintageDialBackground.png';
 import { getTranslation, formatHindiTime, translateCityNameToHindi, formatLocalizedTime, translateDishaShool, translatePanchak } from './utils/translations';
 import { getFestivalsForYear } from './utils/festivalEngine';
+import { getDishaShoolForDay } from './utils/alarmUtils';
 
 const parseTimeToMinutes = (timeStr: string): number => {
   const [time, ampm] = timeStr.split(' ');
@@ -237,6 +238,28 @@ export default function App() {
         console.error("Failed to load permanent notification state", e);
       }
     }
+  }, []);
+
+  // Handle Quick Action button clicks from Android Permanent Notification
+  useEffect(() => {
+    window.onNotificationAction = (type: 'tab' | 'action', value: string) => {
+      if (type === 'tab') {
+        if (value === 'home' || value === 'panchang' || value === 'muhurat' || value === 'festival' || value === 'nakshatra' || value === 'tools' || value === 'alerts') {
+          setActiveTab(value as any);
+        }
+      } else if (type === 'action') {
+        if (value === 'share_poster') {
+          setActiveTab('tools');
+          setTimeout(() => {
+            const el = document.getElementById('tools_poster_card');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }, 300);
+        }
+      }
+    };
+    return () => {
+      delete window.onNotificationAction;
+    };
   }, []);
 
   // Core Astro State
@@ -522,35 +545,72 @@ export default function App() {
     !panchangInfo.planets.every(p => p.sign === 'Aries')
   );
 
-  // Synchronize Widget Data on Android
+  // Synchronize Widget & Live Permanent Notification Data on Android
   useEffect(() => {
-    if (window.AndroidAlarm && typeof window.AndroidAlarm.updateWidgetData === 'function' && panchangInfo) {
-      try {
-        const tithi = panchangInfo.hinduDate.tithi.hindiName.split(' ')[0];
-        const nakshatra = panchangInfo.hinduDate.nakshatra.hindiName;
-        
-        // Find current active Choghadiya
-        const now = new Date();
-        const currentMin = now.getHours() * 60 + now.getMinutes();
-        const activeChog = panchangInfo.choghadiya?.find((ch: any) => 
-          isTimeInInterval(currentMin, ch.startTime, ch.endTime)
-        );
+    if (!panchangInfo) return;
 
-        const choghadiyaName = activeChog ? `${activeChog.hindiName || activeChog.name} (${activeChog.isDay ? 'दिन' : 'रात्रि'})` : '—';
-        const choghadiyaTime = activeChog ? `${activeChog.startTime} - ${activeChog.endTime}` : '—';
-        const rahuKaalStr = panchangInfo.rahuKaal ? `${panchangInfo.rahuKaal.start} - ${panchangInfo.rahuKaal.end}` : '—';
+    try {
+      const tithi = panchangInfo.hinduDate.tithi.hindiName.split(' ')[0];
+      const nakshatra = panchangInfo.hinduDate.nakshatra.hindiName;
+      
+      // Find current active Choghadiya
+      const now = new Date();
+      const currentMin = now.getHours() * 60 + now.getMinutes();
+      const activeChog = panchangInfo.choghadiya?.find((ch: any) => 
+        isTimeInInterval(currentMin, ch.startTime, ch.endTime)
+      );
 
-        const abhijit = activeMuhurats.find((m: any) => m.id === 'abhijit');
-        const abhijitStr = abhijit ? `${abhijit.startTime} - ${abhijit.endTime}` : '—';
-        const brahma = activeMuhurats.find((m: any) => m.id === 'brahma');
-        const brahmaStr = brahma ? `${brahma.startTime} - ${brahma.endTime}` : '—';
+      const choghadiyaName = activeChog ? `${activeChog.hindiName || activeChog.name} (${activeChog.isDay ? 'दिन' : 'रात्रि'})` : '—';
+      const choghadiyaTime = activeChog ? `${activeChog.startTime} - ${activeChog.endTime}` : '—';
+      const rahuKaalStr = panchangInfo.rahuKaal ? `${panchangInfo.rahuKaal.start} - ${panchangInfo.rahuKaal.end}` : '—';
 
+      const abhijit = activeMuhurats.find((m: any) => m.id === 'abhijit');
+      const abhijitStr = abhijit ? `${abhijit.startTime} - ${abhijit.endTime}` : '—';
+      const brahma = activeMuhurats.find((m: any) => m.id === 'brahma');
+      const brahmaStr = brahma ? `${brahma.startTime} - ${brahma.endTime}` : '—';
+
+      // 1. Update Widget Data
+      if (window.AndroidAlarm && typeof window.AndroidAlarm.updateWidgetData === 'function') {
         window.AndroidAlarm.updateWidgetData(tithi, nakshatra, choghadiyaName, choghadiyaTime, rahuKaalStr, brahmaStr, abhijitStr, coords.city);
-      } catch (e) {
-        console.error("Failed to sync widget data", e);
       }
+
+      // 2. Update Live Sticky Panchang Notification (Color-coded live status + remaining minutes + action buttons)
+      if (window.AndroidAlarm && typeof window.AndroidAlarm.updatePermanentNotification === 'function') {
+        let choghadiyaType = 'madhyam';
+        let remainingMin = 0;
+        if (activeChog) {
+          const q = (activeChog.quality || '').toLowerCase();
+          const t = (activeChog.type || '').toLowerCase();
+          if (q === 'excellent' || q === 'good' || t === 'shubh' || t === 'amrit' || t === 'labh') {
+            choghadiyaType = 'shubh';
+          } else if (q === 'inauspicious' || q === 'bad' || t === 'kaal' || t === 'rog' || t === 'udveg') {
+            choghadiyaType = 'ashubh';
+          } else {
+            choghadiyaType = 'madhyam';
+          }
+
+          const endMin = parseTimeToMinutes(activeChog.endTime);
+          remainingMin = endMin >= currentMin ? (endMin - currentMin) : (endMin + 1440 - currentMin);
+        }
+
+        const dishaStr = getDishaShoolForDay(now.getDay());
+
+        window.AndroidAlarm.updatePermanentNotification(
+          coords.city || 'नई दिल्ली',
+          tithi,
+          nakshatra,
+          activeChog ? (activeChog.hindiName || activeChog.name) : '—',
+          choghadiyaType,
+          remainingMin,
+          abhijitStr,
+          rahuKaalStr,
+          dishaStr
+        );
+      }
+    } catch (e) {
+      console.error("Failed to sync widget/notification data", e);
     }
-  }, [panchangInfo, activeMuhurats, coords.city]);
+  }, [panchangInfo, activeMuhurats, coords.city, notificationEnabled, currentMinuteTime]);
 
   // Find rolling chronological Hora list and current active Hora
   const { rollingHoraList, rollingActiveHora } = useMemo(() => {

@@ -365,7 +365,19 @@ declare global {
       ) => void;
       setPermanentNotificationEnabled?: (enabled: boolean) => void;
       isPermanentNotificationEnabled?: () => boolean;
+      updatePermanentNotification?: (
+        city: string,
+        tithi: string,
+        nakshatra: string,
+        choghadiyaName: string,
+        choghadiyaType: string,
+        remainingMin: number,
+        abhijitTime: string,
+        rahuTime: string,
+        dishaShool: string
+      ) => void;
     };
+    onNotificationAction?: (type: 'tab' | 'action', value: string) => void;
     onRingtonePicked?: (alarmId: string, uri: string, title: string) => void;
   }
 }

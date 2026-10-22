@@ -189,3 +189,20 @@ export function toggleQuickAlarm(
     };
   }
 }
+
+
+/**
+ * Calculates traditional Disha Shool string based on day of week.
+ */
+export function getDishaShoolForDay(day: number): string {
+  switch (day) {
+    case 0: return 'पश्चिम (West)';
+    case 1: return 'पूर्व (East)';
+    case 2: return 'उत्तर (North)';
+    case 3: return 'उत्तर (North)';
+    case 4: return 'दक्षिण (South)';
+    case 5: return 'पश्चिम (West)';
+    case 6: return 'पूर्व (East)';
+    default: return '—';
+  }
+}
