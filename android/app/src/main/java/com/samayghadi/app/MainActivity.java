@@ -172,18 +172,23 @@ public class MainActivity extends BridgeActivity {
                 }
 
                 @JavascriptInterface
-                public void updateWidgetData(String tithi, String nakshatra, String choghadiya, String choghadiyaTime, String rahuKaal, String brahma, String abhijit, String city) {
+                public void updateWidgetData(String tithi, String nakshatra, String choghadiyaName, String choghadiyaType, String choghadiyaTime, int remainingMinutes, String rahuKaalStr, String abhijitStr, String dishaShoolStr, String cityName) {
                     try {
                         SharedPreferences sharedPref = getSharedPreferences("SanatanWidgetPrefs", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPref.edit();
-                        editor.putString("tithi", tithi);
-                        editor.putString("nakshatra", nakshatra);
-                        editor.putString("choghadiya", choghadiya);
-                        editor.putString("choghadiyaTime", choghadiyaTime);
-                        editor.putString("rahuKaal", rahuKaal);
-                        editor.putString("brahma", brahma);
-                        editor.putString("abhijit", abhijit);
-                        editor.putString("city", city);
+                        editor.putString("tithi", tithi != null ? tithi : "");
+                        editor.putString("nakshatra", nakshatra != null ? nakshatra : "");
+                        editor.putString("choghadiyaName", choghadiyaName != null ? choghadiyaName : "");
+                        editor.putString("choghadiya", choghadiyaName != null ? choghadiyaName : "");
+                        editor.putString("choghadiyaType", choghadiyaType != null ? choghadiyaType : "madhyam");
+                        editor.putString("choghadiyaTime", choghadiyaTime != null ? choghadiyaTime : "");
+                        editor.putInt("remainingMinutes", remainingMinutes);
+                        editor.putString("rahuKaal", rahuKaalStr != null ? rahuKaalStr : "");
+                        editor.putString("abhijit", abhijitStr != null ? abhijitStr : "");
+                        editor.putString("dishaShool", dishaShoolStr != null ? dishaShoolStr : "");
+                        editor.putString("cityName", cityName != null ? cityName : "");
+                        editor.putString("city", cityName != null ? cityName : "");
+                        editor.putLong("lastUpdated", System.currentTimeMillis());
                         editor.apply();
 
                         Context appCtx = getApplicationContext();
@@ -208,6 +213,12 @@ public class MainActivity extends BridgeActivity {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                }
+
+                // Legacy 8-parameter overload for backwards compatibility
+                @JavascriptInterface
+                public void updateWidgetData(String tithi, String nakshatra, String choghadiya, String choghadiyaTime, String rahuKaal, String brahma, String abhijit, String city) {
+                    updateWidgetData(tithi, nakshatra, choghadiya, "madhyam", choghadiyaTime, 0, rahuKaal, abhijit, "—", city);
                 }
 
                 // Live Sticky Panchang Notification with color coding and actions

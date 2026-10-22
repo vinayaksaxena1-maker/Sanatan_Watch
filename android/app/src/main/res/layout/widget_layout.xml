@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="6dp">
 
     <LinearLayout
         android:id="@+id/widget_container_root"
@@ -12,142 +12,175 @@
         android:layout_height="match_parent"
         android:background="@drawable/widget_background"
         android:orientation="vertical"
-        android:padding="12dp"
+        android:padding="10dp"
         android:elevation="4dp">
 
-        <!-- Header -->
-        <RelativeLayout
+        <!-- Header Row: Title & City/Date -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="6dp">
-            
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="4dp">
+
             <TextView
                 android:id="@+id/widget_title"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="ॐ सनातन घड़ी पंचांग"
                 android:textColor="#FF9933"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
-        </RelativeLayout>
 
-        <!-- Divider line -->
+            <TextView
+                android:id="@+id/widget_header_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📍 कानपुर"
+                android:textColor="#CCCCCC"
+                android:textSize="9.5sp" />
+        </LinearLayout>
+
+        <!-- Divider Line -->
         <ImageView
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="0.5dp"
             android:background="#33FF9933"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="6dp" />
 
-        <!-- Tithi and Nakshatra Row -->
+        <!-- 2-Column Content Body -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:orientation="horizontal"
-            android:weightSum="2"
-            android:layout_marginBottom="6dp">
+            android:weightSum="2">
 
+            <!-- Left Card: Live Choghadiya Status & Advice -->
             <LinearLayout
+                android:id="@+id/widget_left_card"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:orientation="vertical">
-                
+                android:background="@drawable/widget_card_bg"
+                android:orientation="vertical"
+                android:padding="7dp"
+                android:layout_marginEnd="3dp"
+                android:gravity="center_vertical">
+
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/widget_choghadiya_badge"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="आज की तिथि"
-                    android:textColor="#888888"
-                    android:textSize="9sp" />
-                
+                    android:text="🟢 अभी: लाभ चौघड़िया"
+                    android:textColor="#4ADE80"
+                    android:textSize="10.5sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/widget_choghadiya_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="12:05 AM - 01:40 AM"
+                    android:textColor="#E0E0E0"
+                    android:textSize="9.5sp"
+                    android:layout_marginTop="2dp"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:id="@+id/widget_remaining"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="⏳ 35 मिनट शेष"
+                    android:textColor="#FACC15"
+                    android:textSize="9.5sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="2dp"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:id="@+id/widget_advice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="💡 व्यापार व निवेश हेतु उत्तम"
+                    android:textColor="#FFE082"
+                    android:textSize="8.5sp"
+                    android:layout_marginTop="2dp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+            </LinearLayout>
+
+            <!-- Right Card: 4 Vedic Pillars -->
+            <LinearLayout
+                android:id="@+id/widget_right_card"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/widget_card_bg"
+                android:orientation="vertical"
+                android:padding="7dp"
+                android:layout_marginStart="3dp"
+                android:gravity="center_vertical">
+
                 <TextView
                     android:id="@+id/widget_tithi"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="लोअडिंग..."
+                    android:text="📿 तिथि: शुक्ल एकादशी"
                     android:textColor="#FFFFFF"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:textSize="9.5sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/widget_abhijit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✨ अभिजीत: 11:42 - 12:27"
+                    android:textColor="#81C784"
+                    android:textSize="9sp"
+                    android:layout_marginTop="2dp"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:id="@+id/widget_rahu_kaal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="⚠️ राहुकाल: 01:30 - 02:55"
+                    android:textColor="#FF8A80"
+                    android:textSize="9sp"
+                    android:layout_marginTop="2dp"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:id="@+id/widget_disha"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🚫 दिशा शूल: दक्षिण (दही खाएं)"
+                    android:textColor="#E0E0E0"
+                    android:textSize="8.5sp"
+                    android:layout_marginTop="2dp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:paddingLeft="8dp">
-                
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="आज का नक्षत्र"
-                    android:textColor="#888888"
-                    android:textSize="9sp" />
-                
-                <TextView
-                    android:id="@+id/widget_nakshatra"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="लोअडिंग..."
-                    android:textColor="#FFFFFF"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
         </LinearLayout>
 
-        <!-- Choghadiya Row -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="#2E231D"
-            android:padding="6dp"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:id="@+id/widget_choghadiya_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="सक्रिय चौघड़िया: —"
-                android:textColor="#FFB74D"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/widget_choghadiya_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="समय: —"
-                android:textColor="#81C784"
-                android:textSize="9sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <!-- Rahu Kaal Warning Bar -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="#4A1515"
-            android:padding="5dp"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="⚠️ राहुकाल: "
-                android:textColor="#FF8A80"
-                android:textSize="9sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/widget_rahu_kaal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="—"
-                android:textColor="#FFFFFF"
-                android:textSize="9sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+        <!-- Hidden legacy views for backward compatibility -->
+        <TextView
+            android:id="@+id/widget_nakshatra"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+        <TextView
+            android:id="@+id/widget_choghadiya_name"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
 
     </LinearLayout>
 </LinearLayout>

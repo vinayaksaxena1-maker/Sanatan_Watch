@@ -356,12 +356,14 @@ declare global {
       updateWidgetData?: (
         tithi: string,
         nakshatra: string,
-        choghadiya: string,
+        choghadiyaName: string,
+        choghadiyaType: string,
         choghadiyaTime: string,
-        rahuKaal: string,
-        brahma: string,
-        abhijit: string,
-        city: string
+        remainingMinutes: number,
+        rahuKaalStr: string,
+        abhijitStr: string,
+        dishaShoolStr: string,
+        cityName: string
       ) => void;
       setPermanentNotificationEnabled?: (enabled: boolean) => void;
       isPermanentNotificationEnabled?: () => boolean;

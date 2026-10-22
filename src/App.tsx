@@ -569,32 +569,43 @@ export default function App() {
       const brahma = activeMuhurats.find((m: any) => m.id === 'brahma');
       const brahmaStr = brahma ? `${brahma.startTime} - ${brahma.endTime}` : '—';
 
-      // 1. Update Widget Data
+      let choghadiyaType = 'madhyam';
+      let remainingMin = 0;
+      if (activeChog) {
+        const q = (activeChog.quality || '').toLowerCase();
+        const t = (activeChog.type || '').toLowerCase();
+        if (q === 'excellent' || q === 'good' || t === 'shubh' || t === 'amrit' || t === 'labh') {
+          choghadiyaType = 'shubh';
+        } else if (q === 'inauspicious' || q === 'bad' || t === 'kaal' || t === 'rog' || t === 'udveg') {
+          choghadiyaType = 'ashubh';
+        } else {
+          choghadiyaType = 'madhyam';
+        }
+
+        const endMin = parseTimeToMinutes(activeChog.endTime);
+        remainingMin = endMin >= currentMin ? (endMin - currentMin) : (endMin + 1440 - currentMin);
+      }
+
+      const dishaStr = getDishaShoolForDay(now.getDay());
+
+      // 1. Update Widget Data (2x2 Small & 4x2 Medium Native Widgets)
       if (window.AndroidAlarm && typeof window.AndroidAlarm.updateWidgetData === 'function') {
-        window.AndroidAlarm.updateWidgetData(tithi, nakshatra, choghadiyaName, choghadiyaTime, rahuKaalStr, brahmaStr, abhijitStr, coords.city);
+        window.AndroidAlarm.updateWidgetData(
+          tithi,
+          nakshatra,
+          activeChog ? (activeChog.hindiName || activeChog.name) : choghadiyaName,
+          choghadiyaType,
+          choghadiyaTime,
+          remainingMin,
+          rahuKaalStr,
+          abhijitStr,
+          dishaStr,
+          coords.city || 'नई दिल्ली'
+        );
       }
 
       // 2. Update Live Sticky Panchang Notification (Color-coded live status + remaining minutes + action buttons)
       if (window.AndroidAlarm && typeof window.AndroidAlarm.updatePermanentNotification === 'function') {
-        let choghadiyaType = 'madhyam';
-        let remainingMin = 0;
-        if (activeChog) {
-          const q = (activeChog.quality || '').toLowerCase();
-          const t = (activeChog.type || '').toLowerCase();
-          if (q === 'excellent' || q === 'good' || t === 'shubh' || t === 'amrit' || t === 'labh') {
-            choghadiyaType = 'shubh';
-          } else if (q === 'inauspicious' || q === 'bad' || t === 'kaal' || t === 'rog' || t === 'udveg') {
-            choghadiyaType = 'ashubh';
-          } else {
-            choghadiyaType = 'madhyam';
-          }
-
-          const endMin = parseTimeToMinutes(activeChog.endTime);
-          remainingMin = endMin >= currentMin ? (endMin - currentMin) : (endMin + 1440 - currentMin);
-        }
-
-        const dishaStr = getDishaShoolForDay(now.getDay());
-
         window.AndroidAlarm.updatePermanentNotification(
           coords.city || 'नई दिल्ली',
           tithi,

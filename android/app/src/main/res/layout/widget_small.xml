@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="6dp">
 
     <LinearLayout
         android:id="@+id/widget_container_root"
@@ -12,61 +12,109 @@
         android:layout_height="match_parent"
         android:background="@drawable/widget_background"
         android:orientation="vertical"
-        android:padding="12dp"
+        android:padding="10dp"
         android:elevation="4dp"
         android:gravity="center_vertical">
 
-        <!-- Title -->
-        <TextView
-            android:id="@+id/widget_title"
-            android:layout_width="wrap_content"
+        <!-- Header: Title & City -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="ॐ पंचांग"
-            android:textColor="#FF9933"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="6dp"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="4dp">
 
+            <TextView
+                android:id="@+id/widget_small_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ॐ सनातन घड़ी"
+                android:textColor="#FF9933"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_small_city"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📍 कानपुर"
+                android:textColor="#CCCCCC"
+                android:textSize="9sp" />
+        </LinearLayout>
+
+        <!-- Hairline Divider -->
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
             android:background="#33FF9933"
-            android:layout_marginBottom="8dp" />
-
-        <!-- Tithi -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="तिथि"
-            android:textColor="#888888"
-            android:textSize="8sp" />
-        
-        <TextView
-            android:id="@+id/widget_tithi"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="लोअडिंग..."
-            android:textColor="#FFFFFF"
-            android:textSize="12sp"
-            android:textStyle="bold"
             android:layout_marginBottom="6dp" />
 
-        <!-- Nakshatra -->
+        <!-- Live Choghadiya Badge -->
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/widget_small_choghadiya"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="नक्षत्र"
-            android:textColor="#888888"
-            android:textSize="8sp" />
-        
+            android:text="🟢 लाभ चौघड़िया"
+            android:textColor="#4ADE80"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <!-- Choghadiya Time Slot -->
+        <TextView
+            android:id="@+id/widget_small_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="12:05 AM - 01:40 AM"
+            android:textColor="#E0E0E0"
+            android:textSize="10sp"
+            android:layout_marginTop="2dp"
+            android:maxLines="1" />
+
+        <!-- Remaining Minutes Countdown -->
+        <TextView
+            android:id="@+id/widget_small_remaining"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⏳ 45 मिनट शेष (शुभ)"
+            android:textColor="#FACC15"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:layout_marginTop="2dp"
+            android:maxLines="1" />
+
+        <!-- Bottom Hairline Divider -->
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#22FF9933"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="4dp" />
+
+        <!-- Footer: Tithi & Nakshatra -->
+        <TextView
+            android:id="@+id/widget_small_tithi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📅 शुक्ल एकादशी • शतभिषा"
+            android:textColor="#BDBDBD"
+            android:textSize="9sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <!-- Hidden legacy views for backward-compatibility if any service references them -->
+        <TextView
+            android:id="@+id/widget_tithi"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
         <TextView
             android:id="@+id/widget_nakshatra"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="लोअडिंग..."
-            android:textColor="#FFFFFF"
-            android:textSize="12sp"
-            android:textStyle="bold" />
-            
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
     </LinearLayout>
 </LinearLayout>
