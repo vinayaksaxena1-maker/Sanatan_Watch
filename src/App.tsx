@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 
 import { Coords, SettingsState, AppNotification, ChoghadiyaInterval, HoraInterval } from './types';
+import { isAlarmActive, toggleQuickAlarm, QuickAlarmParams } from './utils/alarmUtils';
 import { getPanchangForDate as originalGetPanchangForDate, getMuhuratsForPanchang, getChoghadiyaPresentationData, clearPanchangCache } from './utils/panchangCalc';
 
 const getPanchangForDate = (lat: number, lon: number, date: Date) => {
@@ -665,6 +666,12 @@ export default function App() {
     setTimeout(() => {
       setShowToast(false);
     }, 4500);
+  };
+
+  const handleQuickAlarmToggle = (params: QuickAlarmParams) => {
+    const result = toggleQuickAlarm(notificationsList, params);
+    setNotificationsList(result.updatedList);
+    handlePushNotificationToast(result.toastTitle, result.toastBody);
   };
 
   // Switch Subscriptions in monetization
@@ -1332,6 +1339,8 @@ export default function App() {
                       activeChoghadiyaIndex={activeIndex}
                       displayStartTime={displayStartTime}
                       displayEndTime={displayEndTime}
+                      notificationsList={notificationsList}
+                      onToggleAlarm={handleQuickAlarmToggle}
                     />
                   </div>
 
@@ -1685,9 +1694,15 @@ export default function App() {
                             आज का शुभ एवं वर्जित समय
                           </h3>
                         </div>
-                        <span className="text-[10.5px] font-mono font-bold text-slate-500 dark:text-slate-400">
-                          दैनिक मुहूर्त
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('alerts')}
+                          className="group flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] sm:text-[11.5px] font-serif font-bold text-orange-700 dark:text-amber-400 hover:text-orange-900 dark:hover:text-amber-200 bg-orange-500/10 hover:bg-orange-500/20 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 border border-orange-300/40 dark:border-amber-500/30 transition-all cursor-pointer"
+                          title="धार्मिक व साधना अलार्म पेज खोलें"
+                        >
+                          <Bell className="w-3 h-3 group-hover:scale-110 transition-transform" />
+                          <span>सभी अलार्म ➔</span>
+                        </button>
                       </div>
 
                       {/* 2 Column Layout: Shubh vs Varjit */}
@@ -1698,33 +1713,83 @@ export default function App() {
                             🟢 शुभ समय (कार्य प्रारंभ हेतु श्रेष्ठ)
                           </span>
                           <div className="space-y-2.5">
-                            {abhijit ? (
-                              <div className="flex justify-between items-center bg-emerald-500/10 dark:bg-emerald-950/20 border border-emerald-500/20 rounded-2xl p-2.5 sm:p-3 px-3.5 gap-2">
-                                <div className="flex flex-col gap-1 leading-normal">
-                                  <span className="font-serif font-black text-[15px] sm:text-[16px] text-slate-900 dark:text-emerald-200">अभिजीत मुहूर्त</span>
-                                  <span className="text-[12.5px] sm:text-[13px] text-emerald-800 dark:text-emerald-300 font-sans font-medium">सर्वकार्य सिद्धि हेतु</span>
+                            {abhijit ? (() => {
+                                const isAbhijitActive = isAlarmActive(notificationsList, 'alert_abhijit');
+                                return (
+                                  <div className="flex justify-between items-center bg-emerald-500/10 dark:bg-emerald-950/20 border border-emerald-500/20 rounded-2xl p-2.5 sm:p-3 px-3.5 gap-2">
+                                    <div className="flex flex-col gap-1 leading-normal">
+                                      <span className="font-serif font-black text-[15px] sm:text-[16px] text-slate-900 dark:text-emerald-200">अभिजीत मुहूर्त</span>
+                                      <span className="text-[12.5px] sm:text-[13px] text-emerald-800 dark:text-emerald-300 font-sans font-medium">सर्वकार्य सिद्धि हेतु</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      <span className="font-mono font-black text-emerald-800 dark:text-emerald-300 text-[14.5px] sm:text-[15.5px] text-right">
+                                        {formatHindiTime(abhijit.startTime)} - {formatHindiTime(abhijit.endTime)}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleQuickAlarmToggle({
+                                          id: 'alert_abhijit',
+                                          title: 'अभिजीत मुहूर्त प्रारंभ',
+                                          body: 'सर्वकार्य सिद्धि हेतु अभिजीत मुहूर्त प्रारंभ हो चुका है।',
+                                          time: abhijit.startTime,
+                                          endTime: abhijit.endTime,
+                                          type: 'muhurat'
+                                        })}
+                                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+                                          isAbhijitActive
+                                            ? 'bg-amber-500 text-white border-amber-600 shadow-xs scale-105'
+                                            : 'text-slate-400 dark:text-stone-400 hover:text-amber-500 hover:bg-emerald-500/15 border-emerald-500/30'
+                                        }`}
+                                        title={isAbhijitActive ? "अभिजीत मुहूर्त अलार्म बंद करें" : "अभिजीत मुहूर्त का अलार्म सेट करें"}
+                                        aria-label={isAbhijitActive ? "अभिजीत मुहूर्त अलार्म बंद करें" : "अभिजीत मुहूर्त का अलार्म सेट करें"}
+                                      >
+                                        <Bell className={`w-3.5 h-3.5 ${isAbhijitActive ? 'fill-current' : ''}`} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })() : (
+                                <div className="p-2.5 px-3 bg-slate-100 dark:bg-zinc-800/40 rounded-2xl text-[12px] text-slate-500">
+                                  आज अभिजीत मुहूर्त उपलब्ध नहीं है।
                                 </div>
-                                <span className="font-mono font-black text-emerald-800 dark:text-emerald-300 text-[14.5px] sm:text-[15.5px] shrink-0 text-right">
-                                  {formatHindiTime(abhijit.startTime)} - {formatHindiTime(abhijit.endTime)}
-                                </span>
-                              </div>
-                            ) : (
-                              <div className="p-2.5 px-3 bg-slate-100 dark:bg-zinc-800/40 rounded-2xl text-[12px] text-slate-500">
-                                आज अभिजीत मुहूर्त उपलब्ध नहीं है।
-                              </div>
-                            )}
+                              )}
 
-                            {brahma ? (
-                              <div className="flex justify-between items-center bg-emerald-500/10 dark:bg-emerald-950/20 border border-emerald-500/20 rounded-2xl p-2.5 sm:p-3 px-3.5 gap-2">
-                                <div className="flex flex-col gap-1 leading-normal">
-                                  <span className="font-serif font-black text-[15px] sm:text-[16px] text-slate-900 dark:text-emerald-200">ब्रह्म मुहूर्त</span>
-                                  <span className="text-[12.5px] sm:text-[13px] text-emerald-800 dark:text-emerald-300 font-sans font-medium">पूजा व साधना हेतु</span>
-                                </div>
-                                <span className="font-mono font-black text-emerald-800 dark:text-emerald-300 text-[14.5px] sm:text-[15.5px] shrink-0 text-right">
-                                  {formatHindiTime(brahma.startTime)} - {formatHindiTime(brahma.endTime)}
-                                </span>
-                              </div>
-                            ) : null}
+                              {brahma ? (() => {
+                                const isBrahmaActive = isAlarmActive(notificationsList, 'alert_brahma');
+                                return (
+                                  <div className="flex justify-between items-center bg-emerald-500/10 dark:bg-emerald-950/20 border border-emerald-500/20 rounded-2xl p-2.5 sm:p-3 px-3.5 gap-2">
+                                    <div className="flex flex-col gap-1 leading-normal">
+                                      <span className="font-serif font-black text-[15px] sm:text-[16px] text-slate-900 dark:text-emerald-200">ब्रह्म मुहूर्त</span>
+                                      <span className="text-[12.5px] sm:text-[13px] text-emerald-800 dark:text-emerald-300 font-sans font-medium">पूजा व साधना हेतु</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      <span className="font-mono font-black text-emerald-800 dark:text-emerald-300 text-[14.5px] sm:text-[15.5px] text-right">
+                                        {formatHindiTime(brahma.startTime)} - {formatHindiTime(brahma.endTime)}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleQuickAlarmToggle({
+                                          id: 'alert_brahma',
+                                          title: 'ब्रह्म मुहूर्त प्रारंभ',
+                                          body: 'पूजा व साधना हेतु पावन ब्रह्म मुहूर्त प्रारंभ हो चुका है।',
+                                          time: brahma.startTime,
+                                          endTime: brahma.endTime,
+                                          type: 'muhurat'
+                                        })}
+                                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+                                          isBrahmaActive
+                                            ? 'bg-amber-500 text-white border-amber-600 shadow-xs scale-105'
+                                            : 'text-slate-400 dark:text-stone-400 hover:text-amber-500 hover:bg-emerald-500/15 border-emerald-500/30'
+                                        }`}
+                                        title={isBrahmaActive ? "ब्रह्म मुहूर्त अलार्म बंद करें" : "ब्रह्म मुहूर्त का अलार्म सेट करें"}
+                                        aria-label={isBrahmaActive ? "ब्रह्म मुहूर्त अलार्म बंद करें" : "ब्रह्म मुहूर्त का अलार्म सेट करें"}
+                                      >
+                                        <Bell className={`w-3.5 h-3.5 ${isBrahmaActive ? 'fill-current' : ''}`} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })() : null}
                           </div>
                         </div>
 
@@ -1734,38 +1799,120 @@ export default function App() {
                             🔴 वर्जित समय (नया कार्य टालें)
                           </span>
                           <div className="space-y-2.5 select-none">
-                            {/* Rahu Kaal */}
-                            <div className="flex justify-between items-center bg-rose-500/10 dark:bg-rose-950/20 border border-rose-500/20 rounded-2xl p-2.5 sm:p-3 px-3.5 gap-2">
-                              <div className="flex flex-col gap-1 leading-normal">
-                                <span className="font-serif font-black text-[15px] sm:text-[16px] text-slate-900 dark:text-rose-200">राहुकाल</span>
-                                <span className="text-[12.5px] sm:text-[13px] text-rose-800 dark:text-rose-300 font-sans font-medium">मुख्य वर्जित समय</span>
-                              </div>
-                              <span className="font-mono font-black text-rose-800 dark:text-rose-300 text-[14.5px] sm:text-[15.5px] shrink-0 text-right">
-                                {formatHindiTime(panchangInfo.rahuKaal.start)} - {formatHindiTime(panchangInfo.rahuKaal.end)}
-                              </span>
-                            </div>
+                            {/* Rahu Kaal with 5-minute pre-warning */}
+                              {(() => {
+                                const isRahuActive = isAlarmActive(notificationsList, 'alert_rahukaal');
+                                return (
+                                  <div className="flex justify-between items-center bg-rose-500/10 dark:bg-rose-950/20 border border-rose-500/20 rounded-2xl p-2.5 sm:p-3 px-3.5 gap-2">
+                                    <div className="flex flex-col gap-1 leading-normal">
+                                      <span className="font-serif font-black text-[15px] sm:text-[16px] text-slate-900 dark:text-rose-200">राहुकाल</span>
+                                      <span className="text-[12.5px] sm:text-[13px] text-rose-800 dark:text-rose-300 font-sans font-medium">मुख्य वर्जित समय</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      <span className="font-mono font-black text-rose-800 dark:text-rose-300 text-[14.5px] sm:text-[15.5px] text-right">
+                                        {formatHindiTime(panchangInfo.rahuKaal.start)} - {formatHindiTime(panchangInfo.rahuKaal.end)}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleQuickAlarmToggle({
+                                          id: 'alert_rahukaal',
+                                          title: 'राहुकाल पूर्व चेतावनी',
+                                          body: `राहुकाल ${panchangInfo.rahuKaal.start} से प्रारंभ होने वाला है। शुभ कार्य टालें।`,
+                                          time: panchangInfo.rahuKaal.start,
+                                          endTime: panchangInfo.rahuKaal.end,
+                                          type: 'muhurat',
+                                          offsetMinutes: -5
+                                        })}
+                                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+                                          isRahuActive
+                                            ? 'bg-rose-600 text-white border-rose-700 shadow-xs scale-105'
+                                            : 'text-slate-400 dark:text-stone-400 hover:text-rose-500 hover:bg-rose-500/15 border-rose-500/30'
+                                        }`}
+                                        title={isRahuActive ? "राहुकाल अलार्म बंद करें" : "राहुकाल से 5 मिनट पूर्व चेतावनी अलार्म सेट करें"}
+                                        aria-label={isRahuActive ? "राहुकाल अलार्म बंद करें" : "राहुकाल से 5 मिनट पूर्व चेतावनी अलार्म सेट करें"}
+                                      >
+                                        <Bell className={`w-3.5 h-3.5 ${isRahuActive ? 'fill-current' : ''}`} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
 
-                            {/* Yamagandam */}
-                            <div className="flex justify-between items-center bg-amber-500/10 dark:bg-amber-950/20 border border-amber-500/20 rounded-2xl p-2.5 sm:p-3 px-3.5 gap-2">
-                              <div className="flex flex-col gap-1 leading-normal">
-                                <span className="font-serif font-black text-[15px] sm:text-[16px] text-slate-900 dark:text-amber-200">यमगण्ड</span>
-                                <span className="text-[12.5px] sm:text-[13px] text-amber-800 dark:text-amber-300 font-sans font-medium">नया कार्य टालें</span>
-                              </div>
-                              <span className="font-mono font-black text-amber-800 dark:text-amber-300 text-[14.5px] sm:text-[15.5px] shrink-0 text-right">
-                                {formatHindiTime(panchangInfo.yamagandam?.start || '')} - {formatHindiTime(panchangInfo.yamagandam?.end || '')}
-                              </span>
-                            </div>
+                              {/* Yamagandam */}
+                              {(() => {
+                                const isYamaActive = isAlarmActive(notificationsList, 'alert_yamagand');
+                                return (
+                                  <div className="flex justify-between items-center bg-amber-500/10 dark:bg-amber-950/20 border border-amber-500/20 rounded-2xl p-2.5 sm:p-3 px-3.5 gap-2">
+                                    <div className="flex flex-col gap-1 leading-normal">
+                                      <span className="font-serif font-black text-[15px] sm:text-[16px] text-slate-900 dark:text-amber-200">यमगण्ड</span>
+                                      <span className="text-[12.5px] sm:text-[13px] text-amber-800 dark:text-amber-300 font-sans font-medium">नया कार्य टालें</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      <span className="font-mono font-black text-amber-800 dark:text-amber-300 text-[14.5px] sm:text-[15.5px] text-right">
+                                        {formatHindiTime(panchangInfo.yamagandam?.start || '')} - {formatHindiTime(panchangInfo.yamagandam?.end || '')}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleQuickAlarmToggle({
+                                          id: 'alert_yamagand',
+                                          title: 'यमगण्ड काल प्रारंभ',
+                                          body: 'यमगण्ड काल प्रारंभ हो चुका है, नवीन मांगलिक कार्य टालें।',
+                                          time: panchangInfo.yamagandam?.start || '',
+                                          endTime: panchangInfo.yamagandam?.end || '',
+                                          type: 'muhurat'
+                                        })}
+                                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+                                          isYamaActive
+                                            ? 'bg-amber-600 text-white border-amber-700 shadow-xs scale-105'
+                                            : 'text-slate-400 dark:text-stone-400 hover:text-amber-600 hover:bg-amber-500/15 border-amber-500/30'
+                                        }`}
+                                        title={isYamaActive ? "यमगण्ड अलार्म बंद करें" : "यमगण्ड का अलार्म सेट करें"}
+                                        aria-label={isYamaActive ? "यमगण्ड अलार्म बंद करें" : "यमगण्ड का अलार्म सेट करें"}
+                                      >
+                                        <Bell className={`w-3.5 h-3.5 ${isYamaActive ? 'fill-current' : ''}`} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
 
-                            {/* Gulik Kaal */}
-                            <div className="flex justify-between items-center bg-amber-500/10 dark:bg-amber-950/20 border border-amber-500/20 rounded-2xl p-2.5 sm:p-3 px-3.5 gap-2">
-                              <div className="flex flex-col gap-1 leading-normal">
-                                <span className="font-serif font-black text-[15px] sm:text-[16px] text-slate-900 dark:text-amber-200">गुलिक काल</span>
-                                <span className="text-[12.5px] sm:text-[13px] text-amber-800 dark:text-amber-300 font-sans font-medium">नया कार्य टालें</span>
-                              </div>
-                              <span className="font-mono font-black text-amber-800 dark:text-amber-300 text-[14.5px] sm:text-[15.5px] shrink-0 text-right">
-                                {formatHindiTime(panchangInfo.gulikKaal?.start || '')} - {formatHindiTime(panchangInfo.gulikKaal?.end || '')}
-                              </span>
-                            </div>
+                              {/* Gulik Kaal */}
+                              {(() => {
+                                const isGulikActive = isAlarmActive(notificationsList, 'alert_gulik');
+                                return (
+                                  <div className="flex justify-between items-center bg-amber-500/10 dark:bg-amber-950/20 border border-amber-500/20 rounded-2xl p-2.5 sm:p-3 px-3.5 gap-2">
+                                    <div className="flex flex-col gap-1 leading-normal">
+                                      <span className="font-serif font-black text-[15px] sm:text-[16px] text-slate-900 dark:text-amber-200">गुलिक काल</span>
+                                      <span className="text-[12.5px] sm:text-[13px] text-amber-800 dark:text-amber-300 font-sans font-medium">नया कार्य टालें</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      <span className="font-mono font-black text-amber-800 dark:text-amber-300 text-[14.5px] sm:text-[15.5px] text-right">
+                                        {formatHindiTime(panchangInfo.gulikKaal?.start || '')} - {formatHindiTime(panchangInfo.gulikKaal?.end || '')}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleQuickAlarmToggle({
+                                          id: 'alert_gulik',
+                                          title: 'गुलिक काल प्रारंभ',
+                                          body: 'गुलिक काल प्रारंभ हो चुका है, संचय व शुभ कार्य टालें।',
+                                          time: panchangInfo.gulikKaal?.start || '',
+                                          endTime: panchangInfo.gulikKaal?.end || '',
+                                          type: 'muhurat'
+                                        })}
+                                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+                                          isGulikActive
+                                            ? 'bg-amber-600 text-white border-amber-700 shadow-xs scale-105'
+                                            : 'text-slate-400 dark:text-stone-400 hover:text-amber-600 hover:bg-amber-500/15 border-amber-500/30'
+                                        }`}
+                                        title={isGulikActive ? "गुलिक काल अलार्म बंद करें" : "गुलिक काल का अलार्म सेट करें"}
+                                        aria-label={isGulikActive ? "गुलिक काल अलार्म बंद करें" : "गुलिक काल का अलार्म सेट करें"}
+                                      >
+                                        <Bell className={`w-3.5 h-3.5 ${isGulikActive ? 'fill-current' : ''}`} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
                           </div>
                         </div>
                       </div>

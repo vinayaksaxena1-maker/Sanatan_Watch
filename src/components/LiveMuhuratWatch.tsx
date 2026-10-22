@@ -10,9 +10,11 @@ import {
   CheckCircle2,
   AlertTriangle,
   Flame,
-  Heart
+  Heart,
+  Bell
 } from 'lucide-react';
-import { MuhuratItem, HoraInterval, ChoghadiyaInterval } from '../types';
+import { MuhuratItem, HoraInterval, ChoghadiyaInterval, AppNotification } from '../types';
+import { isAlarmActive, QuickAlarmParams } from '../utils/alarmUtils';
 import { AnalogClock } from './AnalogClock';
 import { formatHindiTime } from '../utils/translations';
 
@@ -31,6 +33,8 @@ interface LiveMuhuratWatchProps {
   viewModeOverride?: 'smartwatch' | 'analog';
   hideSelectors?: boolean;
   minimalMode?: boolean;
+  notificationsList?: AppNotification[];
+  onToggleAlarm?: (params: QuickAlarmParams) => void;
 }
 
 const translateType = (type: string) => {
@@ -192,7 +196,9 @@ export function LiveMuhuratWatch({
   horaList,
   viewModeOverride,
   hideSelectors = false,
-  minimalMode = false
+  minimalMode = false,
+  notificationsList,
+  onToggleAlarm
 }: LiveMuhuratWatchProps) {
   const [time, setTime] = useState(new Date());
   const [currentMuhurat, setCurrentMuhurat] = useState<MuhuratItem | null>(null);
@@ -913,6 +919,34 @@ export function LiveMuhuratWatch({
             </div>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
+            {onToggleAlarm && (() => {
+              const slotAlarmId = `alert_slot_${selectedSlot.type}_${selectedSlot.name}_${selectedSlot.startTime}`.replace(/[\s:-]/g, '_');
+              const isSlotActive = Boolean(notificationsList && isAlarmActive(notificationsList, slotAlarmId));
+              return (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onToggleAlarm({
+                      id: slotAlarmId,
+                      title: `${selectedSlot.name} ${selectedSlot.type === 'choghadiya' ? 'चौघड़िया' : 'होरा'}`,
+                      body: `${selectedSlot.name} (${selectedSlot.quality || 'शुभ'}) का समय प्रारंभ हो रहा है।`,
+                      time: selectedSlot.startTime,
+                      endTime: selectedSlot.endTime,
+                      type: 'muhurat'
+                    });
+                  }}
+                  className={`text-[10px] sm:text-xs font-bold px-2 py-1 rounded-xl transition-all cursor-pointer whitespace-nowrap flex items-center gap-1 border ${
+                    isSlotActive
+                      ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                      : 'text-amber-800 dark:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border-amber-400/40 dark:border-amber-500/30'
+                  }`}
+                  title={isSlotActive ? "अलार्म बंद करें" : "इस समय का अलार्म सेट करें"}
+                >
+                  <Bell className={`w-3 h-3 ${isSlotActive ? 'fill-current' : ''}`} />
+                  <span>{isSlotActive ? 'सक्रिय' : 'याद दिलाएं'}</span>
+                </button>
+              );
+            })()}
             <button
               type="button"
               onClick={() => {
@@ -1018,11 +1052,41 @@ export function LiveMuhuratWatch({
 
             {/* Next Upcoming Choghadiya Preview */}
             {nextChoghadiya && (
-              <div className="pt-1.5 border-t border-orange-100/40 dark:border-zinc-800/60 flex items-center justify-between text-xs flex-wrap gap-1">
-                <span className="font-bold text-slate-500 dark:text-slate-400">⏭️ अगला चौघड़िया:</span>
-                <span className="font-bold font-serif text-slate-800 dark:text-slate-200">
-                  {nextStatusInfo.dot} {nextChoghadiya.hindiName || nextChoghadiya.name} चौघड़िया ({formatHindiTime(nextChoghadiya.startTime)} से - {getNextPrecaution(nextChoghadiya.type)})
-                </span>
+              <div className="pt-1.5 border-t border-orange-100/40 dark:border-zinc-800/60 flex items-center justify-between text-xs flex-wrap gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-bold text-slate-500 dark:text-slate-400">⏭️ अगला चौघड़िया:</span>
+                  <span className="font-bold font-serif text-slate-800 dark:text-slate-200">
+                    {nextStatusInfo.dot} {nextChoghadiya.hindiName || nextChoghadiya.name} ({formatHindiTime(nextChoghadiya.startTime)} से)
+                  </span>
+                </div>
+                {onToggleAlarm && (() => {
+                  const nextAlarmId = `alert_next_chog_${nextChoghadiya.name}_${nextChoghadiya.startTime}`.replace(/[\s:-]/g, '_');
+                  const isNextActive = Boolean(notificationsList && isAlarmActive(notificationsList, nextAlarmId));
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onToggleAlarm({
+                          id: nextAlarmId,
+                          title: `${nextChoghadiya.hindiName || nextChoghadiya.name} चौघड़िया`,
+                          body: `${nextChoghadiya.hindiName || nextChoghadiya.name} चौघड़िया प्रारंभ हो रहा है (${nextStatusInfo.label})।`,
+                          time: nextChoghadiya.startTime,
+                          endTime: nextChoghadiya.endTime,
+                          type: 'muhurat'
+                        });
+                      }}
+                      className={`px-2 py-0.5 rounded-lg text-[10.5px] font-bold font-mono transition-all cursor-pointer flex items-center gap-1 border shrink-0 ${
+                        isNextActive
+                          ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                          : 'text-amber-800 dark:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border-amber-400/40 dark:border-amber-500/30'
+                      }`}
+                      title={isNextActive ? "अलार्म बंद करें" : "अगले चौघड़िया का अलार्म सेट करें"}
+                    >
+                      <Bell className={`w-3 h-3 ${isNextActive ? 'fill-current' : ''}`} />
+                      <span>{isNextActive ? 'सक्रिय' : 'याद दिलाएं'}</span>
+                    </button>
+                  );
+                })()}
               </div>
             )}
 
