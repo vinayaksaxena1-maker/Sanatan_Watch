@@ -139,7 +139,7 @@ const DEFAULT_COORDS: Coords = {
 const DEFAULT_SETTINGS: SettingsState = {
   theme: 'light',
   language: 'Hindi',
-  fontSize: 'large',
+  fontSize: 'medium',
   locationMode: 'GPS',
   notifications: {
     morningPanchang: true,
