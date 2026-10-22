@@ -2250,115 +2250,18 @@ export default function App() {
 
 
 
-            {/* 6. TOOLS & PREVIEWS CONSOLE (WIDGETS, POSTERS, SETTINGS, NOTIFICATIONS) */}
+            {/* 6. TOOLS & SETTINGS CONSOLE (2-SEGMENTED: APP SETTINGS | POSTER & WIDGET TOOLS) */}
             {activeTab === 'tools' && (
-              <div className="space-y-4 sm:space-y-5">
-                
-                {/* Tools Quick Section Navigation Bar */}
-                <div id="tools_quick_nav" className="glass-card-light dark:glass-card-dark p-3 sm:p-3.5 text-center shadow-xs border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl">
-                  <span className="text-[12px] sm:text-[13px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block mb-1.5 leading-none text-center">
-                    {settings.language === 'Hindi' ? "॥ त्वरित सुविधा नेविगेशन ॥" : "|| Quick Tools Navigation ||"}
-                  </span>
-                  <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-xs font-bold">
-                    {[
-                      { id: 'tools_poster_card', labelHindi: 'पोस्टर मेकर', labelEng: 'Poster Maker' },
-                      { id: 'tools_widgets_card', labelHindi: 'होम विजेट्स', labelEng: 'Home Widgets' },
-                      { id: 'tools_notification_card', labelHindi: 'स्थायी नोटिफिकेशन', labelEng: 'Permanent Notification' },
-                      { id: 'tools_settings_card', labelHindi: 'सेटिंग्स', labelEng: 'App Settings' }
-                    ].map((item, index, arr) => (
-                      <React.Fragment key={item.id}>
-                        <span
-                          onClick={() => {
-                            const element = document.getElementById(item.id);
-                            if (element) {
-                              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }
-                          }}
-                          className="cursor-pointer text-slate-750 hover:text-orange-655 dark:text-slate-350 dark:hover:text-amber-400 hover:underline transition-all"
-                        >
-                          {settings.language === 'Hindi' ? item.labelHindi : item.labelEng}
-                        </span>
-                        {index < arr.length - 1 && (
-                          <span className="text-slate-300 dark:text-zinc-800 select-none">|</span>
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </div>
-                </div>
-
-                <div id="tools_poster_card" className="p-3.5 sm:p-4.5 bg-white dark:bg-zinc-950/20 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl shadow-xs text-left">
-                  <div className="flex items-center justify-center gap-2 mb-3 border-b !border-[#FF9933]/20 pb-2">
-                    <span className="text-lg">🎨</span>
-                    <h3 className="text-[17px] sm:text-[18px] font-bold font-serif text-slate-800 dark:text-amber-100 text-center">
-                      {settings.language === 'Hindi' ? 'धार्मिक पोस्टर मेकर' : 'Dharmik Poster Maker'}
-                    </h3>
-                  </div>
-                  <PosterGenerator panchang={panchangInfo} city={coords.city} activeMuhurats={activeMuhurats} />
-                </div>
-
-                <div id="tools_widgets_card" className="p-3.5 sm:p-4.5 bg-white dark:bg-zinc-950/20 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl shadow-xs text-left">
-                  <div className="flex items-center justify-center gap-2 mb-3 border-b !border-[#FF9933]/20 pb-2">
-                    <span className="text-lg">📱</span>
-                    <h3 className="text-[17px] sm:text-[18px] font-bold font-serif text-slate-800 dark:text-amber-100 text-center">
-                      {settings.language === 'Hindi' ? 'होम स्क्रीन विजेट्स' : 'Home Screen Widgets'}
-                    </h3>
-                  </div>
-                  <WidgetSimulator panchang={panchangInfo} muhurats={activeMuhurats} city={coords.city} />
-                </div>
-
-                {/* Permanent Notification Toggle Card */}
-                <div id="tools_notification_card" className="p-3.5 sm:p-4.5 bg-white dark:bg-zinc-950/20 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl shadow-xs text-left">
-                  <div className="flex items-center justify-center gap-2 mb-3 border-b !border-[#FF9933]/20 pb-2">
-                    <span className="text-lg">🔔</span>
-                    <h3 className="text-[17px] sm:text-[18px] font-bold font-serif text-slate-800 dark:text-amber-100 text-center">
-                      {settings.language === 'Hindi' ? 'स्थायी पंचांग नोटिफिकेशन' : 'Permanent Panchang Notification'}
-                    </h3>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-3 rounded-2xl bg-orange-500/5 dark:bg-orange-950/10 border !border-[#FF9933]/30 dark:!border-[#FF9933]/20">
-                    <div className="pr-4">
-                      <h4 className="text-[13px] font-bold text-slate-800 dark:text-amber-100">
-                        {settings.language === 'Hindi' ? 'स्थायी पंचांग सूचना चालू करें' : 'Enable Permanent Notification'}
-                      </h4>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-normal">
-                        {settings.language === 'Hindi' 
-                          ? 'मोबाइल के नोटिफिकेशन बार में आज का पंचांग और वर्तमान शुभ-अशुभ काल हमेशा पिन रहेगा।'
-                          : 'Keep today\'s Panchang and current Shubh-Ashubh times pinned in your notification drawer.'}
-                      </p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input 
-                        type="checkbox" 
-                        checked={notificationEnabled} 
-                        onChange={(e) => {
-                          const val = e.target.checked;
-                          setNotificationEnabled(val);
-                          if (window.AndroidAlarm && typeof window.AndroidAlarm.setPermanentNotificationEnabled === 'function') {
-                            window.AndroidAlarm.setPermanentNotificationEnabled(val);
-                          }
-                        }}
-                        className="sr-only peer" 
-                      />
-                      <div className="w-9 h-5 bg-slate-200 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-orange-500"></div>
-                    </label>
-                  </div>
-                </div>
-
-                <div id="tools_settings_card" className="p-3.5 sm:p-4.5 bg-white dark:bg-zinc-950/20 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl shadow-xs text-left">
-                  <div className="flex items-center justify-center gap-2 mb-3 border-b !border-[#FF9933]/20 pb-2">
-                    <span className="text-lg">⚙️</span>
-                    <h3 className="text-[17px] sm:text-[18px] font-bold font-serif text-slate-800 dark:text-amber-100 text-center">
-                      {settings.language === 'Hindi' ? 'ऐप सेटिंग्स' : 'App Settings'}
-                    </h3>
-                  </div>
-                  <SettingsScreen
-                    settings={settings}
-                    setSettings={setSettings}
-                    onPushToast={handlePushNotificationToast}
-                  />
-                </div>
-
-              </div>
+              <SettingsScreen
+                settings={settings}
+                setSettings={setSettings}
+                onPushToast={handlePushNotificationToast}
+                panchangInfo={panchangInfo}
+                city={coords.city}
+                activeMuhurats={activeMuhurats}
+                notificationEnabled={notificationEnabled}
+                setNotificationEnabled={setNotificationEnabled}
+              />
             )}
 
             {/* 7. DEDICATED ALARM & NOTIFICATION SIMULATOR PAGE */}
