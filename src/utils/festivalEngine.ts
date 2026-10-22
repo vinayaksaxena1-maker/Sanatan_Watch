@@ -93,9 +93,11 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       date: dateStr,
       month: month,
       tithi: 'Shukla Ekadashi',
-      description: `Sacred fast dedicated to Lord Vishnu in the month of ${month}. Brings spiritual liberation.`,
+      description: `भगवान श्रीहरि विष्णु की विशेष आराधना, सुख-समृद्धि एवं आत्मिक शांति के लिए ${nameHin} का पावन व्रत।`,
       type: 'Ekadashi',
-      isAuspicious: true
+      isAuspicious: true,
+      paranTime: 'द्वादशी प्रातः 06:30 AM - 08:45 AM',
+      pujaMuhurat: 'प्रातःकाल शुभ वेला'
     });
   } else if (tithiSunrise === 25) {
     let nameEng = 'Krishna Ekadashi Vrat';
@@ -120,9 +122,11 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       date: dateStr,
       month: month,
       tithi: 'Krishna Ekadashi',
-      description: `Sacred fast dedicated to Lord Vishnu in the month of ${month}. Mitigates spiritual obstacles.`,
+      description: `भगवान श्रीहरि विष्णु की कृपा, पाप-निवारण एवं संकट मुक्ति के लिए ${nameHin} का पावन व्रत।`,
       type: 'Ekadashi',
-      isAuspicious: true
+      isAuspicious: true,
+      paranTime: 'द्वादशी प्रातः 06:30 AM - 08:45 AM',
+      pujaMuhurat: 'प्रातःकाल शुभ वेला'
     });
   }
 
@@ -135,9 +139,10 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       date: dateStr,
       month: month,
       tithi: 'Shukla Trayodashi',
-      description: 'Twilight prayer window dedicated to Lord Shiva. Fosters health and release from debts.',
+      description: 'भगवान शिव की आराधना, आरोग्य लाभ और समस्त दोषों की शांति के लिए प्रदोष काल में किया जाने वाला पावन व्रत।',
       type: 'Major',
-      isAuspicious: true
+      isAuspicious: true,
+      pujaMuhurat: 'सायं 05:45 PM - 08:15 PM (प्रदोष काल)'
     });
   } else if (tithiSunset === 27) {
     festivals.push({
@@ -147,9 +152,10 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       date: dateStr,
       month: month,
       tithi: 'Krishna Trayodashi',
-      description: 'Twilight prayer window dedicated to Lord Shiva. Dissolves karmic blocks.',
+      description: 'भगवान भोलेनाथ की कृपा, ऋण मुक्ति और आत्मिक कल्याण के लिए त्रयोदशी प्रदोष वेला का पावन व्रत।',
       type: 'Major',
-      isAuspicious: true
+      isAuspicious: true,
+      pujaMuhurat: 'सायं 05:45 PM - 08:15 PM (प्रदोष काल)'
     });
   }
 
@@ -176,8 +182,9 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       date: dateStr,
       month: month,
       tithi: 'Shukla Ashtami',
-      description: `Sacred fast honoring Goddess Durga on Shukla Ashtami of ${month}. Grants strength and protection.`,
+      description: `भगवती दुर्गा एवं माँ पार्वती की विशेष कृपा, शक्ति और संकट नाश के लिए ${nameHin} का पावन व्रत।`,
       type: 'Major',
+      pujaMuhurat: 'प्रातः एवं सायंकाल देवी पूजन',
       isAuspicious: true
     });
   }
@@ -192,9 +199,10 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         date: dateStr,
         month: month,
         tithi: 'Krishna Ashtami',
-        description: 'Celebrating the birth of Lord Krishna at midnight, symbolizing the victory of righteousness.',
+        description: 'भगवान श्री कृष्ण का मध्यरात्रि का पावन जन्मोत्सव व्रत, बाल गोपाल पूजन एवं दिव्य संकीर्तन।',
         type: 'Major',
-        isAuspicious: true
+        isAuspicious: true,
+        pujaMuhurat: 'निशिता काल (11:58 PM - 12:45 AM)'
       });
     } else if (tithiSunrise === 22) {
       festivals.push({
@@ -204,9 +212,10 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         date: dateStr,
         month: month,
         tithi: 'Krishna Ashtami',
-        description: 'Dedicated to Lord Bhairava (fierce form of Shiva) for spiritual fortitude.',
+        description: 'भगवान कालभैरव की विशेष पूजा-अर्चना, भय मुक्ति, रोग-कष्ट निवारण और आत्मबल के लिए पावन कालाष्टमी व्रत।',
         type: 'Major',
-        isAuspicious: true
+        isAuspicious: true,
+        pujaMuhurat: 'सायंकाल कालभैरव पूजन'
       });
     }
   }
@@ -221,9 +230,10 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         date: dateStr,
         month: month,
         tithi: 'Krishna Chaturdashi',
-        description: 'The Great Night of Shiva. Celebrates the convergence of Shiva and Shakti.',
+        description: 'भगवान शिव एवं माता पार्वती के महामिलन का महापर्व। चार प्रहर पूजन, रुद्राभिषेक एवं रात्रि जागरण का कल्याणकारी व्रत।',
         type: 'Major',
-        isAuspicious: true
+        isAuspicious: true,
+        pujaMuhurat: 'निशिता काल (11:45 PM - 12:35 AM)'
       });
     } else {
       festivals.push({
@@ -233,9 +243,10 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         date: dateStr,
         month: month,
         tithi: 'Krishna Chaturdashi',
-        description: 'Monthly night vigil dedicated to Lord Shiva for inner transformation.',
+        description: 'भगवान भोलेनाथ की विशेष आराधना, रात्रि जागरण और रुद्राभिषेक का मासिक पावन व्रत।',
         type: 'Major',
-        isAuspicious: true
+        isAuspicious: true,
+        pujaMuhurat: 'निशिता काल (11:45 PM - 12:35 AM)'
       });
     }
   }
@@ -250,9 +261,11 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         date: dateStr,
         month: month,
         tithi: 'Krishna Chaturthi',
-        description: 'Fasting day observed by married women for the longevity and prosperity of their husbands.',
+        description: 'पति की दीर्घायु, अखंड सौभाग्य और परिवार के सुख-कल्याण के लिए सुहागिनों का पावन निर्जला व्रत।',
         type: 'Major',
-        isAuspicious: true
+        isAuspicious: true,
+        pujaMuhurat: 'सायं 05:45 PM - 07:05 PM',
+        moonriseTime: 'रात्रि 08:15 PM (चंद्र दर्शन व अर्घ्य)'
       });
     } else {
       festivals.push({
@@ -262,9 +275,11 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         date: dateStr,
         month: month,
         tithi: 'Krishna Chaturthi',
-        description: 'Sacred fast to Lord Ganesha for overcoming difficulties and hardship.',
+        description: 'विघ्नहर्ता श्री गणेश की कृपा से समस्त बाधाओं और संकटों के निवारण हेतु पावन संकष्टी चतुर्थी व्रत।',
         type: 'Major',
-        isAuspicious: true
+        isAuspicious: true,
+        pujaMuhurat: 'सायंकाल गणेश पूजन',
+        moonriseTime: 'चंद्रोदय उपरांत अर्घ्य व पारण'
       });
     }
   }
@@ -278,9 +293,10 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         date: dateStr,
         month: month,
         tithi: 'Shukla Chaturthi',
-        description: 'Ten-day festival celebrating the divine birth of Lord Ganesha.',
+        description: 'विघ्नहर्ता श्री गणेश जी के प्राकट्य का दस दिवसीय पावन भक्ति एवं गणेशोत्सव महापर्व।',
         type: 'Major',
-        isAuspicious: true
+        isAuspicious: true,
+        pujaMuhurat: 'मध्याह्न 11:05 AM - 01:35 PM'
       });
     } else {
       festivals.push({
@@ -290,9 +306,10 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
         date: dateStr,
         month: month,
         tithi: 'Shukla Chaturthi',
-        description: 'Monthly fast dedicated to Vinayaka (Ganesha) for wisdom and success.',
+        description: 'श्री गणेश जी के पूजन से ज्ञान, बुद्धि, रिद्धि-सिद्धि और कार्य सफलता का पावन विनायक चतुर्थी व्रत।',
         type: 'Major',
-        isAuspicious: true
+        isAuspicious: true,
+        pujaMuhurat: 'मध्याह्न गणेश पूजन'
       });
     }
   }
@@ -316,9 +333,11 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       date: dateStr,
       month: month,
       tithi: 'Shukla Purnima',
-      description: `Full moon sacred day in ${month}. Ideal for Satyanarayana Vrat and charity.`,
+      description: `भगवान श्री सत्यनारायण पूजन, पवित्र नदी स्नान, दान-पुण्य एवं चंद्र देव की उपासना का पावन दिन।`,
       type: 'Major',
-      isAuspicious: true
+      isAuspicious: true,
+      pujaMuhurat: 'सायंकाल प्रदोष वेला',
+      moonriseTime: 'सायं 06:15 PM (चंद्र अर्घ्य)'
     });
   }
 
@@ -337,9 +356,10 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       date: dateStr,
       month: month,
       tithi: 'Krishna Amavasya',
-      description: `New moon sacred day in ${month}. Auspicious for ancestral rituals and tarpana.`,
+      description: `पितृ तर्पण, श्राद्ध कर्म, दीपदान और पवित्र नदियों में स्नान के लिए परम कल्याणकारी अमावस्या तिथि।`,
       type: 'Major',
-      isAuspicious: true
+      isAuspicious: true,
+      pujaMuhurat: 'प्रातःकाल स्नान-दान व तर्पण'
     });
   }
 
@@ -352,9 +372,10 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       date: dateStr,
       month: month,
       tithi: 'Shukla Pratipada',
-      description: 'Vedic New Year. Marks the beginning of Chaitra Navratri.',
+      description: 'वैदिक नव संवत्सर का शुभारंभ, सृष्टि निर्माण दिवस और चैत्र नवरात्र कलश स्थापना का पावन पर्व।',
       type: 'Major',
-      isAuspicious: true
+      isAuspicious: true,
+      pujaMuhurat: 'प्रातः 06:20 AM - 10:15 AM (घटस्थापना)'
     });
   }
 
@@ -366,9 +387,10 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       date: dateStr,
       month: month,
       tithi: 'Shukla Navami',
-      description: 'Birth anniversary of Lord Rama, the personification of righteousness.',
+      description: 'मर्यादा पुरुषोत्तम भगवान श्री राम का पावन जन्मोत्सव, मध्याह्न अभिषेक व रामायण पाठ।',
       type: 'Major',
-      isAuspicious: true
+      isAuspicious: true,
+      pujaMuhurat: 'मध्याह्न 11:05 AM - 01:30 PM'
     });
   }
 
@@ -380,9 +402,10 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       date: dateStr,
       month: month,
       tithi: 'Shukla Pratipada',
-      description: 'Commencement of 9-day Shardiya Navratri worship of Divine Mother Durga.',
+      description: 'नवदुर्गा की विशेष उपासना, अखंड ज्योति एवं कलश स्थापना के साथ 9-दिवसीय शारदीय नवरात्र का शुभारंभ।',
       type: 'Major',
-      isAuspicious: true
+      isAuspicious: true,
+      pujaMuhurat: 'प्रातः 06:20 AM - 10:15 AM (घटस्थापना)'
     });
   }
 
@@ -394,9 +417,10 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       date: dateStr,
       month: month,
       tithi: 'Shukla Dashami',
-      description: 'Celebrates Lord Rama\'s victory over Ravana and Goddess Durga\'s victory over Mahishasura.',
+      description: 'अधर्म पर धर्म और बुराई पर अच्छाई की विजय का प्रतीक पावन विजयादशमी एवं अपराजिता पूजन पर्व।',
       type: 'Major',
-      isAuspicious: true
+      isAuspicious: true,
+      pujaMuhurat: 'अपराह्न 01:20 PM - 03:40 PM (विजय मुहूर्त)'
     });
   }
 
@@ -408,9 +432,10 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       date: dateStr,
       month: month,
       tithi: 'Shukla Pratipada',
-      description: 'Commemorates Lord Krishna lifting the Govardhan Hill to protect Ayodhya villagers.',
+      description: 'भगवान श्री कृष्ण द्वारा गोवर्धन पर्वत धारण करने की पावन स्मृति में अन्नकूट महोत्सव एवं गो-माता पूजन।',
       type: 'Major',
-      isAuspicious: true
+      isAuspicious: true,
+      pujaMuhurat: 'प्रातः 06:30 AM - 08:45 AM'
     });
   }
 
@@ -422,16 +447,17 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       date: dateStr,
       month: month,
       tithi: 'Shukla Dwitiya',
-      description: 'Celebrates the bond between brothers and sisters.',
+      description: 'भाई-बहन के पवित्र स्नेह, सुरक्षा और दीर्घायु का प्रतीक पावन यमद्वितीया (भैया दूज) पर्व।',
       type: 'Major',
-      isAuspicious: true
+      isAuspicious: true,
+      pujaMuhurat: 'दोपहर 01:15 PM - 03:30 PM (अपराह्न मुहूर्त)'
     });
   }
 
   // 10. Solar Ingress Festivals (Makar Sankranti)
   const monthGreg = dateObj.getMonth();
   const dateGreg = dateObj.getDate();
-  if (monthGreg === 0 && (dateGreg === 14 || dateGreg === 15)) {
+  if (monthGreg === 0 && dateGreg === 14) {
     festivals.push({
       id: `makar_sankranti_${dateStr}`,
       name: 'Makar Sankranti',
@@ -439,9 +465,11 @@ export function getFestivalsForDay(panchang: PanchangInfo): Festival[] {
       date: dateStr,
       month: month,
       tithi: panchang.hinduDate.tithi.name,
-      description: 'Harvest festival marking the transition of the Sun into Capricorn (Makara rashi).',
+      description: 'सूर्य देव का मकर राशि में प्रवेश। पवित्र तीर्थ स्नान, तिल-गुड़ दान और सूर्य देव की उपासना का महापर्व।',
       type: 'Major',
-      isAuspicious: true
+      isAuspicious: true,
+      pujaMuhurat: 'पुण्यकाल: सूर्योदय से सूर्यास्त',
+      secondaryDate: '15 जनवरी (महापुण्यकाल)'
     });
   }
 
@@ -542,6 +570,55 @@ function getPanchangForFestivalDay(date: Date): PanchangInfo {
  * by evaluating the astronomical rules day-by-day.
  * Runs 100% offline.
  */
+const HINDI_MONTH_ABBRS = ['जनवरी', 'फरवरी', 'मार्च', 'अप्रैल', 'मई', 'जून', 'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर'];
+
+/**
+ * Deduplicates consecutive recurring occurrences of the same festival (e.g. Durgashtami, Purnima, Shivaratri).
+ * Merges them into a single primary celebration card with a secondary date / span badge.
+ */
+export function deduplicateFestivals(festivals: Festival[]): Festival[] {
+  if (!festivals || festivals.length === 0) return [];
+
+  const sorted = [...festivals].sort((a, b) => a.date.localeCompare(b.date));
+  const result: Festival[] = [];
+  const processedIndices = new Set<number>();
+
+  for (let i = 0; i < sorted.length; i++) {
+    if (processedIndices.has(i)) continue;
+    const current = { ...sorted[i] };
+
+    // Check if next festival is a consecutive duplicate of the same event
+    let nextIdx = i + 1;
+    while (nextIdx < sorted.length) {
+      const next = sorted[nextIdx];
+      const isSameEvent = (current.hindiName === next.hindiName || current.name === next.name) &&
+                          (current.month === next.month);
+      
+      const d1 = new Date(current.date).getTime();
+      const d2 = new Date(next.date).getTime();
+      const diffDays = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+
+      if (isSameEvent && diffDays === 1) {
+        processedIndices.add(nextIdx);
+        const nextDateObj = new Date(next.date);
+        const dayNum = nextDateObj.getDate();
+        const monthHin = HINDI_MONTH_ABBRS[nextDateObj.getMonth()] || '';
+        
+        current.secondaryDate = `${dayNum} ${monthHin}`;
+        current.description = `${current.description} (तिथि विस्तार: ${new Date(current.date).getDate()} व ${dayNum} ${monthHin})`;
+        break;
+      } else if (diffDays > 1) {
+        break;
+      }
+      nextIdx++;
+    }
+
+    result.push(current);
+  }
+
+  return result;
+}
+
 export function getFestivalsForYear(year: number, lat: number, lon: number): Festival[] {
   const festivals: Festival[] = [];
   
@@ -557,6 +634,6 @@ export function getFestivalsForYear(year: number, lat: number, lon: number): Fes
     d.setDate(d.getDate() + 1);
   }
   
-  return festivals;
+  return deduplicateFestivals(festivals);
 }
 

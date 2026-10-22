@@ -287,6 +287,10 @@ export interface Festival {
   description: string;
   type: 'Ekadashi' | 'Purnima' | 'Amavasya' | 'Sankashti' | 'Jayanti' | 'Major';
   isAuspicious: boolean;
+  secondaryDate?: string;
+  pujaMuhurat?: string;
+  paranTime?: string;
+  moonriseTime?: string;
 }
 
 export interface AppNotification {
