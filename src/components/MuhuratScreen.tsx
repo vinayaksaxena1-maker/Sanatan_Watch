@@ -1,18 +1,31 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useState, useRef } from 'react';
 import {
   Star,
-  ShieldCheck,
   Building,
   Key,
   Truck,
   Heart,
   ShoppingBag,
   Feather,
-  Calendar
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Flame,
+  AlertTriangle,
+  Clock,
+  Sparkles,
+  CheckCircle2,
+  XCircle,
+  ShieldAlert
 } from 'lucide-react';
 import { PanchangInfo } from '../types';
 import { getMuhuratsForPanchang } from '../utils/panchangCalc';
-import { checkMuhurats } from '../utils/muhuratRules';
+import { checkMuhurats, MuhuratSuitability } from '../utils/muhuratRules';
 import { getTranslation, Language } from '../utils/translations';
 
 interface MuhuratScreenProps {
@@ -56,6 +69,7 @@ const translateAdviceHindi = (advice: string): string => {
     .replace(/Nakshatra ([^.]+) is excellent for new home entry\./g, 'गृह प्रवेश हेतु $1 नक्षत्र अति उत्तम है।')
     .replace(/Nakshatra ([^.]+) is favorable for naming ceremonies\./g, 'नामकरण संस्कार के लिए $1 नक्षत्र अनुकूल है।')
     .replace(/Nakshatra ([^.]+) is auspicious for vehicle purchases\./g, 'वाहन क्रय हेतु $1 नक्षत्र शुभ है।')
+    .replace(/Nakshatra ([^.]+) is not recommended for Griha Pravesh\./g, '$1 नक्षत्र में गृह प्रवेश वर्जित है।')
     .replace(/Nakshatra ([^.]+) is not recommended\./g, '$1 नक्षत्र में गृह प्रवेश टालें।')
     .replace(/Nakshatra ([^.]+) is not preferred\./g, '$1 नक्षत्र विवाह हेतु उत्तम नहीं है।')
     .replace(/Nakshatra ([^.]+) is neutral\./g, '$1 नक्षत्र सामान्य प्रभाव वाला है।')
@@ -83,46 +97,110 @@ const translateAdviceHindi = (advice: string): string => {
     .replace(/Purvabhadrapada/g, 'पूर्वाभाद्रपद').replace(/Uttarabhadrapada/g, 'उत्तराभाद्रपद').replace(/Revati/g, 'रेवती');
 };
 
+// Helper time parser and formatter
+const parseMin = (str: string): number => {
+  if (!str) return 360;
+  const parts = str.trim().split(' ');
+  if (parts.length < 2) return 360;
+  const [time, ampm] = parts;
+  let [hrs, mins] = time.split(':').map(Number);
+  if (isNaN(hrs)) hrs = 6;
+  if (isNaN(mins)) mins = 0;
+  if (ampm === 'PM' && hrs !== 12) hrs += 12;
+  if (ampm === 'AM' && hrs === 12) hrs = 0;
+  return hrs * 60 + mins;
+};
+
+const formatMinStr = (m: number): string => {
+  const norm = ((m % 1440) + 1440) % 1440;
+  let hrs = Math.floor(norm / 60);
+  const mins = Math.floor(norm % 60);
+  const ampm = hrs >= 12 ? 'PM' : 'AM';
+  hrs = hrs % 12;
+  if (hrs === 0) hrs = 12;
+  return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')} ${ampm}`;
+};
+
+// Exact Minute-based Rahu Kaal trimming math
+interface TrimmedSlot {
+  timeStr: string;
+  isCancelled: boolean;
+  warningNote?: string;
+}
+
+const trimSlotForRahuKaal = (
+  slotStartMin: number,
+  slotEndMin: number,
+  rahuStartMin: number,
+  rahuEndMin: number
+): TrimmedSlot => {
+  // If no valid Rahu Kaal interval
+  if (rahuStartMin <= 0 || rahuEndMin <= 0 || rahuEndMin <= rahuStartMin) {
+    return { timeStr: `${formatMinStr(slotStartMin)} - ${formatMinStr(slotEndMin)}`, isCancelled: false };
+  }
+
+  // 1. Entirely inside Rahu Kaal -> Cancelled / Avoided
+  if (slotStartMin >= rahuStartMin && slotEndMin <= rahuEndMin) {
+    return {
+      timeStr: `${formatMinStr(slotStartMin)} - ${formatMinStr(slotEndMin)}`,
+      isCancelled: true,
+      warningNote: 'राहुकाल व्याप्त होने के कारण त्याज्य'
+    };
+  }
+
+  // 2. Starts before Rahu Kaal, ends during Rahu Kaal -> Trim end to Rahu Kaal start
+  if (slotStartMin < rahuStartMin && slotEndMin > rahuStartMin && slotEndMin <= rahuEndMin) {
+    return {
+      timeStr: `${formatMinStr(slotStartMin)} - ${formatMinStr(rahuStartMin)}`,
+      isCancelled: false,
+      warningNote: `${formatMinStr(rahuStartMin)} से राहुकाल प्रारंभ, अतः पूर्व ही संपन्न करें`
+    };
+  }
+
+  // 3. Starts during Rahu Kaal, ends after Rahu Kaal -> Trim start to Rahu Kaal end
+  if (slotStartMin >= rahuStartMin && slotStartMin < rahuEndMin && slotEndMin > rahuEndMin) {
+    return {
+      timeStr: `${formatMinStr(rahuEndMin)} - ${formatMinStr(slotEndMin)}`,
+      isCancelled: false,
+      warningNote: `${formatMinStr(rahuEndMin)} राहुकाल समाप्ति उपरांत अनुकूल`
+    };
+  }
+
+  // 4. Fully encloses Rahu Kaal -> Trim to pre-rahu segment
+  if (slotStartMin < rahuStartMin && slotEndMin > rahuEndMin) {
+    return {
+      timeStr: `${formatMinStr(slotStartMin)} - ${formatMinStr(rahuStartMin)}`,
+      isCancelled: false,
+      warningNote: `${formatMinStr(rahuStartMin)} से ${formatMinStr(rahuEndMin)} तक राहुकाल का त्याग करें`
+    };
+  }
+
+  // No overlap
+  return {
+    timeStr: `${formatMinStr(slotStartMin)} - ${formatMinStr(slotEndMin)}`,
+    isCancelled: false
+  };
+};
+
 export function MuhuratScreen({ 
   panchang, 
   onViewAstrologyChart, 
   currentTime,
   selectedDate,
   onDateChange,
-  language = 'English'
+  language = 'Hindi'
 }: MuhuratScreenProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const dateInputRef = useRef<HTMLInputElement>(null);
   
   const allMuhurats = getMuhuratsForPanchang(panchang);
   const ruleMuhurats = checkMuhurats(panchang);
-  
-  // Custom Muhurat types and auspicious calculation formulas based on current Tithi & Month
-  const tithiValue = panchang.hinduDate.tithi.value;
-  const isKrishnaAshtamiOrChauth = tithiValue === 4 || tithiValue === 8 || tithiValue === 19 || tithiValue === 23;
-
-  // Helper time parser and formatter
-  const parseMin = (str: string) => {
-    const parts = str.trim().split(' ');
-    if (parts.length < 2) return 360;
-    const [time, ampm] = parts;
-    let [hrs, mins] = time.split(':').map(Number);
-    if (ampm === 'PM' && hrs !== 12) hrs += 12;
-    if (ampm === 'AM' && hrs === 12) hrs = 0;
-    return hrs * 60 + mins;
-  };
-
-  const formatMinStr = (m: number) => {
-    let hrs = Math.floor(((m % 1440 + 1440) % 1440) / 60);
-    let mins = Math.floor(((m % 1440 + 1440) % 1440) % 60);
-    const ampm = hrs >= 12 ? 'PM' : 'AM';
-    hrs = hrs % 12;
-    if (hrs === 0) hrs = 12;
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')} ${ampm}`;
-  };
 
   const sMin = parseMin(panchang.sunrise);
   const eMin = parseMin(panchang.sunset);
+
+  const rahuStartMin = panchang.rahuKaal?.start ? parseMin(panchang.rahuKaal.start) : 0;
+  const rahuEndMin = panchang.rahuKaal?.end ? parseMin(panchang.rahuKaal.end) : 0;
   
   const dayOfYear = Math.floor((selectedDate.getTime() - new Date(selectedDate.getFullYear(), 0, 0).getTime()) / 86400000);
   const rashis = ['मेष', 'वृषभ', 'मिथुन', 'कर्क', 'सिंह', 'कन्या', 'तुला', 'वृश्चिक', 'धनु', 'मकर', 'कुंभ', 'मीन'];
@@ -133,76 +211,137 @@ export function MuhuratScreen({
     return language === 'Hindi' ? `${rashis[idx]} लग्न` : `${rashisEng[idx]} Lagna`;
   };
 
+  // Date Navigation Helpers
+  const goToPreviousDay = () => {
+    const prev = new Date(selectedDate);
+    prev.setDate(prev.getDate() - 1);
+    onDateChange(prev);
+  };
+
+  const goToNextDay = () => {
+    const next = new Date(selectedDate);
+    next.setDate(next.getDate() + 1);
+    onDateChange(next);
+  };
+
+  const goToToday = () => {
+    onDateChange(new Date());
+  };
+
+  const isToday = (() => {
+    const now = new Date();
+    return selectedDate.getDate() === now.getDate() &&
+      selectedDate.getMonth() === now.getMonth() &&
+      selectedDate.getFullYear() === now.getFullYear();
+  })();
+
+  const formattedDateHindi = selectedDate.toLocaleDateString(language === 'Hindi' ? 'hi-IN' : 'en-US', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
+
+  const dateInputVal = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value) {
+      const [year, month, day] = e.target.value.split('-').map(Number);
+      onDateChange(new Date(year, month - 1, day));
+    }
+  };
+
+  // Rule Lookups
   const vivahRule = ruleMuhurats.find(r => r.type === 'vivah');
   const gpRule = ruleMuhurats.find(r => r.type === 'griha_pravesh');
   const namkaranRule = ruleMuhurats.find(r => r.type === 'namkaran');
   const vahanRule = ruleMuhurats.find(r => r.type === 'vahan_purchase');
+  const vyaparRule = ruleMuhurats.find(r => r.type === 'business');
+  const bhoomiRule = ruleMuhurats.find(r => r.type === 'land');
 
-  // Render lists of Muhurats with dynamic computations
+  // Categories with Computed Rules and Trimmed Rahu Kaal slots
   const muhuratCategories = [
     {
-      id: 'marriage',
-      name: 'Vivah (Marriage)',
-      hindiName: 'विवाह मुहूर्त',
-      desc: language === 'Hindi' ? 'गुरु और शुक्र के आशीर्वाद से विवाह के पवित्र बंधन के लिए।' : 'For the sacred bond of marriage under the blessings of Jupiter and Venus.',
-      icon: <Heart className="w-5 h-5 text-red-600 dark:text-red-400" />,
-      rating: vivahRule ? Math.max(1, Math.round(vivahRule.score / 20)) : (isKrishnaAshtamiOrChauth ? 3 : 5),
-      slots: [
+      id: 'business',
+      name: 'Business Opening',
+      hindiName: 'व्यापार आरंभ मुहूर्त',
+      shortName: 'व्यापार आरंभ',
+      desc: language === 'Hindi' ? 'नया व्यवसाय, दुकान, प्रतिष्ठान या व्यावसायिक समझौते की शुरुआत के लिए।' : 'For starting a new business, shop, or commercial office.',
+      icon: <ShoppingBag className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />,
+      rule: vyaparRule,
+      isSuitable: vyaparRule ? vyaparRule.isSuitable : true,
+      score: vyaparRule ? vyaparRule.score : 85,
+      rating: vyaparRule ? Math.max(1, Math.round(vyaparRule.score / 20)) : 5,
+      rawSlots: [
         { 
-          time: `${formatMinStr(sMin + 75)} - ${formatMinStr(sMin + 270)}`, 
-          lagna: getDynamicLagna(2), // Mithuna base
-          suitability: vivahRule ? (vivahRule.isSuitable ? (language === 'Hindi' ? 'शुभ (उत्तम)' : 'Auspicious') : (language === 'Hindi' ? 'मध्यम (सामान्य)' : 'Medium')) : (language === 'Hindi' ? 'अत्यंत शुभ (उत्तम)' : 'Highly Auspicious'), 
-          advice: vivahRule ? (language === 'Hindi' ? vivahRule.reasons.join(' ') : 'Planetary aspects are favorable.') : (language === 'Hindi' ? 'विवाह के लिए सर्वोत्तम स्थिति।' : 'Best conditions for marriage.') 
+          startMin: sMin + 345,
+          endMin: sMin + 435,
+          lagna: `${getDynamicLagna(9)} (स्थिर/शुभ) • अभिजीत संयोग`,
+          suitability: 'सर्वोत्तम (अमृत चौघड़िया)', 
+          advice: 'व्यवसाय में निरंतर वृद्धि और ग्राहकों से लाभ के लिए दिन का सर्वश्रेष्ठ समय।' 
         },
         { 
-          time: `${formatMinStr(eMin - 165)} - ${formatMinStr(eMin + 60)}`, 
-          lagna: getDynamicLagna(6), // Tula base
-          suitability: language === 'Hindi' ? 'अच्छा (लाभ)' : 'Good (Gain)', 
-          advice: language === 'Hindi' ? 'सामाजिक आयोजनों के लिए उपयुक्त।' : 'Suitable for social gatherings.' 
-        },
+          startMin: eMin - 120,
+          endMin: eMin - 30,
+          lagna: `${getDynamicLagna(8)} (शुभ)`,
+          suitability: 'अच्छा (लाभ चौघड़िया)', 
+          advice: 'डिजाइन, तकनीक, नवीन सौदों व संपर्क स्थापित करने हेतु शुभ।' 
+        }
       ]
     },
     {
-      id: 'house',
-      name: 'Griha Pravesh',
-      hindiName: 'गृह प्रवेश मुहूर्त',
-      desc: language === 'Hindi' ? 'नए घर या संपत्ति में प्रवेश और निर्माण के लिए।' : 'For entering and starting construction on a new home or property.',
-      icon: <Key className="w-5 h-5 text-amber-500 animate-pulse" />,
-      rating: gpRule ? Math.max(1, Math.round(gpRule.score / 20)) : (tithiValue % 2 === 0 ? 4 : 5),
-      slots: [
+      id: 'land',
+      name: 'Bhoomi Pujan',
+      hindiName: 'भूमि पूजन व निर्माण मुहूर्त',
+      shortName: 'भूमि पूजन',
+      desc: language === 'Hindi' ? 'भूमि क्रय, शिलान्यास, नींव पूजन और नवीन निर्माण कार्य शुरू करने के लिए।' : 'Auspicious beginning for property, land worship, and foundation laying.',
+      icon: <Building className="w-5 h-5 text-teal-600 dark:text-teal-400" />,
+      rule: bhoomiRule,
+      isSuitable: bhoomiRule ? bhoomiRule.isSuitable : true,
+      score: bhoomiRule ? bhoomiRule.score : 75,
+      rating: bhoomiRule ? Math.max(1, Math.round(bhoomiRule.score / 20)) : 4,
+      rawSlots: [
         { 
-          time: `${formatMinStr(sMin + 165)} - ${formatMinStr(sMin + 330)}`, 
-          lagna: getDynamicLagna(1), // Vrishabha base
-          suitability: gpRule ? (gpRule.isSuitable ? (language === 'Hindi' ? 'शुभ (उत्तम)' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ (टालें)' : 'Inauspicious (Avoid)')) : (language === 'Hindi' ? 'शुभ (उत्तम)' : 'Auspicious'), 
-          advice: gpRule ? (language === 'Hindi' ? gpRule.reasons.join(' ') : 'Vedic parameters match.') : (language === 'Hindi' ? 'स्थिर लग्न, गृह प्रवेश के लिए शुभ।' : 'Fixed Lagna, auspicious for entry.') 
+          startMin: sMin + 30,
+          endMin: sMin + 150,
+          lagna: `${getDynamicLagna(7)} (स्थिर)`,
+          suitability: 'शुभ (शुभ चौघड़िया)', 
+          advice: 'प्रातःकाल भूमि का शुद्धिकरण व प्रथम पूजन करने हेतु अनुकूल।' 
         },
         { 
-          time: `${formatMinStr(sMin + 345)} - ${formatMinStr(sMin + 395)}`, 
-          lagna: getDynamicLagna(3), // Karka base
-          suitability: gpRule ? (gpRule.isSuitable ? (language === 'Hindi' ? 'सर्वोत्तम (अमृत)' : 'Best (Amrit)') : (language === 'Hindi' ? 'मध्यम' : 'Medium')) : (language === 'Hindi' ? 'सर्वोत्तम (अमृत)' : 'Best (Amrit)'), 
-          advice: gpRule ? (language === 'Hindi' ? (gpRule.reasons[0] || 'अभिजीत मुहूर्त के साथ अत्यधिक शुभ।') : 'Highly auspicious with Abhijit Muhurat.') : (language === 'Hindi' ? 'अभिजीत मुहूर्त के साथ अत्यधिक शुभ।' : 'Highly auspicious with Abhijit.') 
+          startMin: sMin + 225,
+          endMin: sMin + 330,
+          lagna: `${getDynamicLagna(9)} (मकर लग्न)`,
+          suitability: 'उत्तम (स्थिर लग्न)', 
+          advice: 'स्थायी नींव रखने और निर्माण कार्य प्रारंभ करने के लिए श्रेष्ठ।' 
         }
       ]
     },
     {
       id: 'naming',
       name: 'Naamkaran',
-      hindiName: 'नामकरण मुहूर्त',
-      desc: language === 'Hindi' ? 'नामकरण संस्कार के लिए मुहूर्त।' : 'Muhurat for naming ceremony.',
-      icon: <Feather className="w-5 h-5 text-orange-500" />,
-      rating: namkaranRule ? Math.max(1, Math.round(namkaranRule.score / 20)) : 5,
-      slots: [
+      hindiName: 'नामकरण संस्कार मुहूर्त',
+      shortName: 'नामकरण',
+      desc: language === 'Hindi' ? 'नवजात शिशु के नामकरण संस्कार और प्रथम मंगल विधान हेतु।' : 'Muhurat for newborn baby naming ceremony.',
+      icon: <Feather className="w-5 h-5 text-amber-600 dark:text-amber-400" />,
+      rule: namkaranRule,
+      isSuitable: namkaranRule ? namkaranRule.isSuitable : true,
+      score: namkaranRule ? namkaranRule.score : 65,
+      rating: namkaranRule ? Math.max(1, Math.round(namkaranRule.score / 20)) : 3,
+      rawSlots: [
         { 
-          time: `${formatMinStr(sMin + 180)} - ${formatMinStr(sMin + 360)}`, 
-          lagna: getDynamicLagna(4), // Simha base
-          suitability: namkaranRule ? (namkaranRule.isSuitable ? (language === 'Hindi' ? 'शुभ (उत्तम)' : 'Auspicious') : (language === 'Hindi' ? 'मध्यम' : 'Medium')) : (language === 'Hindi' ? 'शुभ (उत्तम)' : 'Auspicious'), 
-          advice: namkaranRule ? (language === 'Hindi' ? namkaranRule.reasons.join(' ') : 'Intelligent planetary alignments.') : (language === 'Hindi' ? 'बुद्धिमत्ता के लिए अत्यंत शुभ।' : 'Very auspicious for intellect.') 
+          startMin: sMin + 180,
+          endMin: sMin + 360,
+          lagna: `${getDynamicLagna(4)} (शुभ)`,
+          suitability: 'शुभ (उत्तम)', 
+          advice: 'शिशु की दीर्घायु, उत्तम स्वास्थ्य व बुद्धिमत्ता हेतु शुभ मुहूर्त।' 
         },
         { 
-          time: `${formatMinStr(sMin + 480)} - ${formatMinStr(sMin + 570)}`, 
-          lagna: getDynamicLagna(5), // Kanya base
-          suitability: language === 'Hindi' ? 'शुभ (लाभ)' : 'Good (Gain)', 
-          advice: language === 'Hindi' ? 'स्वर्ण आभूषण आदि पहनाने के लिए।' : 'For naming and wearing jewelry.' 
+          startMin: sMin + 480,
+          endMin: sMin + 570,
+          lagna: `${getDynamicLagna(5)}`,
+          suitability: 'शुभ (लाभ)', 
+          advice: 'स्वर्ण आभूषण धारण कराने व आशीर्वाद प्राप्ति हेतु अनुकूल।' 
         }
       ]
     },
@@ -210,95 +349,153 @@ export function MuhuratScreen({
       id: 'vehicle',
       name: 'Vehicle Purchase',
       hindiName: 'वाहन क्रय मुहूर्त',
-      desc: language === 'Hindi' ? 'वाहन, मोटर या व्यावसायिक वाहन की खरीद के लिए मुहूर्त।' : 'For purchase of vehicles or commercial transports.',
-      icon: <Truck className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />,
-      rating: vahanRule ? Math.max(1, Math.round(vahanRule.score / 20)) : (tithiValue === 14 || tithiValue === 30 ? 2 : 4),
-      slots: [
+      shortName: 'वाहन क्रय',
+      desc: language === 'Hindi' ? 'कार, बाइक, स्कूटर या व्यावसायिक वाहन की खरीद व घर लाने हेतु।' : 'For purchase and delivery of vehicles or commercial transports.',
+      icon: <Truck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />,
+      rule: vahanRule,
+      isSuitable: vahanRule ? vahanRule.isSuitable : true,
+      score: vahanRule ? vahanRule.score : 60,
+      rating: vahanRule ? Math.max(1, Math.round(vahanRule.score / 20)) : 3,
+      rawSlots: [
         { 
-          time: `${formatMinStr(sMin + 270)} - ${formatMinStr(sMin + 450)}`, 
-          lagna: getDynamicLagna(10), // Kumbha base
-          suitability: vahanRule ? (vahanRule.isSuitable ? (language === 'Hindi' ? 'अत्यंत शुभ (शुभ)' : 'Highly Auspicious') : (language === 'Hindi' ? 'मध्यम (सामान्य)' : 'Medium')) : (isKrishnaAshtamiOrChauth ? (language === 'Hindi' ? 'मध्यम (सामान्य)' : 'Medium') : (language === 'Hindi' ? 'अत्यंत शुभ (शुभ)' : 'Highly Auspicious')), 
-          advice: vahanRule ? (language === 'Hindi' ? vahanRule.reasons.join(' ') : 'Good metallic aspect scores.') : (language === 'Hindi' ? 'धातु से जुड़ी वस्तुओं के लिए सर्वोत्तम।' : 'Best for purchasing metallic items.') 
+          startMin: sMin + 270,
+          endMin: sMin + 450,
+          lagna: `${getDynamicLagna(10)} (चर)`,
+          suitability: 'अत्यंत शुभ (शुभ चौघड़िया)', 
+          advice: 'धातु व इलेक्ट्रॉनिक वाहनों की खरीद के लिए शुभ समय।' 
         },
         { 
-          time: `${formatMinStr(eMin - 210)} - ${formatMinStr(eMin - 120)}`, 
-          lagna: getDynamicLagna(0), // Mesha base
-          suitability: language === 'Hindi' ? 'शुभ (चल)' : 'Good (Chala)', 
-          advice: language === 'Hindi' ? 'वाहन आदि के लिए बढ़िया मुहूर्त।' : 'Good time to bring home the vehicle.' 
+          startMin: eMin - 210,
+          endMin: eMin - 120,
+          lagna: `${getDynamicLagna(0)} (चर लग्न)`,
+          suitability: 'शुभ (चल चौघड़िया)', 
+          advice: 'वाहन की डिलीवरी लेकर घर में प्रवेश कराने हेतु उपयुक्त।' 
         }
       ]
     },
     {
-      id: 'business',
-      name: 'Business Opening',
-      hindiName: 'व्यापार आरंभ',
-      desc: language === 'Hindi' ? 'नया व्यवसाय, दुकान या कार्यालय शुरू करने का मुहूर्त।' : 'Muhurat for starting a new business, shop, or office.',
-      icon: <ShoppingBag className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />,
-      rating: tithiValue % 5 === 0 ? 3 : 5,
-      slots: [
+      id: 'house',
+      name: 'Griha Pravesh',
+      hindiName: 'गृह प्रवेश मुहूर्त',
+      shortName: 'गृह प्रवेश',
+      desc: language === 'Hindi' ? 'नए घर, फ्लैट या संपत्ति में गृह प्रवेश व वास्तु पूजन के लिए।' : 'For entering and starting living in a new home or property.',
+      icon: <Key className="w-5 h-5 text-orange-600 dark:text-amber-500" />,
+      rule: gpRule,
+      isSuitable: gpRule ? gpRule.isSuitable : false,
+      score: gpRule ? gpRule.score : 30,
+      rating: gpRule ? Math.max(1, Math.round(gpRule.score / 20)) : 1,
+      rawSlots: [
         { 
-          time: `${formatMinStr(sMin + 345)} - ${formatMinStr(sMin + 435)}`, 
-          lagna: language === 'Hindi' ? 'अभिजीत मुहूर्त' : 'Abhijit Muhurat', 
-          suitability: language === 'Hindi' ? 'अत्यंत शुभ (अमृत)' : 'Highly Auspicious (Amrit)', 
-          advice: language === 'Hindi' ? 'व्यवसाय में वृद्धि और लाभ के लिए सर्वोत्तम मुहूर्त।' : 'Best time for business growth and profits.' 
+          startMin: sMin + 165,
+          endMin: sMin + 330,
+          lagna: `${getDynamicLagna(1)} (वृषभ लग्न)`,
+          suitability: 'वैकल्पिक समय', 
+          advice: 'यदि अति आवश्यक हो तो केवल सामान्य घरेलू सामान शिफ्टिंग हेतु उपयोग करें।' 
         },
         { 
-          time: `${formatMinStr(eMin - 120)} - ${formatMinStr(eMin - 30)}`, 
-          lagna: getDynamicLagna(8), // Dhanu base
-          suitability: language === 'Hindi' ? 'अच्छा (लाभ)' : 'Good (Gain)', 
-          advice: language === 'Hindi' ? 'डिजाइन, तकनीक और संचार कार्यों के लिए।' : 'Good for design, tech, and communications.' 
+          startMin: sMin + 345,
+          endMin: sMin + 395,
+          lagna: `${getDynamicLagna(3)} (कर्क लग्न)`,
+          suitability: 'वैकल्पिक समय', 
+          advice: 'अभिजीत वेला का सामान्य संयोग। मुख्य गृह प्रवेश मंगल दिवस पर ही करें।' 
         }
       ]
     },
     {
-      id: 'land',
-      name: 'Bhoomi Pujan',
-      hindiName: 'भूमि पूजन मुहूर्त',
-      desc: language === 'Hindi' ? 'संपत्ति, भूमि पूजन और निर्माण कार्य के लिए शुभ शुरुआत।' : 'Auspicious beginning for property, land worship, and construction.',
-      icon: <Building className="w-5 h-5 text-teal-600 dark:text-teal-450" />,
-      rating: 4,
-      slots: [
+      id: 'marriage',
+      name: 'Vivah (Marriage)',
+      hindiName: 'विवाह मुहूर्त',
+      shortName: 'विवाह',
+      desc: language === 'Hindi' ? 'पाणिग्रहण संस्कार, विवाह फेरे व वैवाहिक मंगल विधान के लिए।' : 'For the sacred bond of marriage under the blessings of Vedic deities.',
+      icon: <Heart className="w-5 h-5 text-rose-600 dark:text-rose-400" />,
+      rule: vivahRule,
+      isSuitable: vivahRule ? vivahRule.isSuitable : false,
+      score: vivahRule ? vivahRule.score : 20,
+      rating: vivahRule ? Math.max(1, Math.round(vivahRule.score / 20)) : 1,
+      rawSlots: [
         { 
-          time: `${formatMinStr(sMin + 30)} - ${formatMinStr(sMin + 150)}`, 
-          lagna: getDynamicLagna(7), // Vrischika base
-          suitability: language === 'Hindi' ? 'शुभ (शुभ)' : 'Auspicious', 
-          advice: language === 'Hindi' ? 'प्रातःकाल भूमि पूजन के लिए उपयुक्त।' : 'Suitable for morning Bhoomi Pujan.' 
+          startMin: sMin + 75,
+          endMin: sMin + 270,
+          lagna: `${getDynamicLagna(2)} (मिथुन लग्न)`,
+          suitability: 'वैकल्पिक समय', 
+          advice: 'वर्तमान में विवाह मुहूर्त शास्त्रसम्मत नहीं है। सगाई या वार्तालाप कर सकते हैं।' 
         },
         { 
-          time: `${formatMinStr(sMin + 225)} - ${formatMinStr(sMin + 330)}`, 
-          lagna: getDynamicLagna(9), // Makara base
-          suitability: language === 'Hindi' ? 'उत्तम (अतिशुभ)' : 'Excellent (Very Auspicious)', 
-          advice: language === 'Hindi' ? 'नींव रखने के लिए सबसे उत्तम समय।' : 'Most auspicious time for laying foundation.' 
+          startMin: eMin - 165,
+          endMin: eMin + 60,
+          lagna: `${getDynamicLagna(6)} (तुला लग्न)`,
+          suitability: 'वैकल्पिक समय', 
+          advice: 'केवल सामान्य पारिवारिक मेल-मिलाप हेतु समय।' 
         }
       ]
     }
   ];
 
+  // Process categories with trimmed Rahu Kaal slots
+  const processedCategories = muhuratCategories.map(cat => {
+    const slots = cat.rawSlots.map(raw => {
+      const trimmed = trimSlotForRahuKaal(raw.startMin, raw.endMin, rahuStartMin, rahuEndMin);
+      return {
+        time: trimmed.timeStr,
+        isCancelled: trimmed.isCancelled,
+        warningNote: trimmed.warningNote,
+        lagna: raw.lagna,
+        suitability: cat.isSuitable 
+          ? (language === 'Hindi' ? raw.suitability : raw.suitability)
+          : (language === 'Hindi' ? 'वैकल्पिक समय (अति आवश्यक होने पर)' : 'Alternative Time (Urgent Only)'),
+        advice: cat.rule && cat.rule.reasons.length > 0
+          ? (language === 'Hindi' ? cat.rule.reasons[0] : cat.rule.reasons[0])
+          : (language === 'Hindi' ? raw.advice : raw.advice)
+      };
+    });
+
+    return {
+      ...cat,
+      slots
+    };
+  });
+
+  // Quick Verdict Categorization
+  const shivaIsAuspicious = panchang.shivaVaas?.isAuspicious ?? false;
+  const agniIsAuspicious = panchang.agniVaas?.isAuspicious ?? false;
+
+  const quickUttam: Array<{ name: string; id: string; score: number }> = [];
+  const quickMadhyam: Array<{ name: string; id: string; score: number }> = [];
+  const quickTalen: Array<{ name: string; id: string; reason: string }> = [];
+
+  processedCategories.forEach(cat => {
+    if (cat.score >= 70) {
+      quickUttam.push({ name: cat.shortName, id: cat.id, score: cat.score });
+    } else if (cat.score >= 40) {
+      quickMadhyam.push({ name: cat.shortName, id: cat.id, score: cat.score });
+    } else {
+      const reason = cat.id === 'house'
+        ? `शतभिषा नक्षत्र`
+        : cat.id === 'marriage'
+          ? `चातुर्मास / नक्षत्र`
+          : 'नक्षत्र प्रतिकूल';
+      quickTalen.push({ name: cat.shortName, id: cat.id, reason });
+    }
+  });
+
+  // Add Rituals to Quick Verdict
+  if (shivaIsAuspicious) {
+    quickUttam.push({ name: 'रुद्राभिषेक', id: 'rituals', score: 85 });
+  } else {
+    quickTalen.push({ name: 'रुद्राभिषेक', id: 'rituals', reason: 'शिव सभा/क्रीड़ा में' });
+  }
+
+  if (agniIsAuspicious) {
+    quickUttam.push({ name: 'हवन/यज्ञ', id: 'rituals', score: 80 });
+  } else {
+    const agniLoc = panchang.agniVaas?.residenceHindi || 'पाताल';
+    quickTalen.push({ name: 'हवन/यज्ञ', id: 'rituals', reason: `अग्नि ${agniLoc} में` });
+  }
+
+  // Active Slots for Live Indicator
   const getActiveSlots = () => {
     const now = currentTime || new Date();
     const currentMin = now.getHours() * 60 + now.getMinutes();
-
-    const parseTimeToMinutes = (timeStr: string): number => {
-      const parts = timeStr.trim().split(' ');
-      if (parts.length < 2) return 0;
-      const [time, ampm] = parts;
-      let [hrsStr, minsStr] = time.split(':');
-      let hrs = parseInt(hrsStr, 10);
-      const mins = parseInt(minsStr, 10);
-      if (ampm === 'PM' && hrs !== 12) hrs += 12;
-      if (ampm === 'AM' && hrs === 12) hrs = 0;
-      return hrs * 60 + mins;
-    };
-
-    const isTimeInInterval = (currMin: number, startStr: string, endStr: string): boolean => {
-      const start = parseTimeToMinutes(startStr);
-      const end = parseTimeToMinutes(endStr);
-      if (start <= end) {
-        return currMin >= start && currMin < end;
-      } else {
-        return currMin >= start || currMin < end;
-      }
-    };
 
     const active: Array<{
       categoryName: string;
@@ -310,19 +507,28 @@ export function MuhuratScreen({
       advice: string;
     }> = [];
 
-    muhuratCategories.forEach(cat => {
+    processedCategories.forEach(cat => {
       cat.slots.forEach(slot => {
+        if (slot.isCancelled) return;
         const [startStr, endStr] = slot.time.split(' - ');
-        if (startStr && endStr && isTimeInInterval(currentMin, startStr, endStr)) {
-          active.push({
-            categoryName: cat.name,
-            categoryHindiName: cat.hindiName,
-            icon: cat.icon,
-            time: slot.time,
-            lagna: slot.lagna,
-            suitability: slot.suitability,
-            advice: slot.advice
-          });
+        if (startStr && endStr) {
+          const start = parseMin(startStr);
+          const end = parseMin(endStr);
+          const inRange = start <= end
+            ? currentMin >= start && currentMin < end
+            : currentMin >= start || currentMin < end;
+
+          if (inRange) {
+            active.push({
+              categoryName: cat.name,
+              categoryHindiName: cat.hindiName,
+              icon: cat.icon,
+              time: slot.time,
+              lagna: slot.lagna,
+              suitability: slot.suitability,
+              advice: slot.advice
+            });
+          }
         }
       });
     });
@@ -333,104 +539,499 @@ export function MuhuratScreen({
   const activeSlots = getActiveSlots();
 
   const categoriesFiltered = selectedCategory === 'all'
-    ? muhuratCategories
-    : muhuratCategories.filter(m => m.id === selectedCategory);
+    ? processedCategories
+    : selectedCategory === 'rituals'
+      ? []
+      : processedCategories.filter(m => m.id === selectedCategory);
 
   return (
     <div id="muhurat_screen_root" className="space-y-3.5 sm:space-y-4.5">
       
-      {/* Date Selector Row */}
-      <div 
-        onClick={() => {
-          if (dateInputRef.current) {
-            try {
-              dateInputRef.current.showPicker();
-            } catch (err) {
-              dateInputRef.current.click();
-            }
-          }
-        }}
-        className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2.5 bg-white/5 dark:bg-[#120B08]/30 p-3 sm:p-3.5 rounded-3xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 text-left cursor-pointer shadow-xs hover:border-[#FF9933]/65 transition-all duration-300"
-      >
-        <div className="text-center sm:text-left flex-grow">
-          <h3 className="text-[14px] font-extrabold text-slate-800 dark:text-amber-100 font-serif text-center sm:text-left">
-            {language === 'Hindi' ? "शुभ मुहूर्त तिथि चयनकर्ता" : "Select Muhurat Date"}
-          </h3>
-          <p className="text-[12px] text-slate-500 dark:text-slate-400 mt-0.5 text-center sm:text-left font-sans">
-            {language === 'Hindi' ? "आगे आने वाले या पिछले दिनों के मुहूर्त जानने के लिए तिथि चुनें।" : "Select date to view upcoming or past auspicious timings."}
-          </p>
-        </div>
-        <div className="relative min-w-[210px] flex items-center justify-center sm:justify-start gap-2 bg-white/75 dark:bg-zinc-900/60 p-2 px-3 rounded-2xl border !border-[#FF9933]/35 dark:!border-[#FF9933]/25 shadow-xs">
-          <Calendar className="w-4 h-4 text-orange-600 shrink-0" />
-          <div className="min-w-0 pr-1 text-left flex-grow">
-            <span className="text-[9px] text-slate-400 font-mono uppercase tracking-wider block">
-              {language === 'Hindi' ? "मुहूर्त तिथि" : "Muhurat Date"}
-            </span>
-            <span className="text-[11.5px] font-extrabold text-[#9A3412] dark:text-orange-200 font-sans block truncate leading-none mt-0.5">
-              {selectedDate.toLocaleDateString(language === 'Hindi' ? 'hi-IN' : 'en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </span>
-          </div>
+      {/* 1. TOP DATE BAR (WebView Safe Input Overlay + Prev/Next Buttons) */}
+      <div className="flex items-center justify-between gap-1.5 bg-white/80 dark:bg-[#120B08]/60 p-2 sm:p-2.5 rounded-2xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 shadow-xs">
+        <button 
+          onClick={goToPreviousDay}
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 dark:bg-white/5 dark:hover:bg-white/10 text-orange-800 dark:text-orange-200 text-xs font-bold font-sans cursor-pointer transition-colors"
+          title="पिछला दिन"
+        >
+          <ChevronLeft className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">पिछला दिन</span>
+        </button>
+
+        {/* WebView-Safe Date Display with Transparent Input Overlay */}
+        <div className="relative flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/15 border border-orange-500/30 text-orange-950 dark:text-amber-100 font-sans font-bold text-xs sm:text-sm cursor-pointer">
+          <Calendar className="w-4 h-4 text-orange-600 dark:text-amber-400 shrink-0 pointer-events-none" />
+          <span className="pointer-events-none truncate font-bold">{formattedDateHindi}</span>
           <input
             type="date"
             ref={dateInputRef}
-            value={`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`}
-            onChange={(e) => {
-              if (e.target.value) {
-                const [year, month, day] = e.target.value.split('-').map(Number);
-                onDateChange(new Date(year, month - 1, day));
-              }
-            }}
-            onClick={(e) => e.stopPropagation()}
-            className="absolute w-0 h-0 opacity-0 pointer-events-none"
+            value={dateInputVal}
+            onChange={handleDateChange}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             title="मुहूर्त तिथि बदलें"
           />
         </div>
+
+        <div className="flex items-center gap-1.5">
+          {!isToday && (
+            <button 
+              onClick={goToToday}
+              className="px-2.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-900 dark:text-amber-200 text-xs font-bold hover:bg-amber-500/30 font-sans cursor-pointer transition-colors"
+            >
+              आज
+            </button>
+          )}
+          <button 
+            onClick={goToNextDay}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 dark:bg-white/5 dark:hover:bg-white/10 text-orange-800 dark:text-orange-200 text-xs font-bold font-sans cursor-pointer transition-colors"
+            title="अगला दिन"
+          >
+            <span className="hidden sm:inline">अगला दिन</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
-      {/* PHASE 14: ASTROLOGICAL DASHBOARD CARD GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-4">
-        
-        {/* Card 1: शुभ मुहूर्त व योग */}
-        <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 text-left rounded-3xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 hover:border-[#FF9933]/60 transition-all duration-300 flex flex-col justify-between shadow-xs">
-          <div className="space-y-2.5">
-            <div className="flex flex-col items-center justify-center text-center pb-2 border-b border-[#FF9933]/25 dark:border-[#FF9933]/15">
-              <span className="p-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 mb-1">✨</span>
-              <h3 className="text-[14px] sm:text-[16px] font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none text-center">
-                {language === 'Hindi' ? "शुभ मुहूर्त व योग" : "Auspicious Muhurats & Yogas"}
-              </h3>
-              <span className="text-[9px] text-emerald-600 dark:text-emerald-400 block mt-1 uppercase tracking-widest font-mono text-center">
-                {language === 'Hindi' ? "शुभ समयावधि" : "Auspicious Timings"}
+      {/* 2. CATEGORY FILTER CHIPS (Horizontal Scrollable Chips) */}
+      <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-2 px-2 scrollbar-hide">
+        <button
+          onClick={() => setSelectedCategory('all')}
+          className={`px-3.5 py-1.5 rounded-full text-[12.5px] font-bold whitespace-nowrap transition-all cursor-pointer border ${
+            selectedCategory === 'all'
+              ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+              : 'bg-white/80 dark:bg-zinc-900/60 hover:bg-slate-50 dark:hover:bg-zinc-850 !border-[#FF9933]/45 dark:!border-[#FF9933]/30 text-slate-700 dark:text-slate-300'
+          }`}
+        >
+          {language === 'Hindi' ? "✨ सभी कार्य" : "✨ All Muhurats"}
+        </button>
+        {processedCategories.map(cat => (
+          <button
+            key={cat.id}
+            onClick={() => setSelectedCategory(cat.id)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all cursor-pointer border ${
+              selectedCategory === cat.id
+                ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+                : 'bg-white/80 dark:bg-zinc-900/60 hover:bg-slate-50 dark:hover:bg-zinc-850 !border-[#FF9933]/45 dark:!border-[#FF9933]/30 text-slate-700 dark:text-slate-300'
+            }`}
+          >
+            {cat.icon}
+            {language === 'Hindi' ? cat.shortName : cat.name}
+          </button>
+        ))}
+        {/* Rituals Filter Chip */}
+        <button
+          onClick={() => setSelectedCategory('rituals')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold whitespace-nowrap transition-all cursor-pointer border ${
+            selectedCategory === 'rituals'
+              ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+              : 'bg-white/80 dark:bg-zinc-900/60 hover:bg-slate-50 dark:hover:bg-zinc-850 !border-[#FF9933]/45 dark:!border-[#FF9933]/30 text-slate-700 dark:text-slate-300'
+          }`}
+        >
+          <Flame className="w-4 h-4 text-orange-600 dark:text-amber-400" />
+          {language === 'Hindi' ? "हवन व रुद्राभिषेक" : "Havan & Rituals"}
+        </button>
+      </div>
+
+      {/* 3. QUICK VERDICT SUMMARY BANNER (आज की मुहूर्त सारांश तालिका) */}
+      <div className="bg-white/85 dark:bg-[#120B08]/70 backdrop-blur-md rounded-3xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 p-3 sm:p-4 text-left shadow-xs space-y-2.5">
+        <div className="flex items-center justify-between border-b border-[#FF9933]/25 dark:border-[#FF9933]/15 pb-2">
+          <div className="flex items-center gap-2">
+            <span className="p-1 rounded-lg bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400">📊</span>
+            <div>
+              <h4 className="text-[14px] sm:text-[15.5px] font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">
+                {language === 'Hindi' ? "आज की मुहूर्त सारांश तालिका" : "Today's Muhurat Verdict"}
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-sans">
+                {language === 'Hindi' ? "शास्त्रसम्मत शुभाशुभ निर्णय (3 सेकंड में त्वरित दर्शन)" : "Quick decision summary for all activities"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2 text-xs font-sans">
+          {/* Row 1: आज उत्तम */}
+          <div className="flex items-start gap-2 pt-0.5">
+            <span className="shrink-0 text-emerald-800 dark:text-emerald-300 font-extrabold flex items-center gap-1 min-w-[76px] sm:min-w-[85px] text-[11.5px]">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              {language === 'Hindi' ? "आज उत्तम:" : "Best:"}
+            </span>
+            <div className="flex flex-wrap gap-1.5 flex-grow">
+              {quickUttam.length > 0 ? (
+                quickUttam.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedCategory(item.id)}
+                    className="px-2 py-0.5 rounded-lg bg-emerald-100/80 hover:bg-emerald-200 dark:bg-emerald-950/40 dark:hover:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border border-emerald-300/40 font-bold text-[11px] cursor-pointer transition-colors"
+                  >
+                    {item.name}
+                  </button>
+                ))
+              ) : (
+                <span className="text-slate-400 italic text-[11px]">{language === 'Hindi' ? "कोई विशेष उत्तम योग नहीं" : "None"}</span>
+              )}
+            </div>
+          </div>
+
+          {/* Row 2: मध्यम अनुकूल */}
+          <div className="flex items-start gap-2">
+            <span className="shrink-0 text-amber-800 dark:text-amber-300 font-extrabold flex items-center gap-1 min-w-[76px] sm:min-w-[85px] text-[11.5px]">
+              <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              {language === 'Hindi' ? "मध्यम:" : "Moderate:"}
+            </span>
+            <div className="flex flex-wrap gap-1.5 flex-grow">
+              {quickMadhyam.length > 0 ? (
+                quickMadhyam.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedCategory(item.id)}
+                    className="px-2 py-0.5 rounded-lg bg-amber-100/70 hover:bg-amber-200 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 text-amber-900 dark:text-amber-200 border border-amber-300/40 font-bold text-[11px] cursor-pointer transition-colors"
+                  >
+                    {item.name}
+                  </button>
+                ))
+              ) : (
+                <span className="text-slate-400 italic text-[11px]">{language === 'Hindi' ? "—" : "None"}</span>
+              )}
+            </div>
+          </div>
+
+          {/* Row 3: आज टालें */}
+          <div className="flex items-start gap-2">
+            <span className="shrink-0 text-rose-800 dark:text-rose-300 font-extrabold flex items-center gap-1 min-w-[76px] sm:min-w-[85px] text-[11.5px]">
+              <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+              {language === 'Hindi' ? "आज टालें:" : "Avoid:"}
+            </span>
+            <div className="flex flex-wrap gap-1.5 flex-grow">
+              {quickTalen.length > 0 ? (
+                quickTalen.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedCategory(item.id)}
+                    className="px-2 py-0.5 rounded-lg bg-rose-100/70 hover:bg-rose-200 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 text-rose-900 dark:text-rose-200 border border-rose-300/40 font-bold text-[11px] cursor-pointer transition-colors"
+                  >
+                    {item.name} <span className="opacity-75 font-normal text-[10px]">({item.reason})</span>
+                  </button>
+                ))
+              ) : (
+                <span className="text-slate-400 italic text-[11px]">{language === 'Hindi' ? "कोई वर्जित कार्य नहीं" : "None"}</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. LIVE ACTIVE MUHURAT DETECTOR (यदि अभी कोई समय स्लॉट एक्टिव हो) */}
+      {activeSlots.length > 0 && selectedCategory !== 'rituals' && (
+        <div className="glass-card-light dark:glass-card-dark p-3 sm:p-3.5 shadow-sm text-left relative overflow-hidden border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl">
+          <div className="flex items-center justify-between pb-1.5 border-b border-[#FF9933]/25 dark:border-[#FF9933]/15 mb-2">
+            <span className="text-[11px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 flex items-center gap-1.5 leading-none">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
+              {language === 'Hindi' ? "लाइव सक्रिय मुहूर्त संसूचक" : "Live Active Muhurat"}
+            </span>
+            <span className="text-[10px] text-slate-400 font-mono">वर्तमान समय अनुकूल</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {activeSlots.map((slot, idx) => (
+              <div key={idx} className="bg-emerald-50/30 dark:bg-emerald-950/15 p-2.5 rounded-2xl border !border-[#FF9933]/25 dark:!border-[#FF9933]/15 flex gap-2.5 items-start">
+                <div className="p-1.5 rounded-xl bg-emerald-100/50 dark:bg-emerald-950/30 shrink-0">
+                  {slot.icon}
+                </div>
+                <div className="min-w-0 flex-grow">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[13.5px] font-serif font-black text-slate-850 dark:text-orange-50">
+                      {language === 'Hindi' ? slot.categoryHindiName : slot.categoryName}
+                    </span>
+                    <span className="text-[9.5px] font-bold bg-emerald-500 text-white dark:bg-emerald-600 px-1.5 py-0.5 rounded">
+                      {slot.suitability}
+                    </span>
+                  </div>
+                  <div className="text-[11px] font-bold text-slate-600 dark:text-zinc-300 mt-0.5 font-mono">
+                    {slot.time}
+                  </div>
+                  <div className="text-[10.5px] text-orange-950 dark:text-orange-200 mt-0.5 font-medium">
+                    {slot.lagna}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 5. SPECIFIC MUHURAT CARDS (With Synchronized Stars & Conditional Badges) */}
+      {categoriesFiltered.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+          {categoriesFiltered.map((cat) => (
+            <div key={cat.id} className="bg-white/85 dark:bg-[#120B08]/70 backdrop-blur-md p-3.5 sm:p-4 rounded-3xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 hover:border-[#FF9933]/65 transition-all duration-300 flex flex-col justify-between text-left shadow-xs">
+              <div>
+                {/* Header: Title + Stars */}
+                <div className="flex justify-between items-start pb-1">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-2xl bg-orange-50/70 dark:bg-orange-950/30 border border-orange-200/50 dark:border-white/5">
+                      {cat.icon}
+                    </div>
+                    <div>
+                      <h3 className="text-[16px] sm:text-[17.5px] font-extrabold text-[#9A3412] dark:text-amber-300 font-serif leading-none">
+                        {language === 'Hindi' ? cat.hindiName : cat.name}
+                      </h3>
+                      {language !== 'Hindi' && <span className="text-[10px] text-slate-400 block mt-0.5">{cat.name}</span>}
+                    </div>
+                  </div>
+
+                  {/* Stars with numeric count */}
+                  <div className="flex items-center gap-1 bg-orange-50 dark:bg-white/5 px-2 py-1 rounded-xl border border-orange-200/40 dark:border-white/5">
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: 5 }).map((_, idx) => (
+                        <Star
+                          key={idx}
+                          className={`w-3.5 h-3.5 ${
+                            idx < cat.rating 
+                              ? 'text-amber-500 fill-amber-500' 
+                              : 'text-stone-300 dark:text-stone-600'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-[11px] font-bold text-amber-800 dark:text-amber-200 font-mono ml-0.5">
+                      ({cat.rating}/5)
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-[11.5px] text-slate-600 dark:text-slate-400 mt-2 font-sans leading-relaxed">
+                  {cat.desc}
+                </p>
+
+                {/* Status Callout Banner */}
+                <div className={`mt-2 p-2 rounded-xl text-xs font-sans font-medium flex items-center gap-1.5 border ${
+                  cat.isSuitable 
+                    ? 'bg-emerald-50/70 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-200 border-emerald-300/40' 
+                    : 'bg-rose-50/80 dark:bg-rose-950/20 text-rose-900 dark:text-rose-200 border-rose-300/40'
+                }`}>
+                  {cat.isSuitable ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span>{language === 'Hindi' ? "आज नक्षत्र व तिथि इस कार्य हेतु अनुकूल हैं।" : "Auspicious alignments today."}</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                      <span>{language === 'Hindi' ? (cat.rule?.reasons[0] || "आज नक्षत्र/तिथि प्रतिकूल है। मुख्य कार्य टालें।") : "Adverse conditions today. Avoid major events."}</span>
+                    </>
+                  )}
+                </div>
+
+                {/* Slots Timelines list */}
+                <div className="space-y-2 mt-3">
+                  <span className="text-[12.5px] font-bold text-stone-700 dark:text-stone-300 font-sans block text-left">
+                    {cat.isSuitable 
+                      ? (language === 'Hindi' ? "आज के श्रेष्ठ समय स्लॉट:" : "Auspicious Time Slots:")
+                      : (language === 'Hindi' ? "वैकल्पिक समय (केवल अति आवश्यक होने पर):" : "Alternative Timings (Urgent Only):")
+                    }
+                  </span>
+
+                  {cat.slots.map((sl, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`p-2.5 rounded-2xl border transition-all duration-300 relative overflow-hidden ${
+                        sl.isCancelled 
+                          ? 'bg-rose-50/40 dark:bg-rose-950/10 border-rose-200 dark:border-rose-900/30 opacity-70'
+                          : 'bg-white/60 dark:bg-white/3 border !border-[#FF9933]/30 dark:!border-[#FF9933]/15'
+                      }`}
+                    >
+                      <div className="flex justify-between items-center gap-2">
+                        <span className={`text-xs sm:text-[13px] font-bold font-mono tracking-tight ${
+                          sl.isCancelled ? 'line-through text-rose-500' : 'text-slate-900 dark:text-slate-100'
+                        }`}>
+                          {sl.time}
+                        </span>
+
+                        {sl.isCancelled ? (
+                          <span className="text-[9.5px] font-bold bg-rose-500 text-white px-2 py-0.5 rounded-full font-mono">
+                            {language === 'Hindi' ? "राहुकाल (त्याज्य)" : "Rahu Kaal"}
+                          </span>
+                        ) : (
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full font-sans ${
+                            cat.isSuitable
+                              ? 'bg-[#e8f5e9] dark:bg-green-950/40 text-green-900 dark:text-green-300 border border-green-200 dark:border-green-800/40'
+                              : 'bg-amber-100 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 border border-amber-300/40'
+                          }`}>
+                            {sl.suitability}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1.5 mt-1.5 text-[11.5px] text-slate-600 dark:text-slate-400">
+                        <span className="text-stone-400 text-[10px] uppercase font-mono">{language === 'Hindi' ? "लग्न:" : "Lagna:"}</span>
+                        <span className="text-orange-950 dark:text-orange-200 font-bold bg-orange-100/60 dark:bg-orange-950/40 px-1.5 py-0.5 rounded font-sans">{sl.lagna}</span>
+                      </div>
+
+                      <div className="text-[12px] text-stone-700 dark:text-stone-300 mt-1 leading-normal font-sans font-normal">
+                        🌿 {language === 'Hindi' ? translateAdviceHindi(sl.advice) : sl.advice}
+                      </div>
+
+                      {sl.warningNote && !sl.isCancelled && (
+                        <div className="mt-1 text-[11px] font-bold text-amber-700 dark:text-amber-300 font-sans flex items-center gap-1">
+                          <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
+                          <span>{sl.warningNote}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Card Footer: Clear Action Verdict */}
+              <div className="mt-3 pt-2.5 border-t border-[#FF9933]/25 dark:border-[#FF9933]/15 flex items-center justify-between text-[11.5px] font-sans">
+                <span className={`font-bold ${cat.isSuitable ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'}`}>
+                  {cat.isSuitable 
+                    ? (language === 'Hindi' ? "✅ आज यह कार्य करने हेतु शुभ दिन है" : "✅ Favorable day for this activity")
+                    : (language === 'Hindi' ? "⚠️ आज मुख्य मुहूर्त नहीं है (केवल वैकल्पिक समय)" : "⚠️ No primary muhurat today")
+                  }
+                </span>
+                <span 
+                  onClick={onViewAstrologyChart}
+                  className="text-orange-600 dark:text-orange-400 font-bold hover:underline cursor-pointer"
+                >
+                  {getTranslation(language, 'viewAstrologyChart')}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 6. RITUALS CARD (शिववास व अग्निवास - Shown on 'all' and 'rituals') */}
+      {(selectedCategory === 'all' || selectedCategory === 'rituals') && (
+        <div id="rituals_card" className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 text-left rounded-3xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 shadow-xs space-y-3">
+          <div className="flex items-center justify-between border-b border-[#FF9933]/25 dark:border-[#FF9933]/15 pb-2">
+            <div className="flex items-center gap-2">
+              <span className="p-1 rounded-lg bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400">🔥</span>
+              <div>
+                <h3 className="text-[15px] sm:text-[17px] font-extrabold text-[#9A3412] dark:text-amber-300 font-serif leading-none">
+                  {language === 'Hindi' ? "दैनिक अनुष्ठान, रुद्राभिषेक व हवन विचार" : "Daily Rituals & Havan Guidance"}
+                </h3>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-sans mt-0.5 block">
+                  {language === 'Hindi' ? "शिववास व अग्निवास की स्थिति के अनुसार निर्णय" : "Based on Shiva Vaas and Agni Vaas"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Shiva Vaas */}
+            {panchang.shivaVaas && (
+              <div className="p-3 rounded-2xl bg-white/70 dark:bg-white/3 border !border-[#FF9933]/25 dark:!border-[#FF9933]/15 space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <span className="text-[13px] font-bold text-slate-800 dark:text-slate-100 font-serif">
+                    🔱 {language === 'Hindi' ? "शिववास (रुद्राभिषेक):" : "Shiva Vaas (Rudrabhishek):"}
+                  </span>
+                  <span className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full border ${
+                    panchang.shivaVaas.isAuspicious
+                      ? 'bg-emerald-100 border-emerald-300 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300'
+                      : 'bg-rose-100 border-rose-300 text-rose-900 dark:bg-rose-950/40 dark:text-rose-300'
+                  }`}>
+                    {panchang.shivaVaas.isAuspicious ? (language === 'Hindi' ? '✨ शुभ (फलदायी)' : 'Auspicious') : (language === 'Hindi' ? '⚠️ वर्जित (टालें)' : 'Avoid')}
+                  </span>
+                </div>
+                <p className="text-[12px] text-slate-600 dark:text-slate-300 leading-relaxed font-sans">
+                  <strong>{language === 'Hindi' ? "स्थान:" : "Location:"}</strong> {language === 'Hindi' ? (panchang.shivaVaas.residenceHindi || panchang.shivaVaas.residence) : panchang.shivaVaas.residence} — {language === 'Hindi' ? translateShivaVaasDescHindi(panchang.shivaVaas.description) : panchang.shivaVaas.description}
+                </p>
+              </div>
+            )}
+
+            {/* Agni Vaas */}
+            {panchang.agniVaas && (
+              <div className="p-3 rounded-2xl bg-white/70 dark:bg-white/3 border !border-[#FF9933]/25 dark:!border-[#FF9933]/15 space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <span className="text-[13px] font-bold text-slate-800 dark:text-slate-100 font-serif">
+                    🔥 {language === 'Hindi' ? "अग्निवास (यज्ञ/हवन):" : "Agni Vaas (Havan/Yajna):"}
+                  </span>
+                  <span className={`text-[10.5px] font-bold px-2 py-0.5 rounded-full border ${
+                    panchang.agniVaas.isAuspicious
+                      ? 'bg-emerald-100 border-emerald-300 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300'
+                      : 'bg-rose-100 border-rose-300 text-rose-900 dark:bg-rose-950/40 dark:text-rose-300'
+                  }`}>
+                    {panchang.agniVaas.isAuspicious ? (language === 'Hindi' ? '✨ शुभ (फलदायी)' : 'Auspicious') : (language === 'Hindi' ? '⚠️ वर्जित (टालें)' : 'Avoid')}
+                  </span>
+                </div>
+                <p className="text-[12px] text-slate-600 dark:text-slate-300 leading-relaxed font-sans">
+                  <strong>{language === 'Hindi' ? "स्थान:" : "Location:"}</strong> {language === 'Hindi' ? (panchang.agniVaas.residenceHindi || panchang.agniVaas.residence) : panchang.agniVaas.residence} — {language === 'Hindi' ? translateAgniVaasDescHindi(panchang.agniVaas.description) : panchang.agniVaas.description}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 7. GENERAL SHUBH & VARJIT SAMAY CHAKRA (Responsive 1-col on mobile, 2-col on desktop) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+        
+        {/* Left Column: शुभ मुहूर्त व योग */}
+        <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 text-left rounded-3xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 shadow-xs flex flex-col justify-between">
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2 pb-2 border-b border-[#FF9933]/25 dark:border-[#FF9933]/15">
+              <span className="p-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400">✨</span>
+              <div>
+                <h3 className="text-[15px] sm:text-[16px] font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">
+                  {language === 'Hindi' ? "आज के सामान्य शुभ मुहूर्त" : "General Auspicious Muhurats"}
+                </h3>
+                <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-sans mt-0.5 block">
+                  {language === 'Hindi' ? "दैनिक कार्यों हेतु शुभ समयावधि" : "Auspicious daily timings"}
+                </span>
+              </div>
             </div>
 
-            {/* Timings */}
+            {/* Timings List */}
             <div className="space-y-1.5 text-[13px]">
-              {allMuhurats.filter(m => m.type !== 'Ashubh').map((m, idx) => (
-                <div key={idx} className="flex justify-between items-center py-1 border-b border-slate-100/40 dark:border-slate-800/10">
-                  <span className="text-slate-500 dark:text-slate-300 font-medium text-[12.5px]">{language === 'Hindi' ? (m.hindiName || m.name) : m.name}:</span>
-                  <span className="font-bold text-slate-855 dark:text-emerald-350 font-mono text-[13px]">{m.startTime} - {m.endTime}</span>
-                </div>
-              ))}
+              {allMuhurats
+                .filter(m => m.type !== 'Ashubh')
+                .map((m, idx) => {
+                  const mStart = parseMin(m.startTime);
+                  const mEnd = parseMin(m.endTime);
+                  const isRahuOverlap = rahuStartMin > 0 && (
+                    (mStart >= rahuStartMin && mEnd <= rahuEndMin) ||
+                    (mStart === rahuStartMin && mEnd === rahuEndMin)
+                  );
+
+                  return (
+                    <div key={idx} className="flex justify-between items-center py-1.5 border-b border-slate-100/60 dark:border-slate-800/20">
+                      <span className="text-slate-600 dark:text-slate-300 font-medium text-[12.5px] font-sans">
+                        {language === 'Hindi' ? (m.hindiName || m.name) : m.name}:
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`font-bold font-mono text-[12.5px] ${isRahuOverlap ? 'line-through text-rose-500' : 'text-slate-900 dark:text-emerald-300'}`}>
+                          {m.startTime} - {m.endTime}
+                        </span>
+                        {isRahuOverlap && (
+                          <span className="text-[9.5px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 px-1 py-0.2 rounded border border-rose-300/40">
+                            राहुकाल
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
+
             {/* Shubh Yogas List */}
             {((panchang.shubhYogas && panchang.shubhYogas.length > 0) || (panchang.pushkarYog && panchang.pushkarYog.active)) && (
               <div className="mt-2.5 pt-2 border-t border-[#FF9933]/25 dark:border-[#FF9933]/15 space-y-1.5">
-                <span className="text-[10.5px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest block font-mono text-center sm:text-left">
+                <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 font-sans block">
                   {language === 'Hindi' ? "आज के विशेष सिद्ध योग:" : "Today's Special Yogas:"}
                 </span>
-                <div className="flex flex-wrap gap-1.5 justify-center sm:justify-start">
+                <div className="flex flex-wrap gap-1.5">
                   {panchang.pushkarYog && panchang.pushkarYog.active && (
-                    <span className="text-[10px] font-black px-2 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-350 border border-amber-300/40 animate-pulse font-serif">
+                    <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-800 dark:text-amber-200 border border-amber-300/40 font-sans">
                       🌟 {language === 'Hindi' ? panchang.pushkarYog.hindiName : panchang.pushkarYog.name} ({panchang.pushkarYog.type})
                     </span>
                   )}
                   {panchang.shubhYogas && panchang.shubhYogas.map((y, idx) => (
-                    <span key={idx} className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-350 border border-emerald-250/30 font-serif">
+                    <span key={idx} className="text-[10.5px] font-bold px-2 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 border border-emerald-300/40 font-sans">
                       ✨ {language === 'Hindi' ? y.hindiName : y.name} ({y.start} - {y.end})
                     </span>
                   ))}
@@ -440,50 +1041,64 @@ export function MuhuratScreen({
           </div>
         </div>
 
-        {/* Card 2: वर्जित समय चक्र */}
-        <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 text-left rounded-3xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 hover:border-[#FF9933]/60 transition-all duration-300 flex flex-col justify-between shadow-xs">
+        {/* Right Column: वर्जित समय चक्र */}
+        <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 text-left rounded-3xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 shadow-xs flex flex-col justify-between">
           <div className="space-y-2.5">
-            <div className="flex flex-col items-center justify-center text-center pb-2 border-b border-[#FF9933]/25 dark:border-[#FF9933]/15">
-              <span className="p-1 rounded-lg bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 mb-1">⚠️</span>
-              <h3 className="text-[14px] sm:text-[16px] font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none text-center">
-                {language === 'Hindi' ? "वर्जित समय चक्र" : "Adverse Periods"}
-              </h3>
-              <span className="text-[9px] text-red-600 dark:text-red-405 block mt-1 uppercase tracking-widest font-mono text-center">
-                {language === 'Hindi' ? "अशुभ समयावधि" : "Inauspicious Timings"}
-              </span>
+            <div className="flex items-center gap-2 pb-2 border-b border-[#FF9933]/25 dark:border-[#FF9933]/15">
+              <span className="p-1 rounded-lg bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400">⚠️</span>
+              <div>
+                <h3 className="text-[15px] sm:text-[16px] font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none">
+                  {language === 'Hindi' ? "वर्जित समय चक्र" : "Adverse Periods"}
+                </h3>
+                <span className="text-[11px] text-rose-700 dark:text-rose-400 font-sans mt-0.5 block">
+                  {language === 'Hindi' ? "इस समय नवीन कार्य आरंभ न करें" : "Avoid starting new tasks"}
+                </span>
+              </div>
             </div>
 
-            {/* Inauspicious Timings */}
+            {/* Inauspicious Timings List */}
             <div className="space-y-1.5 text-[13px]">
               {allMuhurats.filter(m => m.type === 'Ashubh').map((m, idx) => (
-                <div key={idx} className="flex justify-between items-center py-1 border-b border-slate-100/40 dark:border-slate-800/10">
-                  <span className="text-slate-500 dark:text-slate-300 font-medium text-[12.5px]">{language === 'Hindi' ? (m.hindiName || m.name) : m.name}:</span>
-                  <span className="font-bold text-red-655 dark:text-rose-400 font-mono text-[13px]">{m.startTime} - {m.endTime}</span>
+                <div key={idx} className="flex justify-between items-center py-1.5 border-b border-slate-100/60 dark:border-slate-800/20">
+                  <span className="text-slate-600 dark:text-slate-300 font-medium text-[12.5px] font-sans">
+                    {language === 'Hindi' ? (m.hindiName || m.name) : m.name}:
+                  </span>
+                  <span className="font-bold text-rose-700 dark:text-rose-400 font-mono text-[12.5px]">
+                    {m.startTime} - {m.endTime}
+                  </span>
                 </div>
               ))}
 
               {/* Varjyam */}
               {panchang.varjyam && panchang.varjyam.length > 0 && panchang.varjyam.map((v, idx) => (
-                <div key={`var-${idx}`} className="flex justify-between items-center py-1 border-b border-slate-100/40 dark:border-slate-800/10">
-                  <span className="text-slate-500 dark:text-slate-300 font-medium text-[12.5px]">{language === 'Hindi' ? "वर्ज्यम:" : "Varjyam:"}</span>
-                  <span className="font-bold text-red-655 dark:text-rose-400 font-mono text-[13px]">{v.start} - {v.end}</span>
+                <div key={`var-${idx}`} className="flex justify-between items-center py-1.5 border-b border-slate-100/60 dark:border-slate-800/20">
+                  <span className="text-slate-600 dark:text-slate-300 font-medium text-[12.5px] font-sans">
+                    {language === 'Hindi' ? "वर्ज्यम:" : "Varjyam:"}
+                  </span>
+                  <span className="font-bold text-rose-700 dark:text-rose-400 font-mono text-[12.5px]">
+                    {v.start} - {v.end}
+                  </span>
                 </div>
               ))}
             </div>
 
             {/* Alerts */}
             {((panchang.dagdaTithi && panchang.dagdaTithi.isDagda) || (panchang.bhadra && panchang.bhadra.active)) && (
-              <div className="mt-2.5 pt-2 border-t border-[#FF9933]/25 dark:border-[#FF9933]/15 space-y-1 text-[11px]">
+              <div className="mt-2.5 pt-2 border-t border-[#FF9933]/25 dark:border-[#FF9933]/15 space-y-1.5 text-xs font-sans">
                 {panchang.dagdaTithi && panchang.dagdaTithi.isDagda && (
-                  <div className="text-red-700 dark:text-red-400 font-bold bg-red-500/10 px-2 py-1 rounded border border-red-500/15 font-serif text-center sm:text-left">
-                    {language === 'Hindi' ? "🚨 आज दग्ध तिथि है! महत्वपूर्ण कार्य टालें।" : "🚨 Today is Dagda Tithi! Avoid starting important activities."}
+                  <div className="text-rose-800 dark:text-rose-300 font-bold bg-rose-500/10 px-2.5 py-1.5 rounded-xl border border-rose-500/20 flex items-center gap-1.5">
+                    <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>{language === 'Hindi' ? "आज दग्ध तिथि है! महत्वपूर्ण कार्य टालें।" : "Today is Dagda Tithi!"}</span>
                   </div>
                 )}
                 {panchang.bhadra && panchang.bhadra.active && (
-                  <div className="text-red-700 dark:text-red-400 font-bold bg-red-500/10 px-2 py-1 rounded border border-red-500/15 font-serif text-center sm:text-left">
-                    {language === 'Hindi'
-                      ? `🚨 भद्रा काल सक्रिय है (${panchang.bhadra.startTime} से ${panchang.bhadra.endTime} तक)।`
-                      : `🚨 Bhadra period is active (from ${panchang.bhadra.startTime} to ${panchang.bhadra.endTime}).`}
+                  <div className="text-rose-800 dark:text-rose-300 font-bold bg-rose-500/10 px-2.5 py-1.5 rounded-xl border border-rose-500/20 flex items-center gap-1.5">
+                    <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>
+                      {language === 'Hindi'
+                        ? `भद्रा काल सक्रिय (${panchang.bhadra.startTime} से ${panchang.bhadra.endTime}) - शुभ कार्य वर्जित`
+                        : `Bhadra active (${panchang.bhadra.startTime} to ${panchang.bhadra.endTime})`}
+                    </span>
                   </div>
                 )}
               </div>
@@ -491,232 +1106,8 @@ export function MuhuratScreen({
           </div>
         </div>
 
-        {/* Card 3: शिववास व अग्निवास */}
-        <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 text-left rounded-3xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 hover:border-[#FF9933]/60 transition-all duration-300 flex flex-col justify-between shadow-xs">
-          <div className="space-y-2.5">
-            <div className="flex flex-col items-center justify-center text-center pb-2 border-b border-[#FF9933]/25 dark:border-[#FF9933]/15">
-              <span className="p-1 rounded-lg bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 mb-1">🔥</span>
-              <h3 className="text-[14px] sm:text-[16px] font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none text-center">
-                {language === 'Hindi' ? "अग्निवास व शिववास" : "Ritual Muhurats"}
-              </h3>
-              <span className="text-[9px] text-orange-600 dark:text-orange-400 block mt-1 uppercase tracking-widest font-mono text-center">
-                {language === 'Hindi' ? "अनुष्ठान शुभता" : "Ritual Auspiciousness"}
-              </span>
-            </div>
-
-            <div className="space-y-2.5">
-              {/* Shiva Vaas */}
-              {panchang.shivaVaas && (
-                <div className="p-2.5 rounded-2xl bg-white/5 dark:bg-white/2 border !border-[#FF9933]/25 dark:!border-[#FF9933]/15">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[13px] font-bold text-slate-800 dark:text-slate-200 font-serif">
-                      {language === 'Hindi' ? "शिववास (रुद्राभिषेक):" : "Shiva Vaas (Rudrabhishek):"}
-                    </span>
-                    <span className={`text-[11px] font-black px-2 py-0.5 rounded border ${
-                      panchang.shivaVaas.isAuspicious
-                        ? 'bg-emerald-100 border-emerald-250 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
-                        : 'bg-rose-100 border-rose-250 text-rose-800 dark:bg-rose-950/30 dark:text-rose-455'
-                    }`}>
-                      {panchang.shivaVaas.isAuspicious ? (language === 'Hindi' ? 'शुभ' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ' : 'Avoid')}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-300 mt-1 leading-normal font-sans">
-                    <strong>{language === 'Hindi' ? "वास स्थान:" : "Residence:"}</strong> {language === 'Hindi' ? (panchang.shivaVaas.residenceHindi || panchang.shivaVaas.residence) : panchang.shivaVaas.residence} - {language === 'Hindi' ? translateShivaVaasDescHindi(panchang.shivaVaas.description) : panchang.shivaVaas.description}
-                  </p>
-                </div>
-              )}
-
-              {/* Agni Vaas */}
-              {panchang.agniVaas && (
-                <div className="p-2.5 rounded-2xl bg-white/5 dark:bg-white/2 border !border-[#FF9933]/25 dark:!border-[#FF9933]/15">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[13px] font-bold text-slate-800 dark:text-slate-200 font-serif">
-                      {language === 'Hindi' ? "अग्निवास (यज्ञ/हवन):" : "Agni Vaas (Yajna/Havan):"}
-                    </span>
-                    <span className={`text-[11px] font-black px-2 py-0.5 rounded border ${
-                      panchang.agniVaas.isAuspicious
-                        ? 'bg-emerald-100 border-emerald-250 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400'
-                        : 'bg-rose-100 border-rose-250 text-rose-800 dark:bg-rose-950/30 dark:text-rose-455'
-                    }`}>
-                      {panchang.agniVaas.isAuspicious ? (language === 'Hindi' ? 'शुभ' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ' : 'Avoid')}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-300 mt-1 leading-normal font-sans">
-                    <strong>{language === 'Hindi' ? "वास स्थान:" : "Residence:"}</strong> {language === 'Hindi' ? (panchang.agniVaas.residenceHindi || panchang.agniVaas.residence) : panchang.agniVaas.residence} - {language === 'Hindi' ? translateAgniVaasDescHindi(panchang.agniVaas.description) : panchang.agniVaas.description}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
       </div>
 
-      {/* Active Muhurats Section */}
-      {activeSlots.length > 0 && (
-        <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 shadow-sm text-left relative overflow-hidden border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl">
-          <div className="absolute right-0 top-0 -mt-10 -mr-10 w-36 h-36 bg-emerald-500/8 dark:bg-emerald-600/8 blur-2xl rounded-full pointer-events-none"></div>
-
-          <div className="flex flex-col items-center justify-center text-center gap-1 mb-2.5 pb-2 border-b border-[#FF9933]/25 dark:border-[#FF9933]/15">
-            <span className="text-[12px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 flex items-center justify-center gap-1.5 leading-none">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              {language === 'Hindi' ? "लाइव सक्रिय मुहूर्त संसूचक" : "Live Active Muhurat Detector"}
-            </span>
-            <h3 className="text-[15px] sm:text-[17px] font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none text-center mt-0.5">
-              {getTranslation(language, 'liveMuhurat')}
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {activeSlots.map((slot, idx) => (
-              <div key={idx} className="bg-emerald-50/20 dark:bg-emerald-950/10 p-2.5 sm:p-3 rounded-2xl border !border-[#FF9933]/25 dark:!border-[#FF9933]/15 flex gap-2.5 items-start">
-                <div className="p-1.5 rounded-xl bg-emerald-100/40 dark:bg-emerald-950/30 shrink-0">
-                  {slot.icon}
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[15px] font-serif font-black text-slate-850 dark:text-orange-50">
-                      {language === 'Hindi' ? slot.categoryHindiName : slot.categoryName}
-                    </span>
-                    <span className="text-[9.5px] font-black tracking-widest bg-emerald-500 text-white dark:bg-emerald-600 uppercase px-1.5 py-0.5 rounded shadow-3xs">
-                      {slot.suitability}
-                    </span>
-                  </div>
-                  <div className="text-[11px] font-bold text-slate-500 dark:text-zinc-450 mt-0.5 font-mono">
-                    {language === 'Hindi' ? "समय:" : "Time:"} {slot.time}
-                  </div>
-                  <div className="text-[11px] text-slate-655 dark:text-zinc-400 mt-0.5">
-                    <span className="font-bold text-orange-950 dark:text-orange-200">{language === 'Hindi' ? "लग्न:" : "Lagna:"} {slot.lagna}</span>
-                  </div>
-                  <p className="text-[10.5px] text-slate-500 dark:text-slate-400 italic mt-0.5 leading-snug font-sans">
-                    🌿 {language === 'Hindi' ? translateAdviceHindi(slot.advice) : slot.advice}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Search selection menus */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1.5 -mx-4 px-4 scrollbar-hide">
-        <button
-          onClick={() => setSelectedCategory('all')}
-          className={`px-3.5 py-1.5 rounded-full text-[12.5px] font-bold whitespace-nowrap transition-all cursor-pointer border ${
-            selectedCategory === 'all'
-              ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
-              : 'bg-white/80 dark:bg-zinc-900/60 hover:bg-slate-50 dark:hover:bg-zinc-850 !border-[#FF9933]/45 dark:!border-[#FF9933]/30 text-slate-700 dark:text-slate-300'
-          }`}
-        >
-          {getTranslation(language, 'allMuhurats')}
-        </button>
-        {muhuratCategories.map(cat => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12.5px] font-bold whitespace-nowrap transition-all cursor-pointer border ${
-              selectedCategory === cat.id
-                ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
-                : 'bg-white/80 dark:bg-zinc-900/60 hover:bg-slate-50 dark:hover:bg-zinc-850 !border-[#FF9933]/45 dark:!border-[#FF9933]/30 text-slate-700 dark:text-slate-300'
-            }`}
-          >
-            {cat.icon}
-            {language === 'Hindi' ? cat.hindiName : cat.name}
-          </button>
-        ))}
-      </div>
-
-      {/* Warning regarding Rahu Kaal or special adverse timing if any */}
-      <div className="bg-amber-500/5 dark:bg-amber-500/2 rounded-3xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 p-3 sm:p-3.5 text-center sm:text-left flex flex-col sm:flex-row items-center sm:items-start gap-2.5 shadow-sm">
-        <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
-        <div>
-          <h4 className="text-[14px] sm:text-[16px] font-bold text-amber-950 dark:text-amber-200 font-serif text-center sm:text-left">
-            {language === 'Hindi' ? "ज्योतिषीय दिशानिर्देश (राहुकाल)" : "Astrological Guidelines (Rahu Kaal)"}
-          </h4>
-          <p className="text-[11px] sm:text-[12px] text-amber-900/90 dark:text-amber-300/80 leading-normal mt-0.5 font-sans text-center sm:text-left">
-            {language === 'Hindi'
-              ? `कृपया सुनिश्चित करें कि चुना गया समय सक्रिय राहुकाल (${panchang.rahuKaal.start} - ${panchang.rahuKaal.end}) से मेल नहीं खाता है, क्योंकि राहुकाल के दौरान कोई नया काम शुरू करना शुभ नहीं माना जाता है।`
-              : `Please ensure the selected time does not overlap with active Rahu Kaal (${panchang.rahuKaal.start} - ${panchang.rahuKaal.end}), as starting new work during Rahu Kaal is considered inauspicious.`}
-          </p>
-        </div>
-      </div>
-
-      {/* Render matching category grids */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
-        {categoriesFiltered.map((cat) => (
-          <div key={cat.id} className="bg-white/5 dark:bg-[#120B08]/40 backdrop-blur-md p-3.5 sm:p-4 rounded-3xl border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 hover:border-[#FF9933]/65 transition-all duration-300 flex flex-col justify-between text-left shadow-xs">
-            <div>
-              <div className="flex justify-between items-center pb-1">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-xl bg-orange-50/50 dark:bg-orange-950/20">
-                    {cat.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-[14px] sm:text-[16px] font-extrabold text-orange-950 dark:text-amber-100 font-serif leading-none">
-                      {language === 'Hindi' ? cat.hindiName : cat.name}
-                    </h3>
-                    {language !== 'Hindi' && <span className="text-[10px] text-slate-400 block mt-0.5">{cat.name}</span>}
-                  </div>
-                </div>
-
-                {/* Stars */}
-                <div className="flex gap-0.5 animate-pulse">
-                  {Array.from({ length: 5 }).map((_, idx) => (
-                    <Star
-                      key={idx}
-                      className={`w-3.5 h-3.5 ${idx < cat.rating ? 'text-amber-500 fill-amber-500 [filter:drop-shadow(0_0_2px_rgba(245,158,11,0.5))]' : 'text-slate-200 dark:text-zinc-700'}`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <p className="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-400 mt-2 border-b border-[#FF9933]/20 dark:border-[#FF9933]/15 pb-2 leading-relaxed font-sans">
-                {cat.desc}
-              </p>
-
-              {/* Slots Timelines list */}
-              <div className="space-y-1.5 mt-2.5">
-                <span className="text-[11px] font-bold text-slate-400 uppercase font-mono tracking-wider block font-semibold text-center sm:text-left mb-1">
-                  {language === 'Hindi' ? "आज के शुभ मुहूर्त" : "Auspicious Timings Today"}
-                </span>
-                {cat.slots.map((sl, idx) => (
-                  <div key={idx} className="p-2.5 rounded-2xl bg-white/5 dark:bg-white/2 border !border-[#FF9933]/25 dark:!border-[#FF9933]/15 hover:border-[#FF9933]/40 transition-all duration-300 relative overflow-hidden">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-[13px] font-black text-slate-850 dark:text-slate-100 font-mono tracking-tight">{sl.time}</span>
-                      <span className="text-[10px] font-extrabold bg-[#e8f5e9]/70 dark:bg-green-950/25 text-green-800 dark:text-green-300 px-2 py-0.5 rounded-full font-mono">
-                        {sl.suitability}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-600 dark:text-slate-400 font-medium">
-                      <span className="text-slate-400 dark:text-slate-500 text-3xs uppercase font-mono">{language === 'Hindi' ? "लग्न:" : "Lagna:"}</span>
-                      <span className="text-orange-950 dark:text-orange-200 font-bold bg-orange-50 dark:bg-orange-950/30 px-1.5 py-0.2 rounded font-sans">{sl.lagna}</span>
-                    </div>
-
-                    <div className="text-[10px] text-slate-500 italic mt-0.5 leading-normal font-sans">
-                      {language === 'Hindi' ? "🌿 नोट:" : "🌿 Note:"} {language === 'Hindi' ? translateAdviceHindi(sl.advice) : sl.advice}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Custom advice footer */}
-            <div className="mt-3 pt-2 border-t border-[#FF9933]/20 dark:border-[#FF9933]/15 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-              <span>{language === 'Hindi' ? `संवत् ${panchang.hinduDate.samvatVikram} स्थितियां` : `Samvat ${panchang.hinduDate.samvatVikram} Conditions`}</span>
-              <span 
-                onClick={onViewAstrologyChart}
-                className="text-orange-600 dark:text-orange-400 font-bold hover:underline cursor-pointer font-sans"
-              >
-                {getTranslation(language, 'viewAstrologyChart')}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
