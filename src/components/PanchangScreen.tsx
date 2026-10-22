@@ -14,15 +14,18 @@ import {
   Calendar,
   CalendarRange,
   ChevronRight,
+  ChevronLeft,
   TrendingUp,
   Search,
   CheckCircle2,
   XCircle,
-  Sparkles
+  Sparkles,
+  Flame,
+  ShieldAlert,
+  ShieldCheck
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { PanchangInfo } from '../types';
-import { MoonPhaseVisualizer } from './MoonPhaseVisualizer';
 import { HoraSystem } from './HoraSystem';
 import { getTranslation } from '../utils/translations';
 import { getMuhuratsForPanchang, NAKSHATRA_DETAILS } from '../utils/panchangCalc';
@@ -233,36 +236,144 @@ const translateSymbolHindi = (symbol: string): string => {
     'Umbrella/Round Amulet': 'छत्र या ताबीज',
     'Circular Amulet or Umbrella': 'छत्र या ताबीज',
     'Umbrella': 'छत्र',
-    'Amulet': 'ताबीज'
+    'Amulet': 'ताबीज',
+    'Empty Circle/100 Stars': 'सौ तारों का समूह (रिक्त वृत्त)',
+    'Empty Circle': 'रिक्त वृत्त',
+    '100 Stars': 'सौ तारों का समूह',
+    'Movable (Chara)': 'चर (गतिशील)'
   };
   return map[symbol] || symbol;
 };
 
 const translateNakshatraNatureHindi = (nature: string): string => {
-  const map: Record<string, string> = {
-    'Mridu': 'मृदु (कोमल)',
-    'Teekshna': 'तीक्ष्ण (उग्र)',
-    'Ugra': 'उग्र (कठोर)',
-    'Dhruva': 'ध्रुव (स्थिर)',
-    'Chara': 'चर (चंचल)',
-    'Laghu': 'लघु (क्षिप्र)',
-    'Mishra': 'मिश्र (साधारण)',
-    'Sharp': 'तीक्ष्ण (उग्र)',
-    'Fierce': 'उग्र (कठोर)',
-    'Fixed': 'ध्रुव (स्थिर)',
-    'Movable': 'चर (चंचल)',
-    'Light': 'लघु (क्षिप्र)',
-    'Mixed': 'मिश्र (साधारण)',
-    'Soft': 'मृदु (कोमल)',
-    'मृदु': 'मृदु (कोमल)',
-    'तीक्ष्ण': 'तीक्ष्ण (उग्र)',
-    'उग्र': 'उग्र (कठोर)',
-    'ध्रुव': 'ध्रुव (स्थिर)',
-    'चर': 'चर (चंचल)',
-    'लघु': 'लघु (क्षिप्र)',
-    'मिश्र': 'मिश्र (साधारण)'
-  };
-  return map[nature] || nature;
+  if (!nature) return '';
+  const clean = nature.toLowerCase();
+  if (clean.includes('chara') || clean.includes('movable')) return 'चर (गतिशील)';
+  if (clean.includes('dhruva') || clean.includes('fixed')) return 'ध्रुव (स्थिर)';
+  if (clean.includes('mridu') || clean.includes('soft')) return 'मृदु (कोमल)';
+  if (clean.includes('ugra') || clean.includes('fierce')) return 'उग्र (कठोर)';
+  if (clean.includes('laghu') || clean.includes('light') || clean.includes('kshipra')) return 'लघु (क्षिप्र)';
+  if (clean.includes('teekshna') || clean.includes('sharp')) return 'तीक्ष्ण (दारुण)';
+  if (clean.includes('mishra') || clean.includes('mixed')) return 'मिश्र (साधारण)';
+  return nature;
+};
+
+const getTithiNatureBadge = (tithiVal: number, lang: 'English' | 'Hindi') => {
+  const norm = ((tithiVal - 1) % 15) + 1;
+  if (norm === 1 || norm === 6 || norm === 11) {
+    return {
+      label: lang === 'Hindi' ? 'नन्दा तिथि' : 'Nanda Tithi',
+      color: 'bg-emerald-100/70 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border-emerald-300/70'
+    };
+  } else if (norm === 2 || norm === 7 || norm === 12) {
+    return {
+      label: lang === 'Hindi' ? 'भद्रा तिथि' : 'Bhadra Tithi',
+      color: 'bg-amber-100/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 border-amber-300/70'
+    };
+  } else if (norm === 3 || norm === 8 || norm === 13) {
+    return {
+      label: lang === 'Hindi' ? 'जया तिथि' : 'Jaya Tithi',
+      color: 'bg-emerald-100/70 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border-emerald-300/70'
+    };
+  } else if (norm === 4 || norm === 9 || norm === 14) {
+    return {
+      label: lang === 'Hindi' ? 'रिक्ता तिथि' : 'Rikta Tithi',
+      color: 'bg-rose-100/70 dark:bg-rose-950/40 text-rose-800 dark:text-rose-455 border-rose-300/70'
+    };
+  } else {
+    return {
+      label: lang === 'Hindi' ? 'पूर्णा तिथि' : 'Poorna Tithi',
+      color: 'bg-orange-100/70 dark:bg-orange-950/40 text-orange-800 dark:text-orange-400 border-orange-300/70'
+    };
+  }
+};
+
+const getTithiSignificanceHindi = (tithiVal: number, name: string): string => {
+  const norm = ((tithiVal - 1) % 15) + 1;
+  if (tithiVal === 15) {
+    return 'पूर्णिमा तिथि मां लक्ष्मी और सत्यनारायण भगवान की कृपा प्राप्ति, दान, जप और तीर्थ स्नान के लिए परम पुण्यदायी है।';
+  }
+  if (tithiVal === 30) {
+    return 'अमावस्या तिथि पितृ तर्पण, श्राद्ध कर्म और आत्म-चिंतन के लिए समर्पित है। इस दिन नए सांसारिक कार्य टालें।';
+  }
+  switch (norm) {
+    case 1: return 'प्रतिपदा तिथि नए संकल्प, नवीन आरंभ और देव पूजन के लिए शुभ फलदायी मानी जाती है।';
+    case 2: return 'द्वितीया (दूज) तिथि नवीन कार्य, यात्रा, पारिवारिक मेलजोल व संस्कारों के लिए अत्यंत अनुकूल है।';
+    case 3: return 'तृतीया (तीज) तिथि मां गौरी की आराधना, आरोग्य, सौभाग्य वृद्धि और मांगलिक कार्यों हेतु उत्तम है।';
+    case 4: return 'चतुर्थी तिथि विघ्नहर्ता भगवान श्री गणेश की उपासना और संकट निवारण के लिए श्रेष्ठ है।';
+    case 5: return 'पंचमी तिथि देवी सरस्वती और नाग देव की पूजा तथा विद्यारंभ के लिए परम कल्याणकारी है।';
+    case 6: return 'षष्ठी तिथि भगवान कार्तिकेय की आराधना और स्वास्थ्य व ऊर्जा वृद्धि के लिए शुभ है।';
+    case 7: return 'सप्तमी तिथि भगवान सूर्य नारायण की उपासना, आरोग्य लाभ और मान-सम्मान प्राप्ति हेतु उत्तम है।';
+    case 8: return 'अष्टमी तिथि मां दुर्गा और शिव पूजन के लिए अत्यधिक फलदायी व आध्यात्मिक ऊर्जावान मानी जाती है।';
+    case 9: return 'नवमी तिथि मर्यादा पुरुषोत्तम श्री राम और देवी सिद्धिदात्री की कृपा प्राप्ति के लिए विशेष है।';
+    case 10: return 'दशमी तिथि विजय, धर्म रक्षा, यात्रा और महत्वपूर्ण कार्यों की सिद्धि के लिए शुभ मानी जाती है।';
+    case 11: return 'एकादशी तिथि भगवान विष्णु की उपासना, व्रत, साधना और सात्विक कार्यों के लिए परम शुभ मानी जाती है।';
+    case 12: return 'द्वादशी तिथि विष्णु पूजन, तुलसी सेवा, व्रत पारण और सात्विक कर्मों के लिए परम श्रेष्ठ है।';
+    case 13: return 'त्रयोदशी तिथि (प्रदोष काल) भगवान शिव की आराधना और सर्व मनोकामना पूर्ति हेतु शुभ है।';
+    case 14: return 'चतुर्दशी तिथि भगवान शिव और उग्र साधनाओं के लिए अनुकूल है। नए सांसारिक मांगलिक कार्य टालना श्रेयस्कर है।';
+    case 15: return 'पूर्णा तिथि सभी प्रकार के मांगलिक कार्यों, अनुष्ठान और उत्सवों के लिए परिपूर्ण मानी जाती है।';
+    default: return 'चंद्रमा और सूर्य की कोणीय दूरी से निर्मित शुभ चंद्र-सौर तिथि।';
+  }
+};
+
+const getNakshatraNatureBadge = (nature: string, lang: 'English' | 'Hindi') => {
+  const clean = nature ? nature.toLowerCase() : '';
+  if (clean.includes('chara') || clean.includes('movable')) {
+    return {
+      label: lang === 'Hindi' ? 'चर (गतिशील)' : 'Chara (Movable)',
+      color: 'bg-amber-100/70 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 border-amber-300/70'
+    };
+  } else if (clean.includes('dhruva') || clean.includes('fixed')) {
+    return {
+      label: lang === 'Hindi' ? 'ध्रुव (स्थिर)' : 'Dhruva (Fixed)',
+      color: 'bg-blue-100/70 dark:bg-blue-950/40 text-blue-800 dark:text-blue-400 border-blue-300/70'
+    };
+  } else if (clean.includes('mridu') || clean.includes('soft')) {
+    return {
+      label: lang === 'Hindi' ? 'मृदु (कोमल)' : 'Mridu (Soft)',
+      color: 'bg-emerald-100/70 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border-emerald-300/70'
+    };
+  } else if (clean.includes('ugra') || clean.includes('fierce')) {
+    return {
+      label: lang === 'Hindi' ? 'उग्र (कठोर)' : 'Ugra (Fierce)',
+      color: 'bg-rose-100/70 dark:bg-rose-950/40 text-rose-800 dark:text-rose-455 border-rose-300/70'
+    };
+  } else if (clean.includes('kshipra') || clean.includes('light') || clean.includes('laghu')) {
+    return {
+      label: lang === 'Hindi' ? 'लघु (क्षिप्र)' : 'Laghu (Swift)',
+      color: 'bg-purple-100/70 dark:bg-purple-950/40 text-purple-800 dark:text-purple-400 border-purple-300/70'
+    };
+  } else if (clean.includes('teekshna') || clean.includes('sharp')) {
+    return {
+      label: lang === 'Hindi' ? 'तीक्ष्ण (दारुण)' : 'Teekshna (Sharp)',
+      color: 'bg-red-100/70 dark:bg-red-950/40 text-red-800 dark:text-red-455 border-red-300/70'
+    };
+  } else {
+    return {
+      label: lang === 'Hindi' ? 'मिश्र (साधारण)' : 'Mishra (Mixed)',
+      color: 'bg-slate-100/70 dark:bg-slate-900/50 text-slate-800 dark:text-slate-300 border-slate-300/70'
+    };
+  }
+};
+
+const getFormattedHeaderDate = (date: Date, lang: 'English' | 'Hindi'): string => {
+  const validDate = (date && !isNaN(date.getTime())) ? date : new Date();
+  if (lang === 'Hindi') {
+    const days = ['रविवार', 'सोमवार', 'मंगलवार', 'बुधवार', 'गुरुवार', 'शुक्रवार', 'शनिवार'];
+    const months = ['जनवरी', 'फ़रवरी', 'मार्च', 'अप्रैल', 'मई', 'जून', 'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर'];
+    const dayName = days[validDate.getDay()];
+    const day = validDate.getDate();
+    const monthName = months[validDate.getMonth()];
+    const year = validDate.getFullYear();
+    return `${dayName}, ${day} ${monthName} ${year}`;
+  } else {
+    return validDate.toLocaleDateString('en-IN', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
 };
 
 const translateLordHindi = (lord: string): string => {
@@ -702,19 +813,16 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
   ];
 
   const solarLunarTrio = [
-    { label: getTranslation(language, 'sunrise'), val: panchang.sunrise, desc: language === 'Hindi' ? 'प्रार्थना के लिए शुभ प्रातःकाल' : 'Auspicious morning time', icon: <Sun className="w-5 h-5 text-amber-500 animate-spin-slow" /> },
+    { label: getTranslation(language, 'sunrise'), val: panchang.sunrise, desc: language === 'Hindi' ? 'प्रातःकालीन शुभ काल' : 'Auspicious morning time', icon: <Sun className="w-5 h-5 text-amber-500 animate-spin-slow" /> },
     { label: getTranslation(language, 'sunset'), val: panchang.sunset, desc: language === 'Hindi' ? 'संध्यावंदन का समय' : 'Evening prayer time', icon: <Sun className="w-5 h-5 text-orange-600" /> },
     { label: getTranslation(language, 'moonrise'), val: panchang.moonrise, desc: language === 'Hindi' ? 'चन्द्रोदय का समय' : 'Moonrise time', icon: <Moon className="w-5 h-5 text-indigo-400" /> },
-    { label: getTranslation(language, 'moonset'), val: panchang.moonset, desc: language === 'Hindi' ? 'चन्द्रास्त का समय' : 'Moonset time', icon: <Moon className="w-5 h-5 text-slate-400" /> },
-    {
-      label: language === 'Hindi' ? 'इष्टकाल' : 'Ishtakala',
-      val: panchang.ishtakala?.formatted || 'N/A',
-      desc: language === 'Hindi' ? 'सूर्योदय से व्यतीत समय (घटी-विघटी)' : 'Time elapsed since sunrise (Ghati-Vighati)',
-      icon: <Clock className="w-5 h-5 text-emerald-500" />
-    }
+    { label: getTranslation(language, 'moonset'), val: panchang.moonset, desc: language === 'Hindi' ? 'चन्द्रास्त का समय' : 'Moonset time', icon: <Moon className="w-5 h-5 text-slate-400" /> }
   ];
 
-    const mainPanchangElements = [
+  const tithiBadgeInfo = getTithiNatureBadge(hDate?.tithi?.value || 1, language);
+  const nakshatraBadgeInfo = getNakshatraNatureBadge(hDate?.nakshatra?.nature || '', language);
+
+  const mainPanchangElements = [
     {
       title: getTranslation(language, 'tithi'),
       fullName: language === 'Hindi' ? (hDate?.tithi?.hindiName || '') : (hDate?.tithi?.name || ''),
@@ -722,8 +830,11 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
       endTime: hDate?.tithi?.endTime || '',
       lord: language === 'Hindi' ? translateLordHindi(hDate?.tithi?.lord || '') : (hDate?.tithi?.lord || ''),
       deity: language === 'Hindi' ? translateDeityHindi(hDate?.tithi?.deity || '') : (hDate?.tithi?.deity || ''),
-      description: language === 'Hindi' ? 'चंद्रमा की 12 डिग्री की कोणीय दूरी को दर्शाने वाला चंद्र-सौर दिन।' : 'Lunar day representing a 12-degree angular displacement of the Moon.',
-      badgeColor: 'bg-orange-100 border-orange-255 text-orange-850'
+      description: language === 'Hindi'
+        ? getTithiSignificanceHindi(hDate?.tithi?.value || 1, hDate?.tithi?.hindiName || '')
+        : 'Lunar day representing a 12-degree angular displacement of the Moon.',
+      badgeText: tithiBadgeInfo.label,
+      badgeColor: tithiBadgeInfo.color
     },
     {
       title: getTranslation(language, 'nakshatra'),
@@ -735,11 +846,12 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
       lord: language === 'Hindi' ? translateLordHindi(hDate?.nakshatra?.lord || '') : (hDate?.nakshatra?.lord || ''),
       deity: language === 'Hindi' ? translateDeityHindi(hDate?.nakshatra?.deity || '') : (hDate?.nakshatra?.deity || ''),
       description: language === 'Hindi'
-        ? `चंद्र राशि का भाग (${translateSymbolHindi(hDate?.nakshatra?.symbol || '')})। प्रकृति ${translateNakshatraNatureHindi(hDate?.nakshatra?.nature || '')} है।` + 
+        ? `प्रतीक: ${translateSymbolHindi(hDate?.nakshatra?.symbol || '')} • स्वभाव: ${translateNakshatraNatureHindi(hDate?.nakshatra?.nature || '')}।` + 
           (hDate?.nakshatra?.gana ? ` गण: ${translateGanaHindi(hDate.nakshatra.gana)} | योनि: ${translateYoniHindi(hDate.nakshatra.yoni)} | नाड़ी: ${translateNadiHindi(hDate.nakshatra.nadi)}` : '')
-        : `Segment of Moon's path (${hDate?.nakshatra?.symbol || ''}). Nature is ${hDate?.nakshatra?.nature || ''}.` + 
+        : `Symbol: ${hDate?.nakshatra?.symbol || ''}. Nature: ${hDate?.nakshatra?.nature || ''}.` + 
           (hDate?.nakshatra?.gana ? ` Gana: ${hDate.nakshatra.gana} | Yoni: ${hDate.nakshatra.yoni} | Nadi: ${hDate.nakshatra.nadi}` : ''),
-      badgeColor: 'bg-amber-100 border-amber-200 text-amber-800'
+      badgeText: nakshatraBadgeInfo.label,
+      badgeColor: nakshatraBadgeInfo.color
     },
     {
       title: getTranslation(language, 'yoga'),
@@ -751,9 +863,10 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
       description: language === 'Hindi'
         ? translateYogaDescriptionHindi(hDate?.yoga?.name || '')
         : (hDate?.yoga?.meaning || 'Combined longitude of Sun and Moon divided into 27 equal parts.'),
+      badgeText: hDate?.yoga?.type === 'Shubh' ? (language === 'Hindi' ? 'शुभ योग' : 'Auspicious') : (language === 'Hindi' ? 'अशुभ योग' : 'Inauspicious'),
       badgeColor: hDate?.yoga?.type === 'Shubh' 
-        ? 'bg-emerald-100 border-emerald-255 text-emerald-850 dark:bg-emerald-950/30 dark:text-emerald-400' 
-        : 'bg-rose-100 border-rose-255 text-rose-850 dark:bg-rose-950/30 dark:text-rose-455'
+        ? 'bg-emerald-100/70 border-emerald-300 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400' 
+        : 'bg-rose-100/70 border-rose-300 text-rose-800 dark:bg-rose-950/40 dark:text-rose-455'
     },
     {
       title: getTranslation(language, 'karana'),
@@ -767,81 +880,39 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
       description: language === 'Hindi'
         ? (hDate.karana.description || 'एक तिथि का आधा हिस्सा, चंद्र चक्र में एक महत्वपूर्ण घटना का संकेत देता है।')
         : 'Half of a Tithi, indicating a critical phase in the lunar cycle.',
-      badgeColor: hDate.karana.classification === 'Shubh' 
-        ? 'bg-purple-100 border-purple-255 text-purple-850 dark:bg-purple-950/30 dark:text-purple-400' 
-        : 'bg-red-100 border-red-255 text-red-850 dark:bg-red-950/30 dark:text-red-400'
+      badgeText: (hDate.karana1 || hDate.karana)?.classification === 'Shubh' 
+        ? (language === 'Hindi' ? 'शुभ करण' : 'Auspicious') 
+        : (language === 'Hindi' ? 'विष्टि (भद्रा - वर्जित)' : 'Inauspicious'),
+      badgeColor: (hDate.karana1 || hDate.karana)?.classification === 'Shubh' 
+        ? 'bg-emerald-100/70 border-emerald-300 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400' 
+        : 'bg-rose-100/70 border-rose-300 text-rose-800 dark:bg-rose-950/40 dark:text-rose-455'
     }
   ];
 
   return (
     <div id="panchang_screen_root" className="space-y-4 sm:space-y-6">
       
-      {/* Quick Section Navigation Bar */}
-      <div className="glass-card-light dark:glass-card-dark p-2.5 sm:p-3 text-left shadow-xs border !border-[#FF9933]/50 dark:!border-[#FF9933]/35">
-        <span className="text-[11px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block mb-1.5 leading-none text-center">
-          {language === 'Hindi' ? "॥ त्वरित नेविगेशन ॥" : "|| Quick Navigation ||"}
-        </span>
-        <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
-          {[
-            { id: 'panchang_main_card', labelHindi: 'पंचांग मुख्य गणना', labelEng: 'Panchang Main' },
-            { id: 'astro_attributes_card', labelHindi: 'ज्योतिषीय विवरण', labelEng: 'Astrological Details' },
-            { id: 'muhurat_time_cycles_card', labelHindi: 'शुभ-अशुभ मुहूर्त', labelEng: 'Muhurat Cycles' },
-            { id: 'active_live_hora', labelHindi: 'लाइव होरा', labelEng: 'Live Hora' },
-            { id: 'active_live_choghadiya', labelHindi: 'लाइव चौघड़िया', labelEng: 'Live Choghadiya' },
-            { id: 'moon_phase_section', labelHindi: 'चन्द्र कलाएं', labelEng: 'Moon Phase' },
-            { id: 'navagraha_positions_card', labelHindi: 'ग्रह स्पष्ट डिग्री', labelEng: 'Navagraha Longitude' },
-            { id: 'grah_gochar_phal_card', labelHindi: 'ग्रह गोचर व फल', labelEng: 'Planet Transits' }
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                const element = document.getElementById(item.id);
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-              }}
-              className="py-1 px-2.5 sm:py-1.5 sm:px-3 rounded-xl text-[10px] font-extrabold border transition-all cursor-pointer bg-white/70 hover:bg-orange-50/50 dark:bg-zinc-900/60 dark:hover:bg-zinc-800/80 border-orange-100/50 dark:border-zinc-800/60 text-slate-750 dark:text-slate-350 hover:border-orange-300 shadow-3xs"
-            >
-              {language === 'Hindi' ? item.labelHindi : item.labelEng}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* 📅 TOP DATE SELECTOR CARD (1-TAP DAY NAVIGATION) */}
+      <div className="glass-card-light dark:glass-card-dark p-3 sm:p-4 border !border-[#FF9933]/50 dark:!border-[#FF9933]/35 rounded-3xl shadow-xs text-center">
+        <div className="flex items-center justify-between gap-2">
+          <button
+            onClick={() => {
+              const prev = new Date(selectedDate);
+              prev.setDate(prev.getDate() - 1);
+              onDateChange(prev);
+            }}
+            className="py-1.5 px-2.5 sm:px-3 rounded-xl border border-orange-200/70 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/70 hover:bg-orange-50 dark:hover:bg-zinc-800 text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1 transition-all cursor-pointer shadow-3xs"
+          >
+            <ChevronLeft className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+            <span>{language === 'Hindi' ? 'पिछला दिन' : 'Prev'}</span>
+          </button>
 
-
-      {/* COMPACT & INTEGRATED SINGLE PANCHANG CARD - Styled exactly like Welcome Card */}
-      <div id="panchang_main_card" className="glass-card-light dark:glass-card-dark p-3.5 sm:p-5 text-left space-y-4 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30">
-        
-        {/* Header section (Aligns to Name/Grec status card) */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-orange-100/60 dark:border-zinc-800/80">
-          <div className="space-y-0.5 text-center sm:text-left w-full sm:w-auto">
-            <span className="text-[13px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block text-center sm:text-left">
-              {language === 'Hindi' ? "॥ संपूर्ण विवरण ॥" : "|| Detailed Breakdown ||"}
-            </span>
-            <h2 className="text-[17px] sm:text-[19px] font-bold font-serif text-slate-800 dark:text-amber-100 text-center sm:text-left">
-              {language === 'Hindi' ? "वैदिक पंचांग संपूर्ण गणना" : "Vedic Panchang Complete Calculations"}
-            </h2>
-            <p className="text-[10.5px] sm:text-[11.5px] text-slate-500 dark:text-slate-400 text-center sm:text-left">
-              {language === 'Hindi' 
-                ? "सूर्योदय, सूर्यास्त, तिथि, नक्षत्र, योग, करण और संवत् का वैज्ञानिक एवं आध्यात्मिक संयोजन।" 
-                : "Scientific and spiritual combination of sunrise, sunset, tithi, nakshatra, yoga, karana, and samvat."}
-            </p>
-          </div>
-
-          {/* Premium Date Input Picker for Isolated Panchang Calculation (DD-MM-YYYY Format) */}
-          <div className="relative flex items-center justify-center gap-2 bg-slate-500/5 dark:bg-zinc-950/40 border border-slate-200/55 dark:border-zinc-850 rounded-xl p-2 px-3 shrink-0 self-center cursor-pointer">
-            <span className="text-[10px] font-bold text-slate-450 dark:text-slate-400 uppercase font-mono tracking-wider">
-              {language === 'Hindi' ? 'तिथि चुनें:' : 'Select Date:'}
-            </span>
-            <div className="flex items-center gap-1.5 text-xs text-slate-800 dark:text-amber-100 font-mono font-bold">
-              <Calendar className="w-3.5 h-3.5 text-orange-500 shrink-0" />
-              <span>{(() => {
-                const validDate = (selectedDate && !isNaN(selectedDate.getTime())) ? selectedDate : new Date();
-                const day = String(validDate.getDate()).padStart(2, '0');
-                const month = String(validDate.getMonth() + 1).padStart(2, '0');
-                const year = validDate.getFullYear();
-                return `${day}-${month}-${year}`;
-              })()}</span>
+          <div className="relative cursor-pointer group flex-1 max-w-[260px] mx-1">
+            <div className="py-1.5 px-3 rounded-2xl bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-orange-500/10 border border-orange-300/70 dark:border-amber-500/30 flex items-center justify-center gap-2 shadow-inner">
+              <Calendar className="w-4 h-4 text-orange-600 dark:text-orange-400 shrink-0" />
+              <span className="text-[12.5px] sm:text-[14px] font-bold text-slate-850 dark:text-amber-100 font-serif truncate">
+                {getFormattedHeaderDate(selectedDate, language)}
+              </span>
             </div>
             <input
               type="date"
@@ -864,29 +935,119 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                 }
               }}
               className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
-              title={language === 'Hindi' ? 'तिथि बदलें' : 'Change Date'}
+              title={language === 'Hindi' ? 'तिथि बदलें (कैलेंडर)' : 'Change Date'}
             />
           </div>
+
+          <button
+            onClick={() => {
+              const next = new Date(selectedDate);
+              next.setDate(next.getDate() + 1);
+              onDateChange(next);
+            }}
+            className="py-1.5 px-2.5 sm:px-3 rounded-xl border border-orange-200/70 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/70 hover:bg-orange-50 dark:hover:bg-zinc-800 text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1 transition-all cursor-pointer shadow-3xs"
+          >
+            <span>{language === 'Hindi' ? 'अगला दिन' : 'Next'}</span>
+            <ChevronRight className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+          </button>
+        </div>
+
+        {/* Go to Today Button */}
+        {(() => {
+          const today = new Date();
+          const d = (selectedDate && !isNaN(selectedDate.getTime())) ? selectedDate : new Date();
+          const isToday = today.getFullYear() === d.getFullYear() &&
+                          today.getMonth() === d.getMonth() &&
+                          today.getDate() === d.getDate();
+          if (!isToday) {
+            return (
+              <div className="mt-2 pt-1.5 border-t border-orange-100/50 dark:border-zinc-800/50 flex justify-center">
+                <button
+                  onClick={() => onDateChange(new Date())}
+                  className="py-0.5 px-3 rounded-full bg-orange-500/15 hover:bg-orange-500/25 text-orange-700 dark:text-orange-400 border border-orange-300/50 dark:border-orange-900/50 text-[11px] font-bold font-mono transition-all cursor-pointer flex items-center gap-1"
+                >
+                  <span>🔄</span> {language === 'Hindi' ? 'आज पर जाएं (Today)' : 'Go to Today'}
+                </button>
+              </div>
+            );
+          }
+          return null;
+        })()}
+      </div>
+
+      {/* Quick Section Navigation Bar */}
+      <div className="glass-card-light dark:glass-card-dark p-2.5 sm:p-3 text-left shadow-xs border !border-[#FF9933]/50 dark:!border-[#FF9933]/35 rounded-3xl">
+        <span className="text-[11px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block mb-1.5 leading-none text-center">
+          {language === 'Hindi' ? "॥ त्वरित नेविगेशन ॥" : "|| Quick Navigation ||"}
+        </span>
+        <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
+          {[
+            { id: 'panchang_main_card', labelHindi: 'पंचांग मुख्य अंग', labelEng: 'Panchang Main' },
+            { id: 'muhurat_time_cycles_card', labelHindi: 'शुभ-अशुभ मुहूर्त', labelEng: 'Muhurat Cycles' },
+            { id: 'anushthan_card', labelHindi: 'अग्नि व शिव वास', labelEng: 'Ritual Guidelines' },
+            { id: 'action:hora_modal', labelHindi: 'लाइव होरा सारिणी', labelEng: 'Live Hora Chart' },
+            { id: 'action:choghadiya_modal', labelHindi: 'चौघड़िया तालिका', labelEng: 'Choghadiya Table' },
+            { id: 'navagraha_positions_card', labelHindi: 'ग्रह स्पष्ट डिग्री', labelEng: 'Navagraha Longitude' },
+            { id: 'grah_gochar_phal_card', labelHindi: 'ग्रह गोचर व फल', labelEng: 'Planet Transits' }
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                if (item.id === 'action:hora_modal') {
+                  setShowHoraModal(true);
+                } else if (item.id === 'action:choghadiya_modal') {
+                  setShowChoghadiyaModal(true);
+                } else {
+                  const element = document.getElementById(item.id);
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }
+              }}
+              className="py-1 px-2.5 sm:py-1.5 sm:px-3 rounded-xl text-[11px] sm:text-[11.5px] font-bold border transition-all cursor-pointer bg-white/70 hover:bg-orange-50/50 dark:bg-zinc-900/60 dark:hover:bg-zinc-800/80 border-orange-100/60 dark:border-zinc-800/60 text-slate-750 dark:text-slate-350 hover:border-orange-300 shadow-3xs"
+            >
+              {language === 'Hindi' ? item.labelHindi : item.labelEng}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* COMPACT & INTEGRATED SINGLE PANCHANG CARD */}
+      <div id="panchang_main_card" className="glass-card-light dark:glass-card-dark p-3.5 sm:p-5 text-left space-y-4 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl">
+        
+        {/* Header section */}
+        <div className="pb-2 border-b border-orange-100/60 dark:border-zinc-800/80 text-center sm:text-left">
+          <span className="text-[12px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block">
+            {language === 'Hindi' ? "॥ संपूर्ण विवरण ॥" : "|| Detailed Breakdown ||"}
+          </span>
+          <h2 className="text-[18px] sm:text-[20px] font-bold font-serif text-slate-800 dark:text-amber-100 mt-0.5">
+            {language === 'Hindi' ? "वैदिक पंचांग संपूर्ण गणना" : "Vedic Panchang Complete Calculations"}
+          </h2>
+          <p className="text-[11px] sm:text-[12px] text-slate-500 dark:text-slate-400 mt-0.5">
+            {language === 'Hindi' 
+              ? "सूर्योदय, सूर्यास्त, तिथि, नक्षत्र, योग, करण और संवत् का शास्त्रीय संयोजन।" 
+              : "Classical combination of sunrise, sunset, tithi, nakshatra, yoga, karana, and samvat."}
+          </p>
         </div>
 
         {/* A. Astronomical Timings Section */}
         <div>
-          <h4 className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 font-mono">
+          <h4 className="text-[11.5px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2 font-mono">
             {language === 'Hindi' ? "🌅 सूर्य और चन्द्रोदय समय" : "🌅 Astronomical Timings"}
           </h4>
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {solarLunarTrio.map((item, idx) => (
               <div 
                 key={idx} 
-                className="bg-white/5 dark:bg-white/2 backdrop-blur-xs p-2.5 sm:p-3 rounded-2xl border border-white/10 dark:border-white/5 hover:scale-[1.02] hover:border-orange-500/20 shadow-[0_4px_20px_0_rgba(0,0,0,0.08)] transition-all duration-300 flex items-center gap-2.5 text-left"
+                className="bg-white/40 dark:bg-white/2 backdrop-blur-xs p-2.5 sm:p-3 rounded-2xl border border-orange-100/60 dark:border-white/5 hover:border-orange-500/20 shadow-xs transition-all duration-300 flex items-center gap-2.5 text-left"
               >
-                <div className="p-1.5 sm:p-2 rounded-xl bg-orange-100/40 dark:bg-orange-950/20 shrink-0">
+                <div className="p-1.5 sm:p-2 rounded-xl bg-orange-100/50 dark:bg-orange-950/30 shrink-0">
                   {item.icon}
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[9px] font-bold text-slate-400 block font-mono uppercase tracking-wider">{item.label}</span>
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block font-mono uppercase tracking-wider">{item.label}</span>
                   <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-orange-100 font-mono mt-0.5 block">{item.val}</span>
-                  <span className="text-[8px] sm:text-[9.5px] text-slate-400 dark:text-slate-500 block truncate">{item.desc}</span>
+                  <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 block truncate">{item.desc}</span>
                 </div>
               </div>
             ))}
@@ -895,7 +1056,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
 
         {/* B. Core Panchang Attributes Grid (Tithi, Nakshatra, Yoga, Karana) */}
         <div className="pt-3.5 border-t border-slate-100 dark:border-zinc-800/80">
-          <h4 className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2.5 font-mono">
+          <h4 className="text-[11.5px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2.5 font-mono">
             {language === 'Hindi' ? "🕉️ मुख्य पंचांग अंग" : "🕉️ Five Essential Elements"}
           </h4>
           
@@ -917,60 +1078,60 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                 return (
                   <div 
                     key={idx} 
-                    className={`${gridClass} bg-white/5 dark:bg-[#120B08]/40 backdrop-blur-md p-3.5 sm:p-4 rounded-3xl border border-white/10 dark:border-white/5 hover:border-orange-500/30 hover:scale-[1.01] hover:translate-y-[-2px] shadow-[0_8px_32px_0_rgba(0,0,0,0.15)] transition-all duration-300 flex flex-col justify-between text-left`}
+                    className={`${gridClass} bg-white/50 dark:bg-[#120B08]/40 backdrop-blur-md p-3.5 sm:p-4 rounded-3xl border border-orange-100/70 dark:border-white/5 hover:border-orange-500/30 shadow-xs transition-all duration-300 flex flex-col justify-between text-left`}
                   >
                     <div>
-                      <div className="flex justify-between items-start">
-                        <span className="text-[13px] font-extrabold text-orange-600 dark:text-orange-400 font-serif">{elem.title}</span>
-                        <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-full border ${elem.badgeColor} font-mono uppercase tracking-wide shadow-3xs`}>
-                          {elem.title}
+                      <div className="flex justify-between items-center">
+                        <span className="text-[14px] font-black text-orange-600 dark:text-orange-400 font-serif">{elem.title}</span>
+                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${elem.badgeColor} font-mono shadow-3xs`}>
+                          {elem.badgeText}
                         </span>
                       </div>
                       
                       {/* Prathama Karana */}
                       {k1 && (
-                        <div className="mt-2.5 pb-2.5 border-b border-slate-100/10 dark:border-zinc-800/30">
-                          <span className="text-[8.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono">
+                        <div className="mt-2.5 pb-2.5 border-b border-slate-200/50 dark:border-zinc-800/30">
+                          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 font-sans block">
                             {language === 'Hindi' ? "प्रथम करण" : "First Karana"}
                           </span>
-                          <h3 className="text-sm sm:text-base font-black text-slate-800 dark:text-amber-100 mt-1 flex items-center gap-1.5 leading-tight font-serif">
+                          <h3 className="text-sm sm:text-base font-black text-slate-800 dark:text-amber-100 mt-0.5 flex items-center gap-1.5 leading-tight font-serif">
                             <Feather className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400 flex-shrink-0" />
                             {language === 'Hindi' ? translateKaranaHindi(k1.name) : k1.name}
                           </h3>
-                        <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                          <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-slate-900/60 px-2 py-0.5 rounded-md text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-                            <span>{language === 'Hindi' ? "समाप्ति:" : "Ends:"}</span>
-                            <strong className="text-slate-800 dark:text-slate-200 font-bold">{k1.endTime}</strong>
+                          <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/60 px-2 py-0.5 rounded-md text-[10.5px] text-slate-600 dark:text-slate-400 font-mono">
+                              <span>{language === 'Hindi' ? "समाप्ति:" : "Ends:"}</span>
+                              <strong className="text-slate-800 dark:text-slate-200 font-bold">{k1.endTime}</strong>
+                            </div>
+                            <span className={`text-[9.5px] font-bold px-1.5 py-0.25 rounded border font-mono ${
+                              k1.classification === 'Shubh'
+                                ? 'bg-emerald-100/50 border-emerald-300 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400'
+                                : 'bg-rose-100/50 border-rose-300 text-rose-800 dark:bg-rose-950/20 dark:text-rose-455'
+                            }`}>
+                              {language === 'Hindi' 
+                                ? (k1.natureHindi || (k1.type === 'Fixed' ? 'स्थिर' : 'चर'))
+                                : (k1.nature || k1.type)}
+                            </span>
                           </div>
-                          <span className={`text-[9px] font-bold px-1.5 py-0.25 rounded border font-mono ${
-                            k1.classification === 'Shubh'
-                              ? 'bg-emerald-100/50 border-emerald-300 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400'
-                              : 'bg-rose-100/50 border-rose-300 text-rose-800 dark:bg-rose-950/20 dark:text-rose-455'
-                          }`}>
-                            {language === 'Hindi' 
-                              ? (k1.natureHindi || (k1.type === 'Fixed' ? 'स्थिर' : 'चर'))
-                              : (k1.nature || k1.type)}
-                          </span>
                         </div>
-                      </div>
                       )}
 
                       {/* Dwitiya Karana */}
                       {k2 && (
                         <div className="mt-2.5">
-                          <span className="text-[8.5px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono">
+                          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 font-sans block">
                             {language === 'Hindi' ? "द्वितीय करण" : "Second Karana"}
                           </span>
-                          <h3 className="text-sm sm:text-base font-black text-slate-800 dark:text-amber-100 mt-1 flex items-center gap-1.5 leading-tight font-serif">
+                          <h3 className="text-sm sm:text-base font-black text-slate-800 dark:text-amber-100 mt-0.5 flex items-center gap-1.5 leading-tight font-serif">
                             <Feather className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400 flex-shrink-0" />
                             {language === 'Hindi' ? translateKaranaHindi(k2.name) : k2.name}
                           </h3>
                           <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                            <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-slate-900/60 px-2 py-0.5 rounded-md text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/60 px-2 py-0.5 rounded-md text-[10.5px] text-slate-600 dark:text-slate-400 font-mono">
                               <span>{language === 'Hindi' ? "समाप्ति:" : "Ends:"}</span>
                               <strong className="text-slate-800 dark:text-slate-200 font-bold">{k2.endTime}</strong>
                             </div>
-                            <span className={`text-[9px] font-bold px-1.5 py-0.25 rounded border font-mono ${
+                            <span className={`text-[9.5px] font-bold px-1.5 py-0.25 rounded border font-mono ${
                               k2.classification === 'Shubh'
                                 ? 'bg-emerald-100/50 border-emerald-300 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400'
                                 : 'bg-rose-100/50 border-rose-300 text-rose-800 dark:bg-rose-950/20 dark:text-rose-455'
@@ -985,22 +1146,22 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                     </div>
 
                     {/* Meta properties - Actual Lords and Deities */}
-                    <div className="grid grid-cols-2 gap-x-2 gap-y-1 mt-2.5 pt-2.5 border-t border-slate-100/10 dark:border-zinc-800/30 text-[10.5px]">
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-1 mt-2.5 pt-2.5 border-t border-slate-200/50 dark:border-zinc-800/30 text-[11px]">
                       <div>
-                        <span className="text-slate-400 block font-mono">{language === 'Hindi' ? "प्रथम स्वामी" : "1st Lord"}</span>
-                        <span className="font-bold text-slate-700 dark:text-amber-300 block mt-0.5 truncate">{k1Info?.lord || '—'}</span>
+                        <span className="text-slate-500 dark:text-slate-400 block font-sans">{language === 'Hindi' ? "प्रथम स्वामी" : "1st Lord"}</span>
+                        <span className="font-bold text-slate-800 dark:text-amber-200 block mt-0.5 truncate">{k1Info?.lord || '—'}</span>
                       </div>
                       <div>
-                        <span className="text-slate-400 block font-mono">{language === 'Hindi' ? "द्वितीय स्वामी" : "2nd Lord"}</span>
-                        <span className="font-bold text-slate-700 dark:text-amber-300 block mt-0.5 truncate">{k2Info ? k2Info.lord : '—'}</span>
+                        <span className="text-slate-500 dark:text-slate-400 block font-sans">{language === 'Hindi' ? "द्वितीय स्वामी" : "2nd Lord"}</span>
+                        <span className="font-bold text-slate-800 dark:text-amber-200 block mt-0.5 truncate">{k2Info ? k2Info.lord : '—'}</span>
                       </div>
                       <div>
-                        <span className="text-slate-400 block font-mono">{language === 'Hindi' ? "प्रथम देवता" : "1st Deity"}</span>
-                        <span className="font-bold text-slate-700 dark:text-amber-300 block mt-0.5 truncate">{k1Info?.deity || '—'}</span>
+                        <span className="text-slate-500 dark:text-slate-400 block font-sans">{language === 'Hindi' ? "प्रथम देवता" : "1st Deity"}</span>
+                        <span className="font-bold text-slate-800 dark:text-amber-200 block mt-0.5 truncate">{k1Info?.deity || '—'}</span>
                       </div>
                       <div>
-                        <span className="text-slate-400 block font-mono">{language === 'Hindi' ? "द्वितीय देवता" : "2nd Deity"}</span>
-                        <span className="font-bold text-slate-700 dark:text-amber-300 block mt-0.5 truncate">{k2Info ? k2Info.deity : '—'}</span>
+                        <span className="text-slate-500 dark:text-slate-400 block font-sans">{language === 'Hindi' ? "द्वितीय देवता" : "2nd Deity"}</span>
+                        <span className="font-bold text-slate-800 dark:text-amber-200 block mt-0.5 truncate">{k2Info ? k2Info.deity : '—'}</span>
                       </div>
                     </div>
                   </div>
@@ -1010,13 +1171,13 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
               return (
                 <div 
                   key={idx} 
-                  className={`${gridClass} bg-white/5 dark:bg-[#120B08]/40 backdrop-blur-md p-3.5 sm:p-4 rounded-3xl border border-white/10 dark:border-white/5 hover:border-orange-500/30 hover:scale-[1.01] hover:translate-y-[-2px] shadow-[0_8px_32px_0_rgba(0,0,0,0.15)] transition-all duration-300 flex flex-col justify-between text-left`}
+                  className={`${gridClass} bg-white/50 dark:bg-[#120B08]/40 backdrop-blur-md p-3.5 sm:p-4 rounded-3xl border border-orange-100/70 dark:border-white/5 hover:border-orange-500/30 shadow-xs transition-all duration-300 flex flex-col justify-between text-left`}
                 >
                   <div>
-                    <div className="flex justify-between items-start">
-                      <span className="text-[13px] font-extrabold text-orange-600 dark:text-orange-400 font-serif">{elem.title}</span>
-                      <span className={`text-[9.5px] font-black px-2 py-0.5 rounded-full border ${elem.badgeColor} font-mono uppercase tracking-wide shadow-3xs`}>
-                        {elem.title}
+                    <div className="flex justify-between items-center">
+                      <span className="text-[14px] font-black text-orange-600 dark:text-orange-400 font-serif">{elem.title}</span>
+                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${elem.badgeColor} font-mono shadow-3xs`}>
+                        {elem.badgeText}
                       </span>
                     </div>
                     
@@ -1025,17 +1186,17 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                       {elem.fullName}
                     </h3>
                     
-                    <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-slate-900/60 px-2 py-0.5 rounded-md inline-flex text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-mono">
+                    <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/60 px-2 py-0.5 rounded-md inline-flex text-[10.5px] text-slate-600 dark:text-slate-400 mt-1.5 font-mono">
                       <span>{language === 'Hindi' ? "समाप्ति:" : "Ends:"}</span>
                       <strong className="text-slate-800 dark:text-slate-200 font-bold">{elem.endTime}</strong>
                     </div>
 
-                    <p className="text-[12px] text-slate-550 dark:text-slate-400 font-sans mt-2 leading-relaxed">
+                    <p className="text-[12.5px] sm:text-[13px] text-slate-600 dark:text-slate-350 font-sans mt-2.5 leading-relaxed">
                       {elem.description}
                     </p>
 
                     {elem.title === getTranslation(language, 'tithi') && hDate.tithi.percentPassed !== undefined && (
-                      <div className="w-full relative h-[95px] flex flex-col items-center justify-end mt-2.5 bg-white/5 dark:bg-white/2 rounded-xl p-2 border border-white/10 dark:border-white/5">
+                      <div className="w-full relative h-[95px] flex flex-col items-center justify-end mt-2.5 bg-white/30 dark:bg-white/2 rounded-xl p-2 border border-orange-100/50 dark:border-white/5">
                         <div className="absolute top-1.5 w-full px-3.5 flex justify-between text-[8.5px] font-mono font-semibold text-slate-500">
                           <div className="text-left leading-tight">{language === 'Hindi' ? "आरंभ" : "Starts"}<br/><span className="text-slate-800 dark:text-slate-300 font-bold">{hDate.tithi.startTime}</span></div>
                           <div className="text-right leading-tight">{language === 'Hindi' ? "समाप्ति" : "Ends"}<br/><span className="text-slate-800 dark:text-slate-300 font-bold">{hDate.tithi.endTime}</span></div>
@@ -1072,14 +1233,14 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                   </div>
 
                   {/* Meta properties */}
-                  <div className="grid grid-cols-2 gap-2 mt-2.5 pt-2.5 border-t border-slate-100/80 dark:border-slate-800/50 text-[10.5px]">
+                  <div className="grid grid-cols-2 gap-2 mt-2.5 pt-2.5 border-t border-slate-200/50 dark:border-slate-800/50 text-[11px]">
                     <div>
-                      <span className="text-slate-400 block font-mono">{language === 'Hindi' ? "स्वामी / शासक" : "Ruler / Lord"}</span>
-                      <span className="font-bold text-slate-700 dark:text-amber-300 block mt-0.5 truncate">{elem.lord}</span>
+                      <span className="text-slate-500 dark:text-slate-400 block font-sans">{language === 'Hindi' ? "स्वामी / शासक" : "Ruler / Lord"}</span>
+                      <span className="font-bold text-slate-800 dark:text-amber-200 block mt-0.5 truncate">{elem.lord}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block font-mono">{language === 'Hindi' ? "देवता / आशीर्वाद" : "Deity / Blessing"}</span>
-                      <span className="font-bold text-slate-700 dark:text-amber-300 block mt-0.5 truncate">{elem.deity}</span>
+                      <span className="text-slate-500 dark:text-slate-400 block font-sans">{language === 'Hindi' ? "देवता / आशीर्वाद" : "Deity / Blessing"}</span>
+                      <span className="font-bold text-slate-800 dark:text-amber-200 block mt-0.5 truncate">{elem.deity}</span>
                     </div>
                   </div>
                 </div>
@@ -1088,31 +1249,36 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
           </div>
         </div>
 
-        {/* C. Samvat Timeline Row */}
+        {/* C. Samvat Timeline Row + Ishtakala */}
         <div className="pt-3.5 border-t border-slate-100 dark:border-zinc-800/80">
-          <div className="flex flex-col md:flex-row gap-3 items-center justify-between text-left bg-white/5 dark:bg-[#120B08]/30 p-3 sm:p-3.5 rounded-2xl border border-white/10 dark:border-white/5">
+          <div className="flex flex-col gap-3 text-left bg-white/40 dark:bg-[#120B08]/30 p-3.5 rounded-2xl border border-orange-100/60 dark:border-white/5">
             <div className="flex items-center gap-3 w-full">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500/80 to-orange-500/80 flex items-center justify-center font-bold text-xs text-white shadow-3xs shrink-0 font-sans">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center font-bold text-xs text-white shadow-3xs shrink-0 font-sans">
                 VS
               </div>
               <div>
-                <h3 className="text-sm font-extrabold text-slate-800 dark:text-amber-100 font-serif">{language === 'Hindi' ? "संवत् प्रणाली विवरण" : "Samvat Calendar Details"}</h3>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{language === 'Hindi' ? "विक्रम और शक संवत् की पारंपरिक प्राचीन वैदिक कैलेंडर प्रणाली।" : "Traditional ancient Vedic calendar system of Vikram and Shaka Samvat."}</p>
+                <h3 className="text-sm font-extrabold text-slate-800 dark:text-amber-100 font-serif">{language === 'Hindi' ? "संवत् व कालमान विवरण" : "Samvat Calendar & Time Metrics"}</h3>
+                <p className="text-[10.5px] text-slate-500 dark:text-slate-400 mt-0.5">{language === 'Hindi' ? "वैदिक संवत्सर और सूर्योदय से व्यतीत पारम्परिक घटी-विघटी।" : "Traditional Vedic calendar years and elapsed ghati-vighati."}</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2.5 w-full md:w-auto shrink-0">
-              <div className="p-2 px-3 rounded-xl bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 text-center font-mono min-w-[90px]">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full">
+              <div className="p-2 px-3 rounded-xl bg-white/60 dark:bg-black/20 border border-orange-100/60 dark:border-white/5 text-center min-w-[90px]">
                 <span className="text-[11px] font-bold text-[#9E2A00] dark:text-[#FF9933] uppercase block tracking-wider font-sans">{language === 'Hindi' ? "विक्रम संवत्" : "Vikram Samvat"}</span>
-                <span className="text-orange-950 dark:text-amber-200 font-extrabold text-base sm:text-lg block mt-0.5">{hDate.samvatVikram}</span>
+                <span className="text-orange-950 dark:text-amber-200 font-extrabold text-base sm:text-lg block mt-0.5 font-mono">{hDate.samvatVikram}</span>
               </div>
-              <div className="p-2 px-3 rounded-xl bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 text-center font-mono min-w-[90px]">
+              <div className="p-2 px-3 rounded-xl bg-white/60 dark:bg-black/20 border border-orange-100/60 dark:border-white/5 text-center min-w-[90px]">
                 <span className="text-[11px] font-bold text-[#9E2A00] dark:text-[#FF9933] uppercase block tracking-wider font-sans">{language === 'Hindi' ? "शक संवत्" : "Shaka Samvat"}</span>
-                <span className="text-orange-950 dark:text-amber-200 font-extrabold text-base sm:text-lg block mt-0.5">{hDate.samvatShaka}</span>
+                <span className="text-orange-950 dark:text-amber-200 font-extrabold text-base sm:text-lg block mt-0.5 font-mono">{hDate.samvatShaka}</span>
               </div>
-              <div className="p-2 px-3 rounded-xl bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 text-center font-mono min-w-[90px]">
+              <div className="p-2 px-3 rounded-xl bg-white/60 dark:bg-black/20 border border-orange-100/60 dark:border-white/5 text-center min-w-[90px]">
                 <span className="text-[11px] font-bold text-[#9E2A00] dark:text-[#FF9933] uppercase block tracking-wider font-sans">{language === 'Hindi' ? "गुजरात संवत्" : "Gujarati Samvat"}</span>
-                <span className="text-orange-950 dark:text-amber-200 font-extrabold text-base sm:text-lg block mt-0.5">{hDate.samvatGujarati || hDate.samvatVikram - 1}</span>
+                <span className="text-orange-950 dark:text-amber-200 font-extrabold text-base sm:text-lg block mt-0.5 font-mono">{hDate.samvatGujarati || hDate.samvatVikram - 1}</span>
+              </div>
+              <div className="p-2 px-3 rounded-xl bg-white/60 dark:bg-black/20 border border-orange-100/60 dark:border-white/5 text-center min-w-[90px]">
+                <span className="text-[11px] font-bold text-[#9E2A00] dark:text-[#FF9933] uppercase block tracking-wider font-sans">{language === 'Hindi' ? "इष्टकाल" : "Ishtakala"}</span>
+                <span className="text-orange-950 dark:text-amber-200 font-extrabold text-sm sm:text-base block mt-0.5 font-mono">{panchang.ishtakala?.formatted || '—'}</span>
+                <span className="text-[9px] text-slate-400 dark:text-slate-500 block font-sans">{language === 'Hindi' ? "घटी-विघटी" : "Ghati-Vighati"}</span>
               </div>
             </div>
           </div>
@@ -1302,8 +1468,94 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
         </div>
       </div>
 
+      {/* 🔥 PHASE 11: DAILY ANUSHTHAN & PUJA CARD (AGNI VAAS & SHIVA VAAS) */}
+      <div id="anushthan_card" className="glass-card-light dark:glass-card-dark p-3.5 sm:p-5 text-left space-y-3 shadow-xs border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl mt-4">
+        <div className="space-y-0.5 pb-2 border-b border-orange-100/60 dark:border-zinc-800/80 text-center">
+          <span className="text-[12px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block text-center">
+            {language === 'Hindi' ? "॥ दैनिक अनुष्ठान व साधना विचार ॥" : "|| Daily Ritual & Worship Guidelines ||"}
+          </span>
+          <h2 className="text-[17px] sm:text-[19px] font-bold font-serif text-slate-800 dark:text-amber-100 text-center">
+            {language === 'Hindi' ? "अग्नि वास एवं शिव वास विचार" : "Agni Vaas & Shiva Vaas"}
+          </h2>
+          <p className="text-[11px] sm:text-[12px] text-slate-500 dark:text-slate-400 text-center">
+            {language === 'Hindi'
+              ? "हवन, यज्ञ, एवं भगवान शिव के रुद्राभिषेक अनुष्ठान हेतु शास्त्रीय स्थिति।"
+              : "Vedic guidelines for performing havan, yagya, and Shiva Rudrabhishek rituals."}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
+          {/* Agni Vaas Card */}
+          <div className={`p-3.5 sm:p-4 rounded-2xl border transition-all ${
+            panchang.agniVaas?.isAuspicious
+              ? 'bg-emerald-500/5 border-emerald-500/25 dark:border-emerald-500/20'
+              : 'bg-rose-500/5 border-rose-500/25 dark:border-rose-500/20'
+          }`}>
+            <div className="flex items-center justify-between">
+              <span className="text-[14px] font-black text-slate-800 dark:text-amber-100 font-serif flex items-center gap-1.5">
+                <Flame className="w-4 h-4 text-orange-500" />
+                {language === 'Hindi' ? "अग्नि वास (हवन/यज्ञ विचार)" : "Agni Vaas (Havan Timing)"}
+              </span>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border font-mono ${
+                panchang.agniVaas?.isAuspicious
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-300'
+                  : 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-455 border-rose-300'
+              }`}>
+                {panchang.agniVaas?.isAuspicious
+                  ? (language === 'Hindi' ? "✨ शुभ (फलदायी)" : "Favorable")
+                  : (language === 'Hindi' ? "⚠️ वर्जित (टालें)" : "Avoid")}
+              </span>
+            </div>
+            <div className="mt-2.5 flex items-baseline gap-2">
+              <span className="text-[12px] text-slate-500 dark:text-slate-400 font-sans">{language === 'Hindi' ? "वास स्थान:" : "Residence:"}</span>
+              <span className="text-[16px] font-black text-slate-900 dark:text-amber-200 font-serif">
+                {language === 'Hindi' ? `${panchang.agniVaas?.residenceHindi || 'पृथ्वी'} पर` : panchang.agniVaas?.residence}
+              </span>
+            </div>
+            <p className="text-[12px] text-slate-650 dark:text-slate-350 mt-1.5 leading-relaxed font-sans">
+              {panchang.agniVaas?.description || (panchang.agniVaas?.isAuspicious 
+                ? (language === 'Hindi' ? "आज अग्नि का वास पृथ्वी पर है। हवन व यज्ञ अनुष्ठान करने से मनोवांछित फल व सुख-समृद्धि की प्राप्ति होगी।" : "Agni resides on Earth today. Highly auspicious for performing havan and yagya rituals.")
+                : (language === 'Hindi' ? "आज अग्नि का वास आकाश/पाताल में है। नित्य अग्निहोत्र को छोड़कर काम्य हवन करने से विघ्न हो सकता है।" : "Agni does not reside on Earth today. Avoid special havan ceremonies."))}
+            </p>
+          </div>
+
+          {/* Shiva Vaas Card */}
+          <div className={`p-3.5 sm:p-4 rounded-2xl border transition-all ${
+            panchang.shivaVaas?.isAuspicious
+              ? 'bg-emerald-500/5 border-emerald-500/25 dark:border-emerald-500/20'
+              : 'bg-rose-500/5 border-rose-500/25 dark:border-rose-500/20'
+          }`}>
+            <div className="flex items-center justify-between">
+              <span className="text-[14px] font-black text-slate-800 dark:text-amber-100 font-serif flex items-center gap-1.5">
+                🔱 {language === 'Hindi' ? "शिव वास (रुद्राभिषेक विचार)" : "Shiva Vaas (Rudrabhishek Timing)"}
+              </span>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border font-mono ${
+                panchang.shivaVaas?.isAuspicious
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-300'
+                  : 'bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-455 border-rose-300'
+              }`}>
+                {panchang.shivaVaas?.isAuspicious
+                  ? (language === 'Hindi' ? "✨ शुभ (अभिषेक करें)" : "Favorable")
+                  : (language === 'Hindi' ? "⚠️ वर्जित (अभिषेक टालें)" : "Avoid")}
+              </span>
+            </div>
+            <div className="mt-2.5 flex items-baseline gap-2">
+              <span className="text-[12px] text-slate-500 dark:text-slate-400 font-sans">{language === 'Hindi' ? "वास स्थान:" : "Residence:"}</span>
+              <span className="text-[16px] font-black text-slate-900 dark:text-amber-200 font-serif">
+                {language === 'Hindi' ? panchang.shivaVaas?.residenceHindi : panchang.shivaVaas?.residence}
+              </span>
+            </div>
+            <p className="text-[12px] text-slate-650 dark:text-slate-350 mt-1.5 leading-relaxed font-sans">
+              {panchang.shivaVaas?.description || (panchang.shivaVaas?.isAuspicious
+                ? (language === 'Hindi' ? "भगवान शिव आज अनुकूल स्थिति में विराजमान हैं। आज रुद्राभिषेक, महामृत्युंजय जप व शिव पूजन सर्वकार्य सिद्धि देगा।" : "Lord Shiva resides favorably today. Excellent for Rudrabhishek and Shiva Pooja.")
+                : (language === 'Hindi' ? "आज शिव वास अनुकूल नहीं है। रुद्राभिषेक अनुष्ठान टालें, सामान्य दैनिक शिव स्तुति व ॐ नमः शिवाय जप श्रेयस्कर है।" : "Shiva Vaas is unfavorable today. Avoid special Rudrabhishek rituals."))}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* DAILY MUHURAT & TIME CYCLES CARD */}
-      <div id="muhurat_time_cycles_card" className="glass-card-light dark:glass-card-dark p-3.5 sm:p-5 text-left space-y-3 shadow-sm border !border-[#FF9933]/45 dark:!border-[#FF9933]/30">
+      <div id="muhurat_time_cycles_card" className="glass-card-light dark:glass-card-dark p-3.5 sm:p-5 text-left space-y-4 shadow-xs border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl mt-4">
         <div className="space-y-0.5 pb-2 border-b border-orange-100/60 dark:border-zinc-800/80 text-center">
           <span className="text-[12px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block text-center">
             {language === 'Hindi' ? "॥ शुभ-अशुभ काल चक्र ॥" : "|| Auspicious & Inauspicious Muhuratas ||"}
@@ -1311,167 +1563,171 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
           <h2 className="text-[17px] sm:text-[19px] font-bold font-serif text-slate-800 dark:text-amber-100 text-center">
             {language === 'Hindi' ? "दैनिक समय चक्र और विशिष्ट मुहूर्त" : "Daily Time Cycles & Key Muhuratas"}
           </h2>
-          <p className="text-[10.5px] sm:text-[11.5px] text-slate-500 dark:text-slate-400 text-center">
+          <p className="text-[11px] sm:text-[12px] text-slate-500 dark:text-slate-400 text-center">
             {language === 'Hindi' ? "दैनिक पंचांग के प्रमुख शुभ मुहूर्त एवं अशुभ (वर्जित) काल खंडों की समयावधि।" : "Time duration of key auspicious muhuratas and taboo (avoid) intervals in the daily panchang."}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-          {/* 1. Abhijit Muhurta */}
-          <div className="p-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 hover:border-emerald-500/40 transition-all flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-center">
-                <span className="text-[13px] font-black text-emerald-600 dark:text-emerald-400 font-serif">
-                  {language === 'Hindi' ? "अभिजित मुहूर्त" : "Abhijit Muhurta"}
-                </span>
-                <span className="text-[9.5px] px-1.5 py-0.25 font-bold uppercase rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 font-mono">
-                  {language === 'Hindi' ? "अति शुभ" : "Shubh"}
-                </span>
-              </div>
-              <div className="mt-1.5 text-[17px] font-black text-slate-800 dark:text-amber-100 font-mono">
-                {(() => {
-                  const m = getMuhuratsForPanchang(panchang).find(x => x.id === 'abhijit');
-                  return m ? `${m.startTime} - ${m.endTime}` : '—';
-                })()}
-              </div>
-            </div>
-            <p className="text-[10.5px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed font-sans">
-              {language === 'Hindi' ? "दिन का सर्वश्रेष्ठ समय, सभी शुभ कार्यों के लिए उत्तम।" : "Best time of the day, highly favorable for all auspicious initiations."}
-            </p>
-          </div>
+        {/* 1. Shubh Muhurats Group */}
+        <div>
+          <h4 className="text-[12px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-2 font-mono flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+            {language === 'Hindi' ? "🟢 शुभ मुहूर्त (मांगलिक कार्यों हेतु)" : "🟢 Auspicious Timings"}
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            {(() => {
+              const allMuhurats = getMuhuratsForPanchang(panchang);
+              const abhijitM = allMuhurats.find(x => x.id === 'abhijit');
+              const brahmaM = allMuhurats.find(x => x.id === 'brahma');
+              const godhuliM = allMuhurats.find(x => x.id === 'godhuli');
+              const amritK = getAmritKaal(panchang);
 
-          {/* 2. Amrit Kaal */}
-          <div className="p-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 hover:border-emerald-500/40 transition-all flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-center">
-                <span className="text-[13px] font-black text-emerald-600 dark:text-emerald-400 font-serif">
-                  {language === 'Hindi' ? "अमृत काल" : "Amrit Kaal"}
-                </span>
-                <span className="text-[9.5px] px-1.5 py-0.25 font-bold uppercase rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 font-mono">
-                  {language === 'Hindi' ? "अमृतमय" : "Amrit"}
-                </span>
-              </div>
-              <div className="mt-1.5 text-[17px] font-black text-slate-800 dark:text-amber-100 font-mono">
-                {(() => {
-                  const k = getAmritKaal(panchang);
-                  return k ? `${k.start} - ${k.end}` : '—';
-                })()}
-              </div>
-            </div>
-            <p className="text-[10.5px] text-slate-555 dark:text-slate-400 mt-1.5 leading-relaxed font-sans">
-              {language === 'Hindi' ? "पवित्र एवं देव ऊर्जा काल, धार्मिक व मांगलिक कार्यों हेतु उत्तम।" : "Sacred celestial timing, excellent for spiritual and holy ceremonies."}
-            </p>
-          </div>
+              const shubhList = [
+                {
+                  title: language === 'Hindi' ? "अभिजित मुहूर्त" : "Abhijit Muhurta",
+                  badge: language === 'Hindi' ? "अति शुभ" : "Shubh",
+                  time: abhijitM ? `${abhijitM.startTime} - ${abhijitM.endTime}` : '—',
+                  desc: language === 'Hindi' ? "दिन का सर्वश्रेष्ठ समय, सभी शुभ कार्यों के लिए उत्तम।" : "Best time of the day, highly favorable for all auspicious initiations."
+                },
+                {
+                  title: language === 'Hindi' ? "अमृत काल" : "Amrit Kaal",
+                  badge: language === 'Hindi' ? "अमृतमय" : "Amrit",
+                  time: amritK ? `${amritK.start} - ${amritK.end}` : '—',
+                  desc: language === 'Hindi' ? "पवित्र एवं देव ऊर्जा काल, धार्मिक व मांगलिक कार्यों हेतु उत्तम।" : "Sacred celestial timing, excellent for spiritual and holy ceremonies."
+                },
+                {
+                  title: language === 'Hindi' ? "ब्रह्म मुहूर्त" : "Brahma Muhurat",
+                  badge: language === 'Hindi' ? "पावन" : "Divine",
+                  time: brahmaM ? `${brahmaM.startTime} - ${brahmaM.endTime}` : '—',
+                  desc: language === 'Hindi' ? "सूर्योदय पूर्व का काल, योग, ध्यान व ईश वंदन हेतु सर्वोत्तम।" : "Pre-dawn divine hour, ideal for meditation and prayer."
+                },
+                {
+                  title: language === 'Hindi' ? "गोधूलि मुहूर्त" : "Godhuli Muhurat",
+                  badge: language === 'Hindi' ? "शुभ" : "Auspicious",
+                  time: godhuliM ? `${godhuliM.startTime} - ${godhuliM.endTime}` : '—',
+                  desc: language === 'Hindi' ? "संध्याकाल, शांति, गृह प्रवेश व देव आराधना हेतु कल्याणकारी।" : "Evening twilight period, favorable for peace and prayer."
+                }
+              ];
 
-          {/* 3. Rahu Kaal */}
-          <div className="p-3 rounded-2xl bg-rose-500/5 border border-rose-500/20 hover:border-rose-500/40 transition-all flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-center">
-                <span className="text-[13px] font-black text-rose-600 dark:text-rose-455 font-serif">
-                  {language === 'Hindi' ? "राहुकाल" : "Rahu Kaal"}
-                </span>
-                <span className="text-[9.5px] px-1.5 py-0.25 font-bold uppercase rounded bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 font-mono">
-                  {language === 'Hindi' ? "वर्जित" : "Avoid"}
-                </span>
-              </div>
-              <div className="mt-1.5 text-[17px] font-black text-slate-800 dark:text-amber-100 font-mono">
-                {panchang.rahuKaal ? `${panchang.rahuKaal.start} - ${panchang.rahuKaal.end}` : '—'}
-              </div>
-            </div>
-            <p className="text-[10.5px] text-slate-555 dark:text-slate-400 mt-1.5 leading-relaxed font-sans">
-              {language === 'Hindi' ? "राहु के प्रभाव का काल। इस समय नए कार्यों का आरंभ न करें।" : "Rahu's negative influence. Avoid starting important actions or purchases."}
-            </p>
+              return shubhList.map((m, idx) => (
+                <div key={idx} className="p-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 hover:border-emerald-500/40 transition-all flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[13.5px] font-black text-emerald-700 dark:text-emerald-400 font-serif">
+                        {m.title}
+                      </span>
+                      <span className="text-[9.5px] px-1.5 py-0.25 font-bold uppercase rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 font-mono">
+                        {m.badge}
+                      </span>
+                    </div>
+                    <div className="mt-1.5 text-[16px] sm:text-[17px] font-black text-slate-800 dark:text-amber-100 font-mono">
+                      {m.time}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-550 dark:text-slate-400 mt-1.5 leading-relaxed font-sans">
+                    {m.desc}
+                  </p>
+                </div>
+              ));
+            })()}
           </div>
+        </div>
 
-          {/* 4. Gulik Kaal */}
-          <div className="p-3 rounded-2xl bg-rose-500/5 border border-rose-500/20 hover:border-rose-500/40 transition-all flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-center">
-                <span className="text-[13px] font-black text-rose-600 dark:text-rose-455 font-serif">
-                  {language === 'Hindi' ? "गुलिक काल" : "Gulik Kaal"}
-                </span>
-                <span className="text-[9.5px] px-1.5 py-0.25 font-bold uppercase rounded bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 font-mono">
-                  {language === 'Hindi' ? "वर्जित" : "Avoid"}
-                </span>
+        {/* 2. Varjit Kaal Group */}
+        <div className="pt-2 border-t border-slate-100 dark:border-zinc-800/60">
+          <h4 className="text-[12px] font-black text-rose-700 dark:text-rose-400 uppercase tracking-widest mb-2 font-mono flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-rose-500 inline-block"></span>
+            {language === 'Hindi' ? "🔴 वर्जित / अशुभ काल (नवीन कार्य टालें)" : "🔴 Inauspicious Timings"}
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            {/* Rahu Kaal */}
+            <div className="p-3 rounded-2xl bg-rose-500/5 border border-rose-500/20 hover:border-rose-500/40 transition-all flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[13.5px] font-black text-rose-600 dark:text-rose-455 font-serif">
+                    {language === 'Hindi' ? "राहुकाल" : "Rahu Kaal"}
+                  </span>
+                  <span className="text-[9.5px] px-1.5 py-0.25 font-bold uppercase rounded bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 font-mono">
+                    {language === 'Hindi' ? "वर्जित" : "Avoid"}
+                  </span>
+                </div>
+                <div className="mt-1.5 text-[16px] sm:text-[17px] font-black text-slate-800 dark:text-amber-100 font-mono">
+                  {panchang.rahuKaal ? `${panchang.rahuKaal.start} - ${panchang.rahuKaal.end}` : '—'}
+                </div>
               </div>
-              <div className="mt-1.5 text-[17px] font-black text-slate-800 dark:text-amber-100 font-mono">
-                {panchang.gulikKaal ? `${panchang.gulikKaal.start} - ${panchang.gulikKaal.end}` : '—'}
-              </div>
+              <p className="text-[11px] text-slate-550 dark:text-slate-400 mt-1.5 leading-relaxed font-sans">
+                {language === 'Hindi' ? "राहु के प्रभाव का काल। इस समय नए कार्यों का आरंभ न करें।" : "Rahu's negative influence. Avoid starting important actions."}
+              </p>
             </div>
-            <p className="text-[10.5px] text-slate-555 dark:text-slate-400 mt-1.5 leading-relaxed font-sans">
-              {language === 'Hindi' ? "शनि के पुत्र गुलिक का प्रभाव, कार्यों में बाधा और विलंब लाता है।" : "Saturn's son Gulik's timing. Normal tasks okay, but avoid new beginnings."}
-            </p>
-          </div>
 
-          {/* 5. Yamaganda */}
-          <div className="p-3 rounded-2xl bg-rose-500/5 border border-rose-500/20 hover:border-rose-500/40 transition-all flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-center">
-                <span className="text-[13px] font-black text-rose-600 dark:text-rose-455 font-serif">
-                  {language === 'Hindi' ? "यमगण्ड" : "Yamaganda"}
-                </span>
-                <span className="text-[9.5px] px-1.5 py-0.25 font-bold uppercase rounded bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 font-mono">
-                  {language === 'Hindi' ? "वर्जित" : "Avoid"}
-                </span>
+            {/* Gulik Kaal */}
+            <div className="p-3 rounded-2xl bg-rose-500/5 border border-rose-500/20 hover:border-rose-500/40 transition-all flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[13.5px] font-black text-rose-600 dark:text-rose-455 font-serif">
+                    {language === 'Hindi' ? "गुलिक काल" : "Gulik Kaal"}
+                  </span>
+                  <span className="text-[9.5px] px-1.5 py-0.25 font-bold uppercase rounded bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 font-mono">
+                    {language === 'Hindi' ? "वर्जित" : "Avoid"}
+                  </span>
+                </div>
+                <div className="mt-1.5 text-[16px] sm:text-[17px] font-black text-slate-800 dark:text-amber-100 font-mono">
+                  {panchang.gulikKaal ? `${panchang.gulikKaal.start} - ${panchang.gulikKaal.end}` : '—'}
+                </div>
               </div>
-              <div className="mt-1.5 text-[17px] font-black text-slate-800 dark:text-amber-100 font-mono">
-                {panchang.yamagandam ? `${panchang.yamagandam.start} - ${panchang.yamagandam.end}` : '—'}
-              </div>
+              <p className="text-[11px] text-slate-550 dark:text-slate-400 mt-1.5 leading-relaxed font-sans">
+                {language === 'Hindi' ? "शनि के पुत्र गुलिक का प्रभाव, कार्यों में बाधा व विलंब लाता है।" : "Saturn's son Gulik. Avoid new beginnings."}
+              </p>
             </div>
-            <p className="text-[10.5px] text-slate-555 dark:text-slate-400 mt-1.5 leading-relaxed font-sans">
-              {language === 'Hindi' ? "गुरु के पुत्र यमदेव का समय, यात्रा और महत्वपूर्ण वित्तीय लेनदेन वर्जित हैं।" : "Jupiter's son Yamadeva's period. Avoid travels or major financial assets."}
-            </p>
-          </div>
 
-          {/* 6. Durmuhurta */}
-          <div className="p-3 rounded-2xl bg-rose-500/5 border border-rose-500/20 hover:border-rose-500/40 transition-all flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-center">
-                <span className="text-[13px] font-black text-rose-600 dark:text-rose-455 font-serif">
-                  {language === 'Hindi' ? "दुर्मुहूर्त" : "Durmuhurta"}
-                </span>
-                <span className="text-[9.5px] px-1.5 py-0.25 font-bold uppercase rounded bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 font-mono">
-                  {language === 'Hindi' ? "वर्जित" : "Avoid"}
-                </span>
+            {/* Yamaganda */}
+            <div className="p-3 rounded-2xl bg-rose-500/5 border border-rose-500/20 hover:border-rose-500/40 transition-all flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[13.5px] font-black text-rose-600 dark:text-rose-455 font-serif">
+                    {language === 'Hindi' ? "यमगण्ड" : "Yamaganda"}
+                  </span>
+                  <span className="text-[9.5px] px-1.5 py-0.25 font-bold uppercase rounded bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 font-mono">
+                    {language === 'Hindi' ? "वर्जित" : "Avoid"}
+                  </span>
+                </div>
+                <div className="mt-1.5 text-[16px] sm:text-[17px] font-black text-slate-800 dark:text-amber-100 font-mono">
+                  {panchang.yamagandam ? `${panchang.yamagandam.start} - ${panchang.yamagandam.end}` : '—'}
+                </div>
               </div>
-              <div className="mt-1.5 text-[17px] font-black text-slate-800 dark:text-amber-100 font-mono">
-                {panchang.durmuhurat && panchang.durmuhurat.length > 0
-                  ? panchang.durmuhurat.map(d => `${d.start} - ${d.end}`).join(', ')
-                  : '—'}
-              </div>
+              <p className="text-[11px] text-slate-550 dark:text-slate-400 mt-1.5 leading-relaxed font-sans">
+                {language === 'Hindi' ? "गुरु के पुत्र यमदेव का समय, यात्रा व वित्तीय लेनदेन टालें।" : "Jupiter's son Yamadeva's period. Avoid travels or major financial assets."}
+              </p>
             </div>
-            <p className="text-[10.5px] text-slate-555 dark:text-slate-400 mt-1.5 leading-relaxed font-sans">
-              {language === 'Hindi' ? "अशुद्ध आकाशीय मुहूर्त, इस काल खंड में मांगलिक कार्य स्थगित रखें।" : "Inauspicious celestial timing. Postpone starting important ceremonies."}
-            </p>
-          </div>
 
-          {/* 7. Varjyam */}
-          <div className="p-3 rounded-2xl bg-rose-500/5 border border-rose-500/20 hover:border-rose-500/40 transition-all flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-center">
-                <span className="text-[13px] font-black text-rose-600 dark:text-rose-455 font-serif">
-                  {language === 'Hindi' ? "वर्ज्य काल" : "Varjyam"}
-                </span>
-                <span className="text-[9.5px] px-1.5 py-0.25 font-bold uppercase rounded bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 font-mono">
-                  {language === 'Hindi' ? "वर्जित" : "Avoid"}
-                </span>
+            {/* Durmuhurta */}
+            <div className="p-3 rounded-2xl bg-rose-500/5 border border-rose-500/20 hover:border-rose-500/40 transition-all flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[13.5px] font-black text-rose-600 dark:text-rose-455 font-serif">
+                    {language === 'Hindi' ? "दुर्मुहूर्त" : "Durmuhurta"}
+                  </span>
+                  <span className="text-[9.5px] px-1.5 py-0.25 font-bold uppercase rounded bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 font-mono">
+                    {language === 'Hindi' ? "वर्जित" : "Avoid"}
+                  </span>
+                </div>
+                <div className="mt-1.5 text-[15px] font-black text-slate-800 dark:text-amber-100 font-mono truncate">
+                  {panchang.durmuhurat && panchang.durmuhurat.length > 0
+                    ? panchang.durmuhurat.map(d => `${d.start} - ${d.end}`).join(', ')
+                    : '—'}
+                </div>
               </div>
-              <div className="mt-1.5 text-[17px] font-black text-slate-800 dark:text-amber-100 font-mono">
-                {panchang.varjyam && panchang.varjyam.length > 0
-                  ? panchang.varjyam.map(v => `${v.start} - ${v.end}`).join(', ')
-                  : '—'}
-              </div>
+              <p className="text-[11px] text-slate-550 dark:text-slate-400 mt-1.5 leading-relaxed font-sans">
+                {language === 'Hindi' ? "अशुद्ध आकाशीय मुहूर्त, इस काल में मांगलिक कार्य स्थगित रखें।" : "Inauspicious celestial timing. Postpone starting important ceremonies."}
+              </p>
             </div>
-            <p className="text-[10.5px] text-slate-555 dark:text-slate-400 mt-1.5 leading-relaxed font-sans">
-              {language === 'Hindi' ? "नक्षत्र का विष भाग, इस कालखंड में मांगलिक कार्य सर्वथा वर्जित हैं।" : "Toxic portion of the Nakshatra. Strictly avoid starting new operations."}
-            </p>
           </div>
         </div>
       </div>
 
-      {/* Dynamic Active Live Hora Section Card (Only currently active Hora is shown) */}
+      {/* Dynamic Active Live Hora Section Card */}
       {activeHora && (
-        <div id="active_live_hora" className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 shadow-xs text-left relative overflow-hidden mt-3.5 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30">
+        <div id="active_live_hora" className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 shadow-xs text-left relative overflow-hidden mt-3.5 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl">
           {/* Subtle design aura */}
           <div className="absolute right-0 top-0 -mt-10 -mr-10 w-36 h-36 bg-orange-500/8 dark:bg-orange-600/8 blur-2xl rounded-full pointer-events-none"></div>
 
@@ -1527,7 +1783,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                     ? (language === 'Hindi' ? '“यह होरा क्रूर स्वभाव की मानी जाती है। नए कार्य, बड़े निवेश या मांगलिक कर्म इस अवधि में वर्जित रखना हितकारी होगा।”' : '“This Hora is considered inauspicious. It is advisable to avoid starting new ventures, major investments, or auspicious ceremonies during this period.”')
                     : activeHora.quality === 'Auspicious'
                     ? (language === 'Hindi' ? '“यह अत्यंत शुभ और अमृतमय होरा है। इस काल में किए गए प्रयास प्रायः परम फलदायी और सफल सिद्ध होते हैं।”' : '“This is a highly auspicious and positive Hora. Efforts initiated during this time are generally fruitful and successful.”')
-                    : (language === 'Hindi' ? '“यह एक संतुलित and मध्यम प्रभाव की होरा है। इसमें सामान्य दैनिक, व्यापारिक व नियमित कार्य आसानी से पूरे किए जा सकते हैं।”' : '“This is a balanced Hora with moderate influence. Routine daily tasks and business operations can be carried out smoothly.”')}
+                    : (language === 'Hindi' ? '“यह एक संतुलित और मध्यम प्रभाव की होरा है। इसमें सामान्य दैनिक, व्यापारिक व नियमित कार्य आसानी से पूरे किए जा सकते हैं।”' : '“This is a balanced Hora with moderate influence. Routine daily tasks and business operations can be carried out smoothly.”')}
                 </p>
               </div>
               
@@ -1535,7 +1791,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                 <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">
                   {language === 'Hindi' ? `प्रकार: ${activeHora.isDay ? '🌞 दिवा होरा' : '🌙 रात्रि होरा'}` : `Type: ${activeHora.isDay ? '🌞 Day Hora' : '🌙 Night Hora'}`}
                 </span>
-                <span className="text-[10px] font-extrabold text-orange-600 dark:text-amber-400 hover:underline cursor-pointer flex items-center gap-0.5" onClick={() => setShowHoraModal(true)}>
+                <span className="text-[10.5px] font-extrabold text-orange-600 dark:text-amber-400 hover:underline cursor-pointer flex items-center gap-0.5" onClick={() => setShowHoraModal(true)}>
                   {language === 'Hindi' ? "पूर्ण सारिणी" : "Full Table"} <ChevronRight className="w-2.5 h-2.5" />
                 </span>
               </div>
@@ -1544,153 +1800,9 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
         </div>
       )}
 
-      {/* Dynamic Active Live Choghadiya Section Card (Only currently active Choghadiya is shown) */}
-      {activeChoghadiya && (
-        <div id="active_live_choghadiya" className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 shadow-xs text-left relative overflow-hidden mt-3.5 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30">
-          {/* Subtle design aura */}
-          <div className="absolute right-0 top-0 -mt-10 -mr-10 w-36 h-36 bg-orange-500/8 dark:bg-orange-600/8 blur-2xl rounded-full pointer-events-none"></div>
-
-          <div className="flex flex-col items-center justify-center text-center gap-1 mb-2.5 pb-2 border-b border-orange-100/40 dark:border-zinc-800/60 w-full">
-            <span className="text-[12px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 flex items-center justify-center gap-1.5 leading-none mb-0.5 text-center">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              {language === 'Hindi' ? "लाइव वैदिक चौघड़िया संसूचक" : "Live Vedic Choghadiya Indicator"}
-            </span>
-            <h3 className="text-sm sm:text-base md:text-lg font-extrabold text-slate-800 dark:text-amber-100 font-serif leading-none text-center">
-              {language === 'Hindi' ? "(अभी सक्रिय चौघड़िया)" : "(Current Active Choghadiya)"}
-            </h3>
-          </div>
-
-          {/* Active Choghadiya Info Details */}
-          {(() => {
-            const styles = (() => {
-              switch (activeChoghadiya.type || activeChoghadiya.name) {
-                case 'Amrit':
-                case 'Labh':
-                  return {
-                    bg: 'from-amber-500/5 to-orange-500/5 dark:from-zinc-950/20 dark:to-zinc-950/10',
-                    border: 'border-amber-200/50 dark:border-amber-950/30',
-                    badge: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border-amber-200/50 dark:border-amber-950/40',
-                    text: 'text-amber-850 dark:text-amber-200',
-                    qualityText: activeChoghadiya.type === 'Amrit' ? 'अमृत (अति शुभ)' : 'लाभ (अति शुभ)',
-                    advice: 'यह अत्यंत शुभ और उन्नतिदायक समय है। इस अवधि में किए गए सभी धार्मिक, मांगलिक व व्यापारिक कार्य परम सफलता प्रदान करते हैं।'
-                  };
-                case 'Shubh':
-                  return {
-                    bg: 'from-emerald-500/5 to-teal-500/5 dark:from-zinc-950/20 dark:to-zinc-950/10',
-                    border: 'border-emerald-200/50 dark:border-emerald-950/30',
-                    badge: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200/50 dark:border-emerald-950/40',
-                    text: 'text-emerald-850 dark:text-emerald-200',
-                    qualityText: 'शुभ (मंगलकारी)',
-                    advice: 'यह एक अत्यंत मंगलकारी समय है। कोई भी शुभ संस्कार, पूजन या पारिवारिक मंगल कार्य करने के लिए यह समय सर्वश्रेष्ठ माना जाता है।'
-                  };
-                case 'Chal':
-                  return {
-                    bg: 'from-sky-500/5 to-blue-500/5 dark:from-zinc-950/20 dark:to-zinc-950/10',
-                    border: 'border-sky-200/50 dark:border-sky-950/30',
-                    badge: 'text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/30 border-sky-200/50 dark:border-sky-950/40',
-                    text: 'text-sky-850 dark:text-sky-200',
-                    qualityText: 'चर (सामान्य/मध्यम)',
-                    advice: 'यह एक गतिशील और सामान्य समय है। यात्रा की शुरुआत करने, वाहन क्रय करने या दैनिक कामकाज के लिए यह काल उत्तम और अनुकूल रहता है।'
-                  };
-                case 'Kaal':
-                  return {
-                    bg: 'from-slate-500/5 to-zinc-500/5 dark:from-zinc-950/20 dark:to-zinc-950/10',
-                    border: 'border-slate-200/50 dark:border-zinc-800/40',
-                    badge: 'text-slate-655 dark:text-slate-400 bg-slate-50 dark:bg-zinc-900/30 border-slate-200/50 dark:border-zinc-800/45',
-                    text: 'text-slate-800 dark:text-slate-200',
-                    qualityText: 'काल (अशुभ - वर्जित)',
-                    advice: 'यह काल राहु के समान प्रभाव वाला माना जाता है। इस समय नए कार्यों का आरंभ न करें क्योंकि इससे विवाद, हानि या कार्यों में विलम्ब हो सकता है।'
-                  };
-                case 'Rog':
-                  return {
-                    bg: 'from-rose-500/5 to-red-500/5 dark:from-zinc-950/20 dark:to-zinc-950/10',
-                    border: 'border-rose-200/50 dark:border-rose-950/30',
-                    badge: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border-rose-200/50 dark:border-rose-950/40',
-                    text: 'text-rose-850 dark:text-rose-200',
-                    qualityText: 'रोग (अशुभ - वर्जित)',
-                    advice: 'यह रोग चौघड़िया माना जाता है। इस अवधि में किसी भी प्रकार का नया इलाज, वाहन चलाना या मांगलिक कार्य प्रारंभ करना वर्जित रखना चाहिए।'
-                  };
-                case 'Udveg':
-                default:
-                  return {
-                    bg: 'from-rose-500/5 to-orange-500/5 dark:from-zinc-950/20 dark:to-zinc-950/10',
-                    border: 'border-rose-200/50 dark:border-rose-950/30',
-                    badge: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border-rose-200/50 dark:border-rose-950/40',
-                    text: 'text-rose-850 dark:text-rose-200',
-                    qualityText: 'उद्वेग (अशुभ - वर्जित)',
-                    advice: 'यह सूर्य के प्रभाव वाला उद्वेग काल है जो मानसिक अशांति दे सकता है। सरकारी या प्रशासनिक कार्यों के अतिरिक्त अन्य सभी कार्यों को इस समय टालें।'
-                  };
-              }
-            })();
-
-            return (
-              <div className="flex flex-col md:flex-row gap-3.5 items-stretch justify-between">
-                <div className="flex-grow space-y-1.5">
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <span className="text-[21px] sm:text-[25px] font-serif font-black text-slate-850 dark:text-orange-50 leading-tight">
-                      {language === 'Hindi' ? `${activeChoghadiya.hindiName || activeChoghadiya.name} चौघड़िया` : `${activeChoghadiya.name} Choghadiya`}
-                    </span>
-                    <span className={`text-[11px] sm:text-[12.5px] px-2.5 py-0.5 rounded-full font-black border ${styles.badge} shadow-3xs`}>
-                      {styles.qualityText}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 text-2xs sm:text-xs font-bold text-slate-500 dark:text-zinc-450 font-mono">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{language === 'Hindi' ? `समय: ${activeChoghadiya.startTime} से ${activeChoghadiya.endTime} तक` : `Time: ${activeChoghadiya.startTime} to ${activeChoghadiya.endTime}`}</span>
-                  </div>
-
-                  {/* Suitable Tasks Box */}
-                  <div className="bg-orange-50/20 dark:bg-zinc-950/25 p-2.5 rounded-xl border border-orange-100/30 dark:border-zinc-900/40 mt-1">
-                    <span className="text-[10.5px] font-black text-orange-850 dark:text-amber-300 uppercase tracking-widest block mb-0.5 font-mono">
-                      {language === 'Hindi' ? "प्रभाव और महत्व:" : "Influence & Importance:"}
-                    </span>
-                    <p className="text-[12px] sm:text-[13px] text-slate-650 dark:text-zinc-400 font-medium leading-relaxed">
-                      {styles.advice}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className={`md:w-72 bg-gradient-to-br ${styles.bg} p-3 rounded-xl border border-slate-100 dark:border-zinc-900/40 flex flex-col justify-between text-left`}>
-                  <div className="space-y-1">
-                    <span className="text-[9.5px] font-black text-slate-400 dark:text-zinc-500 uppercase tracking-widest block font-mono">
-                      {language === 'Hindi' ? "वैदिक परामर्श" : "Vedic Advice"}
-                    </span>
-                    <p className="text-[11.5px] sm:text-[12px] text-slate-600 dark:text-zinc-400 font-serif leading-relaxed italic">
-                      {activeChoghadiya.type === 'Amrit' || activeChoghadiya.type === 'Labh' || activeChoghadiya.type === 'Shubh'
-                        ? (language === 'Hindi' ? '“यह काल किसी भी नवीन उपक्रम, यात्रा, खरीद-फरोख्त और शुभ संस्कारों की शुरुआत के लिए उत्तम और सुरक्षित है।”' : '“This period is highly auspicious, making it excellent and safe for starting new ventures, traveling, purchasing, or performing sacred rituals.”')
-                        : activeChoghadiya.type === 'Chal'
-                        ? (language === 'Hindi' ? '“इस सामान्य अवधि में नियमित व्यावसायिक यात्राएं, लेनदेन व सामान्य कार्य बिना किसी बाधा के सम्पन्न किए जा सकते हैं।”' : '“During this neutral period, routine business travels, transactions, and daily activities can be accomplished without obstacles.”')
-                        : (language === 'Hindi' ? '“इस अवधि में किसी भी नए प्रोजेक्ट या बड़े निवेश की शुरुआत को स्थगित रखना ही ज्योतिषीय दृष्टि से श्रेयस्कर होगा।”' : '“It is astrologically recommended to postpone starting new projects or major investments during this inauspicious period.”')}
-                    </p>
-                  </div>
-                  
-                  <div className="mt-2.5 pt-2 border-t border-slate-200/40 dark:border-zinc-800/45 flex items-center justify-between">
-                    <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">
-                      {language === 'Hindi' ? `प्रकार: ${activeChoghadiya.isDay ? '🌞 दिवा चौघड़िया' : '🌙 रात्रि चौघड़िया'}` : `Type: ${activeChoghadiya.isDay ? '🌞 Day Choghadiya' : '🌙 Night Choghadiya'}`}
-                    </span>
-                    <span className="text-[10px] font-extrabold text-orange-600 dark:text-amber-400 hover:underline cursor-pointer flex items-center gap-0.5" onClick={() => setShowChoghadiyaModal(true)}>
-                      {language === 'Hindi' ? "पूर्ण सारिणी" : "Full Table"} <ChevronRight className="w-2.5 h-2.5" />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
-        </div>
-      )}
-
-      {/* Interactive D3.js Moon Phase & Paksha Orbit representation */}
-      <div id="moon_phase_section">
-        <MoonPhaseVisualizer panchang={panchang} />
-      </div>
-
       {/* Anandadi Yoga Card */}
       {panchang.anandadiYoga && (
-        <div className="glass-card-light dark:glass-card-dark p-3 sm:p-3.5 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl bg-amber-50/20 dark:bg-amber-950/5 mt-3 text-left shadow-sm">
+        <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl bg-amber-50/20 dark:bg-amber-950/5 mt-3.5 text-left shadow-sm">
           <div className="flex items-center justify-center gap-1.5 mb-1.5 pb-1 border-b border-amber-200/35 dark:border-amber-950/20 text-center">
             <span className="text-sm">🔮</span>
             <span className="text-[12px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest font-mono text-center">
@@ -1699,21 +1811,21 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
             <div>
-              <span className="text-slate-400 block font-mono text-[10px] uppercase tracking-wider">{language === 'Hindi' ? "योग का नाम" : "Yoga Name"}</span>
-              <span className="font-extrabold text-amber-750 dark:text-amber-300 block text-[14.5px] font-serif">
+              <span className="text-slate-500 dark:text-slate-400 block font-sans text-[11px]">{language === 'Hindi' ? "योग का नाम:" : "Yoga Name:"}</span>
+              <span className="font-extrabold text-amber-800 dark:text-amber-300 block text-[15px] font-serif mt-0.5">
                 {language === 'Hindi' ? panchang.anandadiYoga.nameHindi : panchang.anandadiYoga.name}
               </span>
             </div>
             <div>
-              <span className="text-slate-400 block font-mono text-[10px] uppercase tracking-wider">{language === 'Hindi' ? "प्रकृति व स्थिति" : "Nature & Status"}</span>
-              <span className={`font-black block text-[12px] ${panchang.anandadiYoga.isAuspicious ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+              <span className="text-slate-500 dark:text-slate-400 block font-sans text-[11px]">{language === 'Hindi' ? "प्रकृति व स्थिति:" : "Nature & Status:"}</span>
+              <span className={`font-black block text-[13px] mt-0.5 ${panchang.anandadiYoga.isAuspicious ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                 {panchang.anandadiYoga.isAuspicious ? (language === 'Hindi' ? '✨ शुभ फलदायी' : '✨ Auspicious') : (language === 'Hindi' ? '⚠️ ध्यान दें (अशुभ)' : '⚠️ Inauspicious')}
               </span>
-              <span className="text-[10.5px] text-slate-500 block mt-0.5">🕒 {panchang.anandadiYoga.endTime} {language === 'Hindi' ? 'तक प्रभावी' : 'till'}</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5 font-mono">🕒 {panchang.anandadiYoga.endTime} {language === 'Hindi' ? 'तक प्रभावी' : 'till'}</span>
             </div>
             <div>
-              <span className="text-slate-400 block font-mono text-[10px] uppercase tracking-wider">{language === 'Hindi' ? "वैदिक फलित" : "Vedic Effect"}</span>
-              <span className="text-[12px] text-slate-600 dark:text-slate-300 leading-tight block font-serif mt-0.5">
+              <span className="text-slate-500 dark:text-slate-400 block font-sans text-[11px]">{language === 'Hindi' ? "वैदिक फलित:" : "Vedic Effect:"}</span>
+              <span className="text-[12px] text-slate-650 dark:text-slate-300 leading-relaxed block font-sans mt-0.5">
                 {language === 'Hindi'
                   ? translateAnandadiYogaDescHindi(panchang.anandadiYoga.name || panchang.anandadiYoga.nameHindi, panchang.anandadiYoga.description)
                   : panchang.anandadiYoga.description}
@@ -1725,39 +1837,39 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
 
       {/* Bhadra (Vishti Karana) Engine details card */}
       {panchang.bhadra && panchang.bhadra.active ? (
-        <div className="glass-card-light dark:glass-card-dark p-3 sm:p-3.5 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl bg-red-50/20 dark:bg-red-950/5 mt-3 text-left shadow-sm">
-          <div className="flex items-center justify-center gap-1.5 mb-1.5 pb-1 border-b border-red-200/35 dark:border-red-950/20 text-center">
-            <span className="text-sm">⚠️</span>
+        <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl bg-red-50/20 dark:bg-red-950/5 mt-3.5 text-left shadow-sm">
+          <div className="flex items-center justify-center gap-1.5 mb-2 pb-1 border-b border-red-200/35 dark:border-red-950/20 text-center">
+            <ShieldAlert className="w-4 h-4 text-rose-500" />
             <span className="text-[12px] font-black text-red-650 dark:text-red-400 uppercase tracking-widest font-mono text-center">
               {language === 'Hindi' ? "भद्रा दोष चेतावनी" : "Bhadra Alert"}
             </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+          <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
-              <span className="text-slate-400 block font-mono text-[10px] uppercase tracking-wider">{language === 'Hindi' ? "भद्रा वास" : "Bhadra Residence"}</span>
-              <span className="font-extrabold text-red-750 dark:text-red-400 block text-[13px]">{language === 'Hindi' ? panchang.bhadra.vasHindi : panchang.bhadra.vas}</span>
+              <span className="text-slate-500 dark:text-slate-400 block font-sans text-[11px]">{language === 'Hindi' ? "भद्रा वास:" : "Bhadra Residence:"}</span>
+              <span className="font-extrabold text-red-750 dark:text-red-400 block text-[13.5px] mt-0.5">{language === 'Hindi' ? panchang.bhadra.vasHindi : panchang.bhadra.vas}</span>
             </div>
             <div>
-              <span className="text-slate-400 block font-mono text-[10px] uppercase tracking-wider">{language === 'Hindi' ? "भद्रा समय" : "Bhadra Duration"}</span>
-              <span className="font-extrabold text-slate-800 dark:text-orange-200 block text-[13px]">{language === 'Hindi' ? `${panchang.bhadra.startTime} से ${panchang.bhadra.endTime} तक` : `${panchang.bhadra.startTime} to ${panchang.bhadra.endTime}`}</span>
+              <span className="text-slate-500 dark:text-slate-400 block font-sans text-[11px]">{language === 'Hindi' ? "भद्रा समय:" : "Bhadra Duration:"}</span>
+              <span className="font-extrabold text-slate-800 dark:text-orange-200 block text-[13.5px] font-mono mt-0.5">{language === 'Hindi' ? `${panchang.bhadra.startTime} से ${panchang.bhadra.endTime} तक` : `${panchang.bhadra.startTime} to ${panchang.bhadra.endTime}`}</span>
             </div>
             <div>
-              <span className="text-slate-400 block font-mono text-[10px] uppercase tracking-wider">{language === 'Hindi' ? "भद्रा मुख" : "Bhadra Mukha"}</span>
-              <span className="font-bold text-red-650 dark:text-red-400 block text-[13px]">{language === 'Hindi' ? `${panchang.bhadra.mukha} (अशुभतम समय)` : `${panchang.bhadra.mukha} (Most Inauspicious)`}</span>
+              <span className="text-slate-500 dark:text-slate-400 block font-sans text-[11px]">{language === 'Hindi' ? "भद्रा मुख:" : "Bhadra Mukha:"}</span>
+              <span className="font-bold text-red-650 dark:text-red-400 block text-[13px] mt-0.5">{language === 'Hindi' ? `${panchang.bhadra.mukha} (अशुभतम समय)` : `${panchang.bhadra.mukha} (Most Inauspicious)`}</span>
             </div>
             <div>
-              <span className="text-slate-400 block font-mono text-[10px] uppercase tracking-wider">{language === 'Hindi' ? "भद्रा पुच्छ" : "Bhadra Puchha"}</span>
-              <span className="font-bold text-emerald-600 dark:text-emerald-400 block text-[13px]">{language === 'Hindi' ? `${panchang.bhadra.puchha} (अपेक्षाकृत अनुकूल)` : `${panchang.bhadra.puchha} (Relatively Favorable)`}</span>
+              <span className="text-slate-500 dark:text-slate-400 block font-sans text-[11px]">{language === 'Hindi' ? "भद्रा पुच्छ:" : "Bhadra Puchha:"}</span>
+              <span className="font-bold text-emerald-600 dark:text-emerald-400 block text-[13px] mt-0.5">{language === 'Hindi' ? `${panchang.bhadra.puchha} (अपेक्षाकृत अनुकूल)` : `${panchang.bhadra.puchha} (Relatively Favorable)`}</span>
             </div>
           </div>
-          <p className="text-[10.5px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed font-serif italic border-t border-red-200/10 pt-1.5">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2.5 leading-relaxed font-serif italic border-t border-red-200/20 pt-1.5">
             {language === 'Hindi' ? "* भद्रा के पृथ्वी लोक (मृत्यु लोक) में वास के दौरान विवाह, गृह प्रवेश, मुंडन, और अन्य सभी मांगलिक कार्य सर्वथा वर्जित हैं।" : "* During Bhadra residence in the earthly realm (Prithvi Loka), marriages, housewarming, shaving ceremonies, and all other auspicious events are strictly prohibited."}
           </p>
         </div>
       ) : (
-        <div className="glass-card-light dark:glass-card-dark p-3 sm:p-3.5 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-2xl bg-emerald-50/10 dark:bg-emerald-950/5 mt-3 text-left shadow-sm flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-sm">🛡️</span>
+        <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-2xl bg-emerald-50/15 dark:bg-emerald-950/5 mt-3.5 text-left shadow-xs flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" />
             <div>
               <span className="text-[12px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest font-mono block">
                 {language === 'Hindi' ? "भद्रा दोष स्थिति" : "Bhadra Status"}
@@ -1767,15 +1879,15 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
               </span>
             </div>
           </div>
-          <span className="text-[10.5px] text-slate-400 font-mono italic">
-            {language === 'Hindi' ? "अगला भद्रा: विष्टि करण पर" : "Next Bhadra: On Vishti Karana"}
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono italic">
+            {language === 'Hindi' ? "अगला: विष्टि करण पर" : "Next: On Vishti Karana"}
           </span>
         </div>
       )}
 
       {/* Panchak Alert Card */}
       {panchang.panchak && panchang.panchak.active && (
-        <div className="glass-card-light dark:glass-card-dark p-3 sm:p-3.5 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl bg-amber-50/20 dark:bg-amber-950/5 mt-3 text-left shadow-sm">
+        <div className="glass-card-light dark:glass-card-dark p-3.5 sm:p-4 border !border-[#FF9933]/45 dark:!border-[#FF9933]/30 rounded-3xl bg-amber-50/20 dark:bg-amber-950/5 mt-3.5 text-left shadow-sm">
           <div className="flex items-center justify-center gap-1.5 mb-1.5 pb-1 border-b border-amber-250/35 dark:border-amber-950/20 text-center">
             <span className="text-sm">⚠️</span>
             <span className="text-[12px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest font-mono text-center">
@@ -1784,14 +1896,18 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
             <div>
-              <span className="text-slate-400 block font-mono text-[10px] uppercase tracking-wider">{language === 'Hindi' ? "पंचक प्रकार" : "Panchak Type"}</span>
-              <span className="font-extrabold text-amber-750 dark:text-amber-400 block text-[13px]">{language === 'Hindi' ? `${panchang.panchak.typeHindi} पंचक` : `${panchang.panchak.type} Panchak`}</span>
+              <span className="text-slate-500 dark:text-slate-400 block font-sans text-[11px]">{language === 'Hindi' ? "पंचक प्रकार:" : "Panchak Type:"}</span>
+              <span className="font-extrabold text-amber-800 dark:text-amber-400 block text-[13.5px] mt-0.5">
+                {language === 'Hindi' 
+                  ? ((panchang.panchak.typeHindi || '').includes('पंचक') ? panchang.panchak.typeHindi : `${panchang.panchak.typeHindi} पंचक`) 
+                  : `${panchang.panchak.type} Panchak`}
+              </span>
             </div>
             <div>
-              <span className="text-slate-400 block font-mono text-[10px] uppercase tracking-wider">{language === 'Hindi' ? "विवरण / फलादेश" : "Description / Effects"}</span>
-              <span className="text-slate-650 dark:text-zinc-300 block text-[11px] leading-relaxed">
+              <span className="text-slate-500 dark:text-slate-400 block font-sans text-[11px]">{language === 'Hindi' ? "विवरण / फलादेश:" : "Description / Effects:"}</span>
+              <span className="text-slate-650 dark:text-zinc-300 block text-[11.5px] leading-relaxed mt-0.5">
                 {language === 'Hindi' 
-                  ? `${panchang.panchak.typeHindi || ''} पंचक के दौरान विशेष सावधानी बरतनी चाहिए। दक्षिण दिशा की यात्रा, छत डालना व लकड़ी एकत्र करना वर्जित माना जाता है।` 
+                  ? `${(panchang.panchak.typeHindi || '').includes('पंचक') ? panchang.panchak.typeHindi : `${panchang.panchak.typeHindi} पंचक`} के दौरान विशेष सावधानी बरतनी चाहिए। दक्षिण दिशा की यात्रा, छत डालना, चारपाई बुनना व तृण/लकड़ी संग्रह वर्जित माना जाता है।` 
                   : panchang.panchak.description}
               </span>
             </div>
@@ -1971,23 +2087,23 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
 
       {/* All Nakshatras Details Modal */}
       {showAllNakshatrasModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="bg-[#120B08] border border-white/10 rounded-3xl p-5 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative text-left">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#120B08] border border-orange-200/70 dark:border-white/10 rounded-3xl p-4 sm:p-5 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative text-left text-slate-850 dark:text-amber-100">
             <button 
               onClick={() => {
                 setShowAllNakshatrasModal(false);
                 setNakshatraModalSearchQuery('');
               }}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white font-mono font-bold text-lg cursor-pointer bg-white/5 w-8 h-8 rounded-full flex items-center justify-center border border-white/5"
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 font-mono font-bold text-lg cursor-pointer w-8 h-8 rounded-full flex items-center justify-center border border-slate-200 dark:border-white/5 transition-colors"
             >
               ✕
             </button>
-            <div className="pb-3 border-b border-orange-100/10 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="pb-3 border-b border-orange-100/60 dark:border-orange-100/10 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-amber-500 block">
+                <span className="text-[10.5px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block">
                   {language === 'Hindi' ? "॥ ज्योतिष शास्त्र नक्षत्र संदर्भ ॥" : "|| Vedic Nakshatra Reference ||"}
                 </span>
-                <h3 className="text-lg font-bold font-serif text-amber-100">
+                <h3 className="text-lg sm:text-xl font-bold font-serif text-slate-900 dark:text-amber-100">
                   {language === 'Hindi' ? "२७ नक्षत्र सम्पूर्ण विवरण" : "27 Nakshatras Complete Details"}
                 </h3>
               </div>
@@ -1998,13 +2114,13 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                   placeholder={language === 'Hindi' ? "नक्षत्र खोजें..." : "Search Nakshatras..."}
                   value={nakshatraModalSearchQuery}
                   onChange={(e) => setNakshatraModalSearchQuery(e.target.value)}
-                  className="w-full text-xs p-2 pl-8 rounded-xl bg-white/5 border border-white/10 outline-none text-slate-100 focus:border-orange-500"
+                  className="w-full text-xs p-2 pl-8 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-orange-500"
                 />
                 <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5 pointer-events-none" />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
               {NAKSHATRA_DETAILS.filter(nak => {
                 const query = nakshatraModalSearchQuery.toLowerCase();
                 return (
@@ -2021,31 +2137,31 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                 const natureTranslated = language === 'Hindi' ? translateNatureHindi(nak.nature) : nak.nature;
 
                 return (
-                  <div key={nak.name} className="p-4 rounded-2xl bg-orange-50/20 dark:bg-orange-950/5 border border-orange-100/15 dark:border-zinc-850/45 flex flex-col justify-between text-left relative overflow-hidden">
-                    <div className="absolute right-3 top-2 text-3xl font-mono font-black text-slate-500/5 select-none pointer-events-none">
+                  <div key={nak.name} className="p-4 rounded-2xl bg-orange-50/40 dark:bg-orange-950/10 border border-orange-200/50 dark:border-zinc-850/45 flex flex-col justify-between text-left relative overflow-hidden">
+                    <div className="absolute right-3 top-2 text-3xl font-mono font-black text-slate-400/10 select-none pointer-events-none">
                       #{idx + 1}
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <h4 className="text-sm sm:text-base font-black text-slate-850 dark:text-amber-100 font-serif leading-none">
+                        <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-amber-100 font-serif leading-none">
                           {language === 'Hindi' ? nak.hindiName : nak.name}
                         </h4>
-                        <span className={"text-[8px] font-extrabold px-2 py-0.5 rounded-full border tracking-wide font-mono uppercase " + planetColor}>
+                        <span className={"text-[8.5px] font-extrabold px-2 py-0.5 rounded-full border tracking-wide font-mono uppercase " + planetColor}>
                           {language === 'Hindi' ? "स्वामी" : "Ruler"}: {lordNameTranslated}
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-x-2 gap-y-1 py-2 border-t border-b border-orange-100/10 dark:border-zinc-800/20 my-2 text-[10px]">
+                      <div className="grid grid-cols-2 gap-x-2 gap-y-1 py-2 border-t border-b border-orange-200/40 dark:border-zinc-800/20 my-2 text-[10.5px]">
                         <div>
-                          <span className="text-slate-400 dark:text-slate-500 uppercase font-bold tracking-tight block text-[8px]">{language === 'Hindi' ? "प्रतीक:" : "Symbol:"}</span>
-                          <span className="font-extrabold text-slate-800 dark:text-amber-100 mt-0.5 block">{symbolTranslated}</span>
+                          <span className="text-slate-500 dark:text-slate-400 uppercase font-bold tracking-tight block text-[8px]">{language === 'Hindi' ? "प्रतीक:" : "Symbol:"}</span>
+                          <span className="font-extrabold text-slate-850 dark:text-amber-100 mt-0.5 block">{symbolTranslated}</span>
                         </div>
                         <div>
-                          <span className="text-slate-400 dark:text-slate-500 uppercase font-bold tracking-tight block text-[8px]">{language === 'Hindi' ? "देवता:" : "Deity:"}</span>
-                          <span className="font-extrabold text-slate-800 dark:text-amber-100 mt-0.5 block truncate">{deityTranslated}</span>
+                          <span className="text-slate-500 dark:text-slate-400 uppercase font-bold tracking-tight block text-[8px]">{language === 'Hindi' ? "देवता:" : "Deity:"}</span>
+                          <span className="font-extrabold text-slate-850 dark:text-amber-100 mt-0.5 block truncate">{deityTranslated}</span>
                         </div>
                         <div className="col-span-2">
-                          <span className="text-slate-400 dark:text-slate-500 uppercase font-bold tracking-tight block text-[8px]">{language === 'Hindi' ? "प्रवृत्ति (स्वभाव):" : "Nature:"}</span>
+                          <span className="text-slate-500 dark:text-slate-400 uppercase font-bold tracking-tight block text-[8px]">{language === 'Hindi' ? "प्रवृत्ति (स्वभाव):" : "Nature:"}</span>
                           <span className="font-extrabold text-[#7c2d12] dark:text-amber-200 flex items-center gap-1 mt-0.5">
                             <Sparkles className="w-2.5 h-2.5 text-orange-500 shrink-0 animate-pulse" />
                             {natureTranslated}
@@ -2053,23 +2169,23 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                         </div>
                       </div>
 
-                      <p className="text-[10px] text-slate-650 dark:text-slate-350 leading-normal mb-3 font-sans">
+                      <p className="text-[11px] text-slate-650 dark:text-slate-350 leading-relaxed mb-3 font-sans">
                         {nak.description}
                       </p>
                     </div>
 
-                    <div className="space-y-1.5 pt-2 border-t border-dotted border-orange-100/10">
+                    <div className="space-y-1.5 pt-2 border-t border-dotted border-orange-200/40 dark:border-orange-100/10">
                       <div className="flex items-start gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0 mt-0.5" />
-                        <span className="text-[9.5px] text-slate-650 dark:text-slate-350 leading-tight">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                        <span className="text-[10px] text-slate-650 dark:text-slate-350 leading-tight">
                           <strong className="text-emerald-700 dark:text-emerald-455 mr-1">{language === 'Hindi' ? "अनुकूल कार्य:" : "Suitable Acts:"}</strong>
                           {nak.suitableActivities.join(', ')}
                         </span>
                       </div>
                       {nak.avoidActivities && nak.avoidActivities.length > 0 && (
                         <div className="flex items-start gap-1">
-                          <XCircle className="w-3 h-3 text-rose-500 shrink-0 mt-0.5" />
-                          <span className="text-[9.5px] text-slate-650 dark:text-slate-350 leading-tight">
+                          <XCircle className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
+                          <span className="text-[10px] text-slate-650 dark:text-slate-350 leading-tight">
                             <strong className="text-rose-700 dark:text-rose-455 mr-1">{language === 'Hindi' ? "वर्जित कार्य:" : "Avoid Acts:"}</strong>
                             {nak.avoidActivities.join(', ')}
                           </span>
@@ -2086,19 +2202,19 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
 
       {/* Hora Table Modal */}
       {showHoraModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="bg-[#120B08] border border-white/10 rounded-3xl p-5 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative text-left">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#120B08] border border-orange-200/70 dark:border-white/10 rounded-3xl p-4 sm:p-5 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative text-left text-slate-850 dark:text-amber-100">
             <button 
               onClick={() => setShowHoraModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white font-mono font-bold text-lg cursor-pointer bg-white/5 w-8 h-8 rounded-full flex items-center justify-center border border-white/5"
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 font-mono font-bold text-lg cursor-pointer w-8 h-8 rounded-full flex items-center justify-center border border-slate-200 dark:border-white/5 transition-colors"
             >
               ✕
             </button>
-            <div className="pb-3 border-b border-orange-100/10 mb-4">
-              <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-amber-500 block">
+            <div className="pb-3 border-b border-orange-100/60 dark:border-orange-100/10 mb-4">
+              <span className="text-[10.5px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block">
                 {language === 'Hindi' ? "॥ लाइव वैदिक होरा सारणी ॥" : "|| Live Vedic Hora Chart ||"}
               </span>
-              <h3 className="text-lg font-bold font-serif text-amber-100">
+              <h3 className="text-lg sm:text-xl font-bold font-serif text-slate-900 dark:text-amber-100">
                 {language === 'Hindi' ? "सम्पूर्ण २४ घंटे की होरा स्थिति" : "Full 24-Hour Hora Table"}
               </h3>
             </div>
@@ -2111,29 +2227,29 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
 
       {/* Choghadiya Table Modal */}
       {showChoghadiyaModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="bg-[#120B08] border border-white/10 rounded-3xl p-5 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative text-left">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#120B08] border border-orange-200/70 dark:border-white/10 rounded-3xl p-4 sm:p-5 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative text-left text-slate-850 dark:text-amber-100">
             <button 
               onClick={() => setShowChoghadiyaModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white font-mono font-bold text-lg cursor-pointer bg-white/5 w-8 h-8 rounded-full flex items-center justify-center border border-white/5"
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 font-mono font-bold text-lg cursor-pointer w-8 h-8 rounded-full flex items-center justify-center border border-slate-200 dark:border-white/5 transition-colors"
             >
               ✕
             </button>
-            <div className="pb-3 border-b border-orange-100/10 mb-4">
-              <span className="text-[10px] uppercase font-mono font-bold tracking-widest text-amber-500 block">
+            <div className="pb-3 border-b border-orange-100/60 dark:border-orange-100/10 mb-4">
+              <span className="text-[10.5px] uppercase font-mono font-bold tracking-widest text-[#FF9933] dark:text-amber-500 block">
                 {language === 'Hindi' ? "॥ दैनिक चौघड़िया मुहूर्त ॥" : "|| Daily Choghadiya Timings ||"}
               </span>
-              <h3 className="text-lg font-bold font-serif text-amber-100">
+              <h3 className="text-lg sm:text-xl font-bold font-serif text-slate-900 dark:text-amber-100">
                 {language === 'Hindi' ? "सम्पूर्ण दिन-रात्रि चौघड़िया तालिका" : "Full Day-Night Choghadiya Table"}
               </h3>
             </div>
             
-            {/* Grid separating Day and Night Choghadiya for pristine ease of reading */}
+            {/* Grid separating Day and Night Choghadiya */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
               
               {/* Day Choghadiya */}
               <div className="space-y-3">
-                <h4 className="text-[10px] sm:text-xs font-bold text-orange-600 dark:text-orange-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
+                <h4 className="text-[11px] sm:text-xs font-bold text-orange-700 dark:text-orange-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
                   <Sun className="w-4 h-4 text-amber-500 shrink-0" />
                   {language === 'Hindi' ? "दिन का चौघड़िया" : "Daytime Choghadiya"}
                 </h4>
@@ -2147,10 +2263,10 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                       Bad: 'bg-zinc-700 text-white border-zinc-500'
                     };
                     return (
-                      <div key={i} className="p-2.5 rounded-2xl bg-orange-50/20 dark:bg-orange-950/10 border border-orange-100/20 dark:border-zinc-850/45 flex flex-col justify-between min-h-[76px] sm:min-h-[88px]">
+                      <div key={i} className="p-2.5 rounded-2xl bg-orange-50/50 dark:bg-orange-950/10 border border-orange-200/60 dark:border-zinc-850/45 flex flex-col justify-between min-h-[76px] sm:min-h-[88px]">
                         <div>
-                          <span className="text-xs font-black text-slate-850 dark:text-slate-200 font-serif leading-tight block">{ch.hindiName || ch.name}</span>
-                          <span className="text-[9px] text-slate-400 dark:text-slate-500 font-mono mt-0.5 block leading-none">{ch.startTime} - {ch.endTime}</span>
+                          <span className="text-xs font-black text-slate-900 dark:text-slate-100 font-serif leading-tight block">{ch.hindiName || ch.name}</span>
+                          <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 block leading-none">{ch.startTime} - {ch.endTime}</span>
                         </div>
                         <span className={`text-[8.5px] sm:text-[9.5px] font-black uppercase text-center py-0.5 rounded-md mt-2 tracking-wider ${chGlowMap[ch.quality] || chGlowMap['Neutral']}`}>
                           {ch.quality === 'Excellent' ? (language === 'Hindi' ? 'उत्तम' : 'Excellent') : 
@@ -2167,7 +2283,7 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
 
               {/* Night Choghadiya */}
               <div className="space-y-3">
-                <h4 className="text-[10px] sm:text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
+                <h4 className="text-[11px] sm:text-xs font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5 uppercase tracking-wider font-serif">
                   <Moon className="w-4 h-4 text-indigo-400 shrink-0" />
                   {language === 'Hindi' ? "रात का चौघड़िया" : "Nighttime Choghadiya"}
                 </h4>
@@ -2181,10 +2297,10 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
                       Bad: 'bg-zinc-700 text-white border-zinc-500'
                     };
                     return (
-                      <div key={i} className="p-2.5 rounded-2xl bg-orange-50/20 dark:bg-orange-950/10 border border-orange-100/20 dark:border-zinc-850/45 flex flex-col justify-between min-h-[76px] sm:min-h-[88px]">
+                      <div key={i} className="p-2.5 rounded-2xl bg-orange-50/50 dark:bg-orange-950/10 border border-orange-200/60 dark:border-zinc-850/45 flex flex-col justify-between min-h-[76px] sm:min-h-[88px]">
                         <div>
-                          <span className="text-xs font-black text-slate-850 dark:text-slate-200 font-serif leading-tight block">{ch.hindiName || ch.name}</span>
-                          <span className="text-[9px] text-slate-400 dark:text-slate-500 font-mono mt-0.5 block leading-none">{ch.startTime} - {ch.endTime}</span>
+                          <span className="text-xs font-black text-slate-900 dark:text-slate-100 font-serif leading-tight block">{ch.hindiName || ch.name}</span>
+                          <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 block leading-none">{ch.startTime} - {ch.endTime}</span>
                         </div>
                         <span className={`text-[8.5px] sm:text-[9.5px] font-black uppercase text-center py-0.5 rounded-md mt-2 tracking-wider ${chGlowMap[ch.quality] || chGlowMap['Neutral']}`}>
                           {ch.quality === 'Excellent' ? (language === 'Hindi' ? 'उत्तम' : 'Excellent') : 
@@ -2201,6 +2317,19 @@ export function PanchangScreen({ panchang, currentTime, onShare, selectedDate, o
 
             </div>
           </div>
+        </div>
+      )}
+
+      {/* WhatsApp Share CTA Button */}
+      {onShare && (
+        <div className="pt-2 pb-6 flex justify-center">
+          <button
+            onClick={onShare}
+            className="py-3 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm sm:text-base flex items-center gap-2.5 shadow-lg shadow-emerald-600/20 active:scale-95 transition-all cursor-pointer"
+          >
+            <Share2 className="w-5 h-5" />
+            <span>{language === 'Hindi' ? "आज का सम्पूर्ण पंचांग शेयर करें" : "Share Today's Complete Panchang"}</span>
+          </button>
         </div>
       )}
     </div>
