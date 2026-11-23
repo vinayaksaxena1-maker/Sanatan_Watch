@@ -282,6 +282,14 @@ The core astronomical engine files:
 
 Are strictly LOCKED. No developer or AI assistant is allowed to modify, refactor, optimize, or delete any code within these files without obtaining explicit, written confirmation and approval from the project owner in the active chat session.
 
+### Project Owner Authorization: MIT Sanatan Astro Engine v2.0 Migration
+* **Authorization Date:** 24 November 2026
+* **Status:** **EXPLICITLY APPROVED & UNLOCKED BY PROJECT OWNER**
+* **Approved Scope:** Replacing GPL `swisseph-wasm` WebWorker with the verified MIT-licensed Sanatan Astro Engine v2.0 (`astronomy-engine` + NASA JPL Bridge) per `MIGRATION_PLAN.md`.
+* `src/utils/astronomicalEngine.ts` is authorized to be refactored into a synchronous backward-compatible adapter.
+* `src/utils/astroWorker.ts` and `.wasm` / `.se1` binaries are authorized for deletion in Step 2.
+* All UI layouts, components (`AnalogClock`, `ChaughadiyaRing`, `HoraRing`), CSS, and Android widgets remain 100% strictly LOCKED.
+
 ---
 
 # Non-Negotiable Rules
